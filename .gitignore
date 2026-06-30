@@ -23,7 +23,10 @@ projects/*/models/
 # bloat the repo. Only caches and editor locks are otherwise ignored; raw input
 # data stays excluded (see data/ rules above).
 projects/*/runs/**/cache/
-projects/*/runs/**/.~*.xlsx
+# Office/Excel editor lock files (.~ prefix) anywhere, not just runs/
+*.~*.xlsx
+*.~*.xls
+*.~*.docx
 projects/*/runs/**/*.feather
 
 # Local generated package metadata.

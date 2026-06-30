@@ -1,11 +1,11 @@
 {
   "version": 1,
   "run_id": "2026-06-30-gcard-main-lgbm-full",
-  "updated_at": "2026-06-30T16:47:50",
+  "updated_at": "2026-06-30T18:32:09",
   "stage": "report",
   "stage_label": "报告生成",
   "latest_event": {
-    "timestamp": "2026-06-30T16:47:50",
+    "timestamp": "2026-06-30T18:32:09",
     "run_id": "2026-06-30-gcard-main-lgbm-full",
     "stage": "report",
     "step": "action_done",
@@ -24,7 +24,7 @@
       "decision": "done"
     },
     "level": "info",
-    "pid": 97511
+    "pid": 27072
   },
   "stages": {
     "validate_config": {
@@ -269,7 +269,7 @@
       "stage": "report",
       "stage_label": "报告生成",
       "latest_event": {
-        "timestamp": "2026-06-30T16:47:50",
+        "timestamp": "2026-06-30T18:32:09",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "report",
         "step": "action_done",
@@ -288,9 +288,9 @@
           "decision": "done"
         },
         "level": "info",
-        "pid": 97511
+        "pid": 27072
       },
-      "updated_at": "2026-06-30T16:47:50"
+      "updated_at": "2026-06-30T18:32:09"
     }
   }
 }

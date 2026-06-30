@@ -149,16 +149,16 @@ OOS 按月 KS
 
 | index | varname | desc | gain | gain占比 | 累计占比 | split |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | d180_apl_ord_days_cnt | d180_apl_ord_days_cnt | 266671.933 | 0.315 | 0.315 | 50 |
-| 2 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 183188.190 | 0.216 | 0.531 | 100 |
+| 1 | d180_apl_ord_days_cnt | 近180天_订单发起天数(去重) | 266671.933 | 0.315 | 0.315 | 50 |
+| 2 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 近360天_发起订单距评分日的时间间隔_最小 | 183188.190 | 0.216 | 0.531 | 100 |
 | 3 | first_day_diff_event_result_1_all | first_day_diff_event_result_1_all | 127139.594 | 0.150 | 0.681 | 93 |
-| 4 | his_360_day_csh_apl_ord_cnt_his_rto | his_360_day_csh_apl_ord_cnt_his_rto | 61985.650 | 0.073 | 0.754 | 43 |
-| 5 | d180_apl_ord_days_cnt_all | d180_apl_ord_days_cnt_all | 25105.586 | 0.030 | 0.784 | 13 |
+| 4 | his_360_day_csh_apl_ord_cnt_his_rto | 近12月历史CASH订单总数/总订单数 | 61985.650 | 0.073 | 0.754 | 43 |
+| 5 | d180_apl_ord_days_cnt_all | 近180天_订单发起天数(去重)（所有业务类型口径统计） | 25105.586 | 0.030 | 0.784 | 13 |
 | 6 | dau_90d | dau_90d | 11709.892 | 0.014 | 0.798 | 93 |
-| 7 | ord_apl_avg_prc_amt_720_day_per_mth | ord_apl_avg_prc_amt_720_day_per_mth | 7727.379 | 0.009 | 0.807 | 49 |
-| 8 | d30_apl_ord_days_cnt | d30_apl_ord_days_cnt | 6670.857 | 0.008 | 0.815 | 47 |
-| 9 | cnt_avg_ord_span_30d | cnt_avg_ord_span_30d | 5370.938 | 0.006 | 0.821 | 19 |
-| 10 | ddf_lst_app_str_tim_to_mdl_tim_sec | ddf_lst_app_str_tim_to_mdl_tim_sec | 5236.234 | 0.006 | 0.827 | 132 |
+| 7 | ord_apl_avg_prc_amt_720_day_per_mth | 近720天发起动支订单的动支总金额_单月平均 | 7727.379 | 0.009 | 0.807 | 49 |
+| 8 | d30_apl_ord_days_cnt | 近30天_订单发起天数(去重) | 6670.857 | 0.008 | 0.815 | 47 |
+| 9 | cnt_avg_ord_span_30d | cnt_平均订单间隔_30d | 5370.938 | 0.006 | 0.821 | 19 |
+| 10 | ddf_lst_app_str_tim_to_mdl_tim_sec | 设备启动到评分日时间-秒 | 5236.234 | 0.006 | 0.827 | 132 |
 
 > 证据提示：本页不补造缺失结果；当前 run audit 仍应以 `rmw run audit` 输出为准。
 
@@ -594,49 +594,49 @@ OOS 按月 KS
 
 ## 六、重要变量
 
-| feature | gain | split |
-| --- | --- | --- |
-| d180_apl_ord_days_cnt | 266671.933 | 50 |
-| d360_apl_ord_ddf_mdl_ord_crt_dte_min | 183188.190 | 100 |
-| first_day_diff_event_result_1_all | 127139.594 | 93 |
-| his_360_day_csh_apl_ord_cnt_his_rto | 61985.650 | 43 |
-| d180_apl_ord_days_cnt_all | 25105.586 | 13 |
-| dau_90d | 11709.892 | 93 |
-| ord_apl_avg_prc_amt_720_day_per_mth | 7727.379 | 49 |
-| d30_apl_ord_days_cnt | 6670.857 | 47 |
-| cnt_avg_ord_span_30d | 5370.938 | 19 |
-| ddf_lst_app_str_tim_to_mdl_tim_sec | 5236.234 | 132 |
-| 6m_used_lmt_second_der_min | 4890.731 | 15 |
-| 6m_used_lmt_first_der_min | 4789.286 | 13 |
-| payment_day_6m | 4038.475 | 8 |
-| clk_cnt_14d | 3356.992 | 47 |
-| first_day_diff_event_result_0_event_type_loan_all | 3327.589 | 60 |
+| feature | 中文名 | gain | split |
+| --- | --- | --- | --- |
+| d180_apl_ord_days_cnt | 近180天_订单发起天数(去重) | 266671.933 | 50 |
+| d360_apl_ord_ddf_mdl_ord_crt_dte_min | 近360天_发起订单距评分日的时间间隔_最小 | 183188.190 | 100 |
+| first_day_diff_event_result_1_all | first_day_diff_event_result_1_all | 127139.594 | 93 |
+| his_360_day_csh_apl_ord_cnt_his_rto | 近12月历史CASH订单总数/总订单数 | 61985.650 | 43 |
+| d180_apl_ord_days_cnt_all | 近180天_订单发起天数(去重)（所有业务类型口径统计） | 25105.586 | 13 |
+| dau_90d | dau_90d | 11709.892 | 93 |
+| ord_apl_avg_prc_amt_720_day_per_mth | 近720天发起动支订单的动支总金额_单月平均 | 7727.379 | 49 |
+| d30_apl_ord_days_cnt | 近30天_订单发起天数(去重) | 6670.857 | 47 |
+| cnt_avg_ord_span_30d | cnt_平均订单间隔_30d | 5370.938 | 19 |
+| ddf_lst_app_str_tim_to_mdl_tim_sec | 设备启动到评分日时间-秒 | 5236.234 | 132 |
+| 6m_used_lmt_second_der_min | 近6个月额度使用率二阶导数的最小值 | 4890.731 | 15 |
+| 6m_used_lmt_first_der_min | 近6个月额度使用率一阶导数的最小值 | 4789.286 | 13 |
+| payment_day_6m | 近6个月扣款天数 | 4038.475 | 8 |
+| clk_cnt_14d | clk_cnt_14d | 3356.992 | 47 |
+| first_day_diff_event_result_0_event_type_loan_all | first_day_diff_event_result_0_event_type_loan_all | 3327.589 | 60 |
 
 ## 七、Top变量WOE
 
 - Top20 WOE 图见 Excel sheet `Top变量WOE`，PNG 和汇总 CSV 见 `reports/woe_top_features/` 或训练产物目录。
-| 排名 | 变量 | Gain | IV |
-| --- | --- | --- | --- |
-| 1 | d180_apl_ord_days_cnt | 266671.933 | 13.264 |
-| 2 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 183188.190 | 13.111 |
-| 3 | first_day_diff_event_result_1_all | 127139.594 | 11.677 |
-| 4 | his_360_day_csh_apl_ord_cnt_his_rto | 61985.650 | 8.647 |
-| 5 | d180_apl_ord_days_cnt_all | 25105.586 | 12.975 |
-| 6 | dau_90d | 11709.892 | 6.754 |
-| 7 | ord_apl_avg_prc_amt_720_day_per_mth | 7727.379 | 6.905 |
-| 8 | d30_apl_ord_days_cnt | 6670.857 | 11.892 |
-| 9 | cnt_avg_ord_span_30d | 5370.938 | 6.516 |
-| 10 | ddf_lst_app_str_tim_to_mdl_tim_sec | 5236.234 | 6.700 |
-| 11 | 6m_used_lmt_second_der_min | 4890.731 | 7.377 |
-| 12 | 6m_used_lmt_first_der_min | 4789.286 | 5.181 |
-| 13 | payment_day_6m | 4038.475 | 7.239 |
-| 14 | clk_cnt_14d | 3356.992 | 5.369 |
-| 15 | first_day_diff_event_result_0_event_type_loan_all | 3327.589 | 6.607 |
-| 16 | pst_ord_apl_suc_max_prc_amt_180_day | 3240.037 | 5.957 |
-| 17 | rsk_avl_lmt_ch_les_10000_cnt_12m | 3158.131 | 12.075 |
-| 18 | d180_suc_ord_days_cnt_all | 3026.510 | 10.281 |
-| 19 | d180_apl_ord_ddf_mdl_ord_crt_dte_max | 2446.924 | 10.163 |
-| 20 | avg_avl_lmt_lft_rep_prc_3m_cash_1m | 2166.416 | 8.948 |
+| 排名 | 变量 | 中文名 | Gain | IV |
+| --- | --- | --- | --- | --- |
+| 1 | d180_apl_ord_days_cnt | 近180天_订单发起天数(去重) | 266671.933 | 13.264 |
+| 2 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 近360天_发起订单距评分日的时间间隔_最小 | 183188.190 | 13.111 |
+| 3 | first_day_diff_event_result_1_all | first_day_diff_event_result_1_all | 127139.594 | 11.677 |
+| 4 | his_360_day_csh_apl_ord_cnt_his_rto | 近12月历史CASH订单总数/总订单数 | 61985.650 | 8.647 |
+| 5 | d180_apl_ord_days_cnt_all | 近180天_订单发起天数(去重)（所有业务类型口径统计） | 25105.586 | 12.975 |
+| 6 | dau_90d | dau_90d | 11709.892 | 6.754 |
+| 7 | ord_apl_avg_prc_amt_720_day_per_mth | 近720天发起动支订单的动支总金额_单月平均 | 7727.379 | 6.905 |
+| 8 | d30_apl_ord_days_cnt | 近30天_订单发起天数(去重) | 6670.857 | 11.892 |
+| 9 | cnt_avg_ord_span_30d | cnt_平均订单间隔_30d | 5370.938 | 6.516 |
+| 10 | ddf_lst_app_str_tim_to_mdl_tim_sec | 设备启动到评分日时间-秒 | 5236.234 | 6.700 |
+| 11 | 6m_used_lmt_second_der_min | 近6个月额度使用率二阶导数的最小值 | 4890.731 | 7.377 |
+| 12 | 6m_used_lmt_first_der_min | 近6个月额度使用率一阶导数的最小值 | 4789.286 | 5.181 |
+| 13 | payment_day_6m | 近6个月扣款天数 | 4038.475 | 7.239 |
+| 14 | clk_cnt_14d | clk_cnt_14d | 3356.992 | 5.369 |
+| 15 | first_day_diff_event_result_0_event_type_loan_all | first_day_diff_event_result_0_event_type_loan_all | 3327.589 | 6.607 |
+| 16 | pst_ord_apl_suc_max_prc_amt_180_day | 近180天成功动支订单的最大动支总金额（复借订单） | 3240.037 | 5.957 |
+| 17 | rsk_avl_lmt_ch_les_10000_cnt_12m | 近12个月现金贷额度使用率小于10000的次数_v2 | 3158.131 | 12.075 |
+| 18 | d180_suc_ord_days_cnt_all | 近180天_成功交易天数(去重)（所有业务类型口径统计） | 3026.510 | 10.281 |
+| 19 | d180_apl_ord_ddf_mdl_ord_crt_dte_max | 近180天_发起订单距评分日的时间间隔_最大 | 2446.924 | 10.163 |
+| 20 | avg_avl_lmt_lft_rep_prc_3m_cash_1m | 近1个月现金贷平均指标值(可用额度/未来3个月剩余应还金额) | 2166.416 | 8.948 |
 
 ## 八、待补充事项
 

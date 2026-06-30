@@ -93,7 +93,9 @@ handoffs.
 ## Safety Rules
 
 - Never modify `vendor/feature-select-v2/scripts/code/` unless explicitly asked.
-- Never commit raw data, local feather files, model binaries, or secrets.
+- Never commit raw data, local feather/parquet data exports, scored datasets, or
+  secrets. Model binary artifacts such as `model.pkl` may be committed when they
+  are intentional registered run artifacts for reproducibility and traceability.
 - Before any DP or `TMLSQLClient` data pull, generate SQL first and require
   explicit approval before using `--sql-approved`.
 - Do not overwrite previous runs. Create a new `run_id` or require explicit

@@ -88,6 +88,7 @@ def generate_excel_report(
                 train_dir=train_dir,
                 eval_dir=eval_dir,
                 feature_dir=feature_dir,
+                project_dir=project_dir,
             )
 
         _build_description_sheet(
@@ -98,7 +99,7 @@ def generate_excel_report(
             sample_dir=sample_dir,
             feature_dir=feature_dir,
         )
-        _build_features_sheet(wb["重要变量"], train_dir=train_dir, feature_dir=feature_dir)
+        _build_features_sheet(wb["重要变量"], train_dir=train_dir, feature_dir=feature_dir, project_dir=project_dir)
         _build_woe_sheet(wb["Top变量WOE"], train_dir=train_dir, report_dir=output_path.parent)
         _build_screening_params_sheet(wb["变量筛选过程和模型参数"], train_dir=train_dir, feature_dir=feature_dir)
         _build_monthly_effect_sheet(wb["模型效果-每月效果"], eval_dir=eval_dir)
@@ -118,6 +119,7 @@ def generate_excel_report(
             feature_dir=feature_dir,
             sample_dir=sample_dir,
             include_gcard_summary=include_gcard_summary,
+            project_dir=project_dir,
         )
     finally:
         SCORE_COLUMNS, VERSION_LABELS, REPORT_TITLE, PROJECT_DISPLAY_NAME = previous_context
@@ -175,6 +177,28 @@ def _infer_project_dir(eval_dir: Path) -> Path | None:
     return None
 
 
+def _load_feature_name_map(project_dir: Path | None) -> dict[str, str]:
+    """Load {feature_name: feature_comment} (Chinese names) from feature_columns.csv.
+
+    Returns {} when unavailable so callers degrade to English-only (current behavior).
+    """
+    if project_dir is None:
+        return {}
+    path = Path(project_dir) / "data" / "profile" / "feature_metadata" / "feature_columns.csv"
+    if not path.exists():
+        return {}
+    import csv
+
+    name_map: dict[str, str] = {}
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            feature = (row.get("feature_name") or "").strip()
+            comment = (row.get("feature_comment") or "").strip()
+            if feature and comment:
+                name_map[feature] = comment
+    return name_map
+
+
 def _load_first_yaml(directory: Path, names: list[str]) -> dict[str, Any]:
     for name in names:
         path = directory / name
@@ -192,10 +216,12 @@ def _build_gcard_summary_sheet(
     train_dir: Path,
     eval_dir: Path,
     feature_dir: Path,
+    project_dir: Path | None = None,
 ) -> None:
     from openpyxl.styles import Alignment, Font, PatternFill
 
     compare_score = "gcard_v6"
+    name_map = _load_feature_name_map(project_dir)
     compare_label = VERSION_LABELS.get(compare_score, compare_score)
     run_config = _read_json(train_dir / "run_config.json")
     metrics = _read_json(train_dir / "metrics_train_valid.json")
@@ -243,7 +269,7 @@ def _build_gcard_summary_sheet(
 
     row = _write_summary_heading(ws, row, "二、重要变量")
     row = _write_note(ws, row, "本轮仅训练单一全客群主模型；Top变量WOE 详见“Top变量WOE”sheet。")
-    row = _write_table(ws, row, "Top 20 重要变量", _gcard_top_features_frame(importance), apply_color_scale=False)
+    row = _write_table(ws, row, "Top 20 重要变量", _gcard_top_features_frame(importance, name_map=name_map), apply_color_scale=False)
 
     row = _write_summary_heading(ws, row, "三、变量筛选过程和模型参数")
     row = _write_summary_table_pair(
@@ -416,7 +442,7 @@ def _gcard_month_range(monthly: pd.DataFrame | None, final_flag: str) -> str:
     return months[0] if len(months) == 1 else f"{months[0]} ~ {months[-1]}"
 
 
-def _gcard_top_features_frame(importance: pd.DataFrame | None) -> pd.DataFrame:
+def _gcard_top_features_frame(importance: pd.DataFrame | None, name_map: dict[str, str] | None = None) -> pd.DataFrame:
     if importance is None or importance.empty:
         return pd.DataFrame()
     top = importance.head(20).copy().reset_index(drop=True)
@@ -424,7 +450,10 @@ def _gcard_top_features_frame(importance: pd.DataFrame | None) -> pd.DataFrame:
     gain = pd.to_numeric(top.get("gain"), errors="coerce").fillna(0)
     top["index"] = range(1, len(top) + 1)
     top["varname"] = top["feature"]
-    top["desc"] = top["feature"]
+    if name_map:
+        top["desc"] = top["feature"].map(name_map).fillna(top["feature"])
+    else:
+        top["desc"] = top["feature"]
     top["gain占比"] = gain / total_gain if total_gain else 0
     top["累计占比"] = top["gain占比"].cumsum()
     return top[[col for col in ["index", "varname", "desc", "gain", "gain占比", "累计占比", "split"] if col in top.columns]]
@@ -712,7 +741,7 @@ def _gcard_coverage_frame(*, eval_dir: Path, feature_dir: Path) -> pd.DataFrame:
     )
 
 
-def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_dir: Path) -> list[str]:
+def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_dir: Path, project_dir: Path | None = None) -> list[str]:
     compare_score = "gcard_v6"
     compare_label = VERSION_LABELS.get(compare_score, compare_score)
     run_config = _read_json(train_dir / "run_config.json")
@@ -722,6 +751,7 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
     monthly = _read_csv(eval_dir / "monthly_metrics.csv")
     importance = _read_csv(train_dir / "feature_importance.csv")
     psi = _read_csv(eval_dir / "score_psi_by_month.csv")
+    name_map = _load_feature_name_map(project_dir)
 
     lines = [
         f"## Summary（新版模型 vs {compare_label}）",
@@ -784,7 +814,7 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
 
     if importance is not None and not importance.empty:
         lines.extend(["", "### 八、Top 10 重要变量", "", "> 变量明细与 WOE 图见【重要变量】和【Top变量WOE】。", ""])
-        lines.extend(_markdown_table(_gcard_top_features_frame(importance).head(10), limit=10))
+        lines.extend(_markdown_table(_gcard_top_features_frame(importance, name_map=name_map).head(10), limit=10))
 
     lines.extend(
         [
@@ -945,15 +975,18 @@ def _build_description_sheet(
     )
 
 
-def _build_features_sheet(ws, *, train_dir: Path, feature_dir: Path) -> None:
+def _build_features_sheet(ws, *, train_dir: Path, feature_dir: Path, project_dir: Path | None = None) -> None:
     importance = _read_csv(train_dir / "feature_importance.csv")
     drop_detail = _read_csv(train_dir / "feature_drop_detail.csv")
     availability = _read_csv(feature_dir / "feature_availability.csv")
     final_features = _read_feature_list(train_dir, feature_dir)
+    name_map = _load_feature_name_map(project_dir)
 
     row = 1
     if importance is not None and not importance.empty:
         enriched = importance.copy()
+        if name_map:
+            enriched.insert(1, "中文名", enriched["feature"].map(name_map).fillna(""))
         if drop_detail is not None and not drop_detail.empty:
             keep_cols = [col for col in ["feature", "non_null_rate", "unique_count", "drop_reason"] if col in drop_detail.columns]
             enriched = enriched.merge(drop_detail[keep_cols], on="feature", how="left")
@@ -2330,6 +2363,7 @@ def _write_model_reports(
     feature_dir: Path,
     sample_dir: Path,
     include_gcard_summary: bool = False,
+    project_dir: Path | None = None,
 ) -> tuple[Path, Path]:
     run_config = _read_json(train_dir / "run_config.json")
     metrics = _read_json(train_dir / "metrics_train_valid.json")
@@ -2342,6 +2376,7 @@ def _write_model_reports(
     versioned_intent = _read_csv(eval_dir / "intent_zc_segment_distribution_by_version.csv")
     model_score_stability = _read_csv(eval_dir / "model_score_bin_distribution_by_month.csv")
     importance = _read_csv(train_dir / "feature_importance.csv")
+    name_map = _load_feature_name_map(project_dir)
     sample_split = _read_csv(sample_dir / "sample_split_summary.csv")
     woe_summary_path = _find_woe_summary(train_dir=train_dir, report_dir=output_path.parent)
     woe_summary = _read_csv(woe_summary_path) if woe_summary_path else None
@@ -2362,7 +2397,7 @@ def _write_model_reports(
         "",
     ]
     if include_gcard_summary:
-        lines.extend(_gcard_summary_markdown_lines(train_dir=train_dir, eval_dir=eval_dir, feature_dir=feature_dir))
+        lines.extend(_gcard_summary_markdown_lines(train_dir=train_dir, eval_dir=eval_dir, feature_dir=feature_dir, project_dir=project_dir))
         lines.append("")
     lines.extend(
         [
@@ -2451,7 +2486,10 @@ def _write_model_reports(
         ]
     )
     if importance is not None:
-        lines.extend(_markdown_table(importance.head(15)))
+        top_imp = importance.head(15).copy()
+        if name_map:
+            top_imp.insert(1, "中文名", top_imp["feature"].map(name_map).fillna(""))
+        lines.extend(_markdown_table(top_imp))
         lines.append("")
     lines.extend(
         [
@@ -2468,6 +2506,8 @@ def _write_model_reports(
             .rename(columns={"rank": "排名", "feature": "变量", "gain": "Gain", "iv_component": "IV"})
             .sort_values("排名")
         )
+        if name_map:
+            display.insert(2, "中文名", display["变量"].map(name_map).fillna(""))
         lines.extend(_markdown_table(display, limit=20))
         lines.append("")
     else:

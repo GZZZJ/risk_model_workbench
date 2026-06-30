@@ -1848,68 +1848,68 @@
     {
       "path": "reports/model_card.md",
       "size_bytes": 86,
-      "mtime": "2026-06-30T16:47:28",
+      "mtime": "2026-06-30T18:31:32",
       "sha256": "9655d0c15e85afa5cb545fe7ce524a2e7e476bff5a8fd98d7e763e2adc1fa4d8",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:29"
+      "registered_at": "2026-06-30T18:31:33"
     },
     {
       "path": "reports/executive_summary.md",
       "size_bytes": 117,
-      "mtime": "2026-06-30T16:47:28",
+      "mtime": "2026-06-30T18:31:32",
       "sha256": "1ba865def0ef4cad8e249d5c74af8ebad918a303e611bbb4abd119024001a5f9",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:29"
+      "registered_at": "2026-06-30T18:31:35"
     },
     {
       "path": "reports/model_report.xlsx",
-      "size_bytes": 4529381,
-      "mtime": "2026-06-30T16:47:33",
-      "sha256": "0c85b8cede0d5742c4e6f3ea557615f49f3089f125bc48e9fb3d447f42693641",
+      "size_bytes": 4541715,
+      "mtime": "2026-06-30T18:31:42",
+      "sha256": "b66df2958aa95c1f685c0a7388b5045ee4fff9a57ed35a4010c9893f368765fe",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:34"
+      "registered_at": "2026-06-30T18:31:42"
     },
     {
       "path": "reports/model_report.md",
-      "size_bytes": 31705,
-      "mtime": "2026-06-30T16:47:33",
-      "sha256": "48c73d954eaf45164894c6ac08dc82496828ef5fdbee66370f3ebe4b66dc34af",
+      "size_bytes": 33475,
+      "mtime": "2026-06-30T18:31:42",
+      "sha256": "7b493de3d52c45287eb6081a3328e1a370f82d593fddbca4423c81bc58af04f2",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:34"
+      "registered_at": "2026-06-30T18:31:43"
     },
     {
       "path": "reports/model_report.html",
-      "size_bytes": 59176,
-      "mtime": "2026-06-30T16:47:33",
-      "sha256": "bf3a4bb0dd19b7ff53ae321249fc0dcf38cc2ca9d2341a97080263e3166aa344",
+      "size_bytes": 61022,
+      "mtime": "2026-06-30T18:31:42",
+      "sha256": "60df552cf595829f2c2dd55bbcc20ff83f1ea435f1d0777ea977448da3999e20",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:34"
+      "registered_at": "2026-06-30T18:31:43"
     },
     {
       "path": "reports/model_report_missing_results.md",
       "size_bytes": 1841,
-      "mtime": "2026-06-30T16:47:33",
+      "mtime": "2026-06-30T18:31:42",
       "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:35"
+      "registered_at": "2026-06-30T18:31:44"
     },
     {
       "path": "reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
@@ -1920,7 +1920,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:35"
+      "registered_at": "2026-06-30T18:31:44"
     },
     {
       "path": "reports/woe_top_features/images/001_his_90_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1931,7 +1931,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:35"
+      "registered_at": "2026-06-30T18:31:45"
     },
     {
       "path": "reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
@@ -1942,7 +1942,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:36"
+      "registered_at": "2026-06-30T18:31:46"
     },
     {
       "path": "reports/woe_top_features/images/002_unpaid_principal_future_light_add_heavy_WOE.png",
@@ -1953,7 +1953,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:36"
+      "registered_at": "2026-06-30T18:31:46"
     },
     {
       "path": "reports/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png",
@@ -1964,7 +1964,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:36"
+      "registered_at": "2026-06-30T18:31:47"
     },
     {
       "path": "reports/woe_top_features/images/003_ord_apl_max_prc_amt_180_day_WOE.png",
@@ -1975,7 +1975,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:37"
+      "registered_at": "2026-06-30T18:31:47"
     },
     {
       "path": "reports/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
@@ -1986,7 +1986,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:37"
+      "registered_at": "2026-06-30T18:31:48"
     },
     {
       "path": "reports/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1997,7 +1997,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:37"
+      "registered_at": "2026-06-30T18:31:48"
     },
     {
       "path": "reports/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png",
@@ -2008,7 +2008,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:38"
+      "registered_at": "2026-06-30T18:31:49"
     },
     {
       "path": "reports/woe_top_features/images/005_d60_apl_ord_prc_amt_per_stg_max_all_WOE.png",
@@ -2019,7 +2019,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:38"
+      "registered_at": "2026-06-30T18:31:50"
     },
     {
       "path": "reports/woe_top_features/images/006_dau_90d_WOE.png",
@@ -2030,7 +2030,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:38"
+      "registered_at": "2026-06-30T18:31:50"
     },
     {
       "path": "reports/woe_top_features/images/006_his_180_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -2041,7 +2041,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:39"
+      "registered_at": "2026-06-30T18:31:51"
     },
     {
       "path": "reports/woe_top_features/images/007_d180_apl_ord_days_cnt_all_WOE.png",
@@ -2052,7 +2052,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:39"
+      "registered_at": "2026-06-30T18:31:52"
     },
     {
       "path": "reports/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png",
@@ -2063,7 +2063,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:39"
+      "registered_at": "2026-06-30T18:31:53"
     },
     {
       "path": "reports/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png",
@@ -2074,7 +2074,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:40"
+      "registered_at": "2026-06-30T18:31:55"
     },
     {
       "path": "reports/woe_top_features/images/008_ord_apl_sum_prc_amt_360_day_WOE.png",
@@ -2085,7 +2085,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:40"
+      "registered_at": "2026-06-30T18:31:56"
     },
     {
       "path": "reports/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png",
@@ -2096,7 +2096,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:41"
+      "registered_at": "2026-06-30T18:31:56"
     },
     {
       "path": "reports/woe_top_features/images/009_his_360_day_csh_apl_ord_cnt_WOE.png",
@@ -2107,7 +2107,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:41"
+      "registered_at": "2026-06-30T18:31:56"
     },
     {
       "path": "reports/woe_top_features/images/010_cnt_event_result_1_uid_recent_days_120_WOE.png",
@@ -2118,7 +2118,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:41"
+      "registered_at": "2026-06-30T18:31:57"
     },
     {
       "path": "reports/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
@@ -2129,7 +2129,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:42"
+      "registered_at": "2026-06-30T18:31:58"
     },
     {
       "path": "reports/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png",
@@ -2140,7 +2140,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:42"
+      "registered_at": "2026-06-30T18:31:59"
     },
     {
       "path": "reports/woe_top_features/images/011_dau_90d_WOE.png",
@@ -2151,7 +2151,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:42"
+      "registered_at": "2026-06-30T18:31:59"
     },
     {
       "path": "reports/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png",
@@ -2162,7 +2162,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:43"
+      "registered_at": "2026-06-30T18:32:00"
     },
     {
       "path": "reports/woe_top_features/images/012_cnt_other_info_cash_uid_recent_days_30_WOE.png",
@@ -2173,7 +2173,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:43"
+      "registered_at": "2026-06-30T18:32:00"
     },
     {
       "path": "reports/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
@@ -2184,7 +2184,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:43"
+      "registered_at": "2026-06-30T18:32:01"
     },
     {
       "path": "reports/woe_top_features/images/013_payment_day_6m_WOE.png",
@@ -2195,7 +2195,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:44"
+      "registered_at": "2026-06-30T18:32:01"
     },
     {
       "path": "reports/woe_top_features/images/014_clk_cnt_14d_WOE.png",
@@ -2206,7 +2206,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:44"
+      "registered_at": "2026-06-30T18:32:01"
     },
     {
       "path": "reports/woe_top_features/images/014_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
@@ -2217,7 +2217,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:44"
+      "registered_at": "2026-06-30T18:32:02"
     },
     {
       "path": "reports/woe_top_features/images/015_d360_apl_ord_cnt_all_WOE.png",
@@ -2228,7 +2228,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:45"
+      "registered_at": "2026-06-30T18:32:02"
     },
     {
       "path": "reports/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png",
@@ -2239,7 +2239,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:45"
+      "registered_at": "2026-06-30T18:32:03"
     },
     {
       "path": "reports/woe_top_features/images/016_his_720_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -2250,7 +2250,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:45"
+      "registered_at": "2026-06-30T18:32:04"
     },
     {
       "path": "reports/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png",
@@ -2261,7 +2261,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:46"
+      "registered_at": "2026-06-30T18:32:04"
     },
     {
       "path": "reports/woe_top_features/images/017_clk_cnt_14d_WOE.png",
@@ -2272,7 +2272,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:46"
+      "registered_at": "2026-06-30T18:32:05"
     },
     {
       "path": "reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png",
@@ -2283,7 +2283,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:47"
+      "registered_at": "2026-06-30T18:32:05"
     },
     {
       "path": "reports/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png",
@@ -2294,7 +2294,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:47"
+      "registered_at": "2026-06-30T18:32:06"
     },
     {
       "path": "reports/woe_top_features/images/018_rsk_avl_lmt_ch_les_10000_cnt_3m_WOE.png",
@@ -2305,7 +2305,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:48"
+      "registered_at": "2026-06-30T18:32:06"
     },
     {
       "path": "reports/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png",
@@ -2316,7 +2316,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:48"
+      "registered_at": "2026-06-30T18:32:07"
     },
     {
       "path": "reports/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -2327,7 +2327,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:48"
+      "registered_at": "2026-06-30T18:32:07"
     },
     {
       "path": "reports/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png",
@@ -2338,7 +2338,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:49"
+      "registered_at": "2026-06-30T18:32:08"
     },
     {
       "path": "reports/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
@@ -2349,7 +2349,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:49"
+      "registered_at": "2026-06-30T18:32:08"
     },
     {
       "path": "reports/woe_top_features/woe_top20_summary.csv",
@@ -2360,8 +2360,8 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T16:47:49"
+      "registered_at": "2026-06-30T18:32:08"
     }
   ],
-  "updated_at": "2026-06-30T16:47:49"
+  "updated_at": "2026-06-30T18:32:08"
 }
