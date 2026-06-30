@@ -1,0 +1,33 @@
+report:
+  output_formats:
+  - markdown
+  template: model_report.md.j2
+  output_dir: reports
+  sections:
+  - sample_overview
+  - feature_screening
+  - modeling_plan
+  - top_features
+  - model_performance
+  - champion_comparison
+  - risk_profile
+  - next_action
+  outputs:
+  - model_report.md
+  - model_card.md
+  - executive_summary.md
+  stage_steps:
+  - model_report
+sections:
+- sample_overview
+- feature_screening
+- modeling_plan
+- top_features
+- model_performance
+- champion_comparison
+- risk_profile
+- next_action
+outputs:
+- model_report.md
+- model_card.md
+- executive_summary.md

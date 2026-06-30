@@ -59,7 +59,12 @@ def test_request_driven_synthetic_flow_runs_local_outputs(tmp_path):
 
     rows = []
     for idx in range(120):
-        split = "DEV" if idx < 70 else "OOT"
+        if idx < 60:
+            split = "DEV"
+        elif idx < 90:
+            split = "DEV-OOS"
+        else:
+            split = "OOT"
         target = 1 if idx % 5 in {0, 1} else 0
         rows.append(
             {

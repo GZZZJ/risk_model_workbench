@@ -395,7 +395,11 @@ def materialize_request_runtime_configs(
             "label_column": target_column,
             "split_column": split_column,
             "train_values": dev_values,
-            "valid_values": oot_values[:1] or oos_values[:1],
+            # Early-stopping validation must NOT use OOT: OOT is the held-out time
+            # window for final generalization evaluation, and using it to pick
+            # best_iter leaks into (and over-optimistically inflates) the OOT AUC.
+            # Prefer the in-sample OOS split (DEV-OOS) for early stopping.
+            "valid_values": oos_values[:1] or oot_values[:1],
             "oos_values": oos_values + oot_values,
             "experiments": experiments,
             "candidate_targets": _string_list(metadata.get("candidate_targets")),

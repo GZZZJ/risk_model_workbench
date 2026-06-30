@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "run_id": "2026-06-30-gcard-main-lgbm-full",
+  "updated_at": "2026-06-30T14:41:47",
+  "stage": "feature_metadata",
+  "stage_label": "特征元数据",
+  "latest_event": {
+    "timestamp": "2026-06-30T14:41:47",
+    "run_id": "2026-06-30-gcard-main-lgbm-full",
+    "stage": "feature_metadata",
+    "step": "action_done",
+    "status": "done",
+    "message": "特征元数据完成",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "feature_metadata",
+      "failure_code": "",
+      "retry_count": 0,
+      "artifact_count": 3
+    },
+    "level": "info",
+    "pid": 27074
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-06-30T13:53:15",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 11
+        },
+        "level": "info",
+        "pid": 20399
+      },
+      "updated_at": "2026-06-30T13:53:15"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-06-30T13:53:39",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 20418
+      },
+      "updated_at": "2026-06-30T13:53:39"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:41:47",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征元数据完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 3
+        },
+        "level": "info",
+        "pid": 27074
+      },
+      "updated_at": "2026-06-30T14:41:47"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-06-30T13:55:28",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: prescreen by design, intake evidence emitted",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 21
+        },
+        "level": "info",
+        "pid": 20601
+      },
+      "updated_at": "2026-06-30T13:55:28"
+    },
+    "build_wide_sql": {
+      "stage": "build_wide_sql",
+      "stage_label": "宽表 SQL 生成",
+      "latest_event": {
+        "timestamp": "2026-06-30T13:55:29",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "build_wide_sql",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: wide table skipped by design",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "build_wide_sql",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 1
+        },
+        "level": "info",
+        "pid": 20643
+      },
+      "updated_at": "2026-06-30T13:55:29"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:19:36",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "feature_refine",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征精筛完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_refine",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 26
+        },
+        "level": "info",
+        "pid": 20743
+      },
+      "updated_at": "2026-06-30T14:19:36"
+    },
+    "train_baseline": {
+      "stage": "train_baseline",
+      "stage_label": "模型训练",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:31:21",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "train_baseline",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型训练完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "train_baseline",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 31,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 25610
+      },
+      "updated_at": "2026-06-30T14:31:21"
+    },
+    "evaluate": {
+      "stage": "evaluate",
+      "stage_label": "模型评估",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:32:13",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "evaluate",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型评估完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "evaluate",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 47,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 25699
+      },
+      "updated_at": "2026-06-30T14:32:13"
+    },
+    "compare": {
+      "stage": "compare",
+      "stage_label": "冠军挑战者对比",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:32:15",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "compare",
+        "step": "action_done",
+        "status": "done",
+        "message": "冠军挑战者对比完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "compare",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 2,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 25740
+      },
+      "updated_at": "2026-06-30T14:32:15"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-06-30T14:32:26",
+        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "stage": "report",
+        "step": "action_done",
+        "status": "done",
+        "message": "报告生成完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 27,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 25741
+      },
+      "updated_at": "2026-06-30T14:32:26"
+    }
+  }
+}

@@ -142,6 +142,7 @@ def test_materialize_request_runtime_configs_maps_builder_fields(tmp_path):
     assert refine["feature_refine"]["preprocessing"]["max_unique_values"] == 2
     assert refine["feature_refine"]["global_corr"]["threshold"] == 0.75
     assert refine["feature_refine"]["target_feature_count"] == 300
+    assert train["training"]["valid_values"] == ["DEV-OOS"]
     assert train["training"]["experiments"][1]["algorithm"] == "logistic_regression"
     assert train["training"]["experiments"][1]["segment_filter"] == "blue_customer_flag in ['E2', 'E3']"
     assert train["training"]["runtime_step_params"]["scale_pos_weight"]["mode"] == "negative_over_positive"

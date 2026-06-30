@@ -190,6 +190,28 @@ def _register_feature_prescreen_artifacts(run_path: Path, stage: str, project_di
         )
 
 
+def _register_feature_metadata_artifacts(run_path: Path, project_dir: Path) -> None:
+    """Copy project-level feature metadata exports into the run and register them.
+
+    The feature_metadata stage contract requires ``feature_metadata/*``; without
+    this the stage finishes ``done`` but registers nothing, leaving the audit
+    verdict ``incomplete``.
+    """
+    src_dir = project_dir / "data" / "profile" / "feature_metadata"
+    for name in (
+        "feature_tables_meta.json",
+        "feature_table_summary.csv",
+        "feature_columns.csv",
+    ):
+        _copy_and_register_artifact(
+            run_path,
+            "feature_metadata",
+            src_dir / name,
+            Path("feature_metadata") / name,
+            description="Feature metadata export",
+        )
+
+
 def _register_woe_artifacts(path: Path, stage: str, artifact_dir: Path) -> None:
     if not artifact_dir.exists():
         return
@@ -241,6 +263,20 @@ def _load_runtime_project_config(project_dir: Path, run_path: Path) -> dict[str,
 def _load_runtime_config(project_dir: Path, run_path: Path, name: str) -> dict[str, Any]:
     path = _runtime_config_path(run_path, project_dir, name)
     return load_yaml(path) if path.exists() else {}
+
+
+def _runtime_is_local_feather(run_path: Path | None, project_dir: Path) -> bool:
+    """True when the request-materialized runtime config declares local_feather mode.
+
+    Local-feather mode means the wide table pre-exists as the sample ``.feather``
+    file and there is no remote DP pull; ``feature_prescreen`` and ``build_wide_sql``
+    are by-design evidence-only in that mode.
+    """
+    if run_path is None:
+        return False
+    feature_cfg = _load_runtime_config(project_dir, run_path, "feature_select").get("feature_select", {})
+    runtime_request = feature_cfg.get("runtime_request") or {}
+    return runtime_request.get("data_source_mode") == "local_feather"
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -1028,10 +1064,98 @@ def cmd_feature_metadata(args: argparse.Namespace) -> int:
         argv.extend(["--tables-file", tables_file])
     code = metadata_main(argv)
     if code == 0:
+        _register_feature_metadata_artifacts(path, project_dir)
         stage_action_done(path, "feature_metadata")
     else:
         stage_action_failed(path, "feature_metadata", f"metadata command exited with code {code}")
     return code
+
+
+def _finish_feature_prescreen_local_feather(path: Path, project_dir: Path, stage: str) -> int:
+    """In local_feather mode the wide table is the sample file itself; emit intake
+    evidence and finish prescreen as ``done`` (by design) without remote DP pull.
+
+    Produces the ``feature_prescreen`` contract-accepted artifact set #2
+    (data_source_contract / resource_plan / sampling_plan / batch_plan), so the
+    auditor verdict converges to ``complete`` instead of ``scaffold``.
+    """
+    try:
+        feature_cfg = _load_runtime_config(project_dir, path, "feature_select").get("feature_select", {})
+        prescreen_cfg = feature_cfg.get("prescreen", {}) or feature_cfg.get("d01_d02", {}) or {}
+        try:
+            runtime_project = _load_runtime_project_config(project_dir, path)
+        except FileNotFoundError:
+            runtime_project = {}
+        data_cfg = runtime_project.get("data", {}) or {}
+        split_cfg = runtime_project.get("split", {}) or {}
+        feature_columns_path = _resolve_project_relative(
+            project_dir,
+            prescreen_cfg.get("feature_columns", "data/profile/feature_metadata/feature_columns.csv"),
+        )
+        feature_columns = _feature_columns_from_csv(feature_columns_path)
+        required_columns = [
+            column
+            for column in list(
+                dict.fromkeys(
+                    [*map(str, _as_list(data_cfg.get("id_columns")))]
+                    + [
+                        str(_first_value(prescreen_cfg.get("target_col"), data_cfg.get("target_column"), "")),
+                        str(
+                            _first_value(
+                                prescreen_cfg.get("split_col"),
+                                split_cfg.get("source_column"),
+                                data_cfg.get("split_column"),
+                                "",
+                            )
+                        ),
+                    ]
+                    + [str(data_cfg.get("period_column") or "")]
+                )
+            )
+            if column
+        ]
+        resource_cfg = prescreen_cfg.get("resource", {}) or prescreen_cfg.get("resource_planning", {}) or {}
+        random_cfg = prescreen_cfg.get("sampling", {}) or {}
+        random_columns = [
+            str(item)
+            for item in _as_list(_first_value(random_cfg.get("random_columns"), random_cfg.get("random_column")))
+        ]
+        _write_feature_intake_evidence(
+            run_path=path,
+            project_dir=project_dir,
+            stage=stage,
+            stage_config=prescreen_cfg,
+            feature_columns=feature_columns,
+            required_columns=required_columns or ["__required_placeholder"],
+            source_table=data_cfg.get("source_table"),
+            local_feather_path=data_cfg.get("raw_path") if data_cfg.get("raw_path") else None,
+            total_rows=resource_cfg.get("total_rows") or random_cfg.get("total_rows"),
+            random_columns=random_columns,
+        )
+        for artifact_name in (
+            "data_source_contract.json",
+            "resource_plan.json",
+            "sampling_plan.json",
+            "batch_plan.json",
+            "execution_environment.json",
+        ):
+            _register_if_exists(path, stage, Path("feature_selection") / artifact_name)
+        _register_if_exists(path, stage, "feature_selection/profiles/local_feather_profile.json")
+    except Exception as exc:
+        stage_action_failed(
+            path,
+            stage,
+            f"local feather prescreen evidence failed: {exc}",
+            failure_code=classify_exception(exc),
+        )
+        print(f"feature prescreen local-feather evidence failed: {exc}", file=sys.stderr)
+        return 1
+    stage_action_done(
+        path,
+        stage,
+        message="local feather mode: prescreen by design, intake evidence emitted",
+    )
+    return 0
 
 
 def cmd_feature_prescreen(args: argparse.Namespace) -> int:
@@ -1039,6 +1163,8 @@ def cmd_feature_prescreen(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     stage = _feature_prescreen_stage(path)
     stage_action_started(path, stage)
+    if _runtime_is_local_feather(path, project_dir):
+        return _finish_feature_prescreen_local_feather(path, project_dir, stage)
     from risk_model_workbench.batch_feature_select import main as batch_select_main
 
     argv = ["--project-dir", str(project_dir), "--run-dir", str(path), "--stage", stage]
@@ -1120,6 +1246,40 @@ def cmd_feature_prescreen(args: argparse.Namespace) -> int:
     return code
 
 
+def _finish_build_wide_sql_local_feather(run_path: Path, reporter: Any) -> int:
+    """In local_feather mode the wide table pre-exists as the sample file; skip
+    SQL generation/DP execution and finish build_wide_sql as ``done`` (by design).
+
+    Emits ``feature_selection/wide_table_skipped.json`` (the contract-accepted
+    skip set, ``full_modeling.yml`` build_wide_sql), so the auditor verdict is
+    ``complete`` and the stage no longer fails on a missing prescreen remain-features
+    artifact.
+    """
+    skip_payload = {
+        "data_source_mode": "local_feather",
+        "reason": "local_feather_wide_table_is_feather",
+        "note": (
+            "In local_feather mode the wide table pre-exists as the sample feather; "
+            "wide-table SQL generation and DP execution are skipped by design."
+        ),
+        "stage": "build_wide_sql",
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    skip_path = run_path / "feature_selection" / "wide_table_skipped.json"
+    skip_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_json(skip_path, skip_payload)
+    register_artifact(
+        run_path,
+        "build_wide_sql",
+        "feature_selection/wide_table_skipped.json",
+        description="Local-feather wide-table skip (by design)",
+    )
+    if reporter is not None:
+        reporter.emit(step="build_sql", message="本地 feather 模式：宽表即样本文件，按设计跳过", percent=100)
+    stage_action_done(run_path, "build_wide_sql", message="local feather mode: wide table skipped by design")
+    return 0
+
+
 def cmd_build_wide_sql(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     reporter = None
@@ -1129,6 +1289,8 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
         stage_action_started(run_path, "build_wide_sql")
         reporter = ProgressReporter(run_path, "build_wide_sql")
         reporter.emit(step="build_sql", message="开始生成宽表 SQL", percent=10)
+    if run_path is not None and _runtime_is_local_feather(run_path, project_dir):
+        return _finish_build_wide_sql_local_feather(run_path, reporter)
     config_path = _runtime_config_path(run_path, project_dir, "feature_select") if run_path else None
     runtime_feature_cfg = load_yaml(config_path).get("feature_select", {}) if config_path and config_path.exists() else {}
     runtime_wide_cfg = runtime_feature_cfg.get("wide_table", {}) or {}

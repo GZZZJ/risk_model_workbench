@@ -17,11 +17,14 @@ projects/*/data/processed/*
 projects/*/data/local/*
 projects/*/models/
 
-# Run model artifacts (model.pkl, scores feather, etc.) are committed for
-# in-run reproducibility + traceability. Only intermediate caches and editor
-# locks are ignored; raw input data stays excluded (see data/ rules above).
+# Run model artifacts: commit the model (model.pkl) and lightweight metadata
+# (sample.pkl) for in-run reproducibility/traceability. Exclude large score/data
+# feathers — they are reproducible from the committed model + raw input and would
+# bloat the repo. Only caches and editor locks are otherwise ignored; raw input
+# data stays excluded (see data/ rules above).
 projects/*/runs/**/cache/
 projects/*/runs/**/.~*.xlsx
+projects/*/runs/**/*.feather
 
 # Local generated package metadata.
 *.egg-info/
