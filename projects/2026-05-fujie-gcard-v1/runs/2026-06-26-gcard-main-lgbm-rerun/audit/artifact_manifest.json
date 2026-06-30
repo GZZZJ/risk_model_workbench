@@ -2263,9 +2263,9 @@
     },
     {
       "path": "reports/model_report.html",
-      "size_bytes": 51240,
-      "mtime": "2026-06-26T18:03:56",
-      "sha256": "ba866b4a84a62615c23430c07f47171c592ddb4557470e9266d311a7dbdca77f",
+      "size_bytes": 59619,
+      "mtime": "2026-06-30T10:26:08",
+      "sha256": "83875fbbd9e7b48e1011f242e46469bd7a0e22e40989fbed082ce3b79c3e3183",
       "stage": "report",
       "kind": "file",
       "source": "generated",

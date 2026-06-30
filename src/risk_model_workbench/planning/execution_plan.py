@@ -314,7 +314,7 @@ def create_execution_plan(request_doc: dict[str, Any], project_path: str | Path)
                 task_type="report",
                 depends_on=report_dep,
                 args=["report", "--project", project, "--run-id", run_arg],
-                outputs=["reports/model_report.md", "reports/model_card.md", "reports/executive_summary.md"],
+                outputs=["reports/model_report.md", "reports/model_report.html", "reports/model_card.md", "reports/executive_summary.md"],
                 scenario_profile=scenario_profile,
                 step_ids=report_step_ids,
                 step_params=step_params_for(step_config, report_step_ids),

@@ -56,8 +56,8 @@ stage_contracts:
       - [evaluation/benchmark_uplift.csv]
   report:
     accepted_artifact_sets:
-      - [reports/model_report.xlsx, reports/model_report.md, reports/model_card.md, reports/executive_summary.md]
-      - [reports/model_report.md, reports/model_card.md, reports/executive_summary.md]
+      - [reports/model_report.xlsx, reports/model_report.md, reports/model_report.html, reports/model_card.md, reports/executive_summary.md]
+      - [reports/model_report.md, reports/model_report.html, reports/model_card.md, reports/executive_summary.md]
 gates:
   before_train:
     require:

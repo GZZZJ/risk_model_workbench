@@ -97,9 +97,12 @@ def test_generic_report_does_not_emit_gcard_defaults(tmp_path):
     )
 
     report_text = output_path.with_name("model_report.md").read_text(encoding="utf-8")
+    report_html = output_path.with_name("model_report.html").read_text(encoding="utf-8")
     missing_text = output_path.with_name("model_report_missing_results.md").read_text(encoding="utf-8")
     workbook = load_workbook(output_path)
     assert "gcard" not in report_text.lower()
+    assert "gcard" not in report_html.lower()
+    assert "G卡" not in report_html
     assert "gcard" not in missing_text.lower()
     assert "Summary" not in workbook.sheetnames
     assert "# Generic Model模型报告" in report_text

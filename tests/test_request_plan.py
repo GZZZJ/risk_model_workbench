@@ -54,6 +54,8 @@ def test_create_execution_plan_from_request():
     assert plan["step_params"]["constant_value_filter"]["max_unique_values"] == 1
     assert "hier_ranknet_training" not in {step for steps in plan["stage_steps"].values() for step in steps}
     assert not plan["planned_steps"]
+    report_task = next(task for task in plan["tasks"] if task["task_id"] == "report_final")
+    assert "reports/model_report.html" in report_task["outputs"]
 
 
 def test_refine_only_feature_rounds_do_not_force_build_wide_sql():

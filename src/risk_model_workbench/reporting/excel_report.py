@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from html import escape
 from pathlib import Path
@@ -2466,7 +2467,16 @@ def _write_model_reports(
 
     markdown = "\n".join(lines).rstrip() + "\n"
     md_path.write_text(markdown, encoding="utf-8")
-    html_path.write_text(_markdown_to_simple_html(markdown), encoding="utf-8")
+    html_path.write_text(
+        render_model_report_html(
+            markdown,
+            run_config=run_config,
+            eval_dir=eval_dir,
+            include_gcard_summary=include_gcard_summary,
+            run_id=output_path.parent.parent.name,
+        ),
+        encoding="utf-8",
+    )
     return md_path, html_path
 
 
@@ -2759,45 +2769,232 @@ def _fmt_percent(value: Any) -> str:
 
 
 def _markdown_to_simple_html(markdown: str) -> str:
-    lines = markdown.splitlines()
-    html_lines = [
-        "<!doctype html>",
-        '<html lang="zh-CN">',
-        "<head>",
-        '<meta charset="utf-8">',
-        f"<title>{escape(REPORT_TITLE)}</title>",
-        "<style>",
-        "body{font-family:Arial,'Microsoft YaHei',sans-serif;margin:32px;color:#1f2933;line-height:1.55}",
-        "h1{font-size:26px;margin-bottom:16px} h2{font-size:19px;margin-top:28px;border-bottom:1px solid #d9e0e3;padding-bottom:6px}",
-        "table{border-collapse:collapse;margin:12px 0 20px 0;font-size:13px} th,td{border:1px solid #d9e0e3;padding:6px 8px;text-align:right} th{background:#f3f6f6} td:first-child,th:first-child{text-align:left}",
-        "li{margin:4px 0} blockquote{color:#667085;border-left:3px solid #d9e0e3;padding-left:10px}",
-        "</style>",
-        "</head><body>",
-    ]
+    """Compatibility wrapper for callers that still use the old renderer name."""
+    return render_model_report_html(markdown)
+
+
+def render_model_report_html(
+    markdown: str,
+    *,
+    title: str | None = None,
+    run_config: dict[str, Any] | None = None,
+    eval_dir: Path | None = None,
+    include_gcard_summary: bool = False,
+    run_id: str | None = None,
+) -> str:
+    """Render the model report with the same dashboard layout used by GCard runs."""
+    run_config = run_config or {}
+    report_title = title or _markdown_title(markdown) or REPORT_TITLE
+    generated_at = _markdown_generated_date(markdown) or time.strftime("%Y-%m-%d")
+    sidebar_meta = _sidebar_meta(generated_at, include_gcard_summary=include_gcard_summary)
+    hero_meta = _hero_meta(generated_at=generated_at, run_id=run_id, run_config=run_config)
+    body = _markdown_body_to_report_html(
+        markdown,
+        include_gcard_summary=include_gcard_summary,
+        run_config=run_config,
+        eval_dir=eval_dir,
+    )
+    nav_items = _report_nav_items(markdown, include_gcard_summary=include_gcard_summary)
+    return "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="zh-CN">',
+            "<head>",
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            f"<title>{escape(report_title)}</title>",
+            "<style>",
+            _report_html_style(),
+            "</style>",
+            "</head><body>",
+            '<aside class="sidebar" aria-label="报告导航">',
+            f'  <div class="sidebar-title">{escape(report_title)}</div>',
+            f'  <div class="sidebar-meta">{sidebar_meta}</div>',
+            '  <nav class="nav-list">',
+            *[
+                f'    <a class="nav-item" href="#{item_id}"><span class="nav-index">{idx}</span><span>{escape(label)}</span></a>'
+                for idx, (item_id, label) in enumerate(nav_items, start=1)
+            ],
+            "  </nav>",
+            '  <div class="nav-note">表格支持横向滚动；提升类指标已按正负变化着色。</div>',
+            "</aside>",
+            '<main class="report-shell">',
+            '<header class="report-hero">',
+            "  <p class=\"report-eyebrow\">风险场景 AI 建模工作台 · 模型文档</p>",
+            f"  <h1>{escape(report_title)}</h1>",
+            '  <div class="hero-meta">',
+            *[f"    <span>{_inline_markdown_to_html(item)}</span>" for item in hero_meta],
+            "  </div>",
+            "</header>",
+            '<div class="report-body">',
+            body,
+            "</div>",
+            "</main>",
+            "<script>",
+            _report_html_script(),
+            "</script>",
+            "</body></html>",
+        ]
+    )
+
+
+def _markdown_title(markdown: str) -> str | None:
+    for line in markdown.splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    return None
+
+
+def _markdown_generated_date(markdown: str) -> str | None:
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("生成日期："):
+            return stripped.split("：", 1)[1].strip()
+    return None
+
+
+def _sidebar_meta(generated_at: str, *, include_gcard_summary: bool) -> str:
+    if include_gcard_summary:
+        compare_label = VERSION_LABELS.get("gcard_v6", "G卡V6")
+        return f"{escape(generated_at)}<br>model_score vs {escape(compare_label)}"
+    return escape(generated_at)
+
+
+def _hero_meta(*, generated_at: str, run_id: str | None, run_config: dict[str, Any]) -> list[str]:
+    items = [f"生成日期：{generated_at}"]
+    if run_id:
+        items.append(f"Run：{run_id}")
+    label_column = run_config.get("label_column")
+    if label_column:
+        items.append(f"标签：`{label_column}`")
+    algorithm = run_config.get("algorithm")
+    if algorithm:
+        items.append(f"算法：{algorithm}")
+    return items
+
+
+def _report_nav_items(markdown: str, *, include_gcard_summary: bool) -> list[tuple[str, str]]:
+    items: list[tuple[str, str]] = []
+    for line in markdown.splitlines():
+        if not line.startswith("## "):
+            continue
+        title = line[3:].strip()
+        if include_gcard_summary and title.startswith("Summary"):
+            title = "总结"
+        label = _nav_label(title)
+        item_id = _section_id_for_title(title)
+        if item_id and (item_id, label) not in items:
+            items.append((item_id, label))
+    return items
+
+
+def _nav_label(title: str) -> str:
+    if "Summary" in title or "总结" in title:
+        return "总结"
+    if "模型描述" in title:
+        return "模型描述"
+    if "变量筛选" in title:
+        return "变量筛选"
+    if "核心效果" in title:
+        return "核心对比"
+    if "模型效果" in title:
+        return "模型效果"
+    if "模型稳定性" in title:
+        return "模型稳定性"
+    if "重要变量" in title:
+        return "重要变量"
+    if "Top变量WOE" in title:
+        return "Top变量WOE"
+    if "待补充" in title:
+        return "待补充事项"
+    return title
+
+
+def _section_id_for_title(title: str) -> str:
+    if "Summary" in title or "总结" in title:
+        return "summary"
+    if "模型描述" in title:
+        return "model-description"
+    if "变量筛选" in title:
+        return "feature-selection"
+    if "核心效果" in title:
+        return "core-comparison"
+    if "模型效果" in title:
+        return "model-performance"
+    if "模型稳定性" in title:
+        return "model-stability"
+    if "重要变量" in title:
+        return "important-features"
+    if "Top变量WOE" in title:
+        return "top-woe"
+    if "待补充" in title:
+        return "missing-results"
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "section"
+
+
+def _markdown_body_to_report_html(
+    markdown: str,
+    *,
+    include_gcard_summary: bool,
+    run_config: dict[str, Any],
+    eval_dir: Path | None,
+) -> str:
+    html_lines: list[str] = []
     in_ul = False
     in_table = False
-    for line in lines:
-        if line.startswith("# "):
-            if in_ul:
-                html_lines.append("</ul>")
-                in_ul = False
-            html_lines.append(f"<h1>{escape(line[2:])}</h1>")
-        elif line.startswith("## "):
-            if in_ul:
-                html_lines.append("</ul>")
-                in_ul = False
-            html_lines.append(f"<h2>{escape(line[3:])}</h2>")
-        elif line.startswith("- "):
+    skip_summary = False
+
+    def close_ul() -> None:
+        nonlocal in_ul
+        if in_ul:
+            html_lines.append("</ul>")
+            in_ul = False
+
+    def close_table() -> None:
+        nonlocal in_table
+        if in_table:
+            html_lines.append("</table>")
+            in_table = False
+
+    for line in markdown.splitlines():
+        if skip_summary and not line.startswith("## "):
+            continue
+        if skip_summary and line.startswith("## "):
+            skip_summary = False
+
+        stripped = line.strip()
+        if line.startswith("# ") or stripped.startswith("生成日期："):
+            close_ul()
+            close_table()
+            continue
+        if include_gcard_summary and line.startswith("## ") and line[3:].strip().startswith("Summary"):
+            close_ul()
+            close_table()
+            html_lines.append("<h2>总结</h2>")
+            html_lines.append(_render_gcard_summary_grid(eval_dir=eval_dir, run_config=run_config))
+            skip_summary = True
+            continue
+        if line.startswith("## "):
+            close_ul()
+            close_table()
+            html_lines.append(f"<h2>{_inline_markdown_to_html(line[3:].strip())}</h2>")
+            continue
+        if line.startswith("### "):
+            close_ul()
+            close_table()
+            html_lines.append(f'<h3 class="section-subtitle">{_inline_markdown_to_html(line[4:].strip())}</h3>')
+            continue
+        if line.startswith("- "):
+            close_table()
             if not in_ul:
                 html_lines.append("<ul>")
                 in_ul = True
-            html_lines.append(f"<li>{escape(line[2:])}</li>")
-        elif line.startswith("| ") and line.endswith(" |"):
-            if in_ul:
-                html_lines.append("</ul>")
-                in_ul = False
+            html_lines.append(f"<li>{_inline_markdown_to_html(line[2:].strip())}</li>")
+            continue
+        if line.startswith("| ") and line.endswith(" |"):
+            close_ul()
             cells = [cell.strip() for cell in line.strip("|").split("|")]
-            if all(cell == "---" for cell in cells):
+            if _is_markdown_table_separator(cells):
                 continue
             if not in_table:
                 html_lines.append("<table>")
@@ -2805,27 +3002,730 @@ def _markdown_to_simple_html(markdown: str) -> str:
                 tag = "th"
             else:
                 tag = "td"
-            html_lines.append("<tr>" + "".join(f"<{tag}>{escape(cell)}</{tag}>" for cell in cells) + "</tr>")
-        elif line.startswith("> "):
-            if in_table:
-                html_lines.append("</table>")
-                in_table = False
-            html_lines.append(f"<blockquote>{escape(line[2:])}</blockquote>")
-        else:
-            if in_table:
-                html_lines.append("</table>")
-                in_table = False
-            if in_ul:
-                html_lines.append("</ul>")
-                in_ul = False
-            if line.strip():
-                html_lines.append(f"<p>{escape(line)}</p>")
-    if in_table:
-        html_lines.append("</table>")
-    if in_ul:
-        html_lines.append("</ul>")
-    html_lines.append("</body></html>")
+            html_lines.append("<tr>" + "".join(f"<{tag}>{_inline_markdown_to_html(cell)}</{tag}>" for cell in cells) + "</tr>")
+            continue
+        if line.startswith("> "):
+            close_ul()
+            close_table()
+            html_lines.append(f"<blockquote>{_inline_markdown_to_html(line[2:].strip())}</blockquote>")
+            continue
+
+        close_ul()
+        close_table()
+        if stripped:
+            html_lines.append(f"<p>{_inline_markdown_to_html(stripped)}</p>")
+
+    close_ul()
+    close_table()
     return "\n".join(html_lines)
+
+
+def _is_markdown_table_separator(cells: list[str]) -> bool:
+    return bool(cells) and all(set(cell) <= {"-", ":"} and "-" in cell for cell in cells)
+
+
+def _inline_markdown_to_html(text: str) -> str:
+    escaped = escape(str(text))
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
+    return escaped
+
+
+def _render_gcard_summary_grid(*, eval_dir: Path | None, run_config: dict[str, Any]) -> str:
+    if eval_dir is None:
+        return (
+            '<div class="summary-grid">'
+            '<div class="summary-card"><span class="summary-label">报告状态</span>'
+            "<p>当前报告未绑定评估目录，Summary 卡片等待评估产物补齐。</p></div></div>"
+        )
+    compare_score = "gcard_v6"
+    compare_label = VERSION_LABELS.get(compare_score, compare_score)
+    overall = _read_csv(eval_dir / "overall_metrics.csv")
+    segment = _read_csv(eval_dir / "segment_metrics.csv")
+    psi = _read_csv(eval_dir / "score_psi_by_month.csv")
+
+    return "\n".join(
+        [
+            '<div class="summary-grid">',
+            _summary_card_html("迭代效果", _gcard_iteration_summary_table(overall=overall, compare_score=compare_score)),
+            _summary_card_html("高分段表现", _gcard_top_decile_summary_table(eval_dir=eval_dir, compare_score=compare_score), css_class="green"),
+            _summary_card_html("分客群切片", _gcard_segment_slice_summary(segment=segment, compare_score=compare_score), css_class="orange"),
+            _summary_card_html(
+                "稳定性与边界",
+                _gcard_stability_boundary_summary(
+                    psi=psi,
+                    run_config=run_config,
+                    compare_score=compare_score,
+                    compare_label=compare_label,
+                ),
+                css_class="purple",
+            ),
+            "</div>",
+        ]
+    )
+
+
+def _summary_card_html(label: str, inner_html: str, *, css_class: str = "") -> str:
+    class_attr = f"summary-label {css_class}".strip()
+    return "\n".join(
+        [
+            '  <div class="summary-card">',
+            f'    <span class="{class_attr}">{escape(label)}</span>',
+            inner_html,
+            "  </div>",
+        ]
+    )
+
+
+def _gcard_iteration_summary_table(*, overall: pd.DataFrame | None, compare_score: str) -> str:
+    rows = []
+    if overall is not None and not overall.empty:
+        for split in ["OOT-OOS", "OOT", "DEV-OOS"]:
+            row = _row_by_value(overall, "final_flag", split)
+            if not row:
+                continue
+            rows.append(
+                "<tr>"
+                f"<td>{escape(split)}</td>"
+                f"<td>{_metric_arrow(row.get(f'{compare_score}_ks'), row.get('model_score_ks'))}</td>"
+                f"<td>{_fmt_signed_pp(_delta(row.get('model_score_ks'), row.get(f'{compare_score}_ks')))}</td>"
+                f"<td>{_metric_arrow(row.get(f'{compare_score}_auc'), row.get('model_score_auc'))}</td>"
+                f"<td>{_fmt_signed_pp(_delta(row.get('model_score_auc'), row.get(f'{compare_score}_auc')))}</td>"
+                "</tr>"
+            )
+    if not rows:
+        rows.append('<tr><td colspan="5">暂无可用 overall_metrics 对比结果。</td></tr>')
+    return "<table><tr><th>评估口径</th><th>KS 旧→新</th><th>ΔKS</th><th>AUC 旧→新</th><th>ΔAUC</th></tr>" + "".join(rows) + "</table>"
+
+
+def _gcard_top_decile_summary_table(*, eval_dir: Path, compare_score: str) -> str:
+    rows = []
+    for segment_name, segment_key in [("全客群", "all"), ("老户次新", "e2e3"), ("流失户", "b2")]:
+        model = _gcard_top_decile_stat(eval_dir=eval_dir, segment_key=segment_key, score_column="model_score")
+        compare = _gcard_top_decile_stat(eval_dir=eval_dir, segment_key=segment_key, score_column=compare_score)
+        if model is None and compare is None:
+            continue
+        model_rate = model.get("bad_rate") if model else None
+        compare_rate = compare.get("bad_rate") if compare else None
+        rows.append(
+            "<tr>"
+            f"<td>{escape(segment_name)}</td>"
+            f"<td>{_metric_arrow(compare_rate, model_rate)}</td>"
+            f"<td>{_fmt_signed_pp(_delta(model_rate, compare_rate))}</td>"
+            "</tr>"
+        )
+    if not rows:
+        rows.append('<tr><td colspan="3">暂无可用 decile lift 高分段结果。</td></tr>')
+    return "<table><tr><th>客群</th><th>高分10%发起率 旧→新</th><th>提升</th></tr>" + "".join(rows) + "</table>"
+
+
+def _gcard_segment_slice_summary(*, segment: pd.DataFrame | None, compare_score: str) -> str:
+    items = []
+    if segment is not None and not segment.empty:
+        for segment_name in ["次新", "老户", "流失户"]:
+            subset = segment[(segment["segment"] == segment_name) & (segment["final_flag"] == "OOT-OOS")] if {"segment", "final_flag"}.issubset(segment.columns) else pd.DataFrame()
+            if subset.empty:
+                continue
+            row = subset.iloc[0].to_dict()
+            delta = _delta(row.get("model_score_ks"), row.get(f"{compare_score}_ks"))
+            direction = "提升" if delta is not None and delta >= 0 else "低"
+            items.append(
+                f"<li>OOT-OOS {escape(segment_name)} KS "
+                f"{_metric_arrow(row.get(f'{compare_score}_ks'), row.get('model_score_ks'))}，"
+                f"{direction} <strong>{_fmt_signed_pp(delta).replace('+', '')}</strong>。</li>"
+            )
+    if not items:
+        items.append("<li>暂无可用 OOT-OOS 分客群切片结果。</li>")
+    items.append("<li>分客群指标是切片效果，不代表已训练分客群专属模型。</li>")
+    return "<ul>" + "".join(items) + "</ul>"
+
+
+def _gcard_stability_boundary_summary(
+    *,
+    psi: pd.DataFrame | None,
+    run_config: dict[str, Any],
+    compare_score: str,
+    compare_label: str,
+) -> str:
+    items = []
+    model_psi = _latest_psi(psi, "model_score")
+    compare_psi = _latest_psi(psi, compare_score)
+    if model_psi is not None or compare_psi is not None:
+        items.append(
+            f"<li>最新月 PSI：本轮 <strong>{_fmt_metric(model_psi)}</strong>，"
+            f"{escape(compare_label)} <strong>{_fmt_metric(compare_psi)}</strong>。</li>"
+        )
+    label = run_config.get("label_column")
+    if label:
+        items.append(f"<li>主口径：30天发起标签 <code>{escape(str(label))}</code>，关注 AUC、KS、sloping、PSI。</li>")
+    items.append("<li>MOB/金额风险、变量分箱明细和业务字典仍以后文待补充说明为准。</li>")
+    return "<ul>" + "".join(items) + "</ul>"
+
+
+def _latest_psi(psi: pd.DataFrame | None, score_column: str) -> Any:
+    if psi is None or psi.empty or "psi" not in psi.columns:
+        return None
+    subset = psi.copy()
+    if "score_column" in subset.columns:
+        subset = subset[subset["score_column"] == score_column].copy()
+    if subset.empty:
+        return None
+    sort_col = "month" if "month" in subset.columns else "mdl_month" if "mdl_month" in subset.columns else None
+    if sort_col:
+        subset = subset.sort_values(sort_col)
+    return subset.iloc[-1].get("psi")
+
+
+def _delta(new_value: Any, old_value: Any) -> float | None:
+    new_float = _to_float(new_value)
+    old_float = _to_float(old_value)
+    if new_float is None or old_float is None:
+        return None
+    return new_float - old_float
+
+
+def _metric_arrow(old_value: Any, new_value: Any) -> str:
+    return f"{_fmt_metric(old_value)}→{_fmt_metric(new_value)}"
+
+
+def _fmt_signed_pp(value: Any) -> str:
+    numeric = _to_float(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric * 100:+.1f}pp"
+
+
+def _report_html_style() -> str:
+    return """
+:root{
+  --ink:#1f2d3d;
+  --muted:#5f6f82;
+  --line:#d9e2ea;
+  --soft-line:#e9eef3;
+  --page:#f2f5f9;
+  --panel:#ffffff;
+  --panel-subtle:#f7f9fb;
+  --nav:#2d4155;
+  --nav-2:#26384a;
+  --accent:#2d9cdb;
+  --green:#18a957;
+  --red:#cf4444;
+  --orange:#e67e22;
+  --purple:#8e44ad;
+  --shadow:0 8px 22px rgba(31,45,61,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--page);
+  font:14px/1.65 Arial,'Microsoft YaHei','PingFang SC',sans-serif;
+  letter-spacing:0;
+}
+a{color:inherit;text-decoration:none}
+.sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  z-index:20;
+  width:212px;
+  overflow:auto;
+  background:linear-gradient(180deg,var(--nav),var(--nav-2));
+  color:#d7e2ec;
+  padding:18px 14px 28px;
+}
+.sidebar-title{
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  padding:0 0 14px;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  margin-bottom:12px;
+}
+.sidebar-meta{
+  color:#aebdca;
+  font-size:12px;
+  line-height:1.45;
+  margin-bottom:14px;
+}
+.nav-list{display:grid;gap:2px}
+.nav-item{
+  display:grid;
+  grid-template-columns:22px 1fr;
+  align-items:center;
+  gap:7px;
+  min-height:34px;
+  padding:6px 8px;
+  border-radius:6px;
+  color:#d5e0eb;
+  font-size:13px;
+}
+.nav-item:hover,.nav-item.is-active{background:rgba(255,255,255,.1);color:#fff}
+.nav-index{
+  display:grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+.nav-note{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.16);
+  color:#b8c6d3;
+  font-size:12px;
+}
+.report-shell{margin-left:212px;min-height:100vh}
+.report-hero{
+  background:var(--nav);
+  color:#fff;
+  padding:32px 46px 38px;
+}
+.report-eyebrow{
+  margin:0 0 8px;
+  color:#b9c8d6;
+  font-size:13px;
+  font-weight:600;
+}
+.report-hero h1{
+  margin:0;
+  font-size:28px;
+  line-height:1.25;
+  font-weight:800;
+}
+.hero-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.hero-meta span{
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  padding:4px 10px;
+  color:#edf5fb;
+  font-size:12px;
+}
+.report-body{
+  max-width:1480px;
+  margin:0 auto;
+  padding:24px;
+}
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(160px,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+.kpi-card{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  padding:16px 18px;
+}
+.kpi-card strong{
+  display:block;
+  font-size:24px;
+  line-height:1.2;
+  color:#172536;
+}
+.kpi-card span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:12px;
+}
+.kpi-card.good{border-left-color:var(--green)}
+.kpi-card.warn{border-left-color:var(--orange)}
+.kpi-card.info{border-left-color:var(--purple)}
+.report-section{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  margin:16px 0;
+  padding:22px 24px 24px;
+  scroll-margin-top:18px;
+}
+.report-section>h2{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 14px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--soft-line);
+  color:#22364a;
+  font-size:20px;
+  line-height:1.35;
+}
+.section-number{
+  display:grid;
+  place-items:center;
+  min-width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+}
+h3.section-subtitle{
+  display:inline-flex;
+  align-items:center;
+  margin:18px 0 10px;
+  padding:5px 11px;
+  border-radius:999px;
+  background:#eef6fc;
+  color:#176f9f;
+  font-size:14px;
+  font-weight:700;
+}
+.report-section h3.section-subtitle:nth-of-type(2n){background:#edf8f1;color:#168548}
+.report-section h3.section-subtitle:nth-of-type(3n){background:#fff3e8;color:#b85c13}
+.report-section h3.section-subtitle:nth-of-type(4n){background:#f5eefb;color:#7b3fa1}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.summary-card{
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--panel-subtle);
+  padding:14px 16px 16px;
+}
+.summary-label{
+  display:inline-flex;
+  align-items:center;
+  margin-bottom:10px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#2586bd;
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+}
+.summary-label.green{background:#1aa85b}
+.summary-label.orange{background:#e67e22}
+.summary-label.purple{background:#8e44ad}
+.summary-card p{margin:4px 0 0}
+.summary-card ul{margin:4px 0 0;padding-left:18px}
+.summary-card .table-wrap{margin:0;border-color:#d7e0e8}
+.summary-card table{min-width:0;font-size:12px}
+.summary-card th,.summary-card td{padding:6px 8px}
+.summary-card strong{font-weight:800}
+p{margin:9px 0 12px}
+ul{margin:8px 0 14px;padding-left:18px}
+li{margin:4px 0}
+blockquote{
+  margin:12px 0 16px;
+  padding:11px 14px;
+  border:1px solid #dce8f2;
+  border-left:4px solid var(--accent);
+  border-radius:6px;
+  background:#f6fbff;
+  color:#4c5d6e;
+}
+.table-wrap{
+  width:100%;
+  overflow:auto;
+  margin:10px 0 18px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+}
+table{
+  width:100%;
+  min-width:680px;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:13px;
+}
+th,td{
+  border:0;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:8px 10px;
+  text-align:right;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:0}
+th:last-child,td:last-child{border-right:0}
+th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:#f0f4f8;
+  color:#2f4053;
+  font-weight:700;
+}
+td:first-child,th:first-child{text-align:left}
+tbody tr:nth-child(even) td{background:#fbfcfe}
+tbody tr:hover td{background:#edf7ff}
+.dense-table table{font-size:12px}
+.wide-table table{min-width:980px}
+.heat-cell,.bar-cell{
+  position:relative;
+  font-variant-numeric:tabular-nums;
+}
+.heat-cell{background:var(--heat-bg,#fff)!important}
+.bar-cell{
+  --bar-bg:rgba(45,156,219,.24);
+  background:linear-gradient(90deg,var(--bar-bg) 0 var(--bar-width,0%),rgba(255,255,255,0) var(--bar-width,0%) 100%)!important;
+}
+.bar-cell.bar-good{--bar-bg:rgba(24,169,87,.26)}
+.bar-cell.bar-warn{--bar-bg:rgba(230,126,34,.24)}
+.bar-cell.bar-risk{--bar-bg:rgba(207,68,68,.22)}
+.is-positive{color:var(--green);font-weight:700}
+.is-negative{color:var(--red);font-weight:700}
+.is-neutral{color:#65758a;font-weight:600}
+code{
+  padding:2px 5px;
+  border-radius:4px;
+  background:#eef2f6;
+  color:#26384a;
+  font-family:Menlo,Consolas,monospace;
+  font-size:12px;
+}
+@media (max-width:900px){
+  .sidebar{position:relative;width:auto;height:auto;padding:14px}
+  .report-shell{margin-left:0}
+  .report-hero{padding:24px 20px 28px}
+  .report-hero h1{font-size:23px}
+  .report-body{padding:14px}
+  .summary-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .kpi-grid,.nav-list{grid-template-columns:1fr}
+  .report-section{padding:18px 14px}
+}
+@media print{
+  .sidebar{display:none}
+  .report-shell{margin-left:0}
+  .report-hero{background:#fff;color:#172536;border-bottom:1px solid var(--line)}
+  .hero-meta span{color:#172536;border-color:var(--line);background:#f5f7fa}
+  .report-section{box-shadow:none;break-inside:avoid}
+}
+""".strip()
+
+
+def _report_html_script() -> str:
+    return r"""
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.report-body');
+  if (!body) return;
+
+  var idByTitle = [
+    ['总结', 'summary'],
+    ['Summary', 'summary'],
+    ['模型描述', 'model-description'],
+    ['变量筛选', 'feature-selection'],
+    ['核心效果', 'core-comparison'],
+    ['模型效果', 'model-performance'],
+    ['模型稳定性', 'model-stability'],
+    ['重要变量', 'important-features'],
+    ['Top变量WOE', 'top-woe'],
+    ['待补充事项', 'missing-results']
+  ];
+
+  var headings = Array.prototype.slice.call(body.querySelectorAll(':scope > h2'));
+  headings.forEach(function (heading, index) {
+    var section = document.createElement('section');
+    section.className = 'report-section';
+    var title = heading.textContent.trim();
+    var match = idByTitle.find(function (pair) { return title.indexOf(pair[0]) !== -1; });
+    section.id = match ? match[1] : 'section-' + (index + 1);
+
+    var badge = document.createElement('span');
+    badge.className = 'section-number';
+    badge.textContent = String(index + 1);
+    heading.prepend(badge);
+
+    body.insertBefore(section, heading);
+    var current = heading;
+    while (current) {
+      var next = current.nextSibling;
+      section.appendChild(current);
+      if (next && next.nodeType === 1 && next.matches('h2')) break;
+      current = next;
+    }
+  });
+
+  function parseNumeric(text) {
+    var cleaned = String(text || '').replace(/[,%+]/g, '').trim();
+    if (!cleaned || /^N\/A$/i.test(cleaned)) return null;
+    var value = parseFloat(cleaned);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function tableContext(table) {
+    var parts = [];
+    var sectionTitle = table.closest('.report-section') && table.closest('.report-section').querySelector('h2');
+    if (sectionTitle) parts.push(sectionTitle.textContent.trim());
+    var node = table.previousElementSibling;
+    var hops = 0;
+    while (node && hops < 4) {
+      if (/^(H2|H3|P|BLOCKQUOTE|UL)$/i.test(node.tagName)) parts.push(node.textContent.trim());
+      node = node.previousElementSibling;
+      hops += 1;
+    }
+    return parts.join(' | ');
+  }
+
+  function columnValues(table, columnIndex) {
+    return Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).map(function (row) {
+      return parseNumeric(row.children[columnIndex] && row.children[columnIndex].textContent);
+    }).filter(function (value) {
+      return value !== null;
+    });
+  }
+
+  function shouldSkipNumericHeader(header) {
+    return /旧→新|样本数|n_samples|positive|index|序号|排名|split|分组|月份|month|版本|客群|样本$|feature|varname|desc|变量|字段/i.test(header);
+  }
+
+  function heatColor(header, context, value, min, max) {
+    var absMax = Math.max(Math.abs(min), Math.abs(max));
+    var norm = max === min ? 0.75 : (value - min) / (max - min);
+    var alpha = 0.08 + Math.max(0, Math.min(1, norm)) * 0.30;
+    if (/提升|uplift|delta|Δ|gap/i.test(header)) {
+      var deltaStrength = absMax ? Math.min(1, Math.abs(value) / absMax) : 0;
+      var deltaAlpha = 0.08 + deltaStrength * 0.30;
+      if (value > 0) return 'rgba(24,169,87,' + deltaAlpha.toFixed(3) + ')';
+      if (value < 0) return 'rgba(207,68,68,' + deltaAlpha.toFixed(3) + ')';
+      return 'rgba(101,117,138,.10)';
+    }
+    if (/PSI/i.test(header + ' ' + context)) return 'rgba(207,68,68,' + alpha.toFixed(3) + ')';
+    if (/风险|overdue|bad_rate/i.test(header + ' ' + context)) return 'rgba(230,126,34,' + alpha.toFixed(3) + ')';
+    return 'rgba(45,156,219,' + alpha.toFixed(3) + ')';
+  }
+
+  function addHeatScale(table, headers, context, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2) return;
+      var min = Math.min.apply(null, values);
+      var max = Math.max.apply(null, values);
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        cell.classList.add('heat-cell');
+        cell.style.setProperty('--heat-bg', heatColor(headers[columnIndex], context, value, min, max));
+      });
+    });
+  }
+
+  function addDataBars(table, headers, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex).map(Math.abs);
+      if (values.length < 2) return;
+      var max = Math.max.apply(null, values);
+      if (!max) return;
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        var width = Math.max(3, Math.min(100, Math.abs(value) / max * 100));
+        cell.classList.add('bar-cell');
+        if (/lift/i.test(headers[columnIndex])) cell.classList.add('bar-good');
+        if (/剩余|提升/i.test(headers[columnIndex])) cell.classList.add('bar-warn');
+        cell.style.setProperty('--bar-width', width.toFixed(1) + '%');
+      });
+    });
+  }
+
+  function enhanceNumericTable(table, headers, context, changeColumns) {
+    var slopingTable = /sloping|lift|高分10%|累计发起率|剩余发起率/i.test(context + ' ' + headers.join(' '));
+    var comparisonTable = /by月|按月|每月|OOS|整体效果|分客群整体效果|效果对比|AUC|KS/i.test(context);
+    var psiTable = /PSI|稳定性/i.test(context + ' ' + headers.join(' '));
+    var barColumns = [];
+    var heatColumns = [];
+
+    headers.forEach(function (header, columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2 || shouldSkipNumericHeader(header)) return;
+      if (slopingTable && /发起率|lift|提升/i.test(header)) {
+        barColumns.push(columnIndex);
+        return;
+      }
+      if (changeColumns.indexOf(columnIndex) !== -1) {
+        heatColumns.push(columnIndex);
+        return;
+      }
+      if (psiTable && /psi/i.test(header)) {
+        heatColumns.push(columnIndex);
+        return;
+      }
+      if (comparisonTable && (/AUC|KS|本轮|model_score|bad_rate|发起率|风险率/i.test(header) || /AUC|KS/.test(context))) {
+        heatColumns.push(columnIndex);
+      }
+    });
+
+    if (barColumns.length || heatColumns.length) table.closest('.table-wrap').classList.add('visual-table');
+    addDataBars(table, headers, barColumns);
+    addHeatScale(table, headers, context, heatColumns);
+  }
+
+  body.querySelectorAll('table').forEach(function (table) {
+    if (!table.parentElement || table.parentElement.classList.contains('table-wrap')) return;
+    var context = tableContext(table);
+    var wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    if (table.querySelectorAll('th').length >= 7) wrap.classList.add('wide-table');
+    if (table.querySelectorAll('tr').length >= 12) wrap.classList.add('dense-table');
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+
+    var headers = Array.prototype.slice.call(table.querySelectorAll('tr:first-child th')).map(function (th) {
+      return th.textContent.trim();
+    });
+    var changeColumns = headers.reduce(function (acc, header, columnIndex) {
+      if (/提升|gap|delta|uplift|Δ/i.test(header)) acc.push(columnIndex);
+      return acc;
+    }, []);
+
+    table.querySelectorAll('tr').forEach(function (row, rowIndex) {
+      if (rowIndex === 0) return;
+      Array.prototype.slice.call(row.children).forEach(function (cell, columnIndex) {
+        if (changeColumns.indexOf(columnIndex) === -1) return;
+        var value = parseFloat(cell.textContent.replace(/[,%+]/g, ''));
+        if (Number.isNaN(value)) return;
+        if (value > 0) cell.classList.add('is-positive');
+        if (value < 0) cell.classList.add('is-negative');
+        if (value === 0) cell.classList.add('is-neutral');
+      });
+    });
+
+    enhanceNumericTable(table, headers, context, changeColumns);
+  });
+
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.report-section'));
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        navItems.forEach(function (item) {
+          item.classList.toggle('is-active', item.getAttribute('href') === '#' + entry.target.id);
+        });
+      });
+    }, {rootMargin: '-35% 0px -55% 0px', threshold: 0});
+    sections.forEach(function (section) { observer.observe(section); });
+  }
+});
+""".strip()
 
 
 def _write_missing_results_doc(output_path: Path, *, train_dir: Path | None = None, eval_dir: Path | None = None) -> Path:

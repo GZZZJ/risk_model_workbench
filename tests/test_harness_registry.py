@@ -23,6 +23,8 @@ def test_action_registry_covers_full_modeling_stages():
     assert SQL_APPROVAL_REQUIRED in get_action_spec("feature_prescreen").failure_codes
     assert get_action_spec("feature_refine").approval_required is True
     assert get_action_spec("train_baseline").mutates_manifest is True
+    assert "reports/model_report.html" in get_action_spec("report").outputs
+    assert "reports/model_report.html" in get_action_spec("report").artifact_rules
 
 
 def test_tool_registry_declares_permissions_and_auditor_boundary():

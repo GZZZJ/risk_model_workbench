@@ -1669,7 +1669,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     report_path = _runtime_config_path(path, project_dir, "report")
     report_config = load_yaml(report_path) if report_path.exists() else {}
     sections = report_config.get("sections") or report_config.get("report", {}).get("sections") or []
-    outputs = report_config.get("outputs") or report_config.get("report", {}).get("outputs") or ["model_report.md", "model_card.md", "executive_summary.md"]
+    outputs = report_config.get("outputs") or report_config.get("report", {}).get("outputs") or ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]
     report_steps = _as_string_list((report_config.get("report") or {}).get("stage_steps"))
     outputs = _as_string_list(outputs)
     if "model_recovery_report" in report_steps and "model_recovery_report.md" not in outputs:
@@ -1707,20 +1707,26 @@ def cmd_report(args: argparse.Namespace) -> int:
         if suffix == ".xlsx":
             continue
         if suffix == ".html":
-            import html
+            from risk_model_workbench.reporting.excel_report import render_model_report_html
 
             body = _report_body(target.name)
-            _write_text(target, f"<!doctype html><meta charset=\"utf-8\"><pre>{html.escape(body)}</pre>\n")
+            _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
         elif suffix == ".json":
             _write_json(target, {"status": "scaffold", "run_id": args.run_id, "sections": sections, "artifact_manifest": str(manifest_path.relative_to(path))})
         else:
             _write_text(target, _report_body(target.name))
         generated_report_paths.append(target)
 
-    for required_name in ["model_report.md", "model_card.md", "executive_summary.md"]:
+    for required_name in ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]:
         target = path / "reports" / required_name
         if not target.exists():
-            _write_text(target, _report_body(required_name))
+            body = _report_body(required_name)
+            if target.suffix.lower() == ".html":
+                from risk_model_workbench.reporting.excel_report import render_model_report_html
+
+                _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
+            else:
+                _write_text(target, body)
             generated_report_paths.append(target)
     for artifact_path in generated_report_paths:
         register_artifact(path, "report", artifact_path)

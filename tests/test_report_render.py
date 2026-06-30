@@ -17,8 +17,13 @@ def test_report_scaffold():
     run_dir = Path(project) / "runs" / run_id
     try:
         main(["run", "init", "--project", project, "--workflow", "full_modeling", "--run-id", run_id, "--force"])
+        (run_dir / "configs_runtime" / "report.yaml").write_text("report:\n  outputs: [model_report.md]\n", encoding="utf-8")
         assert main(["report", "--project", project, "--run-id", run_id]) == 0
         assert (run_dir / "reports" / "model_report.md").exists()
+        report_html = (run_dir / "reports" / "model_report.html").read_text(encoding="utf-8")
+        assert '<aside class="sidebar"' in report_html
+        assert '<main class="report-shell">' in report_html
+        assert "reports/model_report.html" in (run_dir / "audit" / "artifact_manifest.json").read_text(encoding="utf-8")
     finally:
         shutil.rmtree(run_dir, ignore_errors=True)
 
@@ -40,6 +45,14 @@ def test_imported_excel_report_layout(tmp_path):
     assert output_path.with_name("model_report_missing_results.md").exists()
     assert output_path.with_name("model_report.md").exists()
     assert output_path.with_name("model_report.html").exists()
+    report_html = output_path.with_name("model_report.html").read_text(encoding="utf-8")
+    assert '<aside class="sidebar"' in report_html
+    assert '<main class="report-shell">' in report_html
+    assert '<div class="summary-grid">' in report_html
+    assert "summary-card" in report_html
+    assert "model_score vs G卡V6" in report_html
+    assert "report-section" in report_html
+    assert "table-wrap" in report_html
 
     summary = workbook["Summary"]
     assert _find_cell(summary, "复借G卡模型对比 Summary") is not None
@@ -152,6 +165,8 @@ def test_train_300_report_uses_current_run_training_features(tmp_path):
     assert "3、意愿交叉风险（DEV-OOS）" in report_text
     assert "最终入模" in report_html
     assert "全客群 by月效果" in report_html
+    assert '<aside class="sidebar"' in report_html
+    assert '<div class="summary-grid">' in report_html
 
     workbook = load_workbook(output_path)
     assert workbook.sheetnames == GCARD_REPORT_SHEETS
