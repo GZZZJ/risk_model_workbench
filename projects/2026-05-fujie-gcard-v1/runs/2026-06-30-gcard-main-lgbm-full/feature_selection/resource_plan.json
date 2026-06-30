@@ -3,30 +3,30 @@
   "stage": "feature_refine",
   "memory": {
     "total_bytes": 17179869184,
-    "available_bytes": 4418945024,
+    "available_bytes": 5003673600,
     "platform": "macos",
     "source": "sysctl/sysconf"
   },
   "capacity": {
     "total_memory_bytes": 17179869184,
-    "available_memory_bytes": 4418945024,
+    "available_memory_bytes": 5003673600,
     "memory_budget_fraction": 0.8,
-    "memory_budget_bytes": 3535156019,
+    "memory_budget_bytes": 4002938880,
     "peak_multiplier": 4.0,
-    "matrix_budget_bytes": 883789004,
+    "matrix_budget_bytes": 1000734720,
     "feature_column_count": 2837,
     "required_non_feature_column_count": 20,
     "bytes_per_numeric_value": 8,
     "row_width_bytes": 22856,
-    "max_rows": 38667,
+    "max_rows": 43784,
     "formula": "floor((available_memory_bytes * memory_budget_fraction / peak_multiplier) / ((feature_column_count + required_non_feature_column_count) * bytes_per_numeric_value))"
   },
   "sampling": {
     "total_rows": 489743,
-    "max_rows": 38667,
+    "max_rows": 43784,
     "sampling_required": true,
-    "ratio": 0.07895365528450636,
-    "estimated_rows": 38667,
+    "ratio": 0.0894019924736035,
+    "estimated_rows": 43784,
     "limit": null,
     "reason": "row count exceeds memory capacity"
   },

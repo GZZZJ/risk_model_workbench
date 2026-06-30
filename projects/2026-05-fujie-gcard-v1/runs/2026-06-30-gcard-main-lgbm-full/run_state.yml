@@ -569,7 +569,7 @@ stages:
     - feature_selection/final_500_features.txt
     - feature_selection/final_features.txt
     - feature_selection/resource_usage.json
-    started_at: '2026-06-30T13:56:42'
+    started_at: '2026-06-30T16:15:29'
     action:
       id: feature_refine
       kind: stage
@@ -595,10 +595,10 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T14:19:36'
+      heartbeat_at: '2026-06-30T16:44:47'
       elapsed_seconds: 0.0
       last_event_status: done
-    finished_at: '2026-06-30T14:19:36'
+    finished_at: '2026-06-30T16:44:46'
     last_result:
       status: done
       failure_code: ''
@@ -822,7 +822,27 @@ stages:
     - modeling/main_lgbm/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
     - modeling/main_lgbm/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png
     - modeling/main_lgbm/woe_top_features/woe_top20_summary.csv
-    started_at: '2026-06-30T14:30:06'
+    - modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/006_dau_90d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/013_payment_day_6m_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/014_clk_cnt_14d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    started_at: '2026-06-30T16:44:48'
     action:
       id: train_baseline
       kind: stage
@@ -849,10 +869,10 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T14:31:21'
+      heartbeat_at: '2026-06-30T16:46:24'
       elapsed_seconds: 0.0
       last_event_status: done
-    finished_at: '2026-06-30T14:31:20'
+    finished_at: '2026-06-30T16:46:23'
     last_result:
       status: done
       failure_code: ''
@@ -1076,11 +1096,151 @@ stages:
         description: ''
         artifact_rule: ''
         rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/006_dau_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/013_payment_day_6m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/014_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
       decision:
         stage: train_baseline
         decision: done
         reason: lightgbm training completed from local feather data
-        created_at: '2026-06-30T14:31:20'
+        created_at: '2026-06-30T16:46:23'
   evaluate:
     status: done
     artifacts:
@@ -1131,7 +1291,7 @@ stages:
     - evaluation/score_psi_by_month.csv
     - evaluation/segment_metrics.csv
     - evaluation/champion_challenger.json
-    started_at: '2026-06-30T14:31:22'
+    started_at: '2026-06-30T16:46:25'
     action:
       id: evaluate
       kind: stage
@@ -1152,10 +1312,10 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T14:32:13'
+      heartbeat_at: '2026-06-30T16:47:25'
       elapsed_seconds: 0.0
       last_event_status: done
-    finished_at: '2026-06-30T14:32:12'
+    finished_at: '2026-06-30T16:47:25'
     last_result:
       status: done
       failure_code: ''
@@ -1495,13 +1655,13 @@ stages:
         stage: evaluate
         decision: done
         reason: Evaluation completed from local score feather
-        created_at: '2026-06-30T14:32:12'
+        created_at: '2026-06-30T16:47:24'
   compare:
     status: done
     artifacts:
     - evaluation/benchmark_uplift.csv
     - evaluation/champion_challenger.json
-    started_at: '2026-06-30T14:32:13'
+    started_at: '2026-06-30T16:47:26'
     action:
       id: compare
       kind: stage
@@ -1517,7 +1677,7 @@ stages:
       artifact_rules:
       - evaluation/champion_challenger.json
       - evaluation/benchmark_uplift.csv
-    finished_at: '2026-06-30T14:32:14'
+    finished_at: '2026-06-30T16:47:27'
     last_result:
       status: done
       failure_code: ''
@@ -1542,7 +1702,7 @@ stages:
         stage: compare
         decision: done
         reason: Champion/challenger comparison materialized
-        created_at: '2026-06-30T14:32:14'
+        created_at: '2026-06-30T16:47:27'
     progress:
       step: action_done
       status: done
@@ -1550,7 +1710,7 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T14:32:15'
+      heartbeat_at: '2026-06-30T16:47:27'
       elapsed_seconds: 0.0
       last_event_status: done
   report:
@@ -1583,7 +1743,27 @@ stages:
     - reports/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
     - reports/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png
     - reports/woe_top_features/woe_top20_summary.csv
-    started_at: '2026-06-30T15:24:57'
+    - reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - reports/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png
+    - reports/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png
+    - reports/woe_top_features/images/006_dau_90d_WOE.png
+    - reports/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - reports/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png
+    - reports/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png
+    - reports/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - reports/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png
+    - reports/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png
+    - reports/woe_top_features/images/013_payment_day_6m_WOE.png
+    - reports/woe_top_features/images/014_clk_cnt_14d_WOE.png
+    - reports/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - reports/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+    - reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - reports/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
+    - reports/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+    - reports/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    started_at: '2026-06-30T16:47:28'
     action:
       id: report
       kind: stage
@@ -1607,7 +1787,7 @@ stages:
       - reports/model_report.html
       - reports/model_card.md
       - reports/executive_summary.md
-    finished_at: '2026-06-30T15:25:10'
+    finished_at: '2026-06-30T16:47:50'
     last_result:
       status: done
       failure_code: ''
@@ -1803,11 +1983,151 @@ stages:
         description: ''
         artifact_rule: ''
         rule_matched: false
+      - path: reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/006_dau_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/013_payment_day_6m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/014_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
       decision:
         stage: report
         decision: done
         reason: Excel report generated from standard train and evaluation artifacts
-        created_at: '2026-06-30T15:25:09'
+        created_at: '2026-06-30T16:47:50'
     progress:
       step: action_done
       status: done
@@ -1815,7 +2135,7 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T15:25:10'
+      heartbeat_at: '2026-06-30T16:47:50'
       elapsed_seconds: 0.0
       last_event_status: done
 decisions:
@@ -1859,4 +2179,20 @@ decisions:
   decision: done
   reason: Excel report generated from standard train and evaluation artifacts
   created_at: '2026-06-30T15:25:09'
-updated_at: '2026-06-30T15:25:10'
+- stage: train_baseline
+  decision: done
+  reason: lightgbm training completed from local feather data
+  created_at: '2026-06-30T16:46:23'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-06-30T16:47:24'
+- stage: compare
+  decision: done
+  reason: Champion/challenger comparison materialized
+  created_at: '2026-06-30T16:47:27'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-30T16:47:50'
+updated_at: '2026-06-30T16:47:51'

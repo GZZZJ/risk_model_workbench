@@ -11,3 +11,7 @@
 - 2026-06-30T14:32:14 [compare] done: Champion/challenger comparison materialized
 - 2026-06-30T14:32:26 [report] done: Excel report generated from standard train and evaluation artifacts
 - 2026-06-30T15:25:09 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-30T16:46:23 [train_baseline] done: lightgbm training completed from local feather data
+- 2026-06-30T16:47:24 [evaluate] done: Evaluation completed from local score feather
+- 2026-06-30T16:47:27 [compare] done: Champion/challenger comparison materialized
+- 2026-06-30T16:47:50 [report] done: Excel report generated from standard train and evaluation artifacts

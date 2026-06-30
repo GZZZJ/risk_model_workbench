@@ -17,6 +17,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import pickle
 import sys
 from dataclasses import dataclass
@@ -283,6 +284,113 @@ def univariate_auc_scores(x: pd.DataFrame, y: pd.Series) -> pd.Series:
         except ValueError:
             scores[feature] = 0.0
     return pd.Series(scores).sort_values(ascending=False)
+
+
+def _resolve_vendor_feature_select_code_dir(project_dir: Path | None = None) -> Path:
+    """Locate vendor/feature-select-v2/scripts/code (mirrors batch_feature_select search)."""
+    env_dir = os.environ.get("FEATURE_SELECT_V2_CODE_DIR")
+    here = Path(__file__).resolve()
+    candidates: list[Path | None] = []
+    if env_dir:
+        candidates.append(Path(env_dir))
+    if project_dir is not None:
+        candidates.append(project_dir / "vendor" / "feature-select-v2" / "scripts" / "code")
+    candidates.extend(
+        [
+            here.parents[2] / "vendor" / "feature-select-v2" / "scripts" / "code",
+            Path.cwd() / "vendor" / "feature-select-v2" / "scripts" / "code",
+        ]
+    )
+    for candidate in candidates:
+        if candidate is not None and candidate.exists():
+            return candidate
+    return here.parents[2] / "vendor" / "feature-select-v2" / "scripts" / "code"
+
+
+def _load_vendor_feature_select():
+    """Import vendored feature_select helpers (same functions remote prescreen uses)."""
+    code_dir = _resolve_vendor_feature_select_code_dir()
+    for path in (str(code_dir), str(code_dir / "utils")):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    from utils.feature_select import _corr_filter, _iv_filter, batch_psi  # type: ignore[import-not-found]
+
+    return _iv_filter, _corr_filter, batch_psi
+
+
+def d01_local_prescreen(
+    parts: DatasetParts, available_features: list[str], cfg: dict[str, Any]
+) -> tuple[list[str], pd.DataFrame]:
+    """Local-feather d01: missing-rate (already applied upstream by coerce_feature_frame)
+    + IV + correlation, on the DEV split. Reuses vendor ``_iv_filter`` + ``_corr_filter``
+    (the native path ``d01_preselect_by_toad`` falls back to without toad), so local and
+    remote d01 share IV/corr semantics. Returns (kept_features, detail_df).
+    """
+    step_cfg = cfg.get("local_d01", {}) or {}
+    if not step_cfg.get("enabled", True):
+        detail = pd.DataFrame({"feature": available_features, "iv": 0.0, "drop_reason": "kept"})
+        return list(available_features), detail
+    iv_threshold = float(step_cfg.get("iv", 0.005))
+    corr_threshold = float(step_cfg.get("corr", 0.8))
+    n_bins = int(step_cfg.get("n_bins", 10))
+
+    _iv_filter, _corr_filter, _ = _load_vendor_feature_select()
+    dev = parts.train_x.loc[:, available_features].copy()
+    dev["_target_"] = parts.train_y.values
+    iv_drop, iv_dict = _iv_filter(dev, available_features, "_target_", iv_threshold, n_bins=n_bins)
+    iv_drop_set = set(iv_drop)
+    iv_survivors = [feature for feature in available_features if feature not in iv_drop_set]
+    corr_drop = _corr_filter(dev, iv_survivors, iv_dict, corr_threshold)
+    corr_drop_set = set(corr_drop)
+
+    kept = [feature for feature in iv_survivors if feature not in corr_drop_set]
+    rows = []
+    for feature in available_features:
+        if feature in iv_drop_set:
+            reason = "low_iv"
+        elif feature in corr_drop_set:
+            reason = "high_corr"
+        else:
+            reason = "kept"
+        rows.append({"feature": feature, "iv": float(iv_dict.get(feature, 0.0)), "drop_reason": reason})
+    return kept, pd.DataFrame(rows)
+
+
+def d02_local_psi(
+    parts: DatasetParts, remain_features: list[str], cfg: dict[str, Any]
+) -> tuple[list[str], pd.DataFrame]:
+    """Local-feather d02 stability filter: per-feature PSI (DEV vs OOT). Reuses vendor
+    ``batch_psi`` (same function remote ``run_d02`` uses), so local and remote PSI share
+    binning. Returns (kept_features, detail_df).
+    """
+    step_cfg = cfg.get("local_d02", {}) or {}
+    if not step_cfg.get("enabled", True):
+        detail = pd.DataFrame({"feature": remain_features, "max_psi": 0.0, "drop_reason": "kept"})
+        return list(remain_features), detail
+    if not remain_features:
+        return [], pd.DataFrame(columns=["feature", "max_psi", "drop_reason"])
+    psi_threshold = float(step_cfg.get("psi", 0.2))
+
+    _, _, batch_psi = _load_vendor_feature_select()
+    data_iter = iter(
+        [
+            ("base_DEV", parts.train_x.loc[:, remain_features]),
+            ("exp_OOT", parts.valid_x.loc[:, remain_features]),
+        ]
+    )
+    psi_result = batch_psi(data_iter, list(remain_features), method="quantile", num_nbins=10)
+    fea_psi = psi_result[2] if isinstance(psi_result, tuple) and len(psi_result) > 2 else psi_result
+    feature_max_psi = {feature: float(max(psi.values())) for feature, psi in fea_psi.items()}
+
+    kept: list[str] = []
+    rows = []
+    for feature in remain_features:
+        psi = feature_max_psi.get(feature, 0.0)
+        is_kept = psi <= psi_threshold
+        if is_kept:
+            kept.append(feature)
+        rows.append({"feature": feature, "max_psi": psi, "drop_reason": "kept" if is_kept else "high_psi"})
+    return kept, pd.DataFrame(rows)
 
 
 def global_corr_select(train_x: pd.DataFrame, train_y: pd.Series, cfg: dict[str, Any]) -> tuple[list[str], pd.DataFrame]:
@@ -927,7 +1035,14 @@ def main(argv: list[str] | None = None) -> int:
             },
         )
 
-    corr_features, corr_drops = global_corr_select(parts.train_x.loc[:, available_features], parts.train_y, cfg)
+    d01_kept, d01_detail = d01_local_prescreen(parts, available_features, cfg)
+    d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg)
+    memory_tracker.record("d01_d02_done", d01_kept=len(d01_kept), d02_kept=len(d02_kept))
+    print(
+        f"[STAGE] after_d01: {len(d01_kept)} (dropped {len(available_features) - len(d01_kept)}) "
+        f"| after_d02: {len(d02_kept)} (dropped {len(d01_kept) - len(d02_kept)})"
+    )
+    corr_features, corr_drops = global_corr_select(parts.train_x.loc[:, d02_kept], parts.train_y, cfg)
     memory_tracker.record(
         "global_corr_done",
         kept=len(corr_features),
@@ -992,6 +1107,10 @@ def main(argv: list[str] | None = None) -> int:
 
     preprocess_stats.to_csv(output_dir / "preprocess_feature_stats.csv", index=False, encoding="utf-8-sig")
     corr_drops.to_csv(output_dir / "d00_global_corr_drops.csv", index=False, encoding="utf-8-sig")
+    if isinstance(d01_detail, pd.DataFrame) and not d01_detail.empty:
+        d01_detail.to_csv(output_dir / "d01_local_prescreen_detail.csv", index=False, encoding="utf-8-sig")
+    if isinstance(d02_detail, pd.DataFrame) and not d02_detail.empty:
+        d02_detail.to_csv(output_dir / "d02_local_psi_detail.csv", index=False, encoding="utf-8-sig")
     d03_detail.to_csv(output_dir / "d03_random_importance_detail.csv", index=False, encoding="utf-8-sig")
     d04_detail.to_csv(output_dir / "d04_null_importance_detail.csv", index=False, encoding="utf-8-sig")
     d05_importance.to_csv(output_dir / "d05_baseline_importance.csv", index=False, encoding="utf-8-sig")
@@ -1013,6 +1132,11 @@ def main(argv: list[str] | None = None) -> int:
             "valid_samples": int(len(parts.valid_x)),
             "initial_features": len(initial_features),
             "available_features": len(available_features),
+            "d01_kept_features": len(d01_kept),
+            "d02_kept_features": len(d02_kept),
+            "d01_d02_mode": "local_feather",
+            "d01_thresholds": cfg.get("local_d01", {}),
+            "d02_psi_threshold": float((cfg.get("local_d02", {}) or {}).get("psi", 0.2)),
             "after_global_corr": len(corr_features),
             "d03_mode": str(cfg.get("d03_random_importance", {}).get("mode", "feature_select_v2")),
             "after_d03_random_importance": len(d03_features),

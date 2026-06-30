@@ -1,6 +1,6 @@
 {
   "data_source": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
-  "generated_at": "2026-06-30 14:31:11",
+  "generated_at": "2026-06-30 16:46:05",
   "label_column": "ftr_30d_ord_flag",
   "split_column": "final_flag",
   "train_values": [

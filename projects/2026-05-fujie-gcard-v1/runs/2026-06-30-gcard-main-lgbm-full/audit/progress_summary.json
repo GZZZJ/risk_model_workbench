@@ -1,11 +1,11 @@
 {
   "version": 1,
   "run_id": "2026-06-30-gcard-main-lgbm-full",
-  "updated_at": "2026-06-30T15:25:10",
+  "updated_at": "2026-06-30T16:47:50",
   "stage": "report",
   "stage_label": "报告生成",
   "latest_event": {
-    "timestamp": "2026-06-30T15:25:10",
+    "timestamp": "2026-06-30T16:47:50",
     "run_id": "2026-06-30-gcard-main-lgbm-full",
     "stage": "report",
     "step": "action_done",
@@ -20,11 +20,11 @@
       "action_id": "report",
       "failure_code": "",
       "retry_count": 0,
-      "artifact_count": 27,
+      "artifact_count": 47,
       "decision": "done"
     },
     "level": "info",
-    "pid": 39848
+    "pid": 97511
   },
   "stages": {
     "validate_config": {
@@ -162,7 +162,7 @@
       "stage": "feature_refine",
       "stage_label": "特征精筛",
       "latest_event": {
-        "timestamp": "2026-06-30T14:19:36",
+        "timestamp": "2026-06-30T16:44:47",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "feature_refine",
         "step": "action_done",
@@ -180,15 +180,15 @@
           "artifact_count": 26
         },
         "level": "info",
-        "pid": 20743
+        "pid": 65692
       },
-      "updated_at": "2026-06-30T14:19:36"
+      "updated_at": "2026-06-30T16:44:47"
     },
     "train_baseline": {
       "stage": "train_baseline",
       "stage_label": "模型训练",
       "latest_event": {
-        "timestamp": "2026-06-30T14:31:21",
+        "timestamp": "2026-06-30T16:46:24",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "train_baseline",
         "step": "action_done",
@@ -203,19 +203,19 @@
           "action_id": "train_baseline",
           "failure_code": "",
           "retry_count": 0,
-          "artifact_count": 31,
+          "artifact_count": 51,
           "decision": "done"
         },
         "level": "info",
-        "pid": 25610
+        "pid": 77090
       },
-      "updated_at": "2026-06-30T14:31:21"
+      "updated_at": "2026-06-30T16:46:24"
     },
     "evaluate": {
       "stage": "evaluate",
       "stage_label": "模型评估",
       "latest_event": {
-        "timestamp": "2026-06-30T14:32:13",
+        "timestamp": "2026-06-30T16:47:25",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "evaluate",
         "step": "action_done",
@@ -234,15 +234,15 @@
           "decision": "done"
         },
         "level": "info",
-        "pid": 25699
+        "pid": 89077
       },
-      "updated_at": "2026-06-30T14:32:13"
+      "updated_at": "2026-06-30T16:47:25"
     },
     "compare": {
       "stage": "compare",
       "stage_label": "冠军挑战者对比",
       "latest_event": {
-        "timestamp": "2026-06-30T14:32:15",
+        "timestamp": "2026-06-30T16:47:27",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "compare",
         "step": "action_done",
@@ -261,15 +261,15 @@
           "decision": "done"
         },
         "level": "info",
-        "pid": 25740
+        "pid": 96973
       },
-      "updated_at": "2026-06-30T14:32:15"
+      "updated_at": "2026-06-30T16:47:27"
     },
     "report": {
       "stage": "report",
       "stage_label": "报告生成",
       "latest_event": {
-        "timestamp": "2026-06-30T15:25:10",
+        "timestamp": "2026-06-30T16:47:50",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "report",
         "step": "action_done",
@@ -284,13 +284,13 @@
           "action_id": "report",
           "failure_code": "",
           "retry_count": 0,
-          "artifact_count": 27,
+          "artifact_count": 47,
           "decision": "done"
         },
         "level": "info",
-        "pid": 39848
+        "pid": 97511
       },
-      "updated_at": "2026-06-30T15:25:10"
+      "updated_at": "2026-06-30T16:47:50"
     }
   }
 }

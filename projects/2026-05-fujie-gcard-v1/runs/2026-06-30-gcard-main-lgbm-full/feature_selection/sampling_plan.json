@@ -1,18 +1,18 @@
 {
   "data_source_mode": "local_feather",
   "total_rows": 489743,
-  "max_rows": 38667,
+  "max_rows": 43784,
   "sampling_required": true,
   "method": "local_uniform_random",
-  "ratio": 0.07895365528450636,
-  "estimated_rows": 38667,
+  "ratio": 0.0894019924736035,
+  "estimated_rows": 43784,
   "limit": null,
   "random_column": null,
   "sql_predicate": null,
   "local_row_selection": {
     "method": "uniform_random_fraction",
-    "fraction": 0.07895365528450636,
-    "max_rows": 38667
+    "fraction": 0.0894019924736035,
+    "max_rows": 43784
   },
   "reason": "row count exceeds memory capacity"
 }

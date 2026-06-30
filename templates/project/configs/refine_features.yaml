@@ -43,6 +43,19 @@ feature_refine:
     threshold: 0.80
     score_metric: univariate_auc
 
+  local_d01:
+    # Whole-frame IV + correlation prescreen (local-feather mode; remote uses per-table d01_preselect_by_toad)
+    enabled: true
+    empty: 0.9
+    iv: 0.005
+    corr: 0.8
+    n_bins: 10
+
+  local_d02:
+    # DEV vs OOT per-feature PSI stability filter (local-feather mode)
+    enabled: true
+    psi: 0.2
+
   d03_random_importance:
     enabled: true
     mode: feature_select_v2

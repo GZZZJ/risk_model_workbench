@@ -1,17 +1,34 @@
-"""Regression guard for the feature-screening summary table field mapping.
+"""Regression guards for the feature-screening summary table.
 
-The fallback path of ``_screening_steps_frame`` reads ``stage_summary.json`` (produced
-by feature_refine). Its keys must match what refine actually writes, otherwise the
-report's "剩余变量个数" column shows N/A for steps that genuinely have counts.
+Covers: refine stage_summary key mapping, d01/d02 rendering when present,
+local-feather row ordering (monotonic funnel), and the precedence trap where
+feature_screening_process.json shadows stage_summary.
 """
 
+import json
 from pathlib import Path
 
 from risk_model_workbench.reporting.excel_report import _screening_steps_frame
 
 
-def _refine_stage_summary() -> dict:
+def _stage_summary_local() -> dict:
     return {
+        "data_source_mode": "local_feather",
+        "initial_features": 2837,
+        "available_features": 2563,
+        "d01_kept_features": 2400,
+        "d02_kept_features": 2350,
+        "after_global_corr": 1852,
+        "after_d03_random_importance": 1852,
+        "after_d04_null_importance": 1028,
+        "final_features": 500,
+        "d03_mode": "feature_select_v2",
+    }
+
+
+def _stage_summary_remote_no_d01_d02() -> dict:
+    return {
+        "data_source_mode": "remote_table",
         "initial_features": 2837,
         "available_features": 2563,
         "after_global_corr": 1852,
@@ -22,29 +39,52 @@ def _refine_stage_summary() -> dict:
     }
 
 
-def test_screening_steps_frame_maps_refine_stage_summary_keys(tmp_path):
-    feature_dir = tmp_path / "feature_selection"
-    feature_dir.mkdir()  # no feature_screening_process.json → fallback to stage_summary
+def test_screening_steps_renders_d01_d02_counts_in_local_feather(tmp_path):
+    feature_dir = tmp_path / "fs"
+    feature_dir.mkdir()
 
-    frame = _screening_steps_frame(_refine_stage_summary(), feature_dir)
+    frame = _screening_steps_frame(_stage_summary_local(), feature_dir)
     by_method = dict(zip(frame["筛选方法"], frame["剩余变量个数"]))
 
-    # Refine-backed steps must show real counts, not N/A.
     assert by_method["原始候选变量总数"] == 2837
     assert by_method["Feather观察样本可用特征"] == 2563
-    assert by_method["全局相关性去重：按单变量AUC保留更强特征"] == 1852
-    assert by_method["空标签重要性筛选：保留显著高于空标签分布的特征"] == 1028
+    # d01/d02 now computed locally → real counts, with honest "全表" labels
+    assert by_method["分表基础预筛：缺失率、相关性、IV（全表，local feather）"] == 2400
+    assert by_method["稳定性筛选：DEV vs OOT PSI（全表，local feather）"] == 2350
     assert by_method["最终训练特征"] == 500
 
 
-def test_screening_steps_frame_prescreen_steps_absent_in_local_feather(tmp_path):
-    """d01 (分表预筛) / d02 (稳定性 PSI) are prescreen-side; in local_feather mode
-    prescreen runs by-design without them, so they honestly stay N/A — not a bug."""
-    feature_dir = tmp_path / "feature_selection"
+def test_screening_steps_local_feather_funnel_is_monotonic(tmp_path):
+    feature_dir = tmp_path / "fs"
     feature_dir.mkdir()
 
-    frame = _screening_steps_frame(_refine_stage_summary(), feature_dir)
-    by_method = dict(zip(frame["筛选方法"], frame["剩余变量个数"]))
+    frame = _screening_steps_frame(_stage_summary_local(), feature_dir)
+    counts = [c for c in frame["剩余变量个数"] if isinstance(c, int)]
+    assert counts == sorted(counts, reverse=True), f"funnel not monotone: {counts}"
 
+
+def test_screening_steps_missing_d01_d02_keys_show_na_remote(tmp_path):
+    """Remote stage_summary without d01_kept_features/d02_kept_features → N/A (honest)."""
+    feature_dir = tmp_path / "fs"
+    feature_dir.mkdir()
+
+    frame = _screening_steps_frame(_stage_summary_remote_no_d01_d02(), feature_dir)
+    by_method = dict(zip(frame["筛选方法"], frame["剩余变量个数"]))
+    # remote legacy label, key absent → N/A
     assert by_method["分表基础预筛：缺失率、相关性、IV"] == "N/A"
     assert by_method["稳定性筛选：DEV vs OOT PSI"] == "N/A"
+
+
+def test_screening_steps_shadowed_by_feature_screening_process(tmp_path):
+    """Precedence trap guard: feature_screening_process.json shadows stage_summary."""
+    feature_dir = tmp_path / "fs"
+    feature_dir.mkdir()
+    (feature_dir / "feature_screening_process.json").write_text(
+        json.dumps({"screening_rows": [{"step": 1, "method": "shadow", "remaining_features": 99}]}),
+        encoding="utf-8",
+    )
+
+    frame = _screening_steps_frame(_stage_summary_local(), feature_dir)
+    # process.json branch wins over stage_summary
+    assert 99 in list(frame["剩余变量个数"])
+    assert 2400 not in list(frame["剩余变量个数"])

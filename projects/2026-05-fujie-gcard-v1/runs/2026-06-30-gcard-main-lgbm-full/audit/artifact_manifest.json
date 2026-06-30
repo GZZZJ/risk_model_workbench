@@ -427,1172 +427,6 @@
       "registered_at": "2026-06-30T13:55:29"
     },
     {
-      "path": "feature_selection/data_source_contract.json",
-      "size_bytes": 309,
-      "mtime": "2026-06-30T14:19:24",
-      "sha256": "da464bade07511a48fd79dfbdd7ec2aea434c336577eb4901dcc372505b725a5",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Resource-aware feature intake evidence",
-      "registered_at": "2026-06-30T14:19:33"
-    },
-    {
-      "path": "feature_selection/execution_environment.json",
-      "size_bytes": 279,
-      "mtime": "2026-06-30T14:19:24",
-      "sha256": "8295a63779e4afff22ed73b0ae0c5843e56561cd062ec482603c50c1836274c4",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Resource-aware feature intake evidence",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/resource_plan.json",
-      "size_bytes": 1186,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "0e62ffcee9aa498e68e95b28537eb9b7b8caeda0e9688eddcce179b7153e6db6",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Resource-aware feature intake evidence",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/sampling_plan.json",
-      "size_bytes": 459,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "c13effa820e09079484110c6bbfc5a15aa464d38840701417f60603e595a91bb",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Resource-aware feature intake evidence",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batch_plan.json",
-      "size_bytes": 284588,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "a1ac25cc8e20e1fd6c3e41851b23f9184325d71f28f166088e6d6e9bbb42efe0",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Resource-aware feature intake evidence",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/profiles/local_feather_profile.json",
-      "size_bytes": 259983,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "3e8433a748768460703666aa3f066b2d3b9ca9d42bed4b3fe7a238cfdcabaa88",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature source profile evidence",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_001_plan.json",
-      "size_bytes": 89196,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "1a6668409809ee9eb1f84511a2c8c6470abdd96293aea21f24a6deaae3a67395",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_002_plan.json",
-      "size_bytes": 89944,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "5c89aa0eb57a09b7c1eb6fab76665ddb1080b170737d11c3760771851f475ee7",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_003_plan.json",
-      "size_bytes": 81637,
-      "mtime": "2026-06-30T14:19:33",
-      "sha256": "ba967e652d4c5f8839439ae8c359863fff0abffa29f771ee795bb262d7ae5f77",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_004_plan.json",
-      "size_bytes": 89806,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "137d5ec1ec3df64e9008e0a4c921c476bf137ff7837fca727d425fb177dd1097",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_005_plan.json",
-      "size_bytes": 92582,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "ddcb711a8c3bc902e152cabfd64c10526ff8a67a1761be0faabcd881060f4c40",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_006_plan.json",
-      "size_bytes": 74954,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "ab2dbeb8f0bcf37428b741c03eda9d7722ed145ebba3763469e8b8a5365f1b8c",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_007_plan.json",
-      "size_bytes": 79720,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "4fd586edd0cb76f9da289a72ea85b04b53754731905cb61ad512dafadff3444b",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:34"
-    },
-    {
-      "path": "feature_selection/batches/batch_008_plan.json",
-      "size_bytes": 96044,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "8dd14a4b05da650d811994e4c9c80616aa71ee738d06281f12d566b41ffb0bea",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_009_plan.json",
-      "size_bytes": 83028,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "a468fbbf060648af7536d02ed29365aaf41f3b20c2e536e6e2301f3305076d1b",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_010_plan.json",
-      "size_bytes": 99315,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "0d46bae6c2ac24cc938da27f989d7243484d4dea90b72318c4b12c9f0f1120a6",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_011_plan.json",
-      "size_bytes": 126263,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "82e97561e62bd4b46ebd2e4c24a2ffda1fd8ce8b84145f0d838382027bf3fb82",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_012_plan.json",
-      "size_bytes": 134653,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "75bcc9b4c44a4fd92538ff723d18a22d6af5d24d98468f7fd1598b4e2ce2936a",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_013_plan.json",
-      "size_bytes": 148949,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "69f398d170796159f30eebc3fc291d0447743bd6c36e57502ff9646feb937fba",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_014_plan.json",
-      "size_bytes": 147519,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "6297d2aa30cf7264e8e18506acf48f91779a45cb31d1fce9bba043aeb12eac84",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/batches/batch_015_plan.json",
-      "size_bytes": 74268,
-      "mtime": "2026-06-30T13:55:27",
-      "sha256": "167f0ad8b7f865cf072aa35af96c6a52a6e4f03ca3de185c0a7850990c32b278",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature batch plan",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/stage_summary.json",
-      "size_bytes": 826,
-      "mtime": "2026-06-30T14:19:13",
-      "sha256": "52a15109cbe70c3c301d7e4c1885c8e7787b352c96cf65c9b6e7a3cc9b2ea6aa",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature refinement stage summary",
-      "registered_at": "2026-06-30T14:19:35"
-    },
-    {
-      "path": "feature_selection/feature_stage_summary.json",
-      "size_bytes": 826,
-      "mtime": "2026-06-30T14:19:13",
-      "sha256": "52a15109cbe70c3c301d7e4c1885c8e7787b352c96cf65c9b6e7a3cc9b2ea6aa",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature refinement stage summary compatibility copy",
-      "registered_at": "2026-06-30T14:19:36"
-    },
-    {
-      "path": "feature_selection/final_500_features.txt",
-      "size_bytes": 17992,
-      "mtime": "2026-06-30T14:19:13",
-      "sha256": "8c23486a442389f797a95f2b92a05caa056fa04476be384ee915b29db85d13e1",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Final refined feature list",
-      "registered_at": "2026-06-30T14:19:36"
-    },
-    {
-      "path": "feature_selection/final_features.txt",
-      "size_bytes": 17992,
-      "mtime": "2026-06-30T14:19:13",
-      "sha256": "8c23486a442389f797a95f2b92a05caa056fa04476be384ee915b29db85d13e1",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Final refined feature list",
-      "registered_at": "2026-06-30T14:19:36"
-    },
-    {
-      "path": "feature_selection/resource_usage.json",
-      "size_bytes": 3379,
-      "mtime": "2026-06-30T14:19:13",
-      "sha256": "c636d3d08c7eb5f63f86498786291b31f8d2202fe9ecd69e27afdbfe016ee1ca",
-      "stage": "feature_refine",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature refinement runtime memory usage",
-      "registered_at": "2026-06-30T14:19:36"
-    },
-    {
-      "path": "modeling/main_lgbm/train_metrics.json",
-      "size_bytes": 482,
-      "mtime": "2026-06-30T14:31:12",
-      "sha256": "450b6c86cd2a04986ff83c29bcfc5df953131067e0a09dd95bb1860d3ca3e8a6",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:12"
-    },
-    {
-      "path": "modeling/main_lgbm/metrics_train_valid.json",
-      "size_bytes": 365,
-      "mtime": "2026-06-30T14:30:45",
-      "sha256": "5b77de07226cc08cf8948ae28b1ea20bffe48852f21165dc498ab4ceecab271a",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:12"
-    },
-    {
-      "path": "modeling/main_lgbm/feature_importance.csv",
-      "size_bytes": 28345,
-      "mtime": "2026-06-30T14:30:45",
-      "sha256": "11e3ec2f4fc108e3413a887c4d0f10403ec8f8fd2c672402307af7480c897a49",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:12"
-    },
-    {
-      "path": "modeling/main_lgbm/feature_drop_detail.csv",
-      "size_bytes": 29803,
-      "mtime": "2026-06-30T14:30:27",
-      "sha256": "a75eeb9cab8894b450b50070e79372e5cd4c7267e727a0b4ace8fb0f3b1efd4a",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:13"
-    },
-    {
-      "path": "modeling/main_lgbm/actual_feature_list.txt",
-      "size_bytes": 17992,
-      "mtime": "2026-06-30T14:30:27",
-      "sha256": "8c23486a442389f797a95f2b92a05caa056fa04476be384ee915b29db85d13e1",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:13"
-    },
-    {
-      "path": "modeling/main_lgbm/preprocessing.json",
-      "size_bytes": 27596,
-      "mtime": "2026-06-30T14:30:27",
-      "sha256": "704a9b3b2f6cd0e997c4c276ce2e789208be0444fbcc8964e1aa3b6e48a6c769",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:13"
-    },
-    {
-      "path": "modeling/main_lgbm/run_config.json",
-      "size_bytes": 1537,
-      "mtime": "2026-06-30T14:31:04",
-      "sha256": "cd94821a86f0745db723e7de278061783d2980dd81520e3b7f089587bfcf964e",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:13"
-    },
-    {
-      "path": "modeling/main_lgbm/model.pkl",
-      "size_bytes": 877702,
-      "mtime": "2026-06-30T14:31:03",
-      "sha256": "036e6632e7dbb2cda44cf777e3bc68ea722fe55a54cd798e88cc41fdba40941a",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:14"
-    },
-    {
-      "path": "modeling/main_lgbm/score_column_summary.csv",
-      "size_bytes": 276,
-      "mtime": "2026-06-30T14:31:11",
-      "sha256": "002e20a5b232535fc9ed58798f8b77c959a0326f309da086dcc54ec4b53a966d",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:14"
-    },
-    {
-      "path": "modeling/main_lgbm/scores_all_splits.feather",
-      "size_bytes": 49049370,
-      "mtime": "2026-06-30T14:31:11",
-      "sha256": "9da467f623544386d05be038ee1179555dde1ddc4540cff3fdf03e3e610f2451",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:14"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/001_his_90_day_csh_apl_ord_cnt_his_rto_WOE.png",
-      "size_bytes": 234194,
-      "mtime": "2026-06-30T14:30:46",
-      "sha256": "e9668c10b2ffd0c73e13f75027612b045ca0e724e43450d637a83fbf579903b6",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:15"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/002_unpaid_principal_future_light_add_heavy_WOE.png",
-      "size_bytes": 239609,
-      "mtime": "2026-06-30T14:30:47",
-      "sha256": "2de9687eb4510501fd577d96b967da77c778c7f6e8b274c8d8ff7909d67bed63",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:15"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/003_ord_apl_max_prc_amt_180_day_WOE.png",
-      "size_bytes": 220901,
-      "mtime": "2026-06-30T14:30:47",
-      "sha256": "35e65ac5c48ba11f749adabbee34c822541a9d38ea017af550e56adb78de750f",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:15"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
-      "size_bytes": 278530,
-      "mtime": "2026-06-30T14:30:49",
-      "sha256": "890d0b0150ae63fe14d1203632ad7a3e8f7f6ffda1e9e0c9ed49f8eb18b3ad27",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:15"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/005_d60_apl_ord_prc_amt_per_stg_max_all_WOE.png",
-      "size_bytes": 229646,
-      "mtime": "2026-06-30T14:30:50",
-      "sha256": "73f1d65be82c0decfd66e0bb6b404099bcd3d516a1de50a99ce795c669074b7a",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:16"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/006_his_180_day_csh_apl_ord_cnt_his_rto_WOE.png",
-      "size_bytes": 239806,
-      "mtime": "2026-06-30T14:30:51",
-      "sha256": "5d91d6a19fdf70018d54f9e1aa4603e70cb7e5d7d9d261c0bcf8dac7be753bc3",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:16"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/007_d180_apl_ord_days_cnt_all_WOE.png",
-      "size_bytes": 227341,
-      "mtime": "2026-06-30T14:30:52",
-      "sha256": "5a608be781c3f18bbfcaedcba58bb8c51fa8883ff3ecabfdee75f3db7781f4f8",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:16"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/008_ord_apl_sum_prc_amt_360_day_WOE.png",
-      "size_bytes": 225103,
-      "mtime": "2026-06-30T14:30:52",
-      "sha256": "42ff522cd3f34160e9630f0e66c8b76448eea102f595487727d7befd3ded9de4",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:17"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/009_his_360_day_csh_apl_ord_cnt_WOE.png",
-      "size_bytes": 222413,
-      "mtime": "2026-06-30T14:30:53",
-      "sha256": "5c16adcfcebe43f6160018216f2d007dc2645873256ef7caff28779dfe21f8cb",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:17"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/010_cnt_event_result_1_uid_recent_days_120_WOE.png",
-      "size_bytes": 234739,
-      "mtime": "2026-06-30T14:30:54",
-      "sha256": "882578d4a8fb77a2c7ff4dfc6fef72c02877a372d9a65adaa7f7049bf91f4d44",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:17"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/011_dau_90d_WOE.png",
-      "size_bytes": 229203,
-      "mtime": "2026-06-30T14:30:54",
-      "sha256": "7b130684e5302c389d09a23b9d9a5f8998d66ac615e7f4d4835365827e9583aa",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:17"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/012_cnt_other_info_cash_uid_recent_days_30_WOE.png",
-      "size_bytes": 218481,
-      "mtime": "2026-06-30T14:30:55",
-      "sha256": "310711b34036191238b35114676dfc9a437edc1af705af5cd37d142462e88f52",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:18"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
-      "size_bytes": 262178,
-      "mtime": "2026-06-30T14:30:56",
-      "sha256": "34e6a6b4f5bc1301ffdcfe6e481725089bea97f1652fa14c5c31265496a025f7",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:18"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/014_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
-      "size_bytes": 328341,
-      "mtime": "2026-06-30T14:30:57",
-      "sha256": "8db8c8ad626d9404d502e54eb79782dfcefeee3c7f1cd14f479fb02fe51cf95c",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:18"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/015_d360_apl_ord_cnt_all_WOE.png",
-      "size_bytes": 224869,
-      "mtime": "2026-06-30T14:30:58",
-      "sha256": "9c3d8e0847dd6010e22f4408160a159fad3bd4e9579a77246a85abffb3d9aaa5",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:18"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/016_his_720_day_csh_apl_ord_cnt_his_rto_WOE.png",
-      "size_bytes": 221904,
-      "mtime": "2026-06-30T14:30:59",
-      "sha256": "e041bc33feff7782d6d86a8b719c38e46616589716f786308d581463346af73b",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:19"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/017_clk_cnt_14d_WOE.png",
-      "size_bytes": 216444,
-      "mtime": "2026-06-30T14:31:00",
-      "sha256": "19ac73d1a0a99b85428416303c965b513f5f723e2c2687aec7b3d18350997e6c",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:19"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/018_rsk_avl_lmt_ch_les_10000_cnt_3m_WOE.png",
-      "size_bytes": 231285,
-      "mtime": "2026-06-30T14:31:01",
-      "sha256": "225dbeac839e8e9043ea0ae8b932a8bf6b66f6bb63a4414ce5170b87981909e5",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:19"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
-      "size_bytes": 232458,
-      "mtime": "2026-06-30T14:31:02",
-      "sha256": "4273059628c7589ae62dea2954b3c25b1b56ececa65d291c62f52837d86b2413",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:20"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
-      "size_bytes": 247636,
-      "mtime": "2026-06-30T14:31:03",
-      "sha256": "8463056c5c1ed44e4d812f725183c6b34bee12732fba03572f397d44ddf3b1d4",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:20"
-    },
-    {
-      "path": "modeling/main_lgbm/woe_top_features/woe_top20_summary.csv",
-      "size_bytes": 91575,
-      "mtime": "2026-06-30T14:31:03",
-      "sha256": "2b66dac289246d4147fbf577510b0768ba475c48743a39ccbf09bb1410ab3941",
-      "stage": "train_baseline",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:31:20"
-    },
-    {
-      "path": "evaluation/benchmark_uplift.csv",
-      "size_bytes": 1428,
-      "mtime": "2026-06-30T14:31:59",
-      "sha256": "6a122acf8ff5015738b6c8bc732cbe9d9ab44c32ba456b02bbb57b338390df24",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:00"
-    },
-    {
-      "path": "evaluation/business_risk.csv",
-      "size_bytes": 26643,
-      "mtime": "2026-06-30T14:31:57",
-      "sha256": "26e314a98e797d87e6aeb3fe008e22314b36b065f28275ad6a7ce151503daf6d",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:00"
-    },
-    {
-      "path": "evaluation/champion_challenger.json",
-      "size_bytes": 207,
-      "mtime": "2026-06-30T14:21:43",
-      "sha256": "e7a4617c058b3932f5b7575a07058324a9aca73eb5e33191faf70b8c000796b1",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:01"
-    },
-    {
-      "path": "evaluation/cross_gain_matrix_gcard_v2.csv",
-      "size_bytes": 3090,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "3189a6ea699938b91bbfcac716b14a18a15d7aa72f3d2b7e3e3a1e854c07bc39",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:01"
-    },
-    {
-      "path": "evaluation/cross_gain_matrix_gcard_v4.csv",
-      "size_bytes": 3015,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "c7d69fd169a826b1c749d80513cb43010035c4b585e7bfc1c8536edc8a265925",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:01"
-    },
-    {
-      "path": "evaluation/cross_gain_matrix_gcard_v5.csv",
-      "size_bytes": 3125,
-      "mtime": "2026-06-30T14:31:54",
-      "sha256": "c8724312e2b891113ba77b4cd3db22f5833d18f972f59dbd43010410d29ea493",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:01"
-    },
-    {
-      "path": "evaluation/cross_gain_matrix_gcard_v6.csv",
-      "size_bytes": 2745,
-      "mtime": "2026-06-30T14:31:54",
-      "sha256": "7f27033041a86af4e6c90a3af016cb216d0b5b6533fa8e4511020da6e4bdaaef",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:02"
-    },
-    {
-      "path": "evaluation/decile_lift_all.csv",
-      "size_bytes": 1493,
-      "mtime": "2026-06-30T14:31:51",
-      "sha256": "480ce580874f3968a2e53876394bf8fbb5fffb24be4926b8a5aef11a26487622",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:02"
-    },
-    {
-      "path": "evaluation/decile_lift_all_gcard_v2.csv",
-      "size_bytes": 1482,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "93579189edfc1f9f8e7fae6d880a1cc35f14c7209f824ab68ab8350294b46b32",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:02"
-    },
-    {
-      "path": "evaluation/decile_lift_all_gcard_v4.csv",
-      "size_bytes": 1482,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "29bc1093c24c68dbdf75592d614404e4e8ff4ebd5d4618e7bc1762d40e41c55d",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:02"
-    },
-    {
-      "path": "evaluation/decile_lift_all_gcard_v5.csv",
-      "size_bytes": 1491,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "99658cc834b50bd020ac98bf92d198d16d600f83c87bec78a92e7fd6a886f7c8",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:03"
-    },
-    {
-      "path": "evaluation/decile_lift_all_gcard_v6.csv",
-      "size_bytes": 1485,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "9f8c14ee12f6355d6354a20b19aae2bc2a61ab4d4fd8b4734ab0e23d5608a4dc",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:03"
-    },
-    {
-      "path": "evaluation/decile_lift_all_model_score.csv",
-      "size_bytes": 1493,
-      "mtime": "2026-06-30T14:31:51",
-      "sha256": "480ce580874f3968a2e53876394bf8fbb5fffb24be4926b8a5aef11a26487622",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:03"
-    },
-    {
-      "path": "evaluation/decile_lift_b2.csv",
-      "size_bytes": 1488,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "143aa58e346039fd9aa6deabb5a7a74f330f0235ce451d8146817a794198ad79",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:03"
-    },
-    {
-      "path": "evaluation/decile_lift_b2_gcard_v2.csv",
-      "size_bytes": 1492,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "196e1aa0c16b4326a2786309e28499259be65e15eaa3b33de58afeca6c46d4a8",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:04"
-    },
-    {
-      "path": "evaluation/decile_lift_b2_gcard_v4.csv",
-      "size_bytes": 1480,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "d021b5e89028ea13e73b5fd03b2026859db171a5d5f9a6f52d6b9554fdedc92f",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:04"
-    },
-    {
-      "path": "evaluation/decile_lift_b2_gcard_v5.csv",
-      "size_bytes": 1491,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "cd59a9003e88237638b76c948ed9cbe2ac79201a4068622ee03ce1bb303a8405",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:04"
-    },
-    {
-      "path": "evaluation/decile_lift_b2_gcard_v6.csv",
-      "size_bytes": 1489,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "a7995792e6725a9c20894a5ba4c516d041379824ba47ca680a869592b71fa515",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:04"
-    },
-    {
-      "path": "evaluation/decile_lift_b2_model_score.csv",
-      "size_bytes": 1488,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "143aa58e346039fd9aa6deabb5a7a74f330f0235ce451d8146817a794198ad79",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:05"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3.csv",
-      "size_bytes": 1465,
-      "mtime": "2026-06-30T14:31:51",
-      "sha256": "6e33ac580751af7c30d1358261342e638af3763a3449d41b454a0e53c2d1e404",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:05"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3_gcard_v2.csv",
-      "size_bytes": 1475,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "849219258616f239112b7fc2ebfa7c1b5036a40f4a394fb4be4017687ef80807",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:05"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3_gcard_v4.csv",
-      "size_bytes": 1468,
-      "mtime": "2026-06-30T14:31:52",
-      "sha256": "aefc4a661fc17584bad43e158e73388e20528236cb15730abc162606ad4f9153",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:05"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3_gcard_v5.csv",
-      "size_bytes": 1470,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "b6c1224c0cd3a418c2f1e86aabffb6473c16606b0671fcbb2252ca6d3caed620",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:06"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3_gcard_v6.csv",
-      "size_bytes": 1470,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "5315fcfa3307ca6e309ca77c9a4c1174ee456a57ad80306236d8bf145b11192f",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:06"
-    },
-    {
-      "path": "evaluation/decile_lift_e2e3_model_score.csv",
-      "size_bytes": 1465,
-      "mtime": "2026-06-30T14:31:51",
-      "sha256": "6e33ac580751af7c30d1358261342e638af3763a3449d41b454a0e53c2d1e404",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:06"
-    },
-    {
-      "path": "evaluation/dimension_metrics.csv",
-      "size_bytes": 9348,
-      "mtime": "2026-06-30T14:31:51",
-      "sha256": "bec0170170dadf5ac43a933f0301318885e7431198c774c0c18c025a888ff5e8",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:07"
-    },
-    {
-      "path": "evaluation/evaluation_summary.json",
-      "size_bytes": 3385,
-      "mtime": "2026-06-30T14:32:00",
-      "sha256": "1d0f27d6605dc57053391aeec0f0381d509cfa82a3bf0a10246cc5bfc66b1271",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:07"
-    },
-    {
-      "path": "evaluation/feature_gain_summary.csv",
-      "size_bytes": 917,
-      "mtime": "2026-06-30T14:31:59",
-      "sha256": "5c312fe17156c3e641e51f2390d849daf80108c4311834162addda44babc1fbc",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:07"
-    },
-    {
-      "path": "evaluation/intent_zc_amount_risk.csv",
-      "size_bytes": 351,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "29f43aed99d3ca417c4a38f4eb95912bc872c4e7a50c9cf989abbc6a49484cf4",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:07"
-    },
-    {
-      "path": "evaluation/intent_zc_amount_risk_b2.csv",
-      "size_bytes": 308,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "8fdb85a8b3902b535eaab39c41b3d067102f4cd7ceb5ff521777616c454f393b",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:08"
-    },
-    {
-      "path": "evaluation/intent_zc_amount_risk_e2e3.csv",
-      "size_bytes": 332,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "63dfe1ed2078d5902bd4019d21b461f312dcdf77784f25c9fe09346d776cd5d8",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:08"
-    },
-    {
-      "path": "evaluation/intent_zc_distribution.csv",
-      "size_bytes": 872,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "8b3c43dea378faa99a7b988c141fe050d7fbf1c613140c2f1d0503f3e7425a7c",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:08"
-    },
-    {
-      "path": "evaluation/intent_zc_distribution_b2.csv",
-      "size_bytes": 837,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "8525539a7cb04cdc58eb8fbc0c59b8964418c88b4a4b24ffa5a4c76537e2e594",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:08"
-    },
-    {
-      "path": "evaluation/intent_zc_distribution_e2e3.csv",
-      "size_bytes": 891,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "718c8d8507531ea030007642ae172ce70296fe61e5e28607265454e6d7c627ea",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:09"
-    },
-    {
-      "path": "evaluation/intent_zc_ftr_rate.csv",
-      "size_bytes": 239,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "280bce8d3b868e2cd29f4976d3223a74b5f86545e8bd3d2a214a209e8576d112",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:09"
-    },
-    {
-      "path": "evaluation/intent_zc_ftr_rate_b2.csv",
-      "size_bytes": 231,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "224379f7b8553a923aa40ccddc26187fbdd4f5b82c7dd0df520ed64f1e11e88b",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:09"
-    },
-    {
-      "path": "evaluation/intent_zc_ftr_rate_e2e3.csv",
-      "size_bytes": 246,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "90e8c22baab466cde38cdfc758e34cce03cfc2f9c4fa69a38150786c20498a52",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:09"
-    },
-    {
-      "path": "evaluation/intent_zc_headcount_risk.csv",
-      "size_bytes": 652,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "ce4d74202b9a2ed7f10030829598a9a6145a1a5c48efa115fbb3590b5e276bfc",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:10"
-    },
-    {
-      "path": "evaluation/intent_zc_headcount_risk_b2.csv",
-      "size_bytes": 609,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "cb068320624db35c0089f6997f39b5202e26cae31b7e1d643bb873e143523376",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:10"
-    },
-    {
-      "path": "evaluation/intent_zc_headcount_risk_e2e3.csv",
-      "size_bytes": 684,
-      "mtime": "2026-06-30T14:31:55",
-      "sha256": "27d61d205e6771a43fa000453841ac5ad94febf70d06e6303f7e9ac609bc841a",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:10"
-    },
-    {
-      "path": "evaluation/missing_evaluation_requirements.json",
-      "size_bytes": 457,
-      "mtime": "2026-06-30T14:31:59",
-      "sha256": "947d6bfe3215372ccfff9b4e223fb3edd7137bae7c530210446b3d36f86ec19e",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:10"
-    },
-    {
-      "path": "evaluation/monthly_metrics.csv",
-      "size_bytes": 3748,
-      "mtime": "2026-06-30T14:31:29",
-      "sha256": "f0f6cb62af4cdbe45582a096f7e459bcf2d00e752eab1ebdb32c166756677663",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:11"
-    },
-    {
-      "path": "evaluation/overall_metrics.csv",
-      "size_bytes": 1036,
-      "mtime": "2026-06-30T14:31:26",
-      "sha256": "d6ce12628fda250c4aefce284e15e33e43af9de401ebd8d8e150fabc0691c7d8",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:11"
-    },
-    {
-      "path": "evaluation/ranking_inversion.csv",
-      "size_bytes": 172,
-      "mtime": "2026-06-30T14:31:53",
-      "sha256": "6fdc74a9f7cddce67e4da96d206cdef00cd2ca6a5afa0439d36edfbf4ddd3523",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:11"
-    },
-    {
-      "path": "evaluation/score_psi_bin_detail.csv",
-      "size_bytes": 31556,
-      "mtime": "2026-06-30T14:31:58",
-      "sha256": "b09eef15a4d704b662279e1ac74e9d2a4439d554b78132619801be129a3c1ada",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:11"
-    },
-    {
-      "path": "evaluation/score_psi_by_month.csv",
-      "size_bytes": 1718,
-      "mtime": "2026-06-30T14:31:58",
-      "sha256": "1c266357fc2eb68e3a24e844bbf40a79770eb55d607f2acfc8f24ebf2854da99",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:12"
-    },
-    {
-      "path": "evaluation/segment_metrics.csv",
-      "size_bytes": 5492,
-      "mtime": "2026-06-30T14:31:38",
-      "sha256": "31c13be2d56d692b7034359dab6582487d7e64a9dd86502f54ee43ce00b4ce88",
-      "stage": "evaluate",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:12"
-    },
-    {
-      "path": "evaluation/benchmark_uplift.csv",
-      "size_bytes": 1428,
-      "mtime": "2026-06-30T14:31:59",
-      "sha256": "6a122acf8ff5015738b6c8bc732cbe9d9ab44c32ba456b02bbb57b338390df24",
-      "stage": "compare",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:14"
-    },
-    {
-      "path": "evaluation/champion_challenger.json",
-      "size_bytes": 207,
-      "mtime": "2026-06-30T14:32:14",
-      "sha256": "e7a4617c058b3932f5b7575a07058324a9aca73eb5e33191faf70b8c000796b1",
-      "stage": "compare",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T14:32:14"
-    },
-    {
       "path": "feature_metadata/feature_tables_meta.json",
       "size_bytes": 3405977,
       "mtime": "2026-06-30T14:41:45",
@@ -1626,70 +460,1467 @@
       "registered_at": "2026-06-30T14:41:46"
     },
     {
+      "path": "feature_selection/data_source_contract.json",
+      "size_bytes": 309,
+      "mtime": "2026-06-30T16:44:31",
+      "sha256": "3240e6a535064361ce818b278e7c55cc046b6a024386659a2b146ea05367845c",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Resource-aware feature intake evidence",
+      "registered_at": "2026-06-30T16:44:38"
+    },
+    {
+      "path": "feature_selection/execution_environment.json",
+      "size_bytes": 279,
+      "mtime": "2026-06-30T16:44:31",
+      "sha256": "8fb758bee1a74aa50677ea0d51ff011e15711a4f33f748e8c90e57730b701c12",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Resource-aware feature intake evidence",
+      "registered_at": "2026-06-30T16:44:38"
+    },
+    {
+      "path": "feature_selection/resource_plan.json",
+      "size_bytes": 1186,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "b7c4748773928ba987f456a4e7200d305e95051fe23367181fb5e05ba63917a0",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Resource-aware feature intake evidence",
+      "registered_at": "2026-06-30T16:44:38"
+    },
+    {
+      "path": "feature_selection/sampling_plan.json",
+      "size_bytes": 457,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "5a9818ac6dee00fa1c3f82e979524f9cc0b66422b9fa2e0910137dc3acc95475",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Resource-aware feature intake evidence",
+      "registered_at": "2026-06-30T16:44:39"
+    },
+    {
+      "path": "feature_selection/batch_plan.json",
+      "size_bytes": 284588,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "a1ac25cc8e20e1fd6c3e41851b23f9184325d71f28f166088e6d6e9bbb42efe0",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Resource-aware feature intake evidence",
+      "registered_at": "2026-06-30T16:44:39"
+    },
+    {
+      "path": "feature_selection/profiles/local_feather_profile.json",
+      "size_bytes": 259983,
+      "mtime": "2026-06-30T16:44:37",
+      "sha256": "3e8433a748768460703666aa3f066b2d3b9ca9d42bed4b3fe7a238cfdcabaa88",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature source profile evidence",
+      "registered_at": "2026-06-30T16:44:39"
+    },
+    {
+      "path": "feature_selection/batches/batch_001_plan.json",
+      "size_bytes": 89196,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "1a6668409809ee9eb1f84511a2c8c6470abdd96293aea21f24a6deaae3a67395",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:40"
+    },
+    {
+      "path": "feature_selection/batches/batch_002_plan.json",
+      "size_bytes": 89944,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "5c89aa0eb57a09b7c1eb6fab76665ddb1080b170737d11c3760771851f475ee7",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:40"
+    },
+    {
+      "path": "feature_selection/batches/batch_003_plan.json",
+      "size_bytes": 81637,
+      "mtime": "2026-06-30T16:44:38",
+      "sha256": "ba967e652d4c5f8839439ae8c359863fff0abffa29f771ee795bb262d7ae5f77",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:40"
+    },
+    {
+      "path": "feature_selection/batches/batch_004_plan.json",
+      "size_bytes": 89806,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "137d5ec1ec3df64e9008e0a4c921c476bf137ff7837fca727d425fb177dd1097",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:41"
+    },
+    {
+      "path": "feature_selection/batches/batch_005_plan.json",
+      "size_bytes": 92582,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "ddcb711a8c3bc902e152cabfd64c10526ff8a67a1761be0faabcd881060f4c40",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:41"
+    },
+    {
+      "path": "feature_selection/batches/batch_006_plan.json",
+      "size_bytes": 74954,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "ab2dbeb8f0bcf37428b741c03eda9d7722ed145ebba3763469e8b8a5365f1b8c",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:41"
+    },
+    {
+      "path": "feature_selection/batches/batch_007_plan.json",
+      "size_bytes": 79720,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "4fd586edd0cb76f9da289a72ea85b04b53754731905cb61ad512dafadff3444b",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:42"
+    },
+    {
+      "path": "feature_selection/batches/batch_008_plan.json",
+      "size_bytes": 96044,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "8dd14a4b05da650d811994e4c9c80616aa71ee738d06281f12d566b41ffb0bea",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:42"
+    },
+    {
+      "path": "feature_selection/batches/batch_009_plan.json",
+      "size_bytes": 83028,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "a468fbbf060648af7536d02ed29365aaf41f3b20c2e536e6e2301f3305076d1b",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:42"
+    },
+    {
+      "path": "feature_selection/batches/batch_010_plan.json",
+      "size_bytes": 99315,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "0d46bae6c2ac24cc938da27f989d7243484d4dea90b72318c4b12c9f0f1120a6",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:43"
+    },
+    {
+      "path": "feature_selection/batches/batch_011_plan.json",
+      "size_bytes": 126263,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "82e97561e62bd4b46ebd2e4c24a2ffda1fd8ce8b84145f0d838382027bf3fb82",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:43"
+    },
+    {
+      "path": "feature_selection/batches/batch_012_plan.json",
+      "size_bytes": 134653,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "75bcc9b4c44a4fd92538ff723d18a22d6af5d24d98468f7fd1598b4e2ce2936a",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:43"
+    },
+    {
+      "path": "feature_selection/batches/batch_013_plan.json",
+      "size_bytes": 148949,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "69f398d170796159f30eebc3fc291d0447743bd6c36e57502ff9646feb937fba",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:44"
+    },
+    {
+      "path": "feature_selection/batches/batch_014_plan.json",
+      "size_bytes": 147519,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "6297d2aa30cf7264e8e18506acf48f91779a45cb31d1fce9bba043aeb12eac84",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:44"
+    },
+    {
+      "path": "feature_selection/batches/batch_015_plan.json",
+      "size_bytes": 74268,
+      "mtime": "2026-06-30T13:55:27",
+      "sha256": "167f0ad8b7f865cf072aa35af96c6a52a6e4f03ca3de185c0a7850990c32b278",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature batch plan",
+      "registered_at": "2026-06-30T16:44:44"
+    },
+    {
+      "path": "feature_selection/stage_summary.json",
+      "size_bytes": 971,
+      "mtime": "2026-06-30T16:44:24",
+      "sha256": "85940d380f4af50e0e7c4b4a895dab5f59f33ea6c949412bf2766274c7f00312",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature refinement stage summary",
+      "registered_at": "2026-06-30T16:44:44"
+    },
+    {
+      "path": "feature_selection/feature_stage_summary.json",
+      "size_bytes": 971,
+      "mtime": "2026-06-30T16:44:24",
+      "sha256": "85940d380f4af50e0e7c4b4a895dab5f59f33ea6c949412bf2766274c7f00312",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature refinement stage summary compatibility copy",
+      "registered_at": "2026-06-30T16:44:45"
+    },
+    {
+      "path": "feature_selection/final_500_features.txt",
+      "size_bytes": 17764,
+      "mtime": "2026-06-30T16:44:24",
+      "sha256": "45339028de22094a95a08c7c6db0f116e705e22b34a3839f8a140ce7ad6b7f47",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Final refined feature list",
+      "registered_at": "2026-06-30T16:44:45"
+    },
+    {
+      "path": "feature_selection/final_features.txt",
+      "size_bytes": 17764,
+      "mtime": "2026-06-30T16:44:24",
+      "sha256": "45339028de22094a95a08c7c6db0f116e705e22b34a3839f8a140ce7ad6b7f47",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Final refined feature list",
+      "registered_at": "2026-06-30T16:44:46"
+    },
+    {
+      "path": "feature_selection/resource_usage.json",
+      "size_bytes": 3705,
+      "mtime": "2026-06-30T16:44:24",
+      "sha256": "1612fbaa9dcf3a9aae53b1b3bd42bb7dca2de86b1aca12bf4d34a5d98b1141e9",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature refinement runtime memory usage",
+      "registered_at": "2026-06-30T16:44:46"
+    },
+    {
+      "path": "modeling/main_lgbm/train_metrics.json",
+      "size_bytes": 480,
+      "mtime": "2026-06-30T16:46:06",
+      "sha256": "7963448fba4d32543d90711093786b889d6a5f48db63bc91f829bb8225697068",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:06"
+    },
+    {
+      "path": "modeling/main_lgbm/metrics_train_valid.json",
+      "size_bytes": 363,
+      "mtime": "2026-06-30T16:45:32",
+      "sha256": "405911db2e8c458a1f61c9f0b84d6513d3a14f109db0471cb5530bd083f829bd",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:06"
+    },
+    {
+      "path": "modeling/main_lgbm/feature_importance.csv",
+      "size_bytes": 28221,
+      "mtime": "2026-06-30T16:45:32",
+      "sha256": "ef8fa97a687e58101a740faf398b4c5d9e976231526f7b0e46410fba0d21b8b6",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:06"
+    },
+    {
+      "path": "modeling/main_lgbm/feature_drop_detail.csv",
+      "size_bytes": 29756,
+      "mtime": "2026-06-30T16:45:11",
+      "sha256": "b3ba8c13a4570c605a73d608ee924fe1cef1e3e71c2a65b8e5c8ae6a7022c1d1",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:07"
+    },
+    {
+      "path": "modeling/main_lgbm/actual_feature_list.txt",
+      "size_bytes": 17764,
+      "mtime": "2026-06-30T16:45:11",
+      "sha256": "45339028de22094a95a08c7c6db0f116e705e22b34a3839f8a140ce7ad6b7f47",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:07"
+    },
+    {
+      "path": "modeling/main_lgbm/preprocessing.json",
+      "size_bytes": 27238,
+      "mtime": "2026-06-30T16:45:11",
+      "sha256": "b71682511d9c16179d4cf5445842f1a9d6b66360425ed0951c19fe4acb7fd3b3",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:07"
+    },
+    {
+      "path": "modeling/main_lgbm/run_config.json",
+      "size_bytes": 1535,
+      "mtime": "2026-06-30T16:45:57",
+      "sha256": "1e11c0977a5f0b271c4cbb3150f0cb29662219a14a45d3214401d88d1783bcf3",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:08"
+    },
+    {
+      "path": "modeling/main_lgbm/model.pkl",
+      "size_bytes": 890787,
+      "mtime": "2026-06-30T16:45:55",
+      "sha256": "da3cfa9e646feed5f5585c669348c099e2525127172fd394900ea5778e65774b",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:08"
+    },
+    {
+      "path": "modeling/main_lgbm/score_column_summary.csv",
+      "size_bytes": 276,
+      "mtime": "2026-06-30T16:46:05",
+      "sha256": "feb397ecc87c9cd8f91022f1d6c434557e06d90343b7946feb34ba0f11e65c7d",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:08"
+    },
+    {
+      "path": "modeling/main_lgbm/scores_all_splits.feather",
+      "size_bytes": 49049370,
+      "mtime": "2026-06-30T16:46:05",
+      "sha256": "3f29638e71b09f85faba5d39e70e2a284a833b6301d536cd331003e387f63e06",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:09"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
+      "size_bytes": 231316,
+      "mtime": "2026-06-30T16:45:34",
+      "sha256": "efc7ded74a81af8eece36e8bff7e624542d23bcefbc5eef5ba16c13cf1ebafbc",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:09"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/001_his_90_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 234194,
+      "mtime": "2026-06-30T14:30:46",
+      "sha256": "e9668c10b2ffd0c73e13f75027612b045ca0e724e43450d637a83fbf579903b6",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:10"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
+      "size_bytes": 279951,
+      "mtime": "2026-06-30T16:45:35",
+      "sha256": "0ec9b85554d3720fbe2a5c9bf641a10b33d48e28d25a51330925e6a1ba93ff5d",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:10"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/002_unpaid_principal_future_light_add_heavy_WOE.png",
+      "size_bytes": 239609,
+      "mtime": "2026-06-30T14:30:47",
+      "sha256": "2de9687eb4510501fd577d96b967da77c778c7f6e8b274c8d8ff7909d67bed63",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:10"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png",
+      "size_bytes": 284136,
+      "mtime": "2026-06-30T16:45:36",
+      "sha256": "d4bdbf1b26e6aa5f8927974c6377e1dcfe3dcbc22e92b1a183338c5d081e28ce",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:11"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/003_ord_apl_max_prc_amt_180_day_WOE.png",
+      "size_bytes": 220901,
+      "mtime": "2026-06-30T14:30:47",
+      "sha256": "35e65ac5c48ba11f749adabbee34c822541a9d38ea017af550e56adb78de750f",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:11"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
+      "size_bytes": 278530,
+      "mtime": "2026-06-30T14:30:49",
+      "sha256": "890d0b0150ae63fe14d1203632ad7a3e8f7f6ffda1e9e0c9ed49f8eb18b3ad27",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:11"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 233456,
+      "mtime": "2026-06-30T16:45:37",
+      "sha256": "89956e8d273b61d3483022526b20a9d456990da56f47a4d450a5358c19f2866f",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:12"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png",
+      "size_bytes": 228716,
+      "mtime": "2026-06-30T16:45:38",
+      "sha256": "d0609289193384ca41750b1ce451b9d96ca553f9e3bc20869842b7443818cdb5",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:12"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/005_d60_apl_ord_prc_amt_per_stg_max_all_WOE.png",
+      "size_bytes": 229646,
+      "mtime": "2026-06-30T14:30:50",
+      "sha256": "73f1d65be82c0decfd66e0bb6b404099bcd3d516a1de50a99ce795c669074b7a",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:12"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/006_dau_90d_WOE.png",
+      "size_bytes": 230452,
+      "mtime": "2026-06-30T16:45:39",
+      "sha256": "2f7f89abf5a1882ad2706ec9b91610f72010ececf6b736a2c8c14b5454e50961",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:13"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/006_his_180_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 239806,
+      "mtime": "2026-06-30T14:30:51",
+      "sha256": "5d91d6a19fdf70018d54f9e1aa4603e70cb7e5d7d9d261c0bcf8dac7be753bc3",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:13"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/007_d180_apl_ord_days_cnt_all_WOE.png",
+      "size_bytes": 227341,
+      "mtime": "2026-06-30T14:30:52",
+      "sha256": "5a608be781c3f18bbfcaedcba58bb8c51fa8883ff3ecabfdee75f3db7781f4f8",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:13"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png",
+      "size_bytes": 242619,
+      "mtime": "2026-06-30T16:45:40",
+      "sha256": "6794b169e6ae50df40955562da3086001e9d983f796daf2111940fb59b36f3c9",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:14"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png",
+      "size_bytes": 220688,
+      "mtime": "2026-06-30T16:45:41",
+      "sha256": "35e91ee8927d55a7091eae1833e3763092368aa7f26f6adb9524916ce1e6c271",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:14"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/008_ord_apl_sum_prc_amt_360_day_WOE.png",
+      "size_bytes": 225103,
+      "mtime": "2026-06-30T14:30:52",
+      "sha256": "42ff522cd3f34160e9630f0e66c8b76448eea102f595487727d7befd3ded9de4",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:14"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png",
+      "size_bytes": 261940,
+      "mtime": "2026-06-30T16:45:42",
+      "sha256": "c3633025d42f52fdc31c4e4d13f5d23b04110fb6968496ae8f58a4f6504c2554",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:15"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/009_his_360_day_csh_apl_ord_cnt_WOE.png",
+      "size_bytes": 222413,
+      "mtime": "2026-06-30T14:30:53",
+      "sha256": "5c16adcfcebe43f6160018216f2d007dc2645873256ef7caff28779dfe21f8cb",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:15"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/010_cnt_event_result_1_uid_recent_days_120_WOE.png",
+      "size_bytes": 234739,
+      "mtime": "2026-06-30T14:30:54",
+      "sha256": "882578d4a8fb77a2c7ff4dfc6fef72c02877a372d9a65adaa7f7049bf91f4d44",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:15"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
+      "size_bytes": 328866,
+      "mtime": "2026-06-30T16:45:44",
+      "sha256": "da56a66187dc73dc707a5efc0e9ca18385cbc170ce76cae6bdc0b5a0361a4faa",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:16"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png",
+      "size_bytes": 297130,
+      "mtime": "2026-06-30T16:45:45",
+      "sha256": "0427cd804ba5b8cd6b25df423747a9bfe6273a9c8363325a4d0f8b57003c9c5f",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:16"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/011_dau_90d_WOE.png",
+      "size_bytes": 229203,
+      "mtime": "2026-06-30T14:30:54",
+      "sha256": "7b130684e5302c389d09a23b9d9a5f8998d66ac615e7f4d4835365827e9583aa",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:16"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png",
+      "size_bytes": 282863,
+      "mtime": "2026-06-30T16:45:46",
+      "sha256": "c0ac68c49afb162e3b4cdca89b8b80f9964e6cf349650952e0a89dc32b7252da",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:17"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/012_cnt_other_info_cash_uid_recent_days_30_WOE.png",
+      "size_bytes": 218481,
+      "mtime": "2026-06-30T14:30:55",
+      "sha256": "310711b34036191238b35114676dfc9a437edc1af705af5cd37d142462e88f52",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:17"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
+      "size_bytes": 262178,
+      "mtime": "2026-06-30T14:30:56",
+      "sha256": "34e6a6b4f5bc1301ffdcfe6e481725089bea97f1652fa14c5c31265496a025f7",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:17"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/013_payment_day_6m_WOE.png",
+      "size_bytes": 225573,
+      "mtime": "2026-06-30T16:45:47",
+      "sha256": "55ffc3d01ff84357c83348b3c3ec108607eaa9758402b2c56dbf2be5940e576e",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:18"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/014_clk_cnt_14d_WOE.png",
+      "size_bytes": 216878,
+      "mtime": "2026-06-30T16:45:47",
+      "sha256": "322c05665e4aadefaf0ee50e944897bee67edf72e0bec74768d1e82e1c09fafc",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:18"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/014_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
+      "size_bytes": 328341,
+      "mtime": "2026-06-30T14:30:57",
+      "sha256": "8db8c8ad626d9404d502e54eb79782dfcefeee3c7f1cd14f479fb02fe51cf95c",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:18"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/015_d360_apl_ord_cnt_all_WOE.png",
+      "size_bytes": 224869,
+      "mtime": "2026-06-30T14:30:58",
+      "sha256": "9c3d8e0847dd6010e22f4408160a159fad3bd4e9579a77246a85abffb3d9aaa5",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:19"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png",
+      "size_bytes": 300603,
+      "mtime": "2026-06-30T16:45:49",
+      "sha256": "f12b90400b3baa87310569890abf803b292b20f7dffe417ba5370e668cead2ab",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:19"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/016_his_720_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 221904,
+      "mtime": "2026-06-30T14:30:59",
+      "sha256": "e041bc33feff7782d6d86a8b719c38e46616589716f786308d581463346af73b",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:19"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png",
+      "size_bytes": 229212,
+      "mtime": "2026-06-30T16:45:50",
+      "sha256": "38cb4417cb3cbc69c691a6ffe8b5d36225e7e221de128ed964c74c243e2fc964",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:20"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/017_clk_cnt_14d_WOE.png",
+      "size_bytes": 216444,
+      "mtime": "2026-06-30T14:31:00",
+      "sha256": "19ac73d1a0a99b85428416303c965b513f5f723e2c2687aec7b3d18350997e6c",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:20"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png",
+      "size_bytes": 225846,
+      "mtime": "2026-06-30T16:45:51",
+      "sha256": "1e8034628509c28e1b902695d65999619adc741c340d372d7c4e6f6d116f3fb5",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:20"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png",
+      "size_bytes": 228756,
+      "mtime": "2026-06-30T16:45:52",
+      "sha256": "b024b29c530fa38e7fac2784637e0c58df6ee530b07380d0f7341d145860880e",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:21"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/018_rsk_avl_lmt_ch_les_10000_cnt_3m_WOE.png",
+      "size_bytes": 231285,
+      "mtime": "2026-06-30T14:31:01",
+      "sha256": "225dbeac839e8e9043ea0ae8b932a8bf6b66f6bb63a4414ce5170b87981909e5",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:21"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png",
+      "size_bytes": 225946,
+      "mtime": "2026-06-30T16:45:54",
+      "sha256": "e8dd91170f6631dab4b9d802648657639a454f47d07035559c70fbf7e6ffe10e",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:21"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 232458,
+      "mtime": "2026-06-30T14:31:02",
+      "sha256": "4273059628c7589ae62dea2954b3c25b1b56ececa65d291c62f52837d86b2413",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:22"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png",
+      "size_bytes": 308541,
+      "mtime": "2026-06-30T16:45:55",
+      "sha256": "8bde840a80cfb3776a604593c07f6224ee63eb303cc064218f6d63c0384fa766",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:22"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
+      "size_bytes": 247636,
+      "mtime": "2026-06-30T14:31:03",
+      "sha256": "8463056c5c1ed44e4d812f725183c6b34bee12732fba03572f397d44ddf3b1d4",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:23"
+    },
+    {
+      "path": "modeling/main_lgbm/woe_top_features/woe_top20_summary.csv",
+      "size_bytes": 112252,
+      "mtime": "2026-06-30T16:45:55",
+      "sha256": "34fac92e2904e3907e1b4459844ceabf6f42decc1f98934a370dbf03377554ac",
+      "stage": "train_baseline",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:46:23"
+    },
+    {
+      "path": "evaluation/benchmark_uplift.csv",
+      "size_bytes": 1423,
+      "mtime": "2026-06-30T16:47:07",
+      "sha256": "8930b8aa031bfc211e563e415727575bf328dd83ea3e4f07df95e79bfc3706b3",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:08"
+    },
+    {
+      "path": "evaluation/business_risk.csv",
+      "size_bytes": 26636,
+      "mtime": "2026-06-30T16:47:04",
+      "sha256": "8ed6f91f218e75761baf9c0aab2b61640199dd7aecc9a9b594623a7569662384",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:08"
+    },
+    {
+      "path": "evaluation/champion_challenger.json",
+      "size_bytes": 207,
+      "mtime": "2026-06-30T14:32:14",
+      "sha256": "e7a4617c058b3932f5b7575a07058324a9aca73eb5e33191faf70b8c000796b1",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:09"
+    },
+    {
+      "path": "evaluation/cross_gain_matrix_gcard_v2.csv",
+      "size_bytes": 3212,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "1f72d0ebb7795a7e3613318a029503267613c4189bf04291dedf5a3bf763b5a4",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:09"
+    },
+    {
+      "path": "evaluation/cross_gain_matrix_gcard_v4.csv",
+      "size_bytes": 3082,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "d52cefc419be0985d88da0d9388bbba2def0f8ebcd8cec87ba402423e4afe1b6",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:09"
+    },
+    {
+      "path": "evaluation/cross_gain_matrix_gcard_v5.csv",
+      "size_bytes": 3134,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "0004985a53d488ace20dcc1e3e5244a325d7908fbe299ac980f191f7ca1b5519",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:10"
+    },
+    {
+      "path": "evaluation/cross_gain_matrix_gcard_v6.csv",
+      "size_bytes": 2758,
+      "mtime": "2026-06-30T16:47:01",
+      "sha256": "e7dc9f03f1d853c253cef943b8fd47f7d1fdb068e2a001e9d44c331adb115062",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:10"
+    },
+    {
+      "path": "evaluation/decile_lift_all.csv",
+      "size_bytes": 1494,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "ed213950b11b656c0479338539bb9f1df7205494d481edfe8d1a3861f9a54ae6",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:10"
+    },
+    {
+      "path": "evaluation/decile_lift_all_gcard_v2.csv",
+      "size_bytes": 1482,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "93579189edfc1f9f8e7fae6d880a1cc35f14c7209f824ab68ab8350294b46b32",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:11"
+    },
+    {
+      "path": "evaluation/decile_lift_all_gcard_v4.csv",
+      "size_bytes": 1482,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "29bc1093c24c68dbdf75592d614404e4e8ff4ebd5d4618e7bc1762d40e41c55d",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:11"
+    },
+    {
+      "path": "evaluation/decile_lift_all_gcard_v5.csv",
+      "size_bytes": 1491,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "99658cc834b50bd020ac98bf92d198d16d600f83c87bec78a92e7fd6a886f7c8",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:12"
+    },
+    {
+      "path": "evaluation/decile_lift_all_gcard_v6.csv",
+      "size_bytes": 1485,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "9f8c14ee12f6355d6354a20b19aae2bc2a61ab4d4fd8b4734ab0e23d5608a4dc",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:12"
+    },
+    {
+      "path": "evaluation/decile_lift_all_model_score.csv",
+      "size_bytes": 1494,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "ed213950b11b656c0479338539bb9f1df7205494d481edfe8d1a3861f9a54ae6",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:12"
+    },
+    {
+      "path": "evaluation/decile_lift_b2.csv",
+      "size_bytes": 1485,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "cad7d14dd74e972c68f9f72d41ebbaa4c73e7e794bfc670faf14aae081f6e463",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:13"
+    },
+    {
+      "path": "evaluation/decile_lift_b2_gcard_v2.csv",
+      "size_bytes": 1492,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "196e1aa0c16b4326a2786309e28499259be65e15eaa3b33de58afeca6c46d4a8",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:13"
+    },
+    {
+      "path": "evaluation/decile_lift_b2_gcard_v4.csv",
+      "size_bytes": 1480,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "d021b5e89028ea13e73b5fd03b2026859db171a5d5f9a6f52d6b9554fdedc92f",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:13"
+    },
+    {
+      "path": "evaluation/decile_lift_b2_gcard_v5.csv",
+      "size_bytes": 1491,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "cd59a9003e88237638b76c948ed9cbe2ac79201a4068622ee03ce1bb303a8405",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:14"
+    },
+    {
+      "path": "evaluation/decile_lift_b2_gcard_v6.csv",
+      "size_bytes": 1489,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "a7995792e6725a9c20894a5ba4c516d041379824ba47ca680a869592b71fa515",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:14"
+    },
+    {
+      "path": "evaluation/decile_lift_b2_model_score.csv",
+      "size_bytes": 1485,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "cad7d14dd74e972c68f9f72d41ebbaa4c73e7e794bfc670faf14aae081f6e463",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:14"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3.csv",
+      "size_bytes": 1468,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "ab81852d74bee0ec6982e2c094de2f989ef0c0e8b8c14563a278b37c291402a9",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:15"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3_gcard_v2.csv",
+      "size_bytes": 1475,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "849219258616f239112b7fc2ebfa7c1b5036a40f4a394fb4be4017687ef80807",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:15"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3_gcard_v4.csv",
+      "size_bytes": 1468,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "aefc4a661fc17584bad43e158e73388e20528236cb15730abc162606ad4f9153",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:16"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3_gcard_v5.csv",
+      "size_bytes": 1470,
+      "mtime": "2026-06-30T16:46:59",
+      "sha256": "b6c1224c0cd3a418c2f1e86aabffb6473c16606b0671fcbb2252ca6d3caed620",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:16"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3_gcard_v6.csv",
+      "size_bytes": 1470,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "5315fcfa3307ca6e309ca77c9a4c1174ee456a57ad80306236d8bf145b11192f",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:16"
+    },
+    {
+      "path": "evaluation/decile_lift_e2e3_model_score.csv",
+      "size_bytes": 1468,
+      "mtime": "2026-06-30T16:46:58",
+      "sha256": "ab81852d74bee0ec6982e2c094de2f989ef0c0e8b8c14563a278b37c291402a9",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:17"
+    },
+    {
+      "path": "evaluation/dimension_metrics.csv",
+      "size_bytes": 9354,
+      "mtime": "2026-06-30T16:46:57",
+      "sha256": "0e28f0533e236c5e3c2b4039b6818a15187929d001d41eb73e987eb62d8e14f5",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:17"
+    },
+    {
+      "path": "evaluation/evaluation_summary.json",
+      "size_bytes": 3381,
+      "mtime": "2026-06-30T16:47:08",
+      "sha256": "d02e1a46716b731e0acbf1816e9652031c30246c566533d4e72c2b683683dc13",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:17"
+    },
+    {
+      "path": "evaluation/feature_gain_summary.csv",
+      "size_bytes": 916,
+      "mtime": "2026-06-30T16:47:07",
+      "sha256": "974f048b718897e11f5846ba3e7a16f36af7ae60f2be6b1bcaba5eecae4e9df0",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:18"
+    },
+    {
+      "path": "evaluation/intent_zc_amount_risk.csv",
+      "size_bytes": 337,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "eae325cc0985ff024fe9b249c4ea4c63f762f66372947da5b42a0e157dd9e80f",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:18"
+    },
+    {
+      "path": "evaluation/intent_zc_amount_risk_b2.csv",
+      "size_bytes": 322,
+      "mtime": "2026-06-30T16:47:03",
+      "sha256": "d81cea10f86d36cabc3ab229b91a49f34cf2f6a940559c4221813527cfa0e2c1",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:18"
+    },
+    {
+      "path": "evaluation/intent_zc_amount_risk_e2e3.csv",
+      "size_bytes": 336,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "9f40a6696ee4f5e6862c9634429467aa73c18c31d2becb8e70c06f52dbd84990",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:19"
+    },
+    {
+      "path": "evaluation/intent_zc_distribution.csv",
+      "size_bytes": 875,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "15b1f2b8a8dd04e0508f02b4e031d2323f9114eecf46657bee07fe7208ea7ee7",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:19"
+    },
+    {
+      "path": "evaluation/intent_zc_distribution_b2.csv",
+      "size_bytes": 835,
+      "mtime": "2026-06-30T16:47:03",
+      "sha256": "e9ef48635103d447ae9075de37a8fc5b5b54f36b1050f1615c6f69a710e31583",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:19"
+    },
+    {
+      "path": "evaluation/intent_zc_distribution_e2e3.csv",
+      "size_bytes": 892,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "0a1fa4a78a95658f4fc1a31da4bf86b85f8c3fb46fdfd88e1fde41da4563d9dd",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:20"
+    },
+    {
+      "path": "evaluation/intent_zc_ftr_rate.csv",
+      "size_bytes": 243,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "9bfb610c6d61b2c9d0d8b3a50f0c4733a6bfdf058825dd3de62ae175fc86c197",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:20"
+    },
+    {
+      "path": "evaluation/intent_zc_ftr_rate_b2.csv",
+      "size_bytes": 227,
+      "mtime": "2026-06-30T16:47:03",
+      "sha256": "4c3e2f41b10f76e07af7f1081423db771f143089e35c2f4fa1344553f15fafc4",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:20"
+    },
+    {
+      "path": "evaluation/intent_zc_ftr_rate_e2e3.csv",
+      "size_bytes": 246,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "89cfd84baa7f163836b7f9659c1ba8bebc763774498d611d663b2c7e734c382a",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:21"
+    },
+    {
+      "path": "evaluation/intent_zc_headcount_risk.csv",
+      "size_bytes": 646,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "9d5b2b796a134728eefc8d6c61417c950a2cc2fdbe25a24db5e699fa8dfbd033",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:21"
+    },
+    {
+      "path": "evaluation/intent_zc_headcount_risk_b2.csv",
+      "size_bytes": 610,
+      "mtime": "2026-06-30T16:47:03",
+      "sha256": "5225e84ba85aee1d0971bd0b533d833e665e9327d5e2c5ef7f75a2121a24c78f",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:21"
+    },
+    {
+      "path": "evaluation/intent_zc_headcount_risk_e2e3.csv",
+      "size_bytes": 680,
+      "mtime": "2026-06-30T16:47:02",
+      "sha256": "133dc04b6befb7b3b11528896583536ef7a6a611c5d0a220add8c0cef8537378",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:22"
+    },
+    {
+      "path": "evaluation/missing_evaluation_requirements.json",
+      "size_bytes": 457,
+      "mtime": "2026-06-30T16:47:07",
+      "sha256": "947d6bfe3215372ccfff9b4e223fb3edd7137bae7c530210446b3d36f86ec19e",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:22"
+    },
+    {
+      "path": "evaluation/monthly_metrics.csv",
+      "size_bytes": 3746,
+      "mtime": "2026-06-30T16:46:35",
+      "sha256": "8d40372a7e17c1f7a5acc200ba8fcfe569f72589029f8ee694383663843b26d0",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:22"
+    },
+    {
+      "path": "evaluation/overall_metrics.csv",
+      "size_bytes": 1032,
+      "mtime": "2026-06-30T16:46:32",
+      "sha256": "dd34613985948c34ecfa02bc052b99dbef34c61d94d7936b73f154ab742533be",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:23"
+    },
+    {
+      "path": "evaluation/ranking_inversion.csv",
+      "size_bytes": 172,
+      "mtime": "2026-06-30T16:47:00",
+      "sha256": "6fdc74a9f7cddce67e4da96d206cdef00cd2ca6a5afa0439d36edfbf4ddd3523",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:23"
+    },
+    {
+      "path": "evaluation/score_psi_bin_detail.csv",
+      "size_bytes": 31538,
+      "mtime": "2026-06-30T16:47:05",
+      "sha256": "1abc46a8c6e54fbf1f296b51ab7b1e60db9781febc564384dae1d5cc7f5c01ae",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:23"
+    },
+    {
+      "path": "evaluation/score_psi_by_month.csv",
+      "size_bytes": 1714,
+      "mtime": "2026-06-30T16:47:05",
+      "sha256": "2f80138bee344b0da58fec64d0ac7c20b4de92a4c69fc2709e783bdb4c020176",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:24"
+    },
+    {
+      "path": "evaluation/segment_metrics.csv",
+      "size_bytes": 5495,
+      "mtime": "2026-06-30T16:46:44",
+      "sha256": "625232ef495a42e1cad652e4df3c1578f032a2007c9d1c921cfd7a23c7002f1e",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:24"
+    },
+    {
+      "path": "evaluation/benchmark_uplift.csv",
+      "size_bytes": 1423,
+      "mtime": "2026-06-30T16:47:07",
+      "sha256": "8930b8aa031bfc211e563e415727575bf328dd83ea3e4f07df95e79bfc3706b3",
+      "stage": "compare",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:26"
+    },
+    {
+      "path": "evaluation/champion_challenger.json",
+      "size_bytes": 207,
+      "mtime": "2026-06-30T16:47:26",
+      "sha256": "e7a4617c058b3932f5b7575a07058324a9aca73eb5e33191faf70b8c000796b1",
+      "stage": "compare",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:26"
+    },
+    {
       "path": "reports/model_card.md",
       "size_bytes": 86,
-      "mtime": "2026-06-30T15:24:57",
+      "mtime": "2026-06-30T16:47:28",
       "sha256": "9655d0c15e85afa5cb545fe7ce524a2e7e476bff5a8fd98d7e763e2adc1fa4d8",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:24:57"
+      "registered_at": "2026-06-30T16:47:29"
     },
     {
       "path": "reports/executive_summary.md",
       "size_bytes": 117,
-      "mtime": "2026-06-30T15:24:57",
+      "mtime": "2026-06-30T16:47:28",
       "sha256": "1ba865def0ef4cad8e249d5c74af8ebad918a303e611bbb4abd119024001a5f9",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:24:58"
+      "registered_at": "2026-06-30T16:47:29"
     },
     {
       "path": "reports/model_report.xlsx",
-      "size_bytes": 4333626,
-      "mtime": "2026-06-30T15:25:01",
-      "sha256": "1fdf1390076817fee9a6e49a1d660ca5c24903fdf128b10cdb1d1790431d2b90",
+      "size_bytes": 4529381,
+      "mtime": "2026-06-30T16:47:33",
+      "sha256": "0c85b8cede0d5742c4e6f3ea557615f49f3089f125bc48e9fb3d447f42693641",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:02"
+      "registered_at": "2026-06-30T16:47:34"
     },
     {
       "path": "reports/model_report.md",
-      "size_bytes": 31827,
-      "mtime": "2026-06-30T15:25:02",
-      "sha256": "ea579b0d80e80eafe779c0acca7bc5ea1f4aa214bd39e090eb6aca1bb31efb63",
+      "size_bytes": 31705,
+      "mtime": "2026-06-30T16:47:33",
+      "sha256": "48c73d954eaf45164894c6ac08dc82496828ef5fdbee66370f3ebe4b66dc34af",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:02"
+      "registered_at": "2026-06-30T16:47:34"
     },
     {
       "path": "reports/model_report.html",
-      "size_bytes": 59187,
-      "mtime": "2026-06-30T15:25:02",
-      "sha256": "ec60cdbe40e38b8023ee85d3089c12ac44378e2d0ed6fc8e25a194991f9cade4",
+      "size_bytes": 59176,
+      "mtime": "2026-06-30T16:47:33",
+      "sha256": "bf3a4bb0dd19b7ff53ae321249fc0dcf38cc2ca9d2341a97080263e3166aa344",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:02"
+      "registered_at": "2026-06-30T16:47:34"
     },
     {
       "path": "reports/model_report_missing_results.md",
       "size_bytes": 1841,
-      "mtime": "2026-06-30T15:25:01",
+      "mtime": "2026-06-30T16:47:33",
       "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:03"
+      "registered_at": "2026-06-30T16:47:35"
+    },
+    {
+      "path": "reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
+      "size_bytes": 231316,
+      "mtime": "2026-06-30T16:45:34",
+      "sha256": "efc7ded74a81af8eece36e8bff7e624542d23bcefbc5eef5ba16c13cf1ebafbc",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:35"
     },
     {
       "path": "reports/woe_top_features/images/001_his_90_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1700,7 +1931,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:03"
+      "registered_at": "2026-06-30T16:47:35"
+    },
+    {
+      "path": "reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
+      "size_bytes": 279951,
+      "mtime": "2026-06-30T16:45:35",
+      "sha256": "0ec9b85554d3720fbe2a5c9bf641a10b33d48e28d25a51330925e6a1ba93ff5d",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:36"
     },
     {
       "path": "reports/woe_top_features/images/002_unpaid_principal_future_light_add_heavy_WOE.png",
@@ -1711,7 +1953,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:03"
+      "registered_at": "2026-06-30T16:47:36"
+    },
+    {
+      "path": "reports/woe_top_features/images/003_first_day_diff_event_result_1_all_WOE.png",
+      "size_bytes": 284136,
+      "mtime": "2026-06-30T16:45:36",
+      "sha256": "d4bdbf1b26e6aa5f8927974c6377e1dcfe3dcbc22e92b1a183338c5d081e28ce",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:36"
     },
     {
       "path": "reports/woe_top_features/images/003_ord_apl_max_prc_amt_180_day_WOE.png",
@@ -1722,7 +1975,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:04"
+      "registered_at": "2026-06-30T16:47:37"
     },
     {
       "path": "reports/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
@@ -1733,7 +1986,29 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:04"
+      "registered_at": "2026-06-30T16:47:37"
+    },
+    {
+      "path": "reports/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "size_bytes": 233456,
+      "mtime": "2026-06-30T16:45:37",
+      "sha256": "89956e8d273b61d3483022526b20a9d456990da56f47a4d450a5358c19f2866f",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:37"
+    },
+    {
+      "path": "reports/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png",
+      "size_bytes": 228716,
+      "mtime": "2026-06-30T16:45:38",
+      "sha256": "d0609289193384ca41750b1ce451b9d96ca553f9e3bc20869842b7443818cdb5",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:38"
     },
     {
       "path": "reports/woe_top_features/images/005_d60_apl_ord_prc_amt_per_stg_max_all_WOE.png",
@@ -1744,7 +2019,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:04"
+      "registered_at": "2026-06-30T16:47:38"
+    },
+    {
+      "path": "reports/woe_top_features/images/006_dau_90d_WOE.png",
+      "size_bytes": 230452,
+      "mtime": "2026-06-30T16:45:39",
+      "sha256": "2f7f89abf5a1882ad2706ec9b91610f72010ececf6b736a2c8c14b5454e50961",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:38"
     },
     {
       "path": "reports/woe_top_features/images/006_his_180_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1755,7 +2041,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:04"
+      "registered_at": "2026-06-30T16:47:39"
     },
     {
       "path": "reports/woe_top_features/images/007_d180_apl_ord_days_cnt_all_WOE.png",
@@ -1766,7 +2052,29 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:05"
+      "registered_at": "2026-06-30T16:47:39"
+    },
+    {
+      "path": "reports/woe_top_features/images/007_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png",
+      "size_bytes": 242619,
+      "mtime": "2026-06-30T16:45:40",
+      "sha256": "6794b169e6ae50df40955562da3086001e9d983f796daf2111940fb59b36f3c9",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:39"
+    },
+    {
+      "path": "reports/woe_top_features/images/008_d30_apl_ord_days_cnt_WOE.png",
+      "size_bytes": 220688,
+      "mtime": "2026-06-30T16:45:41",
+      "sha256": "35e91ee8927d55a7091eae1833e3763092368aa7f26f6adb9524916ce1e6c271",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:40"
     },
     {
       "path": "reports/woe_top_features/images/008_ord_apl_sum_prc_amt_360_day_WOE.png",
@@ -1777,7 +2085,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:05"
+      "registered_at": "2026-06-30T16:47:40"
+    },
+    {
+      "path": "reports/woe_top_features/images/009_cnt_avg_ord_span_30d_WOE.png",
+      "size_bytes": 261940,
+      "mtime": "2026-06-30T16:45:42",
+      "sha256": "c3633025d42f52fdc31c4e4d13f5d23b04110fb6968496ae8f58a4f6504c2554",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:41"
     },
     {
       "path": "reports/woe_top_features/images/009_his_360_day_csh_apl_ord_cnt_WOE.png",
@@ -1788,7 +2107,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:05"
+      "registered_at": "2026-06-30T16:47:41"
     },
     {
       "path": "reports/woe_top_features/images/010_cnt_event_result_1_uid_recent_days_120_WOE.png",
@@ -1799,7 +2118,29 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:06"
+      "registered_at": "2026-06-30T16:47:41"
+    },
+    {
+      "path": "reports/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
+      "size_bytes": 328866,
+      "mtime": "2026-06-30T16:45:44",
+      "sha256": "da56a66187dc73dc707a5efc0e9ca18385cbc170ce76cae6bdc0b5a0361a4faa",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:42"
+    },
+    {
+      "path": "reports/woe_top_features/images/011_6m_used_lmt_second_der_min_WOE.png",
+      "size_bytes": 297130,
+      "mtime": "2026-06-30T16:45:45",
+      "sha256": "0427cd804ba5b8cd6b25df423747a9bfe6273a9c8363325a4d0f8b57003c9c5f",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:42"
     },
     {
       "path": "reports/woe_top_features/images/011_dau_90d_WOE.png",
@@ -1810,7 +2151,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:06"
+      "registered_at": "2026-06-30T16:47:42"
+    },
+    {
+      "path": "reports/woe_top_features/images/012_6m_used_lmt_first_der_min_WOE.png",
+      "size_bytes": 282863,
+      "mtime": "2026-06-30T16:45:46",
+      "sha256": "c0ac68c49afb162e3b4cdca89b8b80f9964e6cf349650952e0a89dc32b7252da",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:43"
     },
     {
       "path": "reports/woe_top_features/images/012_cnt_other_info_cash_uid_recent_days_30_WOE.png",
@@ -1821,7 +2173,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:06"
+      "registered_at": "2026-06-30T16:47:43"
     },
     {
       "path": "reports/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
@@ -1832,7 +2184,29 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:07"
+      "registered_at": "2026-06-30T16:47:43"
+    },
+    {
+      "path": "reports/woe_top_features/images/013_payment_day_6m_WOE.png",
+      "size_bytes": 225573,
+      "mtime": "2026-06-30T16:45:47",
+      "sha256": "55ffc3d01ff84357c83348b3c3ec108607eaa9758402b2c56dbf2be5940e576e",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:44"
+    },
+    {
+      "path": "reports/woe_top_features/images/014_clk_cnt_14d_WOE.png",
+      "size_bytes": 216878,
+      "mtime": "2026-06-30T16:45:47",
+      "sha256": "322c05665e4aadefaf0ee50e944897bee67edf72e0bec74768d1e82e1c09fafc",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:44"
     },
     {
       "path": "reports/woe_top_features/images/014_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
@@ -1843,7 +2217,7 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:07"
+      "registered_at": "2026-06-30T16:47:44"
     },
     {
       "path": "reports/woe_top_features/images/015_d360_apl_ord_cnt_all_WOE.png",
@@ -1854,7 +2228,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:07"
+      "registered_at": "2026-06-30T16:47:45"
+    },
+    {
+      "path": "reports/woe_top_features/images/015_first_day_diff_event_result_0_event_type_loan_all_WOE.png",
+      "size_bytes": 300603,
+      "mtime": "2026-06-30T16:45:49",
+      "sha256": "f12b90400b3baa87310569890abf803b292b20f7dffe417ba5370e668cead2ab",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:45"
     },
     {
       "path": "reports/woe_top_features/images/016_his_720_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1865,7 +2250,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:08"
+      "registered_at": "2026-06-30T16:47:45"
+    },
+    {
+      "path": "reports/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png",
+      "size_bytes": 229212,
+      "mtime": "2026-06-30T16:45:50",
+      "sha256": "38cb4417cb3cbc69c691a6ffe8b5d36225e7e221de128ed964c74c243e2fc964",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:46"
     },
     {
       "path": "reports/woe_top_features/images/017_clk_cnt_14d_WOE.png",
@@ -1876,7 +2272,29 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:08"
+      "registered_at": "2026-06-30T16:47:46"
+    },
+    {
+      "path": "reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png",
+      "size_bytes": 225846,
+      "mtime": "2026-06-30T16:45:51",
+      "sha256": "1e8034628509c28e1b902695d65999619adc741c340d372d7c4e6f6d116f3fb5",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:47"
+    },
+    {
+      "path": "reports/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png",
+      "size_bytes": 228756,
+      "mtime": "2026-06-30T16:45:52",
+      "sha256": "b024b29c530fa38e7fac2784637e0c58df6ee530b07380d0f7341d145860880e",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:47"
     },
     {
       "path": "reports/woe_top_features/images/018_rsk_avl_lmt_ch_les_10000_cnt_3m_WOE.png",
@@ -1887,7 +2305,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:08"
+      "registered_at": "2026-06-30T16:47:48"
+    },
+    {
+      "path": "reports/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png",
+      "size_bytes": 225946,
+      "mtime": "2026-06-30T16:45:54",
+      "sha256": "e8dd91170f6631dab4b9d802648657639a454f47d07035559c70fbf7e6ffe10e",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:48"
     },
     {
       "path": "reports/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
@@ -1898,7 +2327,18 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:09"
+      "registered_at": "2026-06-30T16:47:48"
+    },
+    {
+      "path": "reports/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png",
+      "size_bytes": 308541,
+      "mtime": "2026-06-30T16:45:55",
+      "sha256": "8bde840a80cfb3776a604593c07f6224ee63eb303cc064218f6d63c0384fa766",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-06-30T16:47:49"
     },
     {
       "path": "reports/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
@@ -1909,19 +2349,19 @@
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:09"
+      "registered_at": "2026-06-30T16:47:49"
     },
     {
       "path": "reports/woe_top_features/woe_top20_summary.csv",
-      "size_bytes": 91575,
-      "mtime": "2026-06-30T14:31:03",
-      "sha256": "2b66dac289246d4147fbf577510b0768ba475c48743a39ccbf09bb1410ab3941",
+      "size_bytes": 112252,
+      "mtime": "2026-06-30T16:45:55",
+      "sha256": "34fac92e2904e3907e1b4459844ceabf6f42decc1f98934a370dbf03377554ac",
       "stage": "report",
       "kind": "file",
       "source": "generated",
       "description": "",
-      "registered_at": "2026-06-30T15:25:09"
+      "registered_at": "2026-06-30T16:47:49"
     }
   ],
-  "updated_at": "2026-06-30T15:25:09"
+  "updated_at": "2026-06-30T16:47:49"
 }

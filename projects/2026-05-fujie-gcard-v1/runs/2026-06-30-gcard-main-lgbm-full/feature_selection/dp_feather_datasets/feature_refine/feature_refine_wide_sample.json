@@ -2,7 +2,7 @@
   "dataset_id": "feature_refine_wide_sample",
   "description": "特征初筛后宽表抽样，用于D03随机重要性、D04 Null Importance 和D05基线重要性筛选。",
   "status": "ready",
-  "created_or_updated_at": "2026-06-30T13:57:00",
+  "created_or_updated_at": "2026-06-30T16:15:44",
   "storage": {
     "feather_path": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
     "gitignored": true,

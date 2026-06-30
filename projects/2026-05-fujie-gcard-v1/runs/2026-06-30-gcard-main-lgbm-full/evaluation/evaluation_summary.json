@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30 14:32:00",
+  "generated_at": "2026-06-30 16:47:08",
   "scores_source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-30-gcard-main-lgbm-full/modeling/main_lgbm/scores_all_splits.feather",
   "score_columns_evaluated": [
     "model_score",
@@ -54,20 +54,20 @@
   "overall_metrics": {
     "model_score": {
       "DEV": {
-        "auc": 0.9454782172964716,
-        "ks": 0.7486010109781718
+        "auc": 0.9457231627273331,
+        "ks": 0.748625889188582
       },
       "DEV-OOS": {
-        "auc": 0.9324850770704717,
-        "ks": 0.7164854495218125
+        "auc": 0.932504580515793,
+        "ks": 0.7169557244086744
       },
       "OOT": {
-        "auc": 0.9342264543732648,
-        "ks": 0.7328735545395605
+        "auc": 0.9344429083616304,
+        "ks": 0.7329917772589631
       },
       "OOT-OOS": {
-        "auc": 0.9300969438007831,
-        "ks": 0.7185632230796077
+        "auc": 0.92985744201014,
+        "ks": 0.7178296555651257
       }
     },
     "gcard_v2": {
