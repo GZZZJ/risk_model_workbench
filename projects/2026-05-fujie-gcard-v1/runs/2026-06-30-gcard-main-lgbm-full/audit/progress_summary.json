@@ -1,29 +1,30 @@
 {
   "version": 1,
   "run_id": "2026-06-30-gcard-main-lgbm-full",
-  "updated_at": "2026-06-30T14:41:47",
-  "stage": "feature_metadata",
-  "stage_label": "特征元数据",
+  "updated_at": "2026-06-30T15:25:10",
+  "stage": "report",
+  "stage_label": "报告生成",
   "latest_event": {
-    "timestamp": "2026-06-30T14:41:47",
+    "timestamp": "2026-06-30T15:25:10",
     "run_id": "2026-06-30-gcard-main-lgbm-full",
-    "stage": "feature_metadata",
+    "stage": "report",
     "step": "action_done",
     "status": "done",
-    "message": "特征元数据完成",
+    "message": "报告生成完成",
     "current": null,
     "total": null,
     "percent": 100.0,
     "elapsed_seconds": 0.0,
     "eta_seconds": null,
     "metrics": {
-      "action_id": "feature_metadata",
+      "action_id": "report",
       "failure_code": "",
       "retry_count": 0,
-      "artifact_count": 3
+      "artifact_count": 27,
+      "decision": "done"
     },
     "level": "info",
-    "pid": 27074
+    "pid": 39848
   },
   "stages": {
     "validate_config": {
@@ -268,7 +269,7 @@
       "stage": "report",
       "stage_label": "报告生成",
       "latest_event": {
-        "timestamp": "2026-06-30T14:32:26",
+        "timestamp": "2026-06-30T15:25:10",
         "run_id": "2026-06-30-gcard-main-lgbm-full",
         "stage": "report",
         "step": "action_done",
@@ -287,9 +288,9 @@
           "decision": "done"
         },
         "level": "info",
-        "pid": 25741
+        "pid": 39848
       },
-      "updated_at": "2026-06-30T14:32:26"
+      "updated_at": "2026-06-30T15:25:10"
     }
   }
 }

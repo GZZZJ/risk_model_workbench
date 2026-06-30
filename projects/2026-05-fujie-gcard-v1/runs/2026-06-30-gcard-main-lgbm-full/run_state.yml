@@ -3,7 +3,7 @@ project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-f
 workflow: full_modeling
 created_at: '2026-06-30T13:53:15'
 status: done
-current_stage: feature_metadata
+current_stage: report
 stages:
   validate_config:
     status: done
@@ -1583,7 +1583,7 @@ stages:
     - reports/woe_top_features/images/019_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
     - reports/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png
     - reports/woe_top_features/woe_top20_summary.csv
-    started_at: '2026-06-30T14:32:15'
+    started_at: '2026-06-30T15:24:57'
     action:
       id: report
       kind: stage
@@ -1607,7 +1607,7 @@ stages:
       - reports/model_report.html
       - reports/model_card.md
       - reports/executive_summary.md
-    finished_at: '2026-06-30T14:32:26'
+    finished_at: '2026-06-30T15:25:10'
     last_result:
       status: done
       failure_code: ''
@@ -1807,7 +1807,7 @@ stages:
         stage: report
         decision: done
         reason: Excel report generated from standard train and evaluation artifacts
-        created_at: '2026-06-30T14:32:26'
+        created_at: '2026-06-30T15:25:09'
     progress:
       step: action_done
       status: done
@@ -1815,7 +1815,7 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T14:32:26'
+      heartbeat_at: '2026-06-30T15:25:10'
       elapsed_seconds: 0.0
       last_event_status: done
 decisions:
@@ -1855,4 +1855,8 @@ decisions:
   decision: done
   reason: Excel report generated from standard train and evaluation artifacts
   created_at: '2026-06-30T14:32:26'
-updated_at: '2026-06-30T14:41:47'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-30T15:25:09'
+updated_at: '2026-06-30T15:25:10'

@@ -384,14 +384,14 @@ code{
 <h2>二、变量筛选过程</h2>
 <table>
 <tr><th>步骤</th><th>筛选方法</th><th>剩余变量个数</th></tr>
-<tr><td>1</td><td>原始候选变量总数</td><td>N/A</td></tr>
+<tr><td>1</td><td>原始候选变量总数</td><td>2837</td></tr>
 <tr><td>2</td><td>分表基础预筛：缺失率、相关性、IV</td><td>N/A</td></tr>
 <tr><td>3</td><td>稳定性筛选：DEV vs OOT PSI</td><td>N/A</td></tr>
-<tr><td>4</td><td>Feather观察样本可用特征</td><td>N/A</td></tr>
+<tr><td>4</td><td>Feather观察样本可用特征</td><td>2563</td></tr>
 <tr><td>5</td><td>全局相关性去重：按单变量AUC保留更强特征</td><td>1852</td></tr>
 <tr><td>6</td><td>随机数重要性筛选（feature-select-v2兼容）：单随机列对比 split/gain 并剔除尾部重要性特征</td><td>1852</td></tr>
 <tr><td>7</td><td>空标签重要性筛选：保留显著高于空标签分布的特征</td><td>1028</td></tr>
-<tr><td>8</td><td>最终训练特征</td><td>N/A</td></tr>
+<tr><td>8</td><td>最终训练特征</td><td>500</td></tr>
 </table>
 <ul>
 <li>训练预处理保留 500/500 个变量；剔除 0 个变量。</li>
