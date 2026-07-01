@@ -1,0 +1,36 @@
+{
+  "data_source": "/root/notebook/draft/筛选96维度特征样本.feather",
+  "data_source_size_bytes": 7284859802,
+  "generated_at": "2026-06-09 10:20:15",
+  "label_column": "ftr_30d_ord_flag",
+  "label_definition": "30天是否发起(ftr_30d_ord_flag)",
+  "positive_label": 1,
+  "split_column": "final_flag",
+  "train_values": [
+    "DEV"
+  ],
+  "valid_values": [
+    "OOT"
+  ],
+  "oos_values": [
+    "DEV-OOS",
+    "OOT-OOS"
+  ],
+  "segment_column": "blue_customer_flag",
+  "segment_values": {
+    "B2": "流失户",
+    "E2": "次新户",
+    "E3": "老户"
+  },
+  "asset_rating_column": "zc_level",
+  "feature_list_source": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/runs/modeling_feature_set/feature_list.txt",
+  "feature_count_in_list": 96,
+  "feature_count_in_data": 96,
+  "historical_score_columns": [
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ],
+  "train_window_note": "数据时间窗口: ds range from feather"
+}

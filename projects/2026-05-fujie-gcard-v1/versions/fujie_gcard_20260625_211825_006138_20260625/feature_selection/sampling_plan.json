@@ -1,0 +1,18 @@
+{
+  "data_source_mode": "local_feather",
+  "total_rows": 973715,
+  "max_rows": 634468,
+  "sampling_required": true,
+  "method": "local_uniform_random",
+  "ratio": 0.6515951792875739,
+  "estimated_rows": 634468,
+  "limit": null,
+  "random_column": null,
+  "sql_predicate": null,
+  "local_row_selection": {
+    "method": "uniform_random_fraction",
+    "fraction": 0.6515951792875739,
+    "max_rows": 634468
+  },
+  "reason": "row count exceeds memory capacity"
+}

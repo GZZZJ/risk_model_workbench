@@ -19,6 +19,7 @@ from risk_model_workbench.paths import REPO_ROOT, project_config_path
 from risk_model_workbench.rules import summarize_rules
 from risk_model_workbench.run_evidence import load_run_evidence
 from risk_model_workbench.state import load_run_state, run_dir
+from risk_model_workbench.versioning import load_version_index, resolve_workspace_dir
 from risk_model_workbench.workflow_contracts import artifact_exists, audit_contract_artifacts
 
 
@@ -50,6 +51,7 @@ def save_project_state(project_dir: str | Path, state: dict[str, Any]) -> Path:
 def update_project_state(
     project_dir: str | Path,
     *,
+    active_version_id: str | None = None,
     active_run_id: str | None = None,
     current_objective: str | None = None,
     status: str | None = None,
@@ -64,6 +66,8 @@ def update_project_state(
     # repo is moved/renamed (setdefault left a stale path after jingying_model_agent
     # was renamed to risk_model_workbench).
     state["project"] = str(project_path.resolve())
+    if active_version_id is not None:
+        state["active_version_id"] = active_version_id
     if active_run_id is not None:
         state["active_run_id"] = active_run_id
     if current_objective is not None:
@@ -83,16 +87,18 @@ def update_project_state(
     return state
 
 
-def summarize_project(project_dir: str | Path, run_id: str | None = None) -> dict[str, Any]:
+def summarize_project(project_dir: str | Path, run_id: str | None = None, version_id: str | None = None) -> dict[str, Any]:
     project_path = Path(project_dir)
     persisted = load_project_state(project_path)
-    selected_run_id = run_id or persisted.get("active_run_id") or _latest_run_id(project_path)
+    selected_version_id = version_id or persisted.get("active_version_id") or _latest_version_id(project_path)
+    selected_run_id = run_id or (None if selected_version_id else persisted.get("active_run_id") or _latest_run_id(project_path))
     project_info = _load_project_info(project_path)
 
     summary: dict[str, Any] = {
         "project": str(project_path.resolve()),
         "project_name": project_info.get("name") or project_path.name,
         "display_name": project_info.get("display_name") or project_path.name,
+        "active_version_id": selected_version_id,
         "active_run_id": selected_run_id,
         "current_objective": persisted.get("current_objective", ""),
         "status": persisted.get("status", "not_started"),
@@ -103,23 +109,26 @@ def summarize_project(project_dir: str | Path, run_id: str | None = None) -> dic
         "risks": list(persisted.get("risks", [])),
         "rules": summarize_rules(),
         "run": None,
+        "version": None,
     }
 
-    if not selected_run_id:
-        summary["next_actions"] = summary["next_actions"] or ["Initialize a run or set active_run_id in project_state.yml."]
+    if not selected_version_id and not selected_run_id:
+        summary["next_actions"] = summary["next_actions"] or ["Initialize a version or set active_version_id in project_state.yml."]
         return summary
 
-    selected_run_dir = run_dir(project_path, selected_run_id)
+    selected_id = selected_version_id or selected_run_id or ""
+    selected_run_dir = resolve_workspace_dir(project_path, version_id=selected_version_id, run_id=selected_run_id)
     try:
         run_state = load_run_state(selected_run_dir)
     except FileNotFoundError:
         summary["status"] = "blocked"
-        summary["blockers"] = _append_unique(summary["blockers"], [f"active_run_id does not exist: {selected_run_id}"])
+        missing_key = "active_version_id" if selected_version_id else "active_run_id"
+        summary["blockers"] = _append_unique(summary["blockers"], [f"{missing_key} does not exist: {selected_id}"])
         return summary
 
     stage_rows = _stage_rows(run_state)
     try:
-        audit = audit_run(project_path, selected_run_id)
+        audit = audit_run(project_path, selected_id)
     except Exception:
         audit = {"verdict": "unknown", "stages": []}
     audit_issues = _append_unique([], [issue for item in audit.get("stages", []) for issue in item.get("issues", [])])
@@ -128,8 +137,9 @@ def summarize_project(project_dir: str | Path, run_id: str | None = None) -> dic
     summary["next_actions"] = summary["next_actions"] or inferred_next
     summary["blockers"] = _append_unique(summary["blockers"], inferred_blockers)
     summary["risks"] = _append_unique(summary["risks"], inferred_risks)
-    summary["run"] = {
-        "run_id": run_state.get("run_id", selected_run_id),
+    workspace_summary = {
+        "version_id": run_state.get("version_id", selected_version_id or ""),
+        "run_id": run_state.get("run_id", selected_run_id or ""),
         "workflow": run_state.get("workflow", ""),
         "status": run_state.get("status", ""),
         "current_stage": run_state.get("current_stage", ""),
@@ -140,6 +150,8 @@ def summarize_project(project_dir: str | Path, run_id: str | None = None) -> dic
         "audit_verdict": audit.get("verdict", ""),
         "audit_top_issues": audit_issues[:5],
     }
+    summary["version"] = workspace_summary if selected_version_id else None
+    summary["run"] = workspace_summary
     return summary
 
 
@@ -150,6 +162,8 @@ def write_project_state_from_summary(project_dir: str | Path, summary: dict[str,
     # repo is moved/renamed (setdefault left a stale path after jingying_model_agent
     # was renamed to risk_model_workbench).
     state["project"] = str(project_path.resolve())
+    if summary.get("active_version_id"):
+        state["active_version_id"] = summary["active_version_id"]
     if summary.get("active_run_id"):
         state["active_run_id"] = summary["active_run_id"]
     state.setdefault("current_objective", summary.get("current_objective", ""))
@@ -167,6 +181,7 @@ def format_project_summary(summary: dict[str, Any]) -> str:
         f"project: {summary.get('display_name') or summary.get('project_name')}",
         f"path: {summary.get('project')}",
         f"status: {summary.get('status')}",
+        f"active_version_id: {summary.get('active_version_id') or ''}",
         f"active_run_id: {summary.get('active_run_id') or ''}",
     ]
     if summary.get("current_objective"):
@@ -177,10 +192,12 @@ def format_project_summary(summary: dict[str, Any]) -> str:
     run = summary.get("run")
     if run:
         counts = ", ".join(f"{key}={value}" for key, value in sorted(run.get("stage_counts", {}).items()))
+        label = "version" if summary.get("active_version_id") else "run"
         lines.extend(
             [
                 "",
-                "run:",
+                f"{label}:",
+                f"  version_id: {run.get('version_id') or ''}",
                 f"  workflow: {run.get('workflow')}",
                 f"  status: {run.get('status')}",
                 f"  current_stage: {run.get('current_stage')}",
@@ -218,9 +235,9 @@ def write_handoff(
 ) -> Path:
     project_path = Path(project_dir)
     summary = summarize_project(project_path, run_id=run_id)
-    selected_run_id = summary.get("active_run_id") or "no-run"
+    selected_id = summary.get("active_version_id") or summary.get("active_run_id") or "no-version"
     if output is None:
-        output_path = project_path / "handoffs" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-{selected_run_id}.md"
+        output_path = project_path / "handoffs" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-{selected_id}.md"
     else:
         output_path = Path(output)
         if not output_path.is_absolute():
@@ -233,6 +250,7 @@ def write_handoff(
 
     state = update_project_state(
         project_path,
+        active_version_id=summary.get("active_version_id"),
         active_run_id=summary.get("active_run_id"),
         status=summary.get("status"),
         next_actions=summary.get("next_actions", []),
@@ -251,6 +269,7 @@ def format_handoff(summary: dict[str, Any], *, note: str = "", context_snapshot:
         "",
         f"- generated_at: {_now()}",
         f"- project: {summary.get('project')}",
+        f"- active_version_id: {summary.get('active_version_id') or ''}",
         f"- active_run_id: {summary.get('active_run_id') or ''}",
         f"- status: {summary.get('status')}",
     ]
@@ -261,7 +280,11 @@ def format_handoff(summary: dict[str, Any], *, note: str = "", context_snapshot:
 
     lines.extend(["", "## Source Of Truth", ""])
     lines.append("- project_state.yml")
-    if summary.get("active_run_id"):
+    if summary.get("active_version_id"):
+        version_id = summary["active_version_id"]
+        lines.append(f"- versions/{version_id}/version_state.yml")
+        lines.append(f"- versions/{version_id}/audit/artifact_manifest.json")
+    elif summary.get("active_run_id"):
         lines.append(f"- runs/{summary['active_run_id']}/run_state.yml")
         lines.append(f"- runs/{summary['active_run_id']}/audit/artifact_manifest.json")
     if context_snapshot:
@@ -328,6 +351,8 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
     project_path = evidence.project_path
     run_state = evidence.run_state
     contract_source = evidence.contract_source
+    workspace_rel = evidence.run_path.relative_to(project_path)
+    state_filename = "version_state.yml" if (evidence.run_path / "version_state.yml").exists() else "run_state.yml"
 
     stage_states = run_state.get("stages") or {}
     selected_names = [stage] if stage else list(stage_states.keys())
@@ -361,16 +386,18 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
 
     verdict = _rollup_audit_verdict(stage_results)
     source_of_truth = [
-        f"runs/{run_id}/run_state.yml",
-        f"runs/{run_id}/audit/artifact_manifest.json",
+        str(workspace_rel / state_filename),
+        str(workspace_rel / "audit" / "artifact_manifest.json"),
     ]
     if contract_source:
         source_of_truth.append(contract_source)
     return {
         "project": str(project_path.resolve()),
-        "run_id": run_id,
+        "version_id": run_state.get("version_id", ""),
+        "run_id": run_state.get("run_id", run_id),
         "workflow": run_state.get("workflow", ""),
         "run_status": run_state.get("status", ""),
+        "version_status": run_state.get("status", ""),
         "stage": stage or "",
         "verdict": verdict,
         "source_of_truth": source_of_truth,
@@ -381,6 +408,7 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
 
 def format_run_audit(audit: dict[str, Any]) -> str:
     lines = [
+        f"version_id: {audit.get('version_id') or ''}",
         f"run_id: {audit.get('run_id')}",
         f"workflow: {audit.get('workflow')}",
         f"run_status: {audit.get('run_status')}",
@@ -416,10 +444,10 @@ def write_retrospective(
 
     project_path = Path(project_dir)
     summary = summarize_project(project_path, run_id=run_id)
-    selected_run_id = run_id or summary.get("active_run_id")
-    audit = audit_run(project_path, selected_run_id, stage=stage) if selected_run_id else None
+    selected_id = run_id or summary.get("active_version_id") or summary.get("active_run_id")
+    audit = audit_run(project_path, selected_id, stage=stage) if selected_id else None
     if output is None:
-        suffix = stage if scope == "stage" else (selected_run_id or "no-run")
+        suffix = stage if scope == "stage" else (selected_id or "no-version")
         output_path = project_path / "retrospectives" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-{scope}-{suffix}.md"
     else:
         output_path = Path(output)
@@ -433,7 +461,8 @@ def write_retrospective(
 
     state = update_project_state(
         project_path,
-        active_run_id=selected_run_id,
+        active_version_id=summary.get("active_version_id"),
+        active_run_id=summary.get("active_run_id"),
         status=summary.get("status"),
         next_actions=summary.get("next_actions", []),
         blockers=summary.get("blockers", []),
@@ -461,6 +490,7 @@ def format_retrospective(
         "- trigger: explicit",
         f"- scope: {scope}",
         f"- project: {summary.get('project')}",
+        f"- active_version_id: {summary.get('active_version_id') or ''}",
         f"- active_run_id: {summary.get('active_run_id') or ''}",
     ]
     if stage:
@@ -471,7 +501,11 @@ def format_retrospective(
         lines.extend(["", "## Note", "", note])
 
     lines.extend(["", "## Source Of Truth", "", "- project_state.yml"])
-    if summary.get("active_run_id"):
+    if summary.get("active_version_id"):
+        version_id = summary["active_version_id"]
+        lines.append(f"- versions/{version_id}/version_state.yml")
+        lines.append(f"- versions/{version_id}/audit/artifact_manifest.json")
+    elif summary.get("active_run_id"):
         lines.append(f"- runs/{summary['active_run_id']}/run_state.yml")
         lines.append(f"- runs/{summary['active_run_id']}/audit/artifact_manifest.json")
 
@@ -508,12 +542,17 @@ def _resolve_context_snapshot_ref(
 ) -> str | None:
     if not context_snapshot:
         return None
-    selected_run_id = summary.get("active_run_id")
+    selected_id = summary.get("active_version_id") or summary.get("active_run_id")
     raw = str(context_snapshot)
     if raw == "auto":
-        if not selected_run_id:
+        if not selected_id:
             return None
-        path = project_dir / "runs" / str(selected_run_id) / "audit" / "context_snapshot.json"
+        workspace = resolve_workspace_dir(
+            project_dir,
+            version_id=summary.get("active_version_id"),
+            run_id=summary.get("active_run_id"),
+        )
+        path = workspace / "audit" / "context_snapshot.json"
     else:
         path = Path(context_snapshot)
         if not path.is_absolute():
@@ -634,6 +673,25 @@ def _rollup_audit_verdict(stage_results: list[dict[str, Any]]) -> str:
     if "imported" in verdicts:
         return "imported"
     return "unknown"
+
+
+def _latest_version_id(project_dir: Path) -> str | None:
+    index = load_version_index(project_dir)
+    active = index.get("active_version_id")
+    if active:
+        return str(active)
+    candidates: list[tuple[datetime, str]] = []
+    for state_file in (project_dir / "versions").glob("*/version_state.yml"):
+        try:
+            state = yaml.safe_load(state_file.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError):
+            continue
+        version_id = str(state.get("version_id") or state_file.parent.name)
+        timestamp = _parse_datetime(state.get("updated_at") or state.get("created_at")) or datetime.fromtimestamp(state_file.stat().st_mtime)
+        candidates.append((timestamp, version_id))
+    if not candidates:
+        return None
+    return sorted(candidates, key=lambda item: (item[0], item[1]))[-1][1]
 
 
 def _latest_run_id(project_dir: Path) -> str | None:

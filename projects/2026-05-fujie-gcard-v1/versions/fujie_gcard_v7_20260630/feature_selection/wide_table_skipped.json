@@ -1,0 +1,7 @@
+{
+  "data_source_mode": "local_feather",
+  "reason": "local_feather_wide_table_is_feather",
+  "note": "In local_feather mode the wide table pre-exists as the sample feather; wide-table SQL generation and DP execution are skipped by design.",
+  "stage": "build_wide_sql",
+  "created_at": "2026-06-30T13:55:29"
+}

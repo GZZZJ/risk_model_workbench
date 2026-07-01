@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-07-01 12:23:52",
+  "scores_source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-30-gcard-main-lgbm-full/modeling/main_lgbm_tuned/scores_all_splits.feather",
+  "score_columns_evaluated": [
+    "model_score",
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ],
+  "requested_metrics": [
+    "auc",
+    "ks",
+    "decile_lift",
+    "ranking_inversion",
+    "psi"
+  ],
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "splits_evaluated": [
+    "DEV",
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "n_total_samples": 489743,
+  "n_score_columns": 5,
+  "missing_requirements": [
+    {
+      "kind": "dimension",
+      "column": "split",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "month",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "segment",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "decile",
+      "reason": "missing from score table"
+    }
+  ],
+  "dimension_columns_evaluated": [
+    "blue_customer_flag",
+    "zc_level"
+  ],
+  "overall_metrics": {
+    "model_score": {
+      "DEV": {
+        "auc": 0.9539423793530117,
+        "ks": 0.7659682287726249
+      },
+      "DEV-OOS": {
+        "auc": 0.9329282183910251,
+        "ks": 0.7193833789202295
+      },
+      "OOT": {
+        "auc": 0.9344376234294948,
+        "ks": 0.7318528850820154
+      },
+      "OOT-OOS": {
+        "auc": 0.9301920900515067,
+        "ks": 0.7197664403789897
+      }
+    },
+    "gcard_v2": {
+      "DEV": {
+        "auc": 0.9292738715628627,
+        "ks": 0.7141907302495427
+      },
+      "DEV-OOS": {
+        "auc": 0.9259370733597045,
+        "ks": 0.7038200456930981
+      },
+      "OOT": {
+        "auc": 0.9285148934521257,
+        "ks": 0.7175553288836849
+      },
+      "OOT-OOS": {
+        "auc": 0.9215022547363674,
+        "ks": 0.700376267362946
+      }
+    },
+    "gcard_v4": {
+      "DEV": {
+        "auc": 0.9249416979738968,
+        "ks": 0.7083259362789369
+      },
+      "DEV-OOS": {
+        "auc": 0.9214899812666204,
+        "ks": 0.6938746177024521
+      },
+      "OOT": {
+        "auc": 0.9230971405757591,
+        "ks": 0.709733538253707
+      },
+      "OOT-OOS": {
+        "auc": 0.9174731623111531,
+        "ks": 0.6880913602578937
+      }
+    },
+    "gcard_v5": {
+      "DEV": {
+        "auc": 0.9264364529498273,
+        "ks": 0.7098220167032866
+      },
+      "DEV-OOS": {
+        "auc": 0.9232550020882132,
+        "ks": 0.7005919404477734
+      },
+      "OOT": {
+        "auc": 0.927598438636577,
+        "ks": 0.7147744925639008
+      },
+      "OOT-OOS": {
+        "auc": 0.920668484305301,
+        "ks": 0.6926983163196526
+      }
+    },
+    "gcard_v6": {
+      "DEV": {
+        "auc": 0.9367935709699249,
+        "ks": 0.7309617590542226
+      },
+      "DEV-OOS": {
+        "auc": 0.9335679118809683,
+        "ks": 0.7196854443216948
+      },
+      "OOT": {
+        "auc": 0.9358097729687774,
+        "ks": 0.7338111461952732
+      },
+      "OOT-OOS": {
+        "auc": 0.9299017438800257,
+        "ks": 0.7160591761902659
+      }
+    }
+  },
+  "output_dir": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-30-gcard-main-lgbm-full/evaluation_tuned/main_lgbm_tuned"
+}

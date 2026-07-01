@@ -1,0 +1,22 @@
+{
+  "source": "feather",
+  "feather_path": "/root/notebook/draft/十分之一观察样本.feather",
+  "total_rows": 197935,
+  "initial_features": 2843,
+  "available_features": 2837,
+  "after_global_corr": 2013,
+  "after_d03_random_importance": 2013,
+  "after_d04_null_importance": 1306,
+  "final_features": 300,
+  "d05_valid_auc": 0.9316581776640944,
+  "rand_flag_threshold": 0.02,
+  "train_samples": 148308,
+  "valid_samples": 49627,
+  "config": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/configs/refine_features.yaml",
+  "leakage_flagged_features": [
+    "unpaid_principal_future_light_add_heavy"
+  ],
+  "leakage_flagged_in_final": [
+    "unpaid_principal_future_light_add_heavy"
+  ]
+}

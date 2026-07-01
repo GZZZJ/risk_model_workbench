@@ -1,0 +1,14 @@
+request_id: 20260625-1740-model-request
+request_path: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/requests/2026-06-26-gcard-main-lgbm-rerun.md
+plan_id: 20260625-1740-model-request_plan
+workflow: full_modeling
+data_source_mode: local_feather
+sample_location: /Users/guzijun/gcard_1pct_export/sample_50pct.feather
+materialized_configs:
+- project.yml
+- sample.yaml
+- feature_select.yaml
+- refine_features.yaml
+- train.yaml
+- evaluate.yaml
+- report.yaml

@@ -1,0 +1,636 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_final_2tqhk_reptim_360d_con_feature_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_final_2tqhk_reptim_360d_con_feature_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_final_2tqhk_reptim_360d_con_feature_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "6361f4f74bd55ed47b573a05229af5f80011c23516ba24d324d6f49004e3c06d"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_12his_rep_pressure_trend_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_12his_rep_pressure_trend_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_12his_rep_pressure_trend_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "d6e91f7bc38ed86f0d0aa6944eafc59ad13febc69445702fd9952df437a52095"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_30light_cross_heavy_inner_behaviour_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_30light_cross_heavy_inner_behaviour_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_30light_cross_heavy_inner_behaviour_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "d73fe172353217d89b9ed90488e0b9e302762232f222797bdc4399453d85b21b"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f995c4c08e366426c1113021f4a94d86e1ac525647cdd85ca9bc7d8d5bed98b3"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_jqh_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_jqh_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_jqh_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "da16d6f03f6e11067f9d5b7c551ba2b999aca7eac0851f5b076643f23c5ae5f1"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "accee39c7515f77e927ec8868f617ba8427b3c84613575ef2e5d129753529e80"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_continue_ovd_days_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_continue_ovd_days_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_continue_ovd_days_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "8631bd34281fd21e33e2cbf5b55e3b3f785e10a21282c7599be3f7c376652f2b"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "4afbf06e13844c2c03ec08a881d6f69b8812d6e58f498bdf89db5d302db28295"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_v2_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_v2_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_v2_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "bec8136a35cec7579cdd7076780ebe36d822dddfbf323b1aeab707e9b9f98b58"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "a9385bb7d479029cfa0bf329f5e58593c576533eb9121fab42173efbf979a893"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_v2_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_v2_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_v2_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f7ca8dc9f45c3a71c9d963775af2551279f0cba0fa8f60b9e11f700ea3dd944a"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "cb9b16d7138f897f9283658a54a83e45abababfcf1154b40354bbdbd86f8ce64"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_jqh_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_jqh_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_jqh_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "e9004dcd2a6ce47237fcb652559ba103fc29333324b21d972cb2ddb46030395f"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f6510cc807027f6d697cc8643a084138a04cf5ca906ae51002b0804e5b1c9f77"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "58462497469ba3b1529e2f910921a9e0b540a644bb1e970d4a14afe42e735cf0"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_jqh_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_jqh_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_jqh_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "b5ac6ac662992279beaac06985e17c31c3ec243b02d3674826223bd34b9eac93"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "8d1498c73b7abe404527350d676b29734cfa54e1960ac4eccde8883a05f6731f"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12payment_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12payment_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12payment_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "1bef69231b5dda255509219af48caa4e5eb1379c9228d3fd33bea099521c1fcb"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "56a096ff6a2c9518b5192e908dbb2bd6bc267ab27b7b353c5fbb2d7b32c0ea49"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_trend_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_trend_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_trend_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "38172f9d9a684a8d24e4c2817cf70d258149f2121c1439f1c4c97e4470a610b3"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "8a55853969b0519e41b0775fa55fe9ad6b13a226c709aca58b724a08e909b02e"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_jqh_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_jqh_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_jqh_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "c18381183159855ea2d3541ff3689918f812762e3f05db5cd695bfc166735978"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "e9a31e4d3e41cc158611510f2aaa4ca6c8a177df8a0efda0ce9d68a167452fce"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22order_calculate_stage_order_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22order_calculate_stage_order_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22order_calculate_stage_order_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "99570f485965db103068840e7c645dbaa304a554a8e51f455c8ce2e39fa092e2"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22pip_heavy_cross_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22pip_heavy_cross_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22pip_heavy_cross_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "70e5e9ced6a93edf95a587a9aacbd24015ef437b634182ab087b39425c7e4e9d"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_23changzhai_trend_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_23changzhai_trend_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_23changzhai_trend_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "961e1326b2c57b10e6198da455d8f8888b0b1d39c8de1db4712e967fc8e32eec"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_25_cross_inner_behaviour_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_25_cross_inner_behaviour_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_25_cross_inner_behaviour_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "5fbd8a6f95c59b4fb1225f916c59f4d42bc1e212e6ee4ad5d179d99496ccb62b"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_26_lending_costs_detail_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_26_lending_costs_detail_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_26_lending_costs_detail_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "c5d910b36d0681d0ac6ef7c51f8fab30a6fda01818712851ad062d79ceb26db9"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_28lbs_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_28lbs_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_28lbs_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "801630e1243e6b7b7bbefec51568f9ed722e2ce164c50dc10f633cd618b98188"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_31light_credit_trade_cross_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_31light_credit_trade_cross_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_31light_credit_trade_cross_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "1674005372bf537f2ac502a13be2eb285bcfd5579ccdd9b327cabf7b2be0d619"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_5account_extra_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_5account_extra_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_5account_extra_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "fa26682cc0882787f669bb164d53c508c33e820fa7f52d35827899dad10fde91"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "138efdea0cbd800fdcb62526edad9e25459640276223e828cea729793da2af75"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_jqh_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_jqh_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_jqh_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "cbfb3e1c8a98670cb5236e948d905ea76c3d7fff485996ba0b0a995d90ec4097"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "297272d6996617ea5163a4beb42c0bcf43e83f942a4324eb1fe301fc1370104b"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_dau_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_dau_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_dau_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "e9d4f212c163459f51de9b45db862a7c8e9316c77518f894470e6b5f889d0818"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "840e8fd9816f5d4af3b80184d9ccb70ad9902c15406415dc4a7bd7c14e92c33e"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_1_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_1_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_1_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "d460aac7169288c606cfadd912a8e05d04c3dac633777a2442ddfadbfa617d29"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_2_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_2_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_2_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "36820f98a3924fb4a2ca6126c828865888ab61ab2a903092f6794f42df77a508"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_page_view_n_click_cnt_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_page_view_n_click_cnt_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_page_view_n_click_cnt_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "5cf9577fc737d74d0ba0cf64478579e1770800be32e130b04fb1d95389355584"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_ftr_rep_trend_time_series_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_ftr_rep_trend_time_series_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_ftr_rep_trend_time_series_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "256daf972c6c70edbe2be00c80d6b264ef5eef55430f5cc7fcd52cb004410171"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_apply_trend_time_series_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_apply_trend_time_series_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_apply_trend_time_series_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "468779e12418d39054e8952e516f867d87b276716bff42bffae21b819bf85363"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_rep_trend_time_series_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_rep_trend_time_series_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_rep_trend_time_series_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "c1119aeb0b4f325837bdc86890fc9c3a46ad1c1f46e3917df07a38cad2637eaa"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_1_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_1_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_1_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "2955439d8182047c85bfa2525f54c8818cf2b65580d1adbdfc09e843caa136c1"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_2_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_2_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_2_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "4fdc9a2b89c944bff21e4c245ad4225c29fccd8cb8fdea3bbb3f077305d19402"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_3_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_3_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_3_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "1d661562ab7da9f698359c8fd0feb8b5e95dfaa834d6d5d1c2ef8924c98db50f"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_4_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_4_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_4_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f34926108a225542aceebcc263785cc92c2f8e23fc6985925b7d2d23149eb54a"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_repayment_deduct_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_repayment_deduct_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_repayment_deduct_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "645896222e170bb9bf7c3902de3b675abe241d6477c4435c60e6805a6bf9cdc1"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_used_lmt_trend_time_series_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_used_lmt_trend_time_series_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_used_lmt_trend_time_series_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "4f2e7233aa5c5ad5cf33919d05adbb2cc26948b0731491c160ffdb47f0387bd1"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_light_trans_inner_cross_behaviour_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_light_trans_inner_cross_behaviour_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_light_trans_inner_cross_behaviour_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f5ba29d23052fe7a927c21e9d8d754ef7b97ce732ae63d6fa11009ae234afbd7"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_order_repay_crossed_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_order_repay_crossed_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_order_repay_crossed_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "8bfc18e7ad9c75cda686dcc54ce7250c70b466dad6779ade22e64b4ea7e4539f"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_ability_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_ability_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_ability_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "728c1ae6d4fd717ae4ea86a41d71794949e2a41643886d2015be9ef64b14347d"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_will_pressure_derived_new_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_will_pressure_derived_new_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_will_pressure_derived_new_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "dff811fc5dcd70d06c37d675115f4e24a348f3f2473c0a75a6adee543b8b3126"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_adj_amt_enhanced_aggregation_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_adj_amt_enhanced_aggregation_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_adj_amt_enhanced_aggregation_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "b19b7fa4e290af988a6d040deba2a1250b29aed66ca8dd34ded4a9230d6c614a"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_aval_lmt_enhanced_aggregation_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_aval_lmt_enhanced_aggregation_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_aval_lmt_enhanced_aggregation_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "954ed91d78e0985a8676d5b3e48c8a5cc19fa89cd9a358f3d9959b2e507ccba6"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_order_enhanced_aggregation_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_order_enhanced_aggregation_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_order_enhanced_aggregation_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "cd9801e4a51cbf988e7568dd3a0af7ef73771ff3df0d817c2849b18a526490a9"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_15ai_call_record_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_15ai_call_record_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_15ai_call_record_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "ccfcfc628c17cbd66f6fa02c359197243a2141703240f33ae859ddd44f7da23d"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_di_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_di_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_di_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "5fed54b501e0bf5821498cbb520335aa709e4c9ada2a9a773afbc6d7a3562aa9"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_trend_features_di_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_trend_features_di_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_trend_features_di_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "5ada87f8e3b8f1f73e6961eaaa6c1f70528a9faf1910b78fa17103a5cb08372d"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_di_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_di_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_di_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "78b11f7a868f7933a8b2ee4181e700f30af61dc6cc688e41e8a071f69f6b7085"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_trend_features_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_trend_features_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_trend_features_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "e3ada508968dd052e091648ed91a03a4c72dfb6ec97619c96be0e5ec01f0cc9a"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_telemarket_call_info_features_di_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_telemarket_call_info_features_di_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_telemarket_call_info_features_di_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "f6ba9f67380badf28846a864118c09a42c8e7cd7526776ec05aca342762ffd74"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_account_lmt_feature_sample_final_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_account_lmt_feature_sample_final_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_account_lmt_feature_sample_final_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "e0132622bdbb243f468f27c88d0600432ef6d09cb840e3982488dc41308d2a9e"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "9791ade0f61970d0d23ffe2aa6dc87a3745db360342ba54c1ae111dde849d861"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info2_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info2_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info2_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "9ade213b4f537cb13c7230922422b14ba50a0d043397c887c3ee62c894daf294"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info3_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info3_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info3_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "7412cc48c651bed27b0a94939cccce908133a03c8e13bb8b5aedef46813d4bcb"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info4_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info4_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info4_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "9812d993c0fab0ee623681ff4b7a42757f77974b76e2abbbac4c75419a8bcd99"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info5_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info5_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info5_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "6b6114aece2a0871dadf94a523d1ffedccc4fffce9fdf09c61240ae9e2c012ad"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info6_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info6_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info6_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "259cbe02b16815d4a679ea5505befae5468728f76bed314735a86128ba951796"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info7_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info7_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info7_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "b1b7f78db50f6aed5bac10bb23e0f739be711571235758148e47a8b5f2d6d5d0"
+    },
+    {
+      "path": "queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_final_order_info_df_feature.sql",
+      "source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/sql/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_final_order_info_df_feature.sql",
+      "purpose": "ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_final_order_info_df_feature",
+      "stage": "feature_prescreen",
+      "sql_kind": "generated",
+      "created_at": "2026-06-26T10:37:21",
+      "sql_sha256": "ecb7bc1211358003c76e2a87c8d085aee98ca3ea95b03c769262268839d4f864"
+    }
+  ],
+  "updated_at": "2026-06-26T10:37:21"
+}

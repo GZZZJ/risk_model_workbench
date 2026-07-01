@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.registry import load_artifact_manifest
-from risk_model_workbench.state import load_run_state, run_dir
+from risk_model_workbench.state import load_run_state, workspace_id
+from risk_model_workbench.versioning import resolve_workspace_dir
 from risk_model_workbench.workflow_contracts import load_stage_contracts
 
 
@@ -29,13 +30,13 @@ class RunEvidence:
 
 def load_run_evidence(project_dir: str | Path, run_id: str) -> RunEvidence:
     project_path = Path(project_dir)
-    selected_run_dir = run_dir(project_path, run_id)
+    selected_run_dir = resolve_workspace_dir(project_path, run_id=run_id)
     run_state = load_run_state(selected_run_dir)
     stage_contracts, contract_source = load_stage_contracts(str(run_state.get("workflow", "")))
     manifest = load_artifact_manifest(selected_run_dir)
     return RunEvidence(
         project_path=project_path,
-        run_id=run_id,
+        run_id=workspace_id(run_state, run_id),
         run_path=selected_run_dir,
         run_state=run_state,
         manifest=manifest,

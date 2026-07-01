@@ -1,0 +1,126 @@
+feature_refine:
+  input:
+    local_feather_path: /root/notebook/draft/十分之一的2k维观察样本.feather
+    wide_table: pdm_risk.pdm_risk_fujie_gcard_feature_prescreen_wide_feature_v6_1
+    feature_map: runs/feature_prescreen/results/prescreen_wide_feature_map.csv
+    label_column: ftr_30d_ord_flag
+    split_column: final_flag
+    train_value: DEV
+    valid_value: OOT
+    id_columns:
+    - uid
+    - mdl_dte
+    base_columns:
+    - uid
+    - mdl_dte
+    - ds
+    - blue_customer_flag
+    - ftr_30d_ord_flag
+    - ftr_30d_ord_amt
+    - prc_amt_xz_30d_3m
+    - ovd_amt_xz_30d_3m
+    - final_flag
+    - zc_level
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+    - rand_flag0
+    - rand_flag1
+    - rand_flag2
+    - rand_flag3
+    - rand_flag4
+    - rand_flag5
+  sampling:
+    where: ds is not null and final_flag in ('DEV','OOT') and ftr_30d_ord_flag in
+      (0,1) and rand_flag0 < 0.02
+    max_rows: 200000
+  dp_feather:
+    dataset_id: feature_refine_wide_sample
+    description: 特征初筛后宽表抽样，用于D03随机重要性、D04 Null Importance 和D05基线重要性筛选。
+    data_dir: data/local/dp_feather
+    metadata_dir: data/profile/dp_feather_datasets
+  output_dir: runs/feature_refine_wide
+  random_seed: 0
+  target_feature_count: 500
+  preprocessing:
+    missing_sentinels:
+    - -999
+    - -998
+    min_non_null_rate: 0.09999999999999998
+    drop_constant: true
+    max_unique_values: 1
+  global_corr:
+    enabled: true
+    threshold: 0.8
+    score_metric: univariate_auc
+    method: spearman
+    max_abs_corr: 0.8
+  d03_random_importance:
+    enabled: true
+    mode: feature_select_v2
+    bagging_rounds: 5
+    bagging_fraction: 0.5
+    thresholds: 0.95
+    importance_types:
+    - split
+    - gain
+  d04_null_importance:
+    enabled: true
+    max_features_for_null_importance: 2500
+    real_rounds: 3
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.0
+  d05_baseline_importance:
+    enabled: true
+    importance_type: gain
+    keep_top_n: 500
+  lightgbm:
+    objective: binary
+    metric: auc
+    learning_rate: 0.05
+    num_leaves: 31
+    max_depth: 5
+    min_child_samples: 100
+    subsample: 0.7
+    colsample_bytree: 0.7
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    num_boost_round: 400
+    early_stopping_rounds: 50
+  runtime_request:
+    data_source_mode: local_feather
+    sample_location: /root/notebook/draft/十分之一的2k维观察样本.feather
+    step_params:
+      feature_quality_prescreen:
+        require_sql_approval: true
+      sql_review_gate:
+        block_on_high_risk: true
+      missing_rate_filter:
+        threshold: 0.9
+      constant_value_filter:
+        max_unique_values: 1
+      iv_filter:
+        min_iv: 0.005
+      correlation_dedup:
+        method: spearman
+        max_abs_corr: 0.8
+      random_noise_importance:
+        mode: feature_select_v2
+        bagging_rounds: 5
+        bagging_fraction: 0.5
+        thresholds: 0.95
+        importance_types:
+        - split
+        - gain
+      null_importance_filter:
+        null_rounds: 20
+        null_percentile: 75
+        score_threshold: 1.0
+      baseline_importance_filter:
+        importance_type: gain
+        keep_top_n: 500
+      lightgbm_binary_training:
+        early_stopping_rounds: 50
+        max_auc_gap: 0.02

@@ -121,8 +121,9 @@ def format_progress_report(
     events = events or []
     current_stage = run_state.get("current_stage") or summary.get("stage") or ""
     lines = [
+        f"version_id: {run_state.get('version_id', '')}",
         f"run_id: {run_state.get('run_id', '')}",
-        f"run_status: {run_state.get('status', '')}",
+        f"status: {run_state.get('status', '')}",
         f"current_stage: {stage_label(str(current_stage))}",
     ]
     if summary:
@@ -225,6 +226,7 @@ def build_event(
     timestamp = datetime.now().isoformat(timespec="seconds")
     return {
         "timestamp": timestamp,
+        "version_id": _version_id(run_dir),
         "run_id": _run_id(run_dir),
         "stage": stage,
         "step": step,
@@ -345,6 +347,7 @@ def _write_progress_summary(run_dir: Path, event: dict[str, Any]) -> None:
     by_stage[event["stage"]] = stage_summary
     payload = {
         "version": 1,
+        "version_id": event.get("version_id", ""),
         "run_id": event.get("run_id", ""),
         "updated_at": event["timestamp"],
         "stage": event["stage"],
@@ -357,7 +360,9 @@ def _write_progress_summary(run_dir: Path, event: dict[str, Any]) -> None:
 
 
 def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
-    path = run_dir / "run_state.yml"
+    path = run_dir / "version_state.yml"
+    if not path.exists():
+        path = run_dir / "run_state.yml"
     if not path.exists():
         return
     with path.open("r", encoding="utf-8") as handle:
@@ -382,15 +387,30 @@ def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
 def _run_id(run_dir: Path | None) -> str:
     if not run_dir:
         return ""
-    state_path = run_dir / "run_state.yml"
-    if state_path.exists():
+    for state_path in [run_dir / "version_state.yml", run_dir / "run_state.yml"]:
+        if not state_path.exists():
+            continue
         try:
             state = yaml.safe_load(state_path.read_text(encoding="utf-8")) or {}
             if state.get("run_id"):
                 return str(state["run_id"])
         except yaml.YAMLError:
-            pass
+            continue
     return run_dir.name
+
+
+def _version_id(run_dir: Path | None) -> str:
+    if not run_dir:
+        return ""
+    state_path = run_dir / "version_state.yml"
+    if state_path.exists():
+        try:
+            state = yaml.safe_load(state_path.read_text(encoding="utf-8")) or {}
+            if state.get("version_id"):
+                return str(state["version_id"])
+        except yaml.YAMLError:
+            pass
+    return ""
 
 
 def _eta_seconds(*, current: int | None, total: int | None, elapsed_seconds: float | int | None) -> float | None:

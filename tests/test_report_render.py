@@ -5,10 +5,57 @@ import shutil
 from openpyxl import load_workbook
 
 from risk_model_workbench.cli import main
-from risk_model_workbench.reporting.excel_report import REPORT_SHEETS, generate_excel_report
+from risk_model_workbench.reporting.excel_report import (
+    REPORT_SHEETS,
+    generate_excel_report,
+    render_model_report_html as legacy_render_model_report_html,
+)
+from risk_model_workbench.reporting.html_report import (
+    _report_html_script,
+    _report_html_style,
+    render_model_report_html,
+)
 
 
 GCARD_REPORT_SHEETS = ["Summary", *REPORT_SHEETS]
+
+
+def test_html_report_renderer_module_matches_legacy_wrapper():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "生成日期：2026-07-01",
+            "",
+            "## 一、模型描述",
+            "",
+            "- 标签字段：`target`。",
+            "",
+            "| 指标 | 提升 |",
+            "|---|---|",
+            "| KS | +0.030 |",
+        ]
+    )
+
+    html = render_model_report_html(markdown, run_id="run-demo")
+    legacy_html = legacy_render_model_report_html(markdown, run_id="run-demo")
+
+    assert html == legacy_html
+    assert '<aside class="sidebar"' in html
+    assert 'href="#model-description"' in html
+    assert '<main class="report-shell">' in html
+    assert "<code>target</code>" in html
+    assert "<table>" in html
+
+
+def test_html_report_loads_style_and_script_assets():
+    style = _report_html_style()
+    script = _report_html_script()
+
+    assert ".sidebar{" in style
+    assert ".report-shell" in style
+    assert "DOMContentLoaded" in script
+    assert "enhanceNumericTable" in script
 
 
 def test_report_scaffold():

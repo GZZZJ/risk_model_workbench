@@ -3,7 +3,7 @@ project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-f
 workflow: full_modeling
 created_at: '2026-06-30T13:53:15'
 status: done
-current_stage: feature_metadata
+current_stage: evaluate
 stages:
   validate_config:
     status: done
@@ -842,7 +842,69 @@ stages:
     - modeling/main_lgbm/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
     - modeling/main_lgbm/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
     - modeling/main_lgbm/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
-    started_at: '2026-06-30T16:44:48'
+    - modeling/main_lgbm_tuned/train_metrics.json
+    - modeling/main_lgbm_tuned/metrics_train_valid.json
+    - modeling/main_lgbm_tuned/feature_importance.csv
+    - modeling/main_lgbm_tuned/feature_drop_detail.csv
+    - modeling/main_lgbm_tuned/actual_feature_list.txt
+    - modeling/main_lgbm_tuned/preprocessing.json
+    - modeling/main_lgbm_tuned/run_config.json
+    - modeling/main_lgbm_tuned/model.pkl
+    - modeling/main_lgbm_tuned/score_column_summary.csv
+    - modeling/main_lgbm_tuned/scores_all_splits.feather
+    - modeling/main_lgbm_tuned/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/003_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/005_dau_90d_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/006_pmt_crd_amt_3m_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/007_cnt_avg_ord_span_30d_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/008_d180_apl_ord_days_cnt_all_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/011_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/012_clk_cnt_14d_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/013_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/014_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/015_d30_d60_apl_ord_cnt_rat_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/016_pmt_crd_amt_1m_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/018_his_30d_app_str_ctn_v2_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/019_min_rsk_lmt_rate_12m_bt_ch_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - modeling/main_lgbm_tuned/woe_top_features/woe_top20_summary.csv
+    - modeling/main_lgbm_tuned_balanced/train_metrics.json
+    - modeling/main_lgbm_tuned_balanced/metrics_train_valid.json
+    - modeling/main_lgbm_tuned_balanced/feature_importance.csv
+    - modeling/main_lgbm_tuned_balanced/feature_drop_detail.csv
+    - modeling/main_lgbm_tuned_balanced/actual_feature_list.txt
+    - modeling/main_lgbm_tuned_balanced/preprocessing.json
+    - modeling/main_lgbm_tuned_balanced/run_config.json
+    - modeling/main_lgbm_tuned_balanced/model.pkl
+    - modeling/main_lgbm_tuned_balanced/score_column_summary.csv
+    - modeling/main_lgbm_tuned_balanced/scores_all_splits.feather
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/005_d30_d60_apl_ord_cnt_rat_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/007_dau_90d_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/008_pmt_crd_amt_1m_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/009_pmt_crd_amt_3m_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/010_cnt_avg_ord_span_30d_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/011_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/012_d30_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/013_stg_pln_max_prc_amt_12m_ftr_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/014_clk_cnt_14d_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/015_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/016_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/017_his_30d_app_str_ctn_v2_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/018_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - modeling/main_lgbm_tuned_balanced/woe_top_features/woe_top20_summary.csv
+    started_at: '2026-07-01T12:25:01'
     action:
       id: train_baseline
       kind: stage
@@ -869,10 +931,10 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T16:46:24'
+      heartbeat_at: '2026-07-01T12:27:01'
       elapsed_seconds: 0.0
       last_event_status: done
-    finished_at: '2026-06-30T16:46:23'
+    finished_at: '2026-07-01T12:27:00'
     last_result:
       status: done
       failure_code: ''
@@ -1236,11 +1298,445 @@ stages:
         description: ''
         artifact_rule: ''
         rule_matched: false
+      - path: modeling/main_lgbm_tuned/train_metrics.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/train_metrics.json
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned/metrics_train_valid.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/metrics_train_valid.json
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned/feature_importance.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/feature_importance.csv
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned/feature_drop_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/actual_feature_list.txt
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/actual_feature_list.txt
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned/preprocessing.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/run_config.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/model.pkl
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/score_column_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/scores_all_splits.feather
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/003_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/004_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/005_dau_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/006_pmt_crd_amt_3m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/007_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/008_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/011_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/012_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/013_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/014_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/015_d30_d60_apl_ord_cnt_rat_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/016_pmt_crd_amt_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/018_his_30d_app_str_ctn_v2_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/019_min_rsk_lmt_rate_12m_bt_ch_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned/woe_top_features/woe_top20_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/train_metrics.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/train_metrics.json
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned_balanced/metrics_train_valid.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/metrics_train_valid.json
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned_balanced/feature_importance.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/feature_importance.csv
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned_balanced/feature_drop_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/actual_feature_list.txt
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/actual_feature_list.txt
+        rule_matched: true
+      - path: modeling/main_lgbm_tuned_balanced/preprocessing.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/run_config.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/model.pkl
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/score_column_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/scores_all_splits.feather
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/005_d30_d60_apl_ord_cnt_rat_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/007_dau_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/008_pmt_crd_amt_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/009_pmt_crd_amt_3m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/010_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/011_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/012_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/013_stg_pln_max_prc_amt_12m_ftr_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/014_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/015_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/016_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/017_his_30d_app_str_ctn_v2_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/018_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm_tuned_balanced/woe_top_features/woe_top20_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
       decision:
         stage: train_baseline
         decision: done
         reason: lightgbm training completed from local feather data
-        created_at: '2026-06-30T16:46:23'
+        created_at: '2026-07-01T12:27:00'
   evaluate:
     status: done
     artifacts:
@@ -1291,7 +1787,99 @@ stages:
     - evaluation/score_psi_by_month.csv
     - evaluation/segment_metrics.csv
     - evaluation/champion_challenger.json
-    started_at: '2026-06-30T16:46:25'
+    - evaluation_tuned/main_lgbm_tuned/benchmark_uplift.csv
+    - evaluation_tuned/main_lgbm_tuned/business_risk.csv
+    - evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_all_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_b2_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned/dimension_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned/evaluation_summary.json
+    - evaluation_tuned/main_lgbm_tuned/feature_gain_summary.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk_b2.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_distribution.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_distribution_b2.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_distribution_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate_b2.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk_b2.csv
+    - evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned/missing_evaluation_requirements.json
+    - evaluation_tuned/main_lgbm_tuned/monthly_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned/overall_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned/ranking_inversion.csv
+    - evaluation_tuned/main_lgbm_tuned/score_psi_bin_detail.csv
+    - evaluation_tuned/main_lgbm_tuned/score_psi_by_month.csv
+    - evaluation_tuned/main_lgbm_tuned/segment_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/benchmark_uplift.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/business_risk.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v4.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v5.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v6.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_model_score.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/dimension_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/evaluation_summary.json
+    - evaluation_tuned/main_lgbm_tuned_balanced/feature_gain_summary.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk_b2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution_b2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate_b2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk_b2.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk_e2e3.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/missing_evaluation_requirements.json
+    - evaluation_tuned/main_lgbm_tuned_balanced/monthly_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/overall_metrics.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/ranking_inversion.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/score_psi_bin_detail.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/score_psi_by_month.csv
+    - evaluation_tuned/main_lgbm_tuned_balanced/segment_metrics.csv
+    started_at: '2026-07-01T12:27:08'
     action:
       id: evaluate
       kind: stage
@@ -1312,10 +1900,10 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T16:47:25'
+      heartbeat_at: '2026-07-01T12:28:19'
       elapsed_seconds: 0.0
       last_event_status: done
-    finished_at: '2026-06-30T16:47:25'
+    finished_at: '2026-07-01T12:28:18'
     last_result:
       status: done
       failure_code: ''
@@ -1651,11 +2239,655 @@ stages:
         description: ''
         artifact_rule: ''
         rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/business_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/cross_gain_matrix_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_all_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_b2_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/decile_lift_e2e3_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/dimension_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/evaluation_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/feature_gain_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_amount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_distribution_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_distribution_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_ftr_rate_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/intent_zc_headcount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/missing_evaluation_requirements.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/monthly_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/overall_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/ranking_inversion.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/score_psi_bin_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/score_psi_by_month.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned/segment_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/business_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/cross_gain_matrix_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_all_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_b2_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/decile_lift_e2e3_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/dimension_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/evaluation_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/feature_gain_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_amount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_distribution_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_ftr_rate_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_headcount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/missing_evaluation_requirements.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/monthly_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/overall_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/ranking_inversion.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/score_psi_bin_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/score_psi_by_month.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation_tuned/main_lgbm_tuned_balanced/segment_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
       decision:
         stage: evaluate
         decision: done
         reason: Evaluation completed from local score feather
-        created_at: '2026-06-30T16:47:24'
+        created_at: '2026-07-01T12:28:18'
   compare:
     status: done
     artifacts:
@@ -1763,6 +2995,32 @@ stages:
     - reports/woe_top_features/images/018_d180_suc_ord_days_cnt_all_WOE.png
     - reports/woe_top_features/images/019_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
     - reports/woe_top_features/images/020_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx
+    - reports_tuned_main_lgbm_tuned_balanced/model_report.md
+    - reports_tuned_main_lgbm_tuned_balanced/model_report.html
+    - reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md
+    - reports_tuned_main_lgbm_tuned_balanced/report_scope.json
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/005_d30_d60_apl_ord_cnt_rat_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/007_dau_90d_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/008_pmt_crd_amt_1m_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/009_pmt_crd_amt_3m_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/010_cnt_avg_ord_span_30d_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/011_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/012_d30_apl_ord_days_cnt_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/013_stg_pln_max_prc_amt_12m_ftr_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/014_clk_cnt_14d_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/015_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/016_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/017_his_30d_app_str_ctn_v2_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/018_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/woe_top20_summary.csv
     started_at: '2026-06-30T18:31:32'
     action:
       id: report
@@ -2199,4 +3457,29 @@ decisions:
   decision: done
   reason: Excel report generated from standard train and evaluation artifacts
   created_at: '2026-06-30T18:32:09'
-updated_at: '2026-07-01T10:47:26'
+- stage: train_baseline
+  decision: scaffold
+  reason: training data not available
+  created_at: '2026-07-01T12:20:32'
+- stage: train_baseline
+  decision: done
+  reason: lightgbm training completed from local feather data
+  created_at: '2026-07-01T12:23:01'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-07-01T12:24:13'
+- stage: train_baseline
+  decision: done
+  reason: lightgbm training completed from local feather data
+  created_at: '2026-07-01T12:27:00'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-07-01T12:28:18'
+- stage: report
+  decision: generated_tuned_balanced_report
+  reason: Generated and registered report from modeling/main_lgbm_tuned_balanced and
+    evaluation_tuned/main_lgbm_tuned_balanced artifacts.
+  created_at: '2026-07-01T12:54:55'
+updated_at: '2026-07-01T12:54:55'

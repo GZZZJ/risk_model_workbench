@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>复借G卡模型报告</title>
+<style>
+:root{--blue:#17365d;--orange:#f4b183;--line:#d9e0e3;--text:#1f2933;--muted:#667085;--bg:#ffffff;--soft:#f7f9fb}
+body{font-family:Arial,'Microsoft YaHei',sans-serif;margin:32px;color:var(--text);line-height:1.55;background:var(--bg)}
+h1{font-size:26px;margin:0 0 12px 0} h2{font-size:19px;margin:30px 0 12px 0;padding:8px 10px;background:var(--blue);color:#fff;border-radius:2px}
+h3{font-size:16px;margin:24px 0 10px 0;border-left:4px solid var(--orange);padding-left:8px} h4{font-size:14px;margin:18px 0 8px 0}
+p{margin:8px 0} ul{margin:8px 0 14px 20px;padding:0} li{margin:4px 0} code{font-family:Menlo,Consolas,monospace;background:#f2f4f7;padding:1px 4px;border-radius:3px}
+blockquote{margin:8px 0 12px 0;color:#111827;background:var(--orange);border-left:4px solid #d9822b;padding:6px 10px}
+	.table-wrap{overflow-x:auto;margin:10px 0 20px 0} .metric-pair{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin:10px 0 20px 0}.metric-pair .table-wrap{flex:1 1 420px;margin:0}.metric-pair table{width:100%;min-width:0} table{border-collapse:collapse;font-size:13px;min-width:560px} th,td{border:1px solid var(--line);padding:6px 8px;vertical-align:middle} th{background:#f3f6f6;font-weight:700;text-align:center;white-space:nowrap} td{text-align:left} td.num{text-align:right;font-variant-numeric:tabular-nums} tbody tr:nth-child(even){background:var(--soft)}
+</style>
+</head>
+<body>
+<h1>复借G卡模型报告</h1>
+<p>生成日期：2026-06-16；Summary 更新日期：2026-06-24</p>
+<h2>Summary（新版模型 vs G卡V6）</h2>
+<ul>
+<li>口径：新版模型（model_score） vs 旧版全客群模型（G卡V6）；分客群表仅为切片效果，不含分客群专属模型对比。</li>
+<li>更新日期：2026-06-24；指标来源：当前 run 已注册 train/evaluation artifacts。</li>
+<li>详情导航：模型描述、模型效果-每月效果、模型效果-模型sloping、模型稳定性、重要变量。</li>
+</ul>
+<h3>一、结论摘要</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>项目</th><th>摘要</th></tr></thead>
+<tbody>
+<tr><td>核心结论</td><td>OOT-OOS 全客群：本轮 KS 0.720 vs G卡V6 0.716，提升 0.4 个百分点；AUC 0.932 vs G卡V6 0.930，提升 0.2 个百分点。</td></tr>
+<tr><td>对比对象</td><td>G卡V6 作为旧版全客群模型；其余历史版本仍保留在明细 sheet 中供追溯。</td></tr>
+<tr><td>解释边界</td><td>本页只聚焦 30天发起标签的 AUC/KS、OOS 月度表现、分客群切片、sloping、PSI；MOB/金额风险不是本页验收主口径。</td></tr>
+</tbody></table></div>
+<h3>二、模型与样本口径</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>项目</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td>标签字段</td><td>ftr_30d_ord_flag</td></tr>
+<tr><td>训练/验证/OOS</td><td>[&#x27;DEV&#x27;] / [&#x27;OOT&#x27;] / [&#x27;DEV-OOS&#x27;, &#x27;OOT-OOS&#x27;]</td></tr>
+<tr><td>算法</td><td>lightgbm</td></tr>
+<tr><td>入模特征数</td><td class="num">300</td></tr>
+<tr><td>Best iteration</td><td class="num">995</td></tr>
+<tr><td>Valid AUC / KS</td><td>0.937 / 0.737</td></tr>
+</tbody></table></div>
+<h3>三、整体效果对比</h3>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>样本</th><th>样本数</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>DEV</td><td class="num">3,600,000</td><td class="num">0.940</td><td class="num">0.936</td><td class="num">0.3%</td></tr>
+<tr><td>DEV-OOS</td><td class="num">3,600,000</td><td class="num">0.934</td><td class="num">0.933</td><td class="num">0.2%</td></tr>
+<tr><td>OOT</td><td class="num">1,200,000</td><td class="num">0.937</td><td class="num">0.936</td><td class="num">0.1%</td></tr>
+<tr><td>OOT-OOS</td><td class="num">1,200,000</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>样本</th><th>样本数</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>DEV</td><td class="num">3,600,000</td><td class="num">0.736</td><td class="num">0.728</td><td class="num">0.8%</td></tr>
+<tr><td>DEV-OOS</td><td class="num">3,600,000</td><td class="num">0.722</td><td class="num">0.717</td><td class="num">0.4%</td></tr>
+<tr><td>OOT</td><td class="num">1,200,000</td><td class="num">0.737</td><td class="num">0.734</td><td class="num">0.3%</td></tr>
+<tr><td>OOT-OOS</td><td class="num">1,200,000</td><td class="num">0.720</td><td class="num">0.716</td><td class="num">0.4%</td></tr>
+</tbody></table></div>
+</div>
+<h3>四、OOT-OOS 分客群切片效果</h3>
+<blockquote>分客群结果是效果切片，不代表已训练老户次新/流失户专属模型。</blockquote>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>样本数</th><th>30天发起率</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">1,200,000</td><td class="num">14.3%</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+<tr><td>老户次新</td><td class="num">372,417</td><td class="num">40.4%</td><td class="num">0.804</td><td class="num">0.796</td><td class="num">0.7%</td></tr>
+<tr><td>老户</td><td class="num">327,473</td><td class="num">41.7%</td><td class="num">0.807</td><td class="num">0.801</td><td class="num">0.6%</td></tr>
+<tr><td>次新</td><td class="num">44,944</td><td class="num">31.0%</td><td class="num">0.753</td><td class="num">0.738</td><td class="num">1.5%</td></tr>
+<tr><td>流失户</td><td class="num">827,583</td><td class="num">2.6%</td><td class="num">0.896</td><td class="num">0.897</td><td class="num">-0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>样本数</th><th>30天发起率</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">1,200,000</td><td class="num">14.3%</td><td class="num">0.720</td><td class="num">0.716</td><td class="num">0.4%</td></tr>
+<tr><td>老户次新</td><td class="num">372,417</td><td class="num">40.4%</td><td class="num">0.454</td><td class="num">0.443</td><td class="num">1.2%</td></tr>
+<tr><td>老户</td><td class="num">327,473</td><td class="num">41.7%</td><td class="num">0.461</td><td class="num">0.450</td><td class="num">1.2%</td></tr>
+<tr><td>次新</td><td class="num">44,944</td><td class="num">31.0%</td><td class="num">0.379</td><td class="num">0.360</td><td class="num">1.9%</td></tr>
+<tr><td>流失户</td><td class="num">827,583</td><td class="num">2.6%</td><td class="num">0.640</td><td class="num">0.639</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+</div>
+<h3>五、OOS 按月效果</h3>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>样本月份</th><th>样本数</th><th>30天发起率</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>DEV-OOS 2025-06</td><td class="num">600,000</td><td class="num">18.8%</td><td class="num">0.930</td><td class="num">0.928</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td class="num">600,000</td><td class="num">18.4%</td><td class="num">0.934</td><td class="num">0.932</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td class="num">600,000</td><td class="num">18.6%</td><td class="num">0.936</td><td class="num">0.934</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td class="num">600,000</td><td class="num">17.1%</td><td class="num">0.935</td><td class="num">0.935</td><td class="num">0.1%</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td class="num">600,000</td><td class="num">15.9%</td><td class="num">0.935</td><td class="num">0.933</td><td class="num">0.1%</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td class="num">600,000</td><td class="num">15.3%</td><td class="num">0.934</td><td class="num">0.933</td><td class="num">0.2%</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td class="num">600,000</td><td class="num">14.7%</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td class="num">600,000</td><td class="num">13.9%</td><td class="num">0.931</td><td class="num">0.929</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>样本月份</th><th>样本数</th><th>30天发起率</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>DEV-OOS 2025-06</td><td class="num">600,000</td><td class="num">18.8%</td><td class="num">0.708</td><td class="num">0.702</td><td class="num">0.6%</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td class="num">600,000</td><td class="num">18.4%</td><td class="num">0.720</td><td class="num">0.714</td><td class="num">0.5%</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td class="num">600,000</td><td class="num">18.6%</td><td class="num">0.725</td><td class="num">0.720</td><td class="num">0.4%</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td class="num">600,000</td><td class="num">17.1%</td><td class="num">0.725</td><td class="num">0.724</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td class="num">600,000</td><td class="num">15.9%</td><td class="num">0.726</td><td class="num">0.723</td><td class="num">0.3%</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td class="num">600,000</td><td class="num">15.3%</td><td class="num">0.726</td><td class="num">0.721</td><td class="num">0.5%</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td class="num">600,000</td><td class="num">14.7%</td><td class="num">0.721</td><td class="num">0.716</td><td class="num">0.5%</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td class="num">600,000</td><td class="num">13.9%</td><td class="num">0.719</td><td class="num">0.715</td><td class="num">0.4%</td></tr>
+</tbody></table></div>
+</div>
+<h3>六、Sloping 高分10%表现</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>本轮高分10%发起率</th><th>G卡V6高分10%发起率</th><th>发起率提升</th><th>本轮累计lift</th><th>G卡V6累计lift</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">78.4%</td><td class="num">77.1%</td><td class="num">1.3%</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>老户次新</td><td class="num">92.2%</td><td class="num">90.9%</td><td class="num">1.3%</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>流失户</td><td class="num">16.2%</td><td class="num">16.0%</td><td class="num">0.2%</td><td class="num">1</td><td class="num">1</td></tr>
+</tbody></table></div>
+<h3>七、模型稳定性</h3>
+<blockquote>PSI 为本轮模型分数月度汇总；分箱明细和 PSI component 见【模型稳定性】或待补口径说明。</blockquote>
+<div class="table-wrap"><table>
+<thead><tr><th>月份</th><th>PSI</th><th>样本数</th></tr></thead>
+<tbody>
+<tr><td>2025-06</td><td class="num">0</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-07</td><td class="num">0.4%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-08</td><td class="num">0.8%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-09</td><td class="num">1.7%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-10</td><td class="num">2.5%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-11</td><td class="num">3.1%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-12</td><td class="num">3.6%</td><td class="num">1,200,000</td></tr>
+<tr><td>2026-01</td><td class="num">4.6%</td><td class="num">1,200,000</td></tr>
+</tbody></table></div>
+<h3>八、Top 10 重要变量</h3>
+<blockquote>变量明细与 WOE 图见【重要变量】和【Top变量WOE】。</blockquote>
+<div class="table-wrap"><table>
+<thead><tr><th>排名</th><th>feature</th><th>特征中文名</th><th>Gain</th><th>Split</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>d360_apl_ord_ddf_mdl_ord_crt_dte_min</td><td>近360天_发起订单距评分日的时间间隔_最小</td><td class="num">2,331,466.470</td><td class="num">458</td></tr>
+<tr><td class="num">2</td><td>ord_apl_sum_prc_amt_90_day</td><td>近90天发起动支订单的动支总金额总额</td><td class="num">2,261,862.902</td><td class="num">59</td></tr>
+<tr><td class="num">3</td><td>ord_apl_max_prc_amt_180_day</td><td>近180天发起动支订单的最大动支总金额总额</td><td class="num">1,858,213.462</td><td class="num">97</td></tr>
+<tr><td class="num">4</td><td>unpaid_principal_future_light_add_heavy</td><td>重加轻资产未来到期未还本金</td><td class="num">1,851,464.808</td><td class="num">185</td></tr>
+<tr><td class="num">5</td><td>his_90_day_csh_apl_ord_cnt_his_rto</td><td>近3月历史CASH订单总数/总订单数</td><td class="num">1,488,565.267</td><td class="num">64</td></tr>
+<tr><td class="num">6</td><td>d180_apl_ord_days_cnt_all</td><td>近180天_订单发起天数(去重)（所有业务类型口径统计）</td><td class="num">913,489.836</td><td class="num">109</td></tr>
+<tr><td class="num">7</td><td>his_360_day_csh_apl_ord_cnt</td><td>近12月历史CASH订单总数</td><td class="num">804,807.131</td><td class="num">152</td></tr>
+<tr><td class="num">8</td><td>cnt_event_result_1_uid_recent_days_120</td><td>cnt_event_result_1_uid_recent_days_120</td><td class="num">731,484.271</td><td class="num">151</td></tr>
+<tr><td class="num">9</td><td>his_180_day_csh_apl_ord_cnt_his_rto</td><td>近6月历史CASH订单总数/总订单数</td><td class="num">491,328.372</td><td class="num">155</td></tr>
+<tr><td class="num">10</td><td>d360_apl_ord_cnt_all</td><td>近360天_发起订单数（所有业务类型口径统计）</td><td class="num">300,729.802</td><td class="num">83</td></tr>
+</tbody></table></div>
+<blockquote>证据提示：本页不补造缺失结果；当前 run audit 仍应以 rmw run audit 输出为准。</blockquote>
+<h2>一、模型描述</h2>
+<ul>
+<li>模型目标：预测配置标签字段 <code>ftr_30d_ord_flag</code>。</li>
+<li>对比口径：新版模型 <code>model_score</code> vs 旧版全客群模型 G卡V6；分客群表仅作为效果切片，不代表已训练老户次新/流失户专属模型。</li>
+<li>建模样本：训练集 DEV，验证集 OOT，OOS DEV-OOS、OOT-OOS。</li>
+<li>算法：lightgbm；最终入模变量 300 个；best iteration 995。</li>
+<li>验证集效果：AUC 0.937，KS 0.737。</li>
+</ul>
+<h2>二、变量筛选过程</h2>
+<ul>
+<li>当前 run 未登记独立 D01/D02 或 feature_refine 筛选过程产物；以下只展示训练阶段实际候选和入模特征准备结果。</li>
+</ul>
+<div class="table-wrap"><table>
+<thead><tr><th>步骤</th><th>处理说明</th><th>变量个数</th><th>来源</th></tr></thead>
+<tbody>
+<tr><td>训练输入</td><td>读取本轮训练候选特征列表；当前 run 未登记独立 D01/D02 或 feature_refine 筛选过程产物</td><td class="num">301</td><td>modeling/main_lgbm/candidate_feature_list.txt</td></tr>
+<tr><td>训练预处理</td><td>按训练数据字段可用性、缺失哨兵、缺失率与常量字段规则保留变量；填充策略：train_median_fill_zero</td><td class="num">300</td><td>modeling/main_lgbm/preprocessing.json</td></tr>
+<tr><td>训练剔除</td><td>训练预处理阶段剔除变量数</td><td class="num">1</td><td>modeling/main_lgbm/feature_drop_detail.csv</td></tr>
+<tr><td>最终入模</td><td>LightGBM 实际入模变量数</td><td class="num">300</td><td>modeling/main_lgbm/actual_feature_list.txt</td></tr>
+</tbody></table></div>
+<ul>
+<li>训练预处理保留 300/301 个变量；剔除 1 个变量。</li>
+<li>特征列表包含需复核提示：LEAKAGE-WARN: unpaid_principal_future_light_add_heavy - contains indicators that may depend on future information; review before production use</li>
+</ul>
+<h2>三、核心效果与旧版全客群模型对比</h2>
+<ul>
+<li>本节按 Summary 口径仅展示本轮模型与 G卡V6 的对比；其余历史版本保留在评估明细产物中供追溯，不作为本页主结论。</li>
+<li>OOT-OOS 全客群：本轮 KS 0.720 vs G卡V6 0.716，提升 0.4 个百分点；AUC 0.932 vs G卡V6 0.930，提升 0.2 个百分点。</li>
+</ul>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>样本</th><th>样本数</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>DEV</td><td class="num">3,600,000</td><td class="num">0.940</td><td class="num">0.936</td><td class="num">0.3%</td></tr>
+<tr><td>DEV-OOS</td><td class="num">3,600,000</td><td class="num">0.934</td><td class="num">0.933</td><td class="num">0.2%</td></tr>
+<tr><td>OOT</td><td class="num">1,200,000</td><td class="num">0.937</td><td class="num">0.936</td><td class="num">0.1%</td></tr>
+<tr><td>OOT-OOS</td><td class="num">1,200,000</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>样本</th><th>样本数</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>DEV</td><td class="num">3,600,000</td><td class="num">0.736</td><td class="num">0.728</td><td class="num">0.8%</td></tr>
+<tr><td>DEV-OOS</td><td class="num">3,600,000</td><td class="num">0.722</td><td class="num">0.717</td><td class="num">0.4%</td></tr>
+<tr><td>OOT</td><td class="num">1,200,000</td><td class="num">0.737</td><td class="num">0.734</td><td class="num">0.3%</td></tr>
+<tr><td>OOT-OOS</td><td class="num">1,200,000</td><td class="num">0.720</td><td class="num">0.716</td><td class="num">0.4%</td></tr>
+</tbody></table></div>
+</div>
+<h2>四、模型效果</h2>
+<p>1、每月效果（OOS）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>序号</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>OOT-OOS 老户次新切片：本轮全客群模型 KS 0.454 vs G卡V6 0.443，提升 1.2 个百分点。</td></tr>
+<tr><td class="num">2</td><td>OOT-OOS 流失户切片：本轮全客群模型 KS 0.640 vs G卡V6 0.639，提升 0.2 个百分点。</td></tr>
+<tr><td class="num">3</td><td>OOT-OOS 全客群：本轮 KS 0.720 vs G卡V6 0.716，提升 0.4 个百分点；AUC 0.932 vs G卡V6 0.930，提升 0.2 个百分点。</td></tr>
+<tr><td class="num">4</td><td>分客群结果是效果切片，不代表已训练老户次新/流失户专属模型；MOB/金额风险不是本页验收主口径。</td></tr>
+</tbody></table></div>
+<p>OOT-OOS 分客群切片效果</p>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>样本数</th><th>30天发起率</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">1,200,000</td><td class="num">14.3%</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+<tr><td>老户次新</td><td class="num">372,417</td><td class="num">40.4%</td><td class="num">0.804</td><td class="num">0.796</td><td class="num">0.7%</td></tr>
+<tr><td>老户</td><td class="num">327,473</td><td class="num">41.7%</td><td class="num">0.807</td><td class="num">0.801</td><td class="num">0.6%</td></tr>
+<tr><td>次新</td><td class="num">44,944</td><td class="num">31.0%</td><td class="num">0.753</td><td class="num">0.738</td><td class="num">1.5%</td></tr>
+<tr><td>流失户</td><td class="num">827,583</td><td class="num">2.6%</td><td class="num">0.896</td><td class="num">0.897</td><td class="num">-0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>样本数</th><th>30天发起率</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">1,200,000</td><td class="num">14.3%</td><td class="num">0.720</td><td class="num">0.716</td><td class="num">0.4%</td></tr>
+<tr><td>老户次新</td><td class="num">372,417</td><td class="num">40.4%</td><td class="num">0.454</td><td class="num">0.443</td><td class="num">1.2%</td></tr>
+<tr><td>老户</td><td class="num">327,473</td><td class="num">41.7%</td><td class="num">0.461</td><td class="num">0.450</td><td class="num">1.2%</td></tr>
+<tr><td>次新</td><td class="num">44,944</td><td class="num">31.0%</td><td class="num">0.379</td><td class="num">0.360</td><td class="num">1.9%</td></tr>
+<tr><td>流失户</td><td class="num">827,583</td><td class="num">2.6%</td><td class="num">0.640</td><td class="num">0.639</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+</div>
+<p>OOS 按月效果</p>
+<div class="metric-pair">
+<div class="table-wrap"><table>
+<thead><tr><th>样本月份</th><th>样本数</th><th>30天发起率</th><th>本轮AUC</th><th>G卡V6 AUC</th><th>AUC提升</th></tr></thead>
+<tbody>
+<tr><td>DEV-OOS 2025-06</td><td class="num">600,000</td><td class="num">18.8%</td><td class="num">0.930</td><td class="num">0.928</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td class="num">600,000</td><td class="num">18.4%</td><td class="num">0.934</td><td class="num">0.932</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td class="num">600,000</td><td class="num">18.6%</td><td class="num">0.936</td><td class="num">0.934</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td class="num">600,000</td><td class="num">17.1%</td><td class="num">0.935</td><td class="num">0.935</td><td class="num">0.1%</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td class="num">600,000</td><td class="num">15.9%</td><td class="num">0.935</td><td class="num">0.933</td><td class="num">0.1%</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td class="num">600,000</td><td class="num">15.3%</td><td class="num">0.934</td><td class="num">0.933</td><td class="num">0.2%</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td class="num">600,000</td><td class="num">14.7%</td><td class="num">0.932</td><td class="num">0.930</td><td class="num">0.2%</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td class="num">600,000</td><td class="num">13.9%</td><td class="num">0.931</td><td class="num">0.929</td><td class="num">0.2%</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>样本月份</th><th>样本数</th><th>30天发起率</th><th>本轮KS</th><th>G卡V6 KS</th><th>KS提升</th></tr></thead>
+<tbody>
+<tr><td>DEV-OOS 2025-06</td><td class="num">600,000</td><td class="num">18.8%</td><td class="num">0.708</td><td class="num">0.702</td><td class="num">0.6%</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td class="num">600,000</td><td class="num">18.4%</td><td class="num">0.720</td><td class="num">0.714</td><td class="num">0.5%</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td class="num">600,000</td><td class="num">18.6%</td><td class="num">0.725</td><td class="num">0.720</td><td class="num">0.4%</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td class="num">600,000</td><td class="num">17.1%</td><td class="num">0.725</td><td class="num">0.724</td><td class="num">0.2%</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td class="num">600,000</td><td class="num">15.9%</td><td class="num">0.726</td><td class="num">0.723</td><td class="num">0.3%</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td class="num">600,000</td><td class="num">15.3%</td><td class="num">0.726</td><td class="num">0.721</td><td class="num">0.5%</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td class="num">600,000</td><td class="num">14.7%</td><td class="num">0.721</td><td class="num">0.716</td><td class="num">0.5%</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td class="num">600,000</td><td class="num">13.9%</td><td class="num">0.719</td><td class="num">0.715</td><td class="num">0.4%</td></tr>
+</tbody></table></div>
+</div>
+<p>补充：2026年2-4月外推验证（全客群）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>month</th><th>split</th><th>n_samples</th><th>bad_rate</th><th>model_auc</th><th>model_ks</th><th>v6_auc</th><th>v6_ks</th></tr></thead>
+<tbody>
+<tr><td>2026-02</td><td>DEV</td><td class="num">600000</td><td class="num">0.120</td><td class="num">0.938</td><td class="num">0.743</td><td class="num">0.937</td><td class="num">0.739</td></tr>
+<tr><td>2026-02</td><td>OOT</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-02</td><td>DEV-OOS</td><td class="num">600000</td><td class="num">0.128</td><td class="num">0.937</td><td class="num">0.739</td><td class="num">0.936</td><td class="num">0.737</td></tr>
+<tr><td>2026-02</td><td>OOT-OOS</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-02</td><td>DEV+OOT</td><td class="num">600000</td><td class="num">0.120</td><td class="num">0.938</td><td class="num">0.743</td><td class="num">0.937</td><td class="num">0.739</td></tr>
+<tr><td>2026-03</td><td>DEV</td><td class="num">600000</td><td class="num">0.111</td><td class="num">0.942</td><td class="num">0.752</td><td class="num">0.941</td><td class="num">0.748</td></tr>
+<tr><td>2026-03</td><td>OOT</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-03</td><td>DEV-OOS</td><td class="num">600000</td><td class="num">0.116</td><td class="num">0.942</td><td class="num">0.752</td><td class="num">0.941</td><td class="num">0.748</td></tr>
+<tr><td>2026-03</td><td>OOT-OOS</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-03</td><td>DEV+OOT</td><td class="num">600000</td><td class="num">0.111</td><td class="num">0.942</td><td class="num">0.752</td><td class="num">0.941</td><td class="num">0.748</td></tr>
+<tr><td>2026-04</td><td>DEV</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-04</td><td>OOT</td><td class="num">600000</td><td class="num">0.106</td><td class="num">0.945</td><td class="num">0.760</td><td class="num">0.944</td><td class="num">0.757</td></tr>
+<tr><td>2026-04</td><td>DEV-OOS</td><td class="num">0</td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026-04</td><td>OOT-OOS</td><td class="num">600000</td><td class="num">0.111</td><td class="num">0.945</td><td class="num">0.758</td><td class="num">0.943</td><td class="num">0.757</td></tr>
+<tr><td>2026-04</td><td>DEV+OOT</td><td class="num">600000</td><td class="num">0.106</td><td class="num">0.945</td><td class="num">0.760</td><td class="num">0.944</td><td class="num">0.757</td></tr>
+</tbody></table></div>
+<p>2026年2-4月外推验证（分客群）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>month</th><th>split</th><th>segment</th><th>n_samples</th><th>bad_rate</th><th>model_auc</th><th>model_ks</th><th>v6_auc</th><th>v6_ks</th><th>ks_uplift</th></tr></thead>
+<tbody>
+<tr><td>2026-02</td><td>DEV+OOT</td><td>B2</td><td class="num">440892</td><td class="num">0.021</td><td class="num">0.892</td><td class="num">0.640</td><td class="num">0.896</td><td class="num">0.637</td><td class="num">0.003</td></tr>
+<tr><td>2026-02</td><td>DEV</td><td>B2</td><td class="num">440892</td><td class="num">0.021</td><td class="num">0.892</td><td class="num">0.640</td><td class="num">0.896</td><td class="num">0.637</td><td class="num">0.003</td></tr>
+<tr><td>2026-02</td><td>DEV-OOS</td><td>B2</td><td class="num">436114</td><td class="num">0.023</td><td class="num">0.893</td><td class="num">0.639</td><td class="num">0.897</td><td class="num">0.638</td><td class="num">0.001</td></tr>
+<tr><td>2026-02</td><td>DEV+OOT</td><td>E2</td><td class="num">11193</td><td class="num">0.302</td><td class="num">0.753</td><td class="num">0.370</td><td class="num">0.738</td><td class="num">0.356</td><td class="num">0.014</td></tr>
+<tr><td>2026-02</td><td>DEV</td><td>E2</td><td class="num">11193</td><td class="num">0.302</td><td class="num">0.753</td><td class="num">0.370</td><td class="num">0.738</td><td class="num">0.356</td><td class="num">0.014</td></tr>
+<tr><td>2026-02</td><td>DEV-OOS</td><td>E2</td><td class="num">11192</td><td class="num">0.311</td><td class="num">0.759</td><td class="num">0.393</td><td class="num">0.752</td><td class="num">0.372</td><td class="num">0.021</td></tr>
+<tr><td>2026-02</td><td>DEV+OOT</td><td>E3</td><td class="num">147915</td><td class="num">0.401</td><td class="num">0.803</td><td class="num">0.452</td><td class="num">0.797</td><td class="num">0.444</td><td class="num">0.009</td></tr>
+<tr><td>2026-02</td><td>DEV</td><td>E3</td><td class="num">147915</td><td class="num">0.401</td><td class="num">0.803</td><td class="num">0.452</td><td class="num">0.797</td><td class="num">0.444</td><td class="num">0.009</td></tr>
+<tr><td>2026-02</td><td>DEV-OOS</td><td>E3</td><td class="num">152694</td><td class="num">0.415</td><td class="num">0.802</td><td class="num">0.455</td><td class="num">0.796</td><td class="num">0.442</td><td class="num">0.013</td></tr>
+<tr><td>2026-03</td><td>DEV+OOT</td><td>B2</td><td class="num">447803</td><td class="num">0.019</td><td class="num">0.910</td><td class="num">0.675</td><td class="num">0.910</td><td class="num">0.666</td><td class="num">0.009</td></tr>
+<tr><td>2026-03</td><td>DEV</td><td>B2</td><td class="num">447803</td><td class="num">0.019</td><td class="num">0.910</td><td class="num">0.675</td><td class="num">0.910</td><td class="num">0.666</td><td class="num">0.009</td></tr>
+<tr><td>2026-03</td><td>DEV-OOS</td><td>B2</td><td class="num">445523</td><td class="num">0.021</td><td class="num">0.913</td><td class="num">0.686</td><td class="num">0.912</td><td class="num">0.678</td><td class="num">0.007</td></tr>
+<tr><td>2026-03</td><td>DEV+OOT</td><td>E2</td><td class="num">8890</td><td class="num">0.274</td><td class="num">0.764</td><td class="num">0.392</td><td class="num">0.753</td><td class="num">0.376</td><td class="num">0.016</td></tr>
+<tr><td>2026-03</td><td>DEV</td><td>E2</td><td class="num">8890</td><td class="num">0.274</td><td class="num">0.764</td><td class="num">0.392</td><td class="num">0.753</td><td class="num">0.376</td><td class="num">0.016</td></tr>
+<tr><td>2026-03</td><td>DEV-OOS</td><td>E2</td><td class="num">9514</td><td class="num">0.278</td><td class="num">0.755</td><td class="num">0.387</td><td class="num">0.751</td><td class="num">0.383</td><td class="num">0.004</td></tr>
+<tr><td>2026-03</td><td>DEV+OOT</td><td>E3</td><td class="num">143307</td><td class="num">0.385</td><td class="num">0.809</td><td class="num">0.462</td><td class="num">0.802</td><td class="num">0.451</td><td class="num">0.011</td></tr>
+<tr><td>2026-03</td><td>DEV</td><td>E3</td><td class="num">143307</td><td class="num">0.385</td><td class="num">0.809</td><td class="num">0.462</td><td class="num">0.802</td><td class="num">0.451</td><td class="num">0.011</td></tr>
+<tr><td>2026-03</td><td>DEV-OOS</td><td>E3</td><td class="num">144963</td><td class="num">0.396</td><td class="num">0.809</td><td class="num">0.464</td><td class="num">0.804</td><td class="num">0.455</td><td class="num">0.009</td></tr>
+<tr><td>2026-04</td><td>DEV+OOT</td><td>B2</td><td class="num">453136</td><td class="num">0.018</td><td class="num">0.916</td><td class="num">0.693</td><td class="num">0.916</td><td class="num">0.689</td><td class="num">0.004</td></tr>
+<tr><td>2026-04</td><td>OOT</td><td>B2</td><td class="num">453136</td><td class="num">0.018</td><td class="num">0.916</td><td class="num">0.693</td><td class="num">0.916</td><td class="num">0.689</td><td class="num">0.004</td></tr>
+<tr><td>2026-04</td><td>OOT-OOS</td><td>B2</td><td class="num">450270</td><td class="num">0.019</td><td class="num">0.918</td><td class="num">0.694</td><td class="num">0.917</td><td class="num">0.689</td><td class="num">0.005</td></tr>
+<tr><td>2026-04</td><td>DEV+OOT</td><td>E2</td><td class="num">7820</td><td class="num">0.288</td><td class="num">0.775</td><td class="num">0.417</td><td class="num">0.761</td><td class="num">0.397</td><td class="num">0.020</td></tr>
+<tr><td>2026-04</td><td>OOT</td><td>E2</td><td class="num">7820</td><td class="num">0.288</td><td class="num">0.775</td><td class="num">0.417</td><td class="num">0.761</td><td class="num">0.397</td><td class="num">0.020</td></tr>
+<tr><td>2026-04</td><td>OOT-OOS</td><td>E2</td><td class="num">8605</td><td class="num">0.277</td><td class="num">0.758</td><td class="num">0.387</td><td class="num">0.747</td><td class="num">0.375</td><td class="num">0.011</td></tr>
+<tr><td>2026-04</td><td>DEV+OOT</td><td>E3</td><td class="num">139044</td><td class="num">0.383</td><td class="num">0.809</td><td class="num">0.462</td><td class="num">0.804</td><td class="num">0.453</td><td class="num">0.008</td></tr>
+<tr><td>2026-04</td><td>OOT</td><td>E3</td><td class="num">139044</td><td class="num">0.383</td><td class="num">0.809</td><td class="num">0.462</td><td class="num">0.804</td><td class="num">0.453</td><td class="num">0.008</td></tr>
+<tr><td>2026-04</td><td>OOT-OOS</td><td>E3</td><td class="num">141125</td><td class="num">0.392</td><td class="num">0.808</td><td class="num">0.463</td><td class="num">0.803</td><td class="num">0.456</td><td class="num">0.007</td></tr>
+</tbody></table></div>
+<p>2、模型sloping</p>
+<div class="table-wrap"><table>
+<thead><tr><th>客群</th><th>本轮高分10%发起率</th><th>G卡V6高分10%发起率</th><th>发起率提升</th><th>本轮累计lift</th><th>G卡V6累计lift</th></tr></thead>
+<tbody>
+<tr><td>全客群</td><td class="num">78.4%</td><td class="num">77.1%</td><td class="num">1.3%</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>老户次新</td><td class="num">92.2%</td><td class="num">90.9%</td><td class="num">1.3%</td><td class="num">1</td><td class="num">1</td></tr>
+<tr><td>流失户</td><td class="num">16.2%</td><td class="num">16.0%</td><td class="num">0.2%</td><td class="num">1</td><td class="num">1</td></tr>
+</tbody></table></div>
+<p>3、意愿交叉风险（DEV-OOS）</p>
+<ul>
+<li>当前 run 仅有全量观察口径的意愿 x 资产评级结果，缺少老户/流失户和历史版本分层矩阵；完整缺失项见 <code>model_report_missing_results.md</code>。</li>
+</ul>
+<p>当前可用全量观察：占比（意愿评级 x 资产评级）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr></thead>
+<tbody>
+<tr><td>低意愿</td><td class="num">0.000</td><td class="num">0.001</td><td class="num">0.005</td><td class="num">0.009</td><td class="num">0.022</td><td class="num">0.160</td><td class="num">0.137</td><td class="num">0.333</td></tr>
+<tr><td>中意愿</td><td class="num">0.008</td><td class="num">0.025</td><td class="num">0.046</td><td class="num">0.038</td><td class="num">0.069</td><td class="num">0.129</td><td class="num">0.020</td><td class="num">0.333</td></tr>
+<tr><td>高意愿</td><td class="num">0.015</td><td class="num">0.050</td><td class="num">0.072</td><td class="num">0.082</td><td class="num">0.020</td><td class="num">0.075</td><td class="num">0.020</td><td class="num">0.333</td></tr>
+<tr><td>sum</td><td class="num">0.023</td><td class="num">0.076</td><td class="num">0.122</td><td class="num">0.129</td><td class="num">0.110</td><td class="num">0.363</td><td class="num">0.176</td><td class="num">1.000</td></tr>
+</tbody></table></div>
+<p>当前可用全量观察：30天发起率（意愿评级 x 资产评级）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr></thead>
+<tbody>
+<tr><td>低意愿</td><td class="num">0.001</td><td class="num">0.003</td><td class="num">0.002</td><td class="num">0.002</td><td class="num">0.003</td><td class="num">0.003</td><td class="num">0.003</td><td class="num">0.003</td></tr>
+<tr><td>中意愿</td><td class="num">0.040</td><td class="num">0.038</td><td class="num">0.033</td><td class="num">0.034</td><td class="num">0.021</td><td class="num">0.021</td><td class="num">0.027</td><td class="num">0.026</td></tr>
+<tr><td>高意愿</td><td class="num">0.397</td><td class="num">0.433</td><td class="num">0.424</td><td class="num">0.455</td><td class="num">0.400</td><td class="num">0.447</td><td class="num">0.505</td><td class="num">0.440</td></tr>
+<tr><td>sum</td><td class="num">0.273</td><td class="num">0.297</td><td class="num">0.261</td><td class="num">0.300</td><td class="num">0.087</td><td class="num">0.100</td><td class="num">0.062</td><td class="num">0.156</td></tr>
+</tbody></table></div>
+<p>当前可用全量观察：人头风险率（意愿评级 x 资产评级）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr></thead>
+<tbody>
+<tr><td>低意愿</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td></tr>
+<tr><td>中意愿</td><td class="num">0.001</td><td class="num">0.001</td><td class="num">0.001</td><td class="num">0.001</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td><td class="num">0.000</td></tr>
+<tr><td>高意愿</td><td class="num">0.009</td><td class="num">0.013</td><td class="num">0.014</td><td class="num">0.015</td><td class="num">0.011</td><td class="num">0.011</td><td class="num">0.009</td><td class="num">0.013</td></tr>
+<tr><td>sum</td><td class="num">0.006</td><td class="num">0.009</td><td class="num">0.008</td><td class="num">0.010</td><td class="num">0.002</td><td class="num">0.002</td><td class="num">0.001</td><td class="num">0.004</td></tr>
+</tbody></table></div>
+<p>当前可用全量观察：金额风险（仅意愿维度）</p>
+<div class="table-wrap"><table>
+<thead><tr><th>intent_level</th><th>n_samples</th><th>total_principal</th><th>total_overdue</th><th>amount_overdue_rate</th><th>head_risk_count</th><th>head_risk_rate</th></tr></thead>
+<tbody>
+<tr><td>低意愿</td><td class="num">3200000</td><td class="num">10575256.000</td><td class="num">274864.594</td><td class="num">0.026</td><td class="num">60</td><td class="num">0.000</td></tr>
+<tr><td>中意愿</td><td class="num">3200000</td><td class="num">189100096.000</td><td class="num">4099353.500</td><td class="num">0.022</td><td class="num">1064</td><td class="num">0.000</td></tr>
+<tr><td>高意愿</td><td class="num">3200000</td><td class="num">3410450432.000</td><td class="num">111691512.000</td><td class="num">0.033</td><td class="num">40626</td><td class="num">0.013</td></tr>
+</tbody></table></div>
+<h2>五、模型稳定性</h2>
+<ul>
+<li>PSI 为本轮模型分数月度汇总；分箱明细和 PSI component 见【模型稳定性】或待补口径说明。</li>
+</ul>
+<div class="table-wrap"><table>
+<thead><tr><th>月份</th><th>PSI</th><th>样本数</th></tr></thead>
+<tbody>
+<tr><td>2025-06</td><td class="num">0</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-07</td><td class="num">0.4%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-08</td><td class="num">0.8%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-09</td><td class="num">1.7%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-10</td><td class="num">2.5%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-11</td><td class="num">3.1%</td><td class="num">1,200,000</td></tr>
+<tr><td>2025-12</td><td class="num">3.6%</td><td class="num">1,200,000</td></tr>
+<tr><td>2026-01</td><td class="num">4.6%</td><td class="num">1,200,000</td></tr>
+</tbody></table></div>
+<h2>六、重要变量</h2>
+<ul>
+<li>变量明细与 WOE 图见【重要变量】和【Top变量WOE】。</li>
+</ul>
+<div class="table-wrap"><table>
+<thead><tr><th>排名</th><th>feature</th><th>特征中文名</th><th>Gain</th><th>Split</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>d360_apl_ord_ddf_mdl_ord_crt_dte_min</td><td>近360天_发起订单距评分日的时间间隔_最小</td><td class="num">2,331,466.470</td><td class="num">458</td></tr>
+<tr><td class="num">2</td><td>ord_apl_sum_prc_amt_90_day</td><td>近90天发起动支订单的动支总金额总额</td><td class="num">2,261,862.902</td><td class="num">59</td></tr>
+<tr><td class="num">3</td><td>ord_apl_max_prc_amt_180_day</td><td>近180天发起动支订单的最大动支总金额总额</td><td class="num">1,858,213.462</td><td class="num">97</td></tr>
+<tr><td class="num">4</td><td>unpaid_principal_future_light_add_heavy</td><td>重加轻资产未来到期未还本金</td><td class="num">1,851,464.808</td><td class="num">185</td></tr>
+<tr><td class="num">5</td><td>his_90_day_csh_apl_ord_cnt_his_rto</td><td>近3月历史CASH订单总数/总订单数</td><td class="num">1,488,565.267</td><td class="num">64</td></tr>
+<tr><td class="num">6</td><td>d180_apl_ord_days_cnt_all</td><td>近180天_订单发起天数(去重)（所有业务类型口径统计）</td><td class="num">913,489.836</td><td class="num">109</td></tr>
+<tr><td class="num">7</td><td>his_360_day_csh_apl_ord_cnt</td><td>近12月历史CASH订单总数</td><td class="num">804,807.131</td><td class="num">152</td></tr>
+<tr><td class="num">8</td><td>cnt_event_result_1_uid_recent_days_120</td><td>cnt_event_result_1_uid_recent_days_120</td><td class="num">731,484.271</td><td class="num">151</td></tr>
+<tr><td class="num">9</td><td>his_180_day_csh_apl_ord_cnt_his_rto</td><td>近6月历史CASH订单总数/总订单数</td><td class="num">491,328.372</td><td class="num">155</td></tr>
+<tr><td class="num">10</td><td>d360_apl_ord_cnt_all</td><td>近360天_发起订单数（所有业务类型口径统计）</td><td class="num">300,729.802</td><td class="num">83</td></tr>
+</tbody></table></div>
+<h2>七、Top变量WOE</h2>
+<ul>
+<li>Top20 WOE 图见 Excel sheet <code>Top变量WOE</code>，PNG 和汇总 CSV 见 <code>reports/woe_top_features/</code> 或训练产物目录。</li>
+</ul>
+<div class="table-wrap"><table>
+<thead><tr><th>排名</th><th>变量</th><th>Gain</th><th>IV</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>d360_apl_ord_ddf_mdl_ord_crt_dte_min</td><td class="num">2331466.470</td><td class="num">13.055</td></tr>
+<tr><td class="num">2</td><td>ord_apl_sum_prc_amt_90_day</td><td class="num">2261862.902</td><td class="num">6.893</td></tr>
+<tr><td class="num">3</td><td>ord_apl_max_prc_amt_180_day</td><td class="num">1858213.462</td><td class="num">7.641</td></tr>
+<tr><td class="num">4</td><td>unpaid_principal_future_light_add_heavy</td><td class="num">1851464.808</td><td class="num">8.741</td></tr>
+<tr><td class="num">5</td><td>his_90_day_csh_apl_ord_cnt_his_rto</td><td class="num">1488565.267</td><td class="num">5.911</td></tr>
+<tr><td class="num">6</td><td>d180_apl_ord_days_cnt_all</td><td class="num">913489.836</td><td class="num">12.893</td></tr>
+<tr><td class="num">7</td><td>his_360_day_csh_apl_ord_cnt</td><td class="num">804807.131</td><td class="num">10.003</td></tr>
+<tr><td class="num">8</td><td>cnt_event_result_1_uid_recent_days_120</td><td class="num">731484.271</td><td class="num">8.412</td></tr>
+<tr><td class="num">9</td><td>his_180_day_csh_apl_ord_cnt_his_rto</td><td class="num">491328.372</td><td class="num">8.291</td></tr>
+<tr><td class="num">10</td><td>d360_apl_ord_cnt_all</td><td class="num">300729.802</td><td class="num">12.238</td></tr>
+<tr><td class="num">11</td><td>ord_apl_sum_prc_amt_360_day</td><td class="num">269005.655</td><td class="num">9.485</td></tr>
+<tr><td class="num">12</td><td>dau_90d</td><td class="num">236275.718</td><td class="num">6.741</td></tr>
+<tr><td class="num">13</td><td>cnt_other_info_cash_uid_recent_days_30</td><td class="num">234065.608</td><td class="num">3.560</td></tr>
+<tr><td class="num">14</td><td>cnt_avg_ord_span_30d</td><td class="num">144646.982</td><td class="num">6.482</td></tr>
+<tr><td class="num">15</td><td>stg_pln_pay_off_sum_prc_amt_1m</td><td class="num">130206.734</td><td class="num">8.344</td></tr>
+<tr><td class="num">16</td><td>ddf_lst_app_str_tim_to_mdl_tim_sec</td><td class="num">93691.185</td><td class="num">6.685</td></tr>
+<tr><td class="num">17</td><td>his_720_day_csh_apl_ord_cnt_his_rto</td><td class="num">88510.891</td><td class="num">6.487</td></tr>
+<tr><td class="num">18</td><td>clk_cnt_14d</td><td class="num">66581.064</td><td class="num">5.354</td></tr>
+<tr><td class="num">19</td><td>cnt_avb_lmt_2m_v2</td><td class="num">60108.805</td><td class="num">7.333</td></tr>
+<tr><td class="num">20</td><td>d360_max_faqi_prc_amt_divide_rsk_avl_lmt_cash</td><td class="num">57697.036</td><td class="num">10.144</td></tr>
+</tbody></table></div>
+<h2>八、待补充事项</h2>
+<ul>
+<li>证据提示：本页不补造缺失结果；当前 run audit 仍应以 <code>rmw run audit</code> 输出为准。</li>
+<li>当前仍不可补齐：变量分布/分箱图、变量中文描述与业务标签、MOB1/MOB3 历史风险精确定义；这些需要原始特征值、业务字典或未来期还款表现数据。</li>
+<li>详见 <code>model_report_missing_results.md</code>。</li>
+</ul>
+</body>
+</html>

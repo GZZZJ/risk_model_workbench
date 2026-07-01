@@ -105,6 +105,7 @@ def create_project(
         "data/sampled",
         "data/processed",
         "data/profile",
+        "versions",
         "runs",
         "reports",
     ]:

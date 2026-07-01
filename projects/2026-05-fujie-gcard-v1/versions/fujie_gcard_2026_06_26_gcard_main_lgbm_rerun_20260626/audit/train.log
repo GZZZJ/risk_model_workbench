@@ -1,0 +1,20 @@
+[RMW] 模型训练 0% | 模型训练开始执行 | 已用 0秒
+[RMW] 模型训练 8% | 训练特征列表读取完成，共 500 个候选变量 | 已用 3秒
+[RMW] 模型训练 12% | 正在读取训练数据字段：/Users/guzijun/gcard_1pct_export/sample_50pct.feather | 已用 4秒
+[RMW] 模型训练 18% | 正在读取训练数据：519 个目标字段 | 已用 16秒
+[RMW] 模型训练 25% | 训练数据读取完成：489743 行 515 列 | 已用 20秒
+[RMW] 模型训练 38% | 训练预处理完成：保留 500/500 个变量 | 已用 27秒
+[RMW] 模型训练 50% | LightGBM 训练开始：训练样本 183739，验证样本 183480，变量 500 个 | 已用 31秒
+[50]	valid_0's auc: 0.930191
+[100]	valid_0's auc: 0.931665
+[150]	valid_0's auc: 0.932194
+[200]	valid_0's auc: 0.932405
+[250]	valid_0's auc: 0.932479
+[300]	valid_0's auc: 0.932463
+[350]	valid_0's auc: 0.932476
+[RMW] 模型训练 72% | LightGBM 训练完成：valid_auc=0.9325，valid_ks=0.7165，best_iter=303 | 已用 55秒
+[RMW] 模型训练 82% | 开始对全量样本打分 | 已用 1分23秒
+[RMW] 模型训练 90% | 全量打分写入完成：489743 行 | 已用 1分27秒
+[RMW] 模型训练 100% | 训练产物写入完成：模型、指标、重要性和打分文件已生成 | 已用 1分27秒
+[RMW] 模型训练 100% | 模型训练完成 | 已用 0秒
+train complete: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/modeling/main_lgbm

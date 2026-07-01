@@ -1,0 +1,128 @@
+project:
+  name: 2026-05-fujie-gcard-v1
+  display_name: 复借G卡
+  scenario: 复借意愿
+  owner: 牧羊咕
+  created_date: 2026-05-29
+  template: fujie-gcard
+references:
+  planning_doc: ../../docs/legacy/AI经营建模Agent规划.md
+  model_inventory: ../../docs/legacy/现有经营模型梳理.md
+  gcard_workbook: ../../docs/legacy/复借G卡模型文档.xlsx
+  feature_select_v2: ../../vendor/feature-select-v2
+  glossary: docs/名词口径.md
+data:
+  source_table: null
+  raw_path: /Users/guzijun/gcard_1pct_export/sample_50pct.feather
+  feature_path: data/raw/features.feather
+  local_dp_feather_dir: data/local/dp_feather
+  local_dp_feather_metadata_dir: data/profile/dp_feather_datasets
+  dp_fetch_policy: 使用TMLSQLClient从DP取数前必须先展示SQL并获得人工确认；取数后先to_feather落本地，再read_feather处理。
+  id_columns:
+  - uid
+  - mdl_dte
+  time_column: mdl_dte
+  period_column: ds
+  split_column: final_flag
+  target_column: ftr_30d_ord_flag
+  label_definition: 可经营、当前未逾期用户、重资产订单；标签为观察日30天内是否发起
+  sample_logic: 可经营、当前未逾期用户、重资产订单
+  segment_columns:
+  - split
+  - month
+  - segment
+  - decile
+  - blue_customer_flag
+  - zc_level
+split:
+  source_column: final_flag
+  ins_values:
+  - DEV
+  oos_values:
+  - DEV-OOS
+  oot_values:
+  - OOT
+  - OOT-OOS
+splits:
+  dev:
+    values:
+    - DEV
+  dev_oos:
+    values:
+    - DEV-OOS
+  oot:
+    values:
+    - OOT
+    - OOT-OOS
+  oot_oos:
+    values:
+    - OOT-OOS
+  oos:
+    values:
+    - DEV-OOS
+champions:
+  score_columns:
+  - gcard_v2
+  - gcard_v4
+  - gcard_v5
+  - gcard_v6
+current_model:
+  candidate_score_column: model_score
+segments:
+- name: all
+  display_name: 全客群
+  filter: null
+- name: e2e3
+  display_name: 老户次新客群
+  filter: blue_customer_flag in ['E2', 'E3']
+- name: b2
+  display_name: 流失户客群
+  filter: blue_customer_flag == 'B2'
+- name: e2
+  display_name: 次新户客群
+  filter: blue_customer_flag == 'E2'
+- name: e3
+  display_name: 老户客群
+  filter: blue_customer_flag == 'E3'
+business_terms:
+  blue_customer_flag:
+    B2:
+      name: 流失户
+      definition: 结清30天+；2024.08交易侧口径变更为主营结清30+且2个月无发起；2025-07-02变更为180天未发起。
+    E2:
+      name: 次新户
+      definition: 首借后30-100天；后续E1也会在贷中经营，但口径还没完全变化。
+    E3:
+      name: 老户
+      definition: 首借后100天+。
+risk_observation:
+  amount_columns:
+    principal_amount: prc_amt_xz_30d_3m
+    overdue_amount: ovd_amt_xz_30d_3m
+  status: pending_definition_confirmation
+  pending_questions:
+  - MOB1/MOB3人头逾期率和金额逾期率的历史计算逻辑待同事确认。
+  - prc_amt_xz_30d_3m、ovd_amt_xz_30d_3m 是否与历史报告同口径待确认。
+feature_source:
+  status: backtracked_tables_profiled
+  note: 本次特征已在公司平台完成回溯；样本表与70张特征表元数据已记录到本项目目录。
+  table_list: configs/feature_tables.txt
+  metadata_dir: data/profile/feature_metadata
+  inventory_doc: docs/特征表清单.md
+  expected_feature_count: 15028
+  expected_sample_size: millions
+  constraints:
+  - random_sampling_required
+  - batch_feature_screening_required
+open_questions:
+- 本地样本和特征文件路径待确认。
+- 抽样规则待确认。
+- MOB1/MOB3 人头逾期率、金额逾期率历史计算逻辑待确认。
+request:
+  request_id: 20260625-1740-model-request
+  title: 复借 G 卡主模型从0重跑
+  workflow: full_modeling
+  data_source_mode: local_feather
+  sample_location: /Users/guzijun/gcard_1pct_export/sample_50pct.feather
+  business_domain: inloan_operation
+  scenario_profile: fujie_gcard_main_lgbm

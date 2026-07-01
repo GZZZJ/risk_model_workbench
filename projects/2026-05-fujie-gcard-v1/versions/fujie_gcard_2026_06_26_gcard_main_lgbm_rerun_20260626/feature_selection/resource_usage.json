@@ -1,0 +1,115 @@
+{
+  "stage": "feature_refine",
+  "started_at": "2026-06-26T10:46:45",
+  "completed_at": "2026-06-26T11:08:37",
+  "baseline_current_rss_bytes": 109723648,
+  "baseline_peak_rss_bytes": 111247360,
+  "max_current_rss_delta_bytes": 4640653312,
+  "max_peak_rss_delta_bytes": 5355732992,
+  "matrix_memory_bytes": 2050400132,
+  "row_count": 200000,
+  "column_count": 2857,
+  "feature_count": 2563,
+  "configured_peak_multiplier": 4.0,
+  "observed_peak_multiplier": 2.612042843937936,
+  "multiplier_basis": "max_peak_rss_delta_bytes / pandas_dataframe_memory_usage_deep_bytes",
+  "checkpoints": [
+    {
+      "label": "load_feature_list",
+      "created_at": "2026-06-26T10:46:52",
+      "current_rss_bytes": 2924445696,
+      "peak_rss_bytes": 4065837056,
+      "current_rss_delta_bytes": 2814722048,
+      "peak_rss_delta_bytes": 3954589696,
+      "metrics": {
+        "initial_features": 2837,
+        "config_path": "runs/2026-06-26-gcard-main-lgbm-rerun/configs_runtime/refine_features.yaml"
+      }
+    },
+    {
+      "label": "load_sample",
+      "created_at": "2026-06-26T10:47:05",
+      "current_rss_bytes": 588562432,
+      "peak_rss_bytes": 4695015424,
+      "current_rss_delta_bytes": 478838784,
+      "peak_rss_delta_bytes": 4583768064,
+      "metrics": {
+        "rows": 200000,
+        "columns": 2857,
+        "dataframe_memory_bytes": 2384756071
+      }
+    },
+    {
+      "label": "preprocess_done",
+      "created_at": "2026-06-26T10:47:16",
+      "current_rss_bytes": 2052014080,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 1942290432,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "available_features": 2563,
+        "feature_matrix_memory_bytes": 2050400132
+      }
+    },
+    {
+      "label": "split_dataset",
+      "created_at": "2026-06-26T10:47:19",
+      "current_rss_bytes": 4750376960,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 4640653312,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "train_samples": 75347,
+        "valid_samples": 24958
+      }
+    },
+    {
+      "label": "global_corr_done",
+      "created_at": "2026-06-26T11:03:17",
+      "current_rss_bytes": 186417152,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 76693504,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "kept": 1852,
+        "dropped": 711
+      }
+    },
+    {
+      "label": "d03_done",
+      "created_at": "2026-06-26T11:03:18",
+      "current_rss_bytes": 1767768064,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 1658044416,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "kept": 1852,
+        "dropped": 0
+      }
+    },
+    {
+      "label": "d04_done",
+      "created_at": "2026-06-26T11:08:20",
+      "current_rss_bytes": 806797312,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 697073664,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "kept": 1028,
+        "dropped": 824
+      }
+    },
+    {
+      "label": "d05_done",
+      "created_at": "2026-06-26T11:08:37",
+      "current_rss_bytes": 586694656,
+      "peak_rss_bytes": 5466980352,
+      "current_rss_delta_bytes": 476971008,
+      "peak_rss_delta_bytes": 5355732992,
+      "metrics": {
+        "final_features": 500,
+        "d05_valid_auc": 0.9333031650124995
+      }
+    }
+  ]
+}

@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+  "updated_at": "2026-06-26T18:04:12",
+  "stage": "report",
+  "stage_label": "报告生成",
+  "latest_event": {
+    "timestamp": "2026-06-26T18:04:12",
+    "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+    "stage": "report",
+    "step": "action_done",
+    "status": "done",
+    "message": "报告生成完成",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "report",
+      "failure_code": "",
+      "retry_count": 0,
+      "artifact_count": 27,
+      "decision": "done"
+    },
+    "level": "info",
+    "pid": 53585
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-06-26T10:30:08",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 12
+        },
+        "level": "info",
+        "pid": 87996
+      },
+      "updated_at": "2026-06-26T10:30:08"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-06-26T10:31:19",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 88406
+      },
+      "updated_at": "2026-06-26T10:31:19"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-06-26T11:45:44",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征元数据完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 5,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 59382
+      },
+      "updated_at": "2026-06-26T11:45:44"
+    },
+    "build_wide_sql": {
+      "stage": "build_wide_sql",
+      "stage_label": "宽表 SQL 生成",
+      "latest_event": {
+        "timestamp": "2026-06-26T10:36:29",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "build_wide_sql",
+        "step": "action_failed",
+        "status": "failed",
+        "message": "[Errno 2] No such file or directory: '/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/prescreen/results/prescreen_final_remain_features.json'",
+        "current": null,
+        "total": null,
+        "percent": null,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "build_wide_sql",
+          "failure_code": "data_missing",
+          "retry_count": 0,
+          "artifact_count": 0
+        },
+        "level": "error",
+        "pid": 2856
+      },
+      "updated_at": "2026-06-26T10:36:29"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-06-26T10:37:29",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "scaffold",
+        "message": "SQL dry run waiting for approval",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "sql_approval_required",
+          "retry_count": 0,
+          "artifact_count": 92
+        },
+        "level": "info",
+        "pid": 3187
+      },
+      "updated_at": "2026-06-26T10:37:29"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-06-26T11:16:09",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "feature_refine",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征精筛完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_refine",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 5
+        },
+        "level": "info",
+        "pid": 21063
+      },
+      "updated_at": "2026-06-26T11:16:09"
+    },
+    "train_baseline": {
+      "stage": "train_baseline",
+      "stage_label": "模型训练",
+      "latest_event": {
+        "timestamp": "2026-06-26T11:34:31",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "train_baseline",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型训练完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "train_baseline",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 31,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 35236
+      },
+      "updated_at": "2026-06-26T11:34:31"
+    },
+    "evaluate": {
+      "stage": "evaluate",
+      "stage_label": "模型评估",
+      "latest_event": {
+        "timestamp": "2026-06-26T15:53:42",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "evaluate",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型评估完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "evaluate",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 47,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 3707
+      },
+      "updated_at": "2026-06-26T15:53:42"
+    },
+    "compare": {
+      "stage": "compare",
+      "stage_label": "冠军挑战者对比",
+      "latest_event": {
+        "timestamp": "2026-06-26T11:38:04",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "compare",
+        "step": "action_done",
+        "status": "done",
+        "message": "冠军挑战者对比完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "compare",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 2,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 51620
+      },
+      "updated_at": "2026-06-26T11:38:04"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-06-26T18:04:12",
+        "run_id": "2026-06-26-gcard-main-lgbm-rerun",
+        "stage": "report",
+        "step": "action_done",
+        "status": "done",
+        "message": "报告生成完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 27,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 53585
+      },
+      "updated_at": "2026-06-26T18:04:12"
+    }
+  }
+}

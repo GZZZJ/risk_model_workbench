@@ -1,0 +1,18 @@
+{
+  "dataset_id": "feature_prescreen_ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature",
+  "description": "特征初筛样本：ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature，DEV/OOT 分区抽样后用于质量初筛和 PSI 稳定性初筛。",
+  "status": "sql_review_required",
+  "created_or_updated_at": "2026-06-26T10:37:08",
+  "storage": {
+    "feather_path": "runs/2026-06-26-gcard-main-lgbm-rerun/data/dp_feather/feature_prescreen/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature.feather",
+    "gitignored": true
+  },
+  "source": "dp_query",
+  "dimensions": {
+    "rows": null,
+    "columns": null
+  },
+  "sql": "select * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20250630' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20250731' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20250831' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20250930' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20251031' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20251130' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20251231' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')\nunion all\nselect * from ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature where ds = '20260131' and rand_flag0 < 0.1 and final_flag in ('DEV','OOT')",
+  "sql_sha256": "bd34d20ad614d583b7aa800a75fbff86085680aa5b762f659fc30c154487cdc5",
+  "note": "Review this SQL before running DP fetch. The feather file itself is gitignored."
+}

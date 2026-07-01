@@ -1,0 +1,24 @@
+{
+  "missing": [
+    {
+      "kind": "dimension",
+      "column": "split",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "month",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "segment",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "decile",
+      "reason": "missing from score table"
+    }
+  ]
+}

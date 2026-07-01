@@ -1,0 +1,54 @@
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+workflow: imported_feature_screening
+created_at: '2026-06-09T00:13:06'
+status: imported
+current_stage: feature_refine
+stages:
+  validate_config:
+    status: pending
+    artifacts: []
+  sample_check:
+    status: pending
+    artifacts: []
+  feature_metadata:
+    status: pending
+    artifacts: []
+  d01_d02_screening:
+    status: pending
+    artifacts: []
+  build_wide_sql:
+    status: pending
+    artifacts: []
+  feature_refine:
+    status: done
+    artifacts:
+    - feature_selection/feature_screening_process.json
+    - feature_selection/final_features.txt
+    - /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/reports/feature_screening_process.xlsx
+    - /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/runs/feature_refine_feather
+    - /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/runs/modeling_feature_set
+    finished_at: '2026-06-09T00:13:06'
+  train_baseline:
+    status: pending
+    artifacts: []
+  evaluate:
+    status: pending
+    artifacts: []
+  compare:
+    status: pending
+    artifacts: []
+  report:
+    status: pending
+    artifacts: []
+decisions:
+- stage: feature_refine
+  decision: imported
+  reason: 本 run 是从历史产物导入，不是重新执行得到。
+  created_at: '2026-06-09T00:13:06'
+updated_at: '2026-07-01T14:31:37'
+version_id: fujie_gcard_2026_05_imported_feature_screening
+source_type: imported
+lineage:
+  legacy_run_id: 2026-05-imported-feature-screening
+  migrated_from: runs/2026-05-imported-feature-screening
+  migrated_at: '2026-07-01T14:31:37'

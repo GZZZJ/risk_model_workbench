@@ -1,0 +1,21 @@
+# Decision Log
+
+- imported: false
+- 2026-06-26T10:31:19 [sample_check] done: Sample profiling completed from local data
+- 2026-06-26T11:24:32 [train_baseline] scaffold: training failed or dependency missing: can only concatenate str (not "int") to str
+- 2026-06-26T11:29:28 [train_baseline] done: lightgbm training completed from local feather data
+- 2026-06-26T11:34:30 [train_baseline] done: lightgbm training completed from local feather data
+- 2026-06-26T11:35:55 [evaluate] done: Evaluation completed from local score feather
+- 2026-06-26T11:38:03 [compare] done: Champion/challenger comparison materialized
+- 2026-06-26T11:39:16 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-26T11:43:44 [feature_metadata] done: 70 feature tables / 15028 candidate fields exported to project data/profile/feature_metadata and registered into run (local_feather mode)
+- 2026-06-26T11:43:45 [build_wide_sql] scaffold: local_feather mode: wide table pre-exists as sample_50pct.feather (2837 features); canonical build SQL 06_build_d01_d02_wide_table_2837.sql registered as evidence; remote CREATE TABLE not executed
+- 2026-06-26T11:43:46 [feature_prescreen] scaffold: local_feather mode: 70 per-table pull SQLs generated under feature_selection/prescreen/sql as audit evidence; real DP quality computation not executed (refine covers screening on local feather)
+- 2026-06-26T15:53:42 [evaluate] done: Evaluation completed from local score feather
+- 2026-06-26T15:59:32 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-26T17:21:41 [report] excel_scaffold: Excel report not generated: too many values to unpack (expected 2)
+- 2026-06-26T17:21:41 [report] scaffold: report generated with missing real evaluation artifacts
+- 2026-06-26T17:51:31 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-26T18:00:29 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-26T18:02:17 [report] done: Excel report generated from standard train and evaluation artifacts
+- 2026-06-26T18:04:11 [report] done: Excel report generated from standard train and evaluation artifacts

@@ -1,0 +1,13 @@
+{
+  "report_scope": "tuned challenger report",
+  "run_id": "2026-06-30-gcard-main-lgbm-full",
+  "experiment": "main_lgbm_tuned_balanced",
+  "train_dir": "modeling/main_lgbm_tuned_balanced",
+  "eval_dir": "evaluation_tuned/main_lgbm_tuned_balanced",
+  "outputs": [
+    "model_report.html",
+    "model_report.md",
+    "model_report.xlsx",
+    "model_report_missing_results.md"
+  ]
+}

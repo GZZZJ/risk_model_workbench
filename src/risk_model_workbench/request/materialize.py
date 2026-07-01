@@ -414,6 +414,9 @@ def materialize_request_runtime_configs(
             "historical_score_columns": _score_columns(metadata, project_cfg)[1:],
         },
     }
+    request_training = metadata.get("training") if isinstance(metadata.get("training"), dict) else {}
+    if request_training:
+        training_override["training"] = _deep_merge(request_training, training_override["training"])
     if sample_location and data_source_mode == LOCAL_FEATHER:
         training_override["input"]["feather_path"] = sample_location
     runtime_train = _deep_merge(train_cfg, training_override)

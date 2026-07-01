@@ -1,0 +1,8 @@
+{
+  "sql_path": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/queries/06_build_prescreen_wide_table.sql",
+  "feature_map_path": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/runs/feature_prescreen/results/prescreen_wide_feature_map.csv",
+  "output_table": "pdm_risk.pdm_risk_fujie_gcard_feature_prescreen_wide_feature_v6_1",
+  "feature_tables": 59,
+  "features": 2843,
+  "renamed_duplicate_features": 44
+}

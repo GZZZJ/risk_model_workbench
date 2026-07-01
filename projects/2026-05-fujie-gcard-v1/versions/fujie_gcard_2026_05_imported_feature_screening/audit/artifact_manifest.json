@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "path": "feature_selection/feature_screening_process.json",
+      "size_bytes": 5462,
+      "mtime": "2026-06-08T15:50:09",
+      "sha256": "c877983931c7006702f90a4ba8356ae14ba5c982d6113995f99929c2ec29e9b3",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "imported",
+      "description": "",
+      "registered_at": "2026-06-09T00:13:06"
+    },
+    {
+      "path": "feature_selection/final_features.txt",
+      "size_bytes": 3433,
+      "mtime": "2026-06-08T11:25:54",
+      "sha256": "a6ef9cdac5ae39c28ccd061340ccb25aba47838ac92593e503906ec89beed7ae",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "imported",
+      "description": "",
+      "registered_at": "2026-06-09T00:13:06"
+    },
+    {
+      "path": "/Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/reports/feature_screening_process.xlsx",
+      "size_bytes": 7431,
+      "mtime": "2026-06-08T15:50:21",
+      "sha256": "1b4b941852167a1cea8b4d6968c0a724c0e0646598efec7797ae93f4f7095a59",
+      "stage": "feature_refine",
+      "kind": "file",
+      "source": "imported",
+      "description": "",
+      "registered_at": "2026-06-09T00:13:06"
+    },
+    {
+      "path": "/Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/runs/feature_refine_feather",
+      "exists": true,
+      "stage": "feature_refine",
+      "kind": "directory",
+      "source": "imported",
+      "description": "",
+      "registered_at": "2026-06-09T00:13:06"
+    },
+    {
+      "path": "/Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/runs/modeling_feature_set",
+      "exists": true,
+      "stage": "feature_refine",
+      "kind": "directory",
+      "source": "imported",
+      "description": "",
+      "registered_at": "2026-06-09T00:13:06"
+    }
+  ],
+  "updated_at": "2026-06-09T00:13:06"
+}

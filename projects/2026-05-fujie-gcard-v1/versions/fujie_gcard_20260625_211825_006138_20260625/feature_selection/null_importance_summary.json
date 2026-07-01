@@ -1,0 +1,7 @@
+{
+  "input_features": 1090,
+  "passed_null_importance": 360,
+  "null_rounds": 20,
+  "null_percentile": 75,
+  "score_threshold": 1.0
+}

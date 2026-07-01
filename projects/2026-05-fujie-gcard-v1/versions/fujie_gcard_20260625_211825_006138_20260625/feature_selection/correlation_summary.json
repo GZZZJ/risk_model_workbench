@@ -1,0 +1,8 @@
+{
+  "input_features": 1636,
+  "removed_by_correlation": 546,
+  "final_remain": 1090,
+  "method": "pearson_approx",
+  "max_abs_corr": 0.8,
+  "sample_size": 50000
+}

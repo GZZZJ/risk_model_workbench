@@ -1,0 +1,296 @@
+{
+  "version": 1,
+  "run_id": "20260625_211825_006138",
+  "updated_at": "2026-06-25T22:12:38",
+  "stage": "report",
+  "stage_label": "报告生成",
+  "latest_event": {
+    "timestamp": "2026-06-25T22:12:38",
+    "run_id": "20260625_211825_006138",
+    "stage": "report",
+    "step": "action_done",
+    "status": "scaffold",
+    "message": "report generated with missing real evaluation artifacts",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "report",
+      "failure_code": "scaffold_only",
+      "retry_count": 0,
+      "artifact_count": 3,
+      "decision": "scaffold"
+    },
+    "level": "info",
+    "pid": 10048
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-06-25T21:18:31",
+        "run_id": "20260625_211825_006138",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 11
+        },
+        "level": "info",
+        "pid": 9470
+      },
+      "updated_at": "2026-06-25T21:18:31"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-06-25T21:24:37",
+        "run_id": "20260625_211825_006138",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 9490
+      },
+      "updated_at": "2026-06-25T21:24:37"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-06-25T21:42:02",
+        "run_id": "20260625_211825_006138",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征元数据完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 0
+        },
+        "level": "info",
+        "pid": 9682
+      },
+      "updated_at": "2026-06-25T21:42:02"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-06-25T21:43:46",
+        "run_id": "20260625_211825_006138",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "scaffold",
+        "message": "SQL dry run waiting for approval",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "sql_approval_required",
+          "retry_count": 0,
+          "artifact_count": 92
+        },
+        "level": "info",
+        "pid": 9745
+      },
+      "updated_at": "2026-06-25T21:43:46"
+    },
+    "build_wide_sql": {
+      "stage": "build_wide_sql",
+      "stage_label": "宽表 SQL 生成",
+      "latest_event": {
+        "timestamp": "2026-06-25T21:44:27",
+        "run_id": "20260625_211825_006138",
+        "stage": "build_wide_sql",
+        "step": "action_done",
+        "status": "done",
+        "message": "宽表 SQL 生成完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "build_wide_sql",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6
+        },
+        "level": "info",
+        "pid": 9788
+      },
+      "updated_at": "2026-06-25T21:44:27"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-06-25T22:08:15",
+        "run_id": "20260625_211825_006138",
+        "stage": "feature_refine",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征精筛完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_refine",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 26
+        },
+        "level": "info",
+        "pid": 9794
+      },
+      "updated_at": "2026-06-25T22:08:15"
+    },
+    "train_baseline": {
+      "stage": "train_baseline",
+      "stage_label": "模型训练",
+      "latest_event": {
+        "timestamp": "2026-06-25T22:10:12",
+        "run_id": "20260625_211825_006138",
+        "stage": "train_baseline",
+        "step": "action_done",
+        "status": "scaffold",
+        "message": "training failed or dependency missing: Cannot perform reduction 'mean' with string dtype",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "train_baseline",
+          "failure_code": "scaffold_only",
+          "retry_count": 0,
+          "artifact_count": 1,
+          "decision": "scaffold"
+        },
+        "level": "info",
+        "pid": 9907
+      },
+      "updated_at": "2026-06-25T22:10:12"
+    },
+    "evaluate": {
+      "stage": "evaluate",
+      "stage_label": "模型评估",
+      "latest_event": {
+        "timestamp": "2026-06-25T22:12:01",
+        "run_id": "20260625_211825_006138",
+        "stage": "evaluate",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型评估完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "evaluate",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 37,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 9984
+      },
+      "updated_at": "2026-06-25T22:12:01"
+    },
+    "compare": {
+      "stage": "compare",
+      "stage_label": "冠军挑战者对比",
+      "latest_event": {
+        "timestamp": "2026-06-25T22:12:22",
+        "run_id": "20260625_211825_006138",
+        "stage": "compare",
+        "step": "action_done",
+        "status": "done",
+        "message": "冠军挑战者对比完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "compare",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 2,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 10045
+      },
+      "updated_at": "2026-06-25T22:12:22"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-06-25T22:12:38",
+        "run_id": "20260625_211825_006138",
+        "stage": "report",
+        "step": "action_done",
+        "status": "scaffold",
+        "message": "report generated with missing real evaluation artifacts",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "scaffold_only",
+          "retry_count": 0,
+          "artifact_count": 3,
+          "decision": "scaffold"
+        },
+        "level": "info",
+        "pid": 10048
+      },
+      "updated_at": "2026-06-25T22:12:38"
+    }
+  }
+}

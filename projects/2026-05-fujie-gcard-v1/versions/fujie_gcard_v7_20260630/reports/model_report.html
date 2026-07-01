@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>复借G卡模型报告</title>
+<style>
+:root{
+  --ink:#1f2d3d;
+  --muted:#5f6f82;
+  --line:#d9e2ea;
+  --soft-line:#e9eef3;
+  --page:#f2f5f9;
+  --panel:#ffffff;
+  --panel-subtle:#f7f9fb;
+  --nav:#2d4155;
+  --nav-2:#26384a;
+  --accent:#2d9cdb;
+  --green:#18a957;
+  --red:#cf4444;
+  --orange:#e67e22;
+  --purple:#8e44ad;
+  --shadow:0 8px 22px rgba(31,45,61,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--page);
+  font:14px/1.65 Arial,'Microsoft YaHei','PingFang SC',sans-serif;
+  letter-spacing:0;
+}
+a{color:inherit;text-decoration:none}
+.sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  z-index:20;
+  width:212px;
+  overflow:auto;
+  background:linear-gradient(180deg,var(--nav),var(--nav-2));
+  color:#d7e2ec;
+  padding:18px 14px 28px;
+}
+.sidebar-title{
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  padding:0 0 14px;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  margin-bottom:12px;
+}
+.sidebar-meta{
+  color:#aebdca;
+  font-size:12px;
+  line-height:1.45;
+  margin-bottom:14px;
+}
+.nav-list{display:grid;gap:2px}
+.nav-item{
+  display:grid;
+  grid-template-columns:22px 1fr;
+  align-items:center;
+  gap:7px;
+  min-height:34px;
+  padding:6px 8px;
+  border-radius:6px;
+  color:#d5e0eb;
+  font-size:13px;
+}
+.nav-item:hover,.nav-item.is-active{background:rgba(255,255,255,.1);color:#fff}
+.nav-index{
+  display:grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+.nav-note{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.16);
+  color:#b8c6d3;
+  font-size:12px;
+}
+.report-shell{margin-left:212px;min-height:100vh}
+.report-hero{
+  background:var(--nav);
+  color:#fff;
+  padding:32px 46px 38px;
+}
+.report-eyebrow{
+  margin:0 0 8px;
+  color:#b9c8d6;
+  font-size:13px;
+  font-weight:600;
+}
+.report-hero h1{
+  margin:0;
+  font-size:28px;
+  line-height:1.25;
+  font-weight:800;
+}
+.hero-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.hero-meta span{
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  padding:4px 10px;
+  color:#edf5fb;
+  font-size:12px;
+}
+.report-body{
+  max-width:1480px;
+  margin:0 auto;
+  padding:24px;
+}
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(160px,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+.kpi-card{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  padding:16px 18px;
+}
+.kpi-card strong{
+  display:block;
+  font-size:24px;
+  line-height:1.2;
+  color:#172536;
+}
+.kpi-card span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:12px;
+}
+.kpi-card.good{border-left-color:var(--green)}
+.kpi-card.warn{border-left-color:var(--orange)}
+.kpi-card.info{border-left-color:var(--purple)}
+.report-section{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  margin:16px 0;
+  padding:22px 24px 24px;
+  scroll-margin-top:18px;
+}
+.report-section>h2{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 14px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--soft-line);
+  color:#22364a;
+  font-size:20px;
+  line-height:1.35;
+}
+.section-number{
+  display:grid;
+  place-items:center;
+  min-width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+}
+h3.section-subtitle{
+  display:inline-flex;
+  align-items:center;
+  margin:18px 0 10px;
+  padding:5px 11px;
+  border-radius:999px;
+  background:#eef6fc;
+  color:#176f9f;
+  font-size:14px;
+  font-weight:700;
+}
+.report-section h3.section-subtitle:nth-of-type(2n){background:#edf8f1;color:#168548}
+.report-section h3.section-subtitle:nth-of-type(3n){background:#fff3e8;color:#b85c13}
+.report-section h3.section-subtitle:nth-of-type(4n){background:#f5eefb;color:#7b3fa1}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.summary-card{
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--panel-subtle);
+  padding:14px 16px 16px;
+}
+.summary-label{
+  display:inline-flex;
+  align-items:center;
+  margin-bottom:10px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#2586bd;
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+}
+.summary-label.green{background:#1aa85b}
+.summary-label.orange{background:#e67e22}
+.summary-label.purple{background:#8e44ad}
+.summary-card p{margin:4px 0 0}
+.summary-card ul{margin:4px 0 0;padding-left:18px}
+.summary-card .table-wrap{margin:0;border-color:#d7e0e8}
+.summary-card table{min-width:0;font-size:12px}
+.summary-card th,.summary-card td{padding:6px 8px}
+.summary-card strong{font-weight:800}
+p{margin:9px 0 12px}
+ul{margin:8px 0 14px;padding-left:18px}
+li{margin:4px 0}
+blockquote{
+  margin:12px 0 16px;
+  padding:11px 14px;
+  border:1px solid #dce8f2;
+  border-left:4px solid var(--accent);
+  border-radius:6px;
+  background:#f6fbff;
+  color:#4c5d6e;
+}
+.table-wrap{
+  width:100%;
+  overflow:auto;
+  margin:10px 0 18px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+}
+table{
+  width:100%;
+  min-width:680px;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:13px;
+}
+th,td{
+  border:0;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:8px 10px;
+  text-align:right;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:0}
+th:last-child,td:last-child{border-right:0}
+th{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:#f0f4f8;
+  color:#2f4053;
+  font-weight:700;
+}
+td:first-child,th:first-child{text-align:left}
+tbody tr:nth-child(even) td{background:#fbfcfe}
+tbody tr:hover td{background:#edf7ff}
+.dense-table table{font-size:12px}
+.wide-table table{min-width:980px}
+.heat-cell,.bar-cell{
+  position:relative;
+  font-variant-numeric:tabular-nums;
+}
+.heat-cell{background:var(--heat-bg,#fff)!important}
+.bar-cell{
+  --bar-bg:rgba(45,156,219,.24);
+  background:linear-gradient(90deg,var(--bar-bg) 0 var(--bar-width,0%),rgba(255,255,255,0) var(--bar-width,0%) 100%)!important;
+}
+.bar-cell.bar-good{--bar-bg:rgba(24,169,87,.26)}
+.bar-cell.bar-warn{--bar-bg:rgba(230,126,34,.24)}
+.bar-cell.bar-risk{--bar-bg:rgba(207,68,68,.22)}
+.is-positive{color:var(--green);font-weight:700}
+.is-negative{color:var(--red);font-weight:700}
+.is-neutral{color:#65758a;font-weight:600}
+code{
+  padding:2px 5px;
+  border-radius:4px;
+  background:#eef2f6;
+  color:#26384a;
+  font-family:Menlo,Consolas,monospace;
+  font-size:12px;
+}
+@media (max-width:900px){
+  .sidebar{position:relative;width:auto;height:auto;padding:14px}
+  .report-shell{margin-left:0}
+  .report-hero{padding:24px 20px 28px}
+  .report-hero h1{font-size:23px}
+  .report-body{padding:14px}
+  .summary-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .kpi-grid,.nav-list{grid-template-columns:1fr}
+  .report-section{padding:18px 14px}
+}
+@media print{
+  .sidebar{display:none}
+  .report-shell{margin-left:0}
+  .report-hero{background:#fff;color:#172536;border-bottom:1px solid var(--line)}
+  .hero-meta span{color:#172536;border-color:var(--line);background:#f5f7fa}
+  .report-section{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head><body>
+<aside class="sidebar" aria-label="报告导航">
+  <div class="sidebar-title">复借G卡模型报告</div>
+  <div class="sidebar-meta">2026-06-30<br>model_score vs G卡V6</div>
+  <nav class="nav-list">
+    <a class="nav-item" href="#summary"><span class="nav-index">1</span><span>总结</span></a>
+    <a class="nav-item" href="#model-description"><span class="nav-index">2</span><span>模型描述</span></a>
+    <a class="nav-item" href="#feature-selection"><span class="nav-index">3</span><span>变量筛选</span></a>
+    <a class="nav-item" href="#core-comparison"><span class="nav-index">4</span><span>核心对比</span></a>
+    <a class="nav-item" href="#model-performance"><span class="nav-index">5</span><span>模型效果</span></a>
+    <a class="nav-item" href="#model-stability"><span class="nav-index">6</span><span>模型稳定性</span></a>
+    <a class="nav-item" href="#important-features"><span class="nav-index">7</span><span>重要变量</span></a>
+    <a class="nav-item" href="#top-woe"><span class="nav-index">8</span><span>Top变量WOE</span></a>
+    <a class="nav-item" href="#missing-results"><span class="nav-index">9</span><span>待补充事项</span></a>
+  </nav>
+  <div class="nav-note">表格支持横向滚动；提升类指标已按正负变化着色。</div>
+</aside>
+<main class="report-shell">
+<header class="report-hero">
+  <p class="report-eyebrow">风险场景 AI 建模工作台 · 模型文档</p>
+  <h1>复借G卡模型报告</h1>
+  <div class="hero-meta">
+    <span>生成日期：2026-06-30</span>
+    <span>Run：2026-06-30-gcard-main-lgbm-full</span>
+    <span>标签：<code>ftr_30d_ord_flag</code></span>
+    <span>算法：lightgbm</span>
+  </div>
+</header>
+<div class="report-body">
+<h2>总结</h2>
+<div class="summary-grid">
+  <div class="summary-card">
+    <span class="summary-label">迭代效果</span>
+<table><tr><th>评估口径</th><th>KS 旧→新</th><th>ΔKS</th><th>AUC 旧→新</th><th>ΔAUC</th></tr><tr><td>OOT-OOS</td><td>0.716→0.718</td><td>+0.2pp</td><td>0.930→0.930</td><td>-0.0pp</td></tr><tr><td>OOT</td><td>0.734→0.733</td><td>-0.1pp</td><td>0.936→0.934</td><td>-0.1pp</td></tr><tr><td>DEV-OOS</td><td>0.720→0.717</td><td>-0.3pp</td><td>0.934→0.933</td><td>-0.1pp</td></tr></table>
+  </div>
+  <div class="summary-card">
+    <span class="summary-label green">高分段表现</span>
+<table><tr><th>客群</th><th>高分10%发起率 旧→新</th><th>提升</th></tr><tr><td>全客群</td><td>0.772→0.788</td><td>+1.5pp</td></tr><tr><td>老户次新</td><td>0.907→0.927</td><td>+2.0pp</td></tr><tr><td>流失户</td><td>0.160→0.163</td><td>+0.3pp</td></tr></table>
+  </div>
+  <div class="summary-card">
+    <span class="summary-label orange">分客群切片</span>
+<ul><li>OOT-OOS 次新 KS 0.344→0.354，提升 <strong>1.0pp</strong>。</li><li>OOT-OOS 老户 KS 0.441→0.447，提升 <strong>0.6pp</strong>。</li><li>OOT-OOS 流失户 KS 0.651→0.652，提升 <strong>0.1pp</strong>。</li><li>分客群指标是切片效果，不代表已训练分客群专属模型。</li></ul>
+  </div>
+  <div class="summary-card">
+    <span class="summary-label purple">稳定性与边界</span>
+<ul><li>最新月 PSI：本轮 <strong>0.057</strong>，G卡V6 <strong>0.051</strong>。</li><li>主口径：30天发起标签 <code>ftr_30d_ord_flag</code>，关注 AUC、KS、sloping、PSI。</li><li>MOB/金额风险、变量分箱明细和业务字典仍以后文待补充说明为准。</li></ul>
+  </div>
+</div>
+<h2>一、模型描述</h2>
+<ul>
+<li>模型目标：预测配置标签字段 <code>ftr_30d_ord_flag</code>。</li>
+<li>建模样本：训练集 DEV，验证集 DEV-OOS，OOS DEV-OOS、OOT、OOT-OOS。</li>
+<li>算法：lightgbm；最终入模变量 500 个；best iteration 306。</li>
+<li>验证集效果：AUC 0.933，KS 0.717，Train/Valid AUC gap 0.013。</li>
+</ul>
+<h2>二、变量筛选过程</h2>
+<table>
+<tr><th>步骤</th><th>筛选方法</th><th>剩余变量个数</th></tr>
+<tr><td>1</td><td>原始候选变量总数</td><td>2837</td></tr>
+<tr><td>2</td><td>Feather观察样本可用特征</td><td>2563</td></tr>
+<tr><td>3</td><td>分表基础预筛：缺失率、相关性、IV（全表，local feather）</td><td>1773</td></tr>
+<tr><td>4</td><td>稳定性筛选：DEV vs OOT PSI（全表，local feather）</td><td>1773</td></tr>
+<tr><td>5</td><td>全局相关性去重：按单变量AUC保留更强特征</td><td>1773</td></tr>
+<tr><td>6</td><td>随机数重要性筛选（feature-select-v2兼容）：单随机列对比 split/gain 并剔除尾部重要性特征</td><td>1773</td></tr>
+<tr><td>7</td><td>空标签重要性筛选：保留显著高于空标签分布的特征</td><td>1022</td></tr>
+<tr><td>8</td><td>最终训练特征</td><td>500</td></tr>
+</table>
+<ul>
+<li>训练预处理保留 500/500 个变量；剔除 0 个变量。</li>
+</ul>
+<h2>三、核心效果与历史版本对比</h2>
+<ul>
+<li>OOT-OOS：本轮模型 AUC 0.930、KS 0.718；相对 G卡V2 KS 提升 0.017，相对 G卡V4 KS 提升 0.030，相对 G卡V5 KS 提升 0.025，相对 G卡V6 KS 提升 0.002。</li>
+</ul>
+<table>
+<tr><th>final_flag</th><th>n_samples</th><th>positive</th><th>bad_rate</th><th>model_score_auc</th><th>model_score_ks</th></tr>
+<tr><td>DEV</td><td>183739</td><td>28148</td><td>0.153</td><td>0.946</td><td>0.749</td></tr>
+<tr><td>DEV-OOS</td><td>183480</td><td>31827</td><td>0.173</td><td>0.933</td><td>0.717</td></tr>
+<tr><td>OOT</td><td>61173</td><td>7895</td><td>0.129</td><td>0.934</td><td>0.733</td></tr>
+<tr><td>OOT-OOS</td><td>61351</td><td>8889</td><td>0.145</td><td>0.930</td><td>0.718</td></tr>
+</table>
+<table>
+<tr><th>final_flag</th><th>model_score_auc</th><th>model_score_ks</th><th>ks_uplift_vs_gcard_v2</th><th>ks_uplift_vs_gcard_v4</th><th>ks_uplift_vs_gcard_v5</th><th>ks_uplift_vs_gcard_v6</th></tr>
+<tr><td>DEV</td><td>0.946</td><td>0.749</td><td>0.034</td><td>0.040</td><td>0.039</td><td>0.018</td></tr>
+<tr><td>DEV-OOS</td><td>0.933</td><td>0.717</td><td>0.013</td><td>0.023</td><td>0.016</td><td>-0.003</td></tr>
+<tr><td>OOT</td><td>0.934</td><td>0.733</td><td>0.015</td><td>0.023</td><td>0.018</td><td>-0.001</td></tr>
+<tr><td>OOT-OOS</td><td>0.930</td><td>0.718</td><td>0.017</td><td>0.030</td><td>0.025</td><td>0.002</td></tr>
+</table>
+<h2>四、模型效果</h2>
+<p>1、每月效果（OOS）</p>
+<table>
+<tr><th>序号</th><th>结论</th></tr>
+<tr><td>1</td><td>（1）在 OOT-OOS 样本上老户次新客群上，本轮全客群模型 KS 0.440；对比G卡V5 KS 0.402 提升3.8个百分点，对比G卡V6 KS 0.436 提升0.4个百分点。</td></tr>
+<tr><td>2</td><td>（2）在 OOT-OOS 样本上流失户客群上，本轮全客群模型 KS 0.652；对比G卡V5 KS 0.632 提升2.1个百分点，对比G卡V6 KS 0.651 提升0.1个百分点。</td></tr>
+<tr><td>3</td><td>（3）在 OOT-OOS 样本上全客群整体看，本轮模型 KS 0.718，对比G卡V5 KS 0.693 提升2.5个百分点，对比G卡V6 KS 0.716 提升0.2个百分点。</td></tr>
+<tr><td>4</td><td>（4）当前 run 未注册老户次新/流失户专属模型得分，无法复刻历史文档中的“分客群建模 KS”对比；本摘要仅比较本轮全客群模型与已注册的 G卡V5/G卡V6 历史版本。</td></tr>
+</table>
+<p>全客群 by月效果（KS）</p>
+<table>
+<tr><th>样本月份</th><th>本轮模型</th><th>G卡V2</th><th>G卡V4</th><th>G卡V5</th><th>G卡V6</th></tr>
+<tr><td>DEV 2025-06</td><td>0.739</td><td>0.700</td><td>0.700</td><td>0.690</td><td>0.720</td></tr>
+<tr><td>DEV 2025-07</td><td>0.745</td><td>0.712</td><td>0.703</td><td>0.706</td><td>0.730</td></tr>
+<tr><td>DEV 2025-08</td><td>0.747</td><td>0.713</td><td>0.708</td><td>0.710</td><td>0.728</td></tr>
+<tr><td>DEV 2025-09</td><td>0.761</td><td>0.728</td><td>0.719</td><td>0.722</td><td>0.743</td></tr>
+<tr><td>DEV 2025-10</td><td>0.748</td><td>0.711</td><td>0.706</td><td>0.708</td><td>0.728</td></tr>
+<tr><td>DEV 2025-11</td><td>0.761</td><td>0.728</td><td>0.721</td><td>0.726</td><td>0.742</td></tr>
+<tr><td>DEV-OOS 2025-06</td><td>0.704</td><td>0.688</td><td>0.684</td><td>0.681</td><td>0.708</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td>0.713</td><td>0.695</td><td>0.687</td><td>0.696</td><td>0.716</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td>0.730</td><td>0.718</td><td>0.711</td><td>0.719</td><td>0.733</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td>0.720</td><td>0.708</td><td>0.700</td><td>0.703</td><td>0.720</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td>0.720</td><td>0.706</td><td>0.691</td><td>0.702</td><td>0.725</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td>0.722</td><td>0.711</td><td>0.698</td><td>0.706</td><td>0.721</td></tr>
+<tr><td>OOT 2025-12</td><td>0.730</td><td>0.715</td><td>0.712</td><td>0.720</td><td>0.734</td></tr>
+<tr><td>OOT 2026-01</td><td>0.737</td><td>0.722</td><td>0.708</td><td>0.711</td><td>0.735</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td>0.717</td><td>0.698</td><td>0.689</td><td>0.695</td><td>0.713</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td>0.720</td><td>0.705</td><td>0.689</td><td>0.692</td><td>0.719</td></tr>
+</table>
+<p>全客群 by月效果（AUC）</p>
+<table>
+<tr><th>样本月份</th><th>本轮模型</th><th>G卡V2</th><th>G卡V4</th><th>G卡V5</th><th>G卡V6</th></tr>
+<tr><td>DEV 2025-06</td><td>0.945</td><td>0.926</td><td>0.923</td><td>0.921</td><td>0.934</td></tr>
+<tr><td>DEV 2025-07</td><td>0.945</td><td>0.928</td><td>0.925</td><td>0.923</td><td>0.935</td></tr>
+<tr><td>DEV 2025-08</td><td>0.946</td><td>0.929</td><td>0.926</td><td>0.926</td><td>0.937</td></tr>
+<tr><td>DEV 2025-09</td><td>0.948</td><td>0.934</td><td>0.927</td><td>0.931</td><td>0.940</td></tr>
+<tr><td>DEV 2025-10</td><td>0.942</td><td>0.927</td><td>0.920</td><td>0.926</td><td>0.935</td></tr>
+<tr><td>DEV 2025-11</td><td>0.948</td><td>0.932</td><td>0.928</td><td>0.930</td><td>0.938</td></tr>
+<tr><td>DEV-OOS 2025-06</td><td>0.927</td><td>0.920</td><td>0.916</td><td>0.915</td><td>0.929</td></tr>
+<tr><td>DEV-OOS 2025-07</td><td>0.931</td><td>0.923</td><td>0.918</td><td>0.920</td><td>0.931</td></tr>
+<tr><td>DEV-OOS 2025-08</td><td>0.939</td><td>0.931</td><td>0.928</td><td>0.928</td><td>0.939</td></tr>
+<tr><td>DEV-OOS 2025-09</td><td>0.933</td><td>0.928</td><td>0.922</td><td>0.925</td><td>0.934</td></tr>
+<tr><td>DEV-OOS 2025-10</td><td>0.932</td><td>0.925</td><td>0.921</td><td>0.924</td><td>0.933</td></tr>
+<tr><td>DEV-OOS 2025-11</td><td>0.933</td><td>0.928</td><td>0.922</td><td>0.925</td><td>0.934</td></tr>
+<tr><td>OOT 2025-12</td><td>0.935</td><td>0.929</td><td>0.924</td><td>0.928</td><td>0.937</td></tr>
+<tr><td>OOT 2026-01</td><td>0.933</td><td>0.928</td><td>0.922</td><td>0.927</td><td>0.934</td></tr>
+<tr><td>OOT-OOS 2025-12</td><td>0.932</td><td>0.922</td><td>0.918</td><td>0.922</td><td>0.931</td></tr>
+<tr><td>OOT-OOS 2026-01</td><td>0.928</td><td>0.921</td><td>0.917</td><td>0.920</td><td>0.929</td></tr>
+</table>
+<p>分客群整体效果（KS）</p>
+<table>
+<tr><th>客群</th><th>样本</th><th>本轮模型</th><th>G卡V2</th><th>G卡V4</th><th>G卡V5</th><th>G卡V6</th></tr>
+<tr><td>全客群</td><td>DEV</td><td>0.749</td><td>0.714</td><td>0.708</td><td>0.710</td><td>0.731</td></tr>
+<tr><td>全客群</td><td>DEV-OOS</td><td>0.717</td><td>0.704</td><td>0.694</td><td>0.701</td><td>0.720</td></tr>
+<tr><td>全客群</td><td>OOT</td><td>0.733</td><td>0.718</td><td>0.710</td><td>0.715</td><td>0.734</td></tr>
+<tr><td>全客群</td><td>OOT-OOS</td><td>0.718</td><td>0.700</td><td>0.688</td><td>0.693</td><td>0.716</td></tr>
+<tr><td>老户次新</td><td>DEV</td><td>0.539</td><td>0.450</td><td>0.465</td><td>0.430</td><td>0.480</td></tr>
+<tr><td>老户次新</td><td>DEV-OOS</td><td>0.481</td><td>0.455</td><td>0.468</td><td>0.437</td><td>0.485</td></tr>
+<tr><td>老户次新</td><td>OOT</td><td>0.449</td><td>0.415</td><td>0.425</td><td>0.414</td><td>0.454</td></tr>
+<tr><td>老户次新</td><td>OOT-OOS</td><td>0.440</td><td>0.404</td><td>0.417</td><td>0.402</td><td>0.436</td></tr>
+<tr><td>老户</td><td>DEV</td><td>0.543</td><td>0.450</td><td>0.467</td><td>0.433</td><td>0.484</td></tr>
+<tr><td>老户</td><td>DEV-OOS</td><td>0.486</td><td>0.456</td><td>0.472</td><td>0.439</td><td>0.489</td></tr>
+<tr><td>老户</td><td>OOT</td><td>0.453</td><td>0.418</td><td>0.431</td><td>0.420</td><td>0.457</td></tr>
+<tr><td>老户</td><td>OOT-OOS</td><td>0.447</td><td>0.406</td><td>0.425</td><td>0.410</td><td>0.441</td></tr>
+<tr><td>次新</td><td>DEV</td><td>0.462</td><td>0.369</td><td>0.362</td><td>0.306</td><td>0.393</td></tr>
+<tr><td>次新</td><td>DEV-OOS</td><td>0.401</td><td>0.358</td><td>0.352</td><td>0.320</td><td>0.385</td></tr>
+<tr><td>次新</td><td>OOT</td><td>0.377</td><td>0.328</td><td>0.312</td><td>0.299</td><td>0.379</td></tr>
+<tr><td>次新</td><td>OOT-OOS</td><td>0.354</td><td>0.338</td><td>0.314</td><td>0.294</td><td>0.344</td></tr>
+<tr><td>流失户</td><td>DEV</td><td>0.642</td><td>0.589</td><td>0.520</td><td>0.606</td><td>0.629</td></tr>
+<tr><td>流失户</td><td>DEV-OOS</td><td>0.622</td><td>0.602</td><td>0.545</td><td>0.613</td><td>0.630</td></tr>
+<tr><td>流失户</td><td>OOT</td><td>0.606</td><td>0.579</td><td>0.533</td><td>0.603</td><td>0.618</td></tr>
+<tr><td>流失户</td><td>OOT-OOS</td><td>0.652</td><td>0.621</td><td>0.588</td><td>0.632</td><td>0.651</td></tr>
+</table>
+<p>分客群整体效果（AUC）</p>
+<table>
+<tr><th>客群</th><th>样本</th><th>本轮模型</th><th>G卡V2</th><th>G卡V4</th><th>G卡V5</th><th>G卡V6</th></tr>
+<tr><td>全客群</td><td>DEV</td><td>0.946</td><td>0.929</td><td>0.925</td><td>0.926</td><td>0.937</td></tr>
+<tr><td>全客群</td><td>DEV-OOS</td><td>0.933</td><td>0.926</td><td>0.921</td><td>0.923</td><td>0.934</td></tr>
+<tr><td>全客群</td><td>OOT</td><td>0.934</td><td>0.929</td><td>0.923</td><td>0.928</td><td>0.936</td></tr>
+<tr><td>全客群</td><td>OOT-OOS</td><td>0.930</td><td>0.922</td><td>0.917</td><td>0.921</td><td>0.930</td></tr>
+<tr><td>老户次新</td><td>DEV</td><td>0.850</td><td>0.797</td><td>0.804</td><td>0.785</td><td>0.818</td></tr>
+<tr><td>老户次新</td><td>DEV-OOS</td><td>0.818</td><td>0.799</td><td>0.805</td><td>0.788</td><td>0.820</td></tr>
+<tr><td>老户次新</td><td>OOT</td><td>0.796</td><td>0.776</td><td>0.781</td><td>0.774</td><td>0.799</td></tr>
+<tr><td>老户次新</td><td>OOT-OOS</td><td>0.792</td><td>0.768</td><td>0.777</td><td>0.766</td><td>0.792</td></tr>
+<tr><td>老户</td><td>DEV</td><td>0.853</td><td>0.799</td><td>0.808</td><td>0.788</td><td>0.820</td></tr>
+<tr><td>老户</td><td>DEV-OOS</td><td>0.821</td><td>0.801</td><td>0.810</td><td>0.790</td><td>0.823</td></tr>
+<tr><td>老户</td><td>OOT</td><td>0.798</td><td>0.778</td><td>0.785</td><td>0.778</td><td>0.802</td></tr>
+<tr><td>老户</td><td>OOT-OOS</td><td>0.797</td><td>0.772</td><td>0.783</td><td>0.771</td><td>0.797</td></tr>
+<tr><td>次新</td><td>DEV</td><td>0.798</td><td>0.743</td><td>0.729</td><td>0.704</td><td>0.763</td></tr>
+<tr><td>次新</td><td>DEV-OOS</td><td>0.760</td><td>0.737</td><td>0.723</td><td>0.713</td><td>0.758</td></tr>
+<tr><td>次新</td><td>OOT</td><td>0.733</td><td>0.701</td><td>0.683</td><td>0.694</td><td>0.730</td></tr>
+<tr><td>次新</td><td>OOT-OOS</td><td>0.733</td><td>0.709</td><td>0.700</td><td>0.690</td><td>0.728</td></tr>
+<tr><td>流失户</td><td>DEV</td><td>0.899</td><td>0.873</td><td>0.802</td><td>0.882</td><td>0.891</td></tr>
+<tr><td>流失户</td><td>DEV-OOS</td><td>0.887</td><td>0.882</td><td>0.813</td><td>0.888</td><td>0.896</td></tr>
+<tr><td>流失户</td><td>OOT</td><td>0.879</td><td>0.872</td><td>0.806</td><td>0.879</td><td>0.888</td></tr>
+<tr><td>流失户</td><td>OOT-OOS</td><td>0.899</td><td>0.885</td><td>0.833</td><td>0.892</td><td>0.902</td></tr>
+</table>
+<p>2、模型sloping</p>
+<p>全样本 30天发起：在全客群效果 - 本轮模型</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.008</td><td>0.174</td><td>1.110</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.002</td><td>0.011</td><td>0.195</td><td>1.247</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.002</td><td>0.015</td><td>0.223</td><td>1.422</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.003</td><td>0.021</td><td>0.259</td><td>1.653</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.005</td><td>0.030</td><td>0.309</td><td>1.970</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.008</td><td>0.053</td><td>0.379</td><td>2.420</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.019</td><td>0.122</td><td>0.478</td><td>3.049</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.043</td><td>0.272</td><td>0.613</td><td>3.912</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.087</td><td>0.553</td><td>0.788</td><td>5.026</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.157</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在全客群效果 - G卡V2</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.006</td><td>0.174</td><td>1.110</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.001</td><td>0.009</td><td>0.195</td><td>1.248</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.002</td><td>0.014</td><td>0.223</td><td>1.423</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.003</td><td>0.021</td><td>0.259</td><td>1.653</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.005</td><td>0.035</td><td>0.308</td><td>1.965</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.011</td><td>0.068</td><td>0.376</td><td>2.398</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.023</td><td>0.146</td><td>0.469</td><td>2.992</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.048</td><td>0.306</td><td>0.592</td><td>3.778</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.092</td><td>0.586</td><td>0.741</td><td>4.729</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.157</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在全客群效果 - G卡V4</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.134</td><td>0.005</td><td>0.035</td><td>0.180</td><td>1.149</td></tr>
+<tr><td>002</td><td>0.067</td><td>0.007</td><td>0.043</td><td>0.194</td><td>1.240</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.006</td><td>0.041</td><td>0.221</td><td>1.411</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.007</td><td>0.045</td><td>0.257</td><td>1.637</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.008</td><td>0.049</td><td>0.306</td><td>1.951</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.013</td><td>0.082</td><td>0.372</td><td>2.376</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.025</td><td>0.158</td><td>0.465</td><td>2.965</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.048</td><td>0.305</td><td>0.593</td><td>3.780</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.090</td><td>0.572</td><td>0.760</td><td>4.849</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.157</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在全客群效果 - G卡V5</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.101</td><td>0.001</td><td>0.005</td><td>0.174</td><td>1.112</td></tr>
+<tr><td>002</td><td>0.099</td><td>0.001</td><td>0.009</td><td>0.196</td><td>1.248</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.002</td><td>0.013</td><td>0.223</td><td>1.423</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.003</td><td>0.020</td><td>0.259</td><td>1.653</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.005</td><td>0.035</td><td>0.308</td><td>1.965</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.011</td><td>0.072</td><td>0.375</td><td>2.392</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.024</td><td>0.151</td><td>0.467</td><td>2.982</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.049</td><td>0.314</td><td>0.587</td><td>3.744</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.093</td><td>0.592</td><td>0.732</td><td>4.671</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.157</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在全客群效果 - G卡V6</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.005</td><td>0.174</td><td>1.111</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.001</td><td>0.007</td><td>0.196</td><td>1.248</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.002</td><td>0.012</td><td>0.223</td><td>1.423</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.003</td><td>0.018</td><td>0.259</td><td>1.654</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.005</td><td>0.030</td><td>0.309</td><td>1.970</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.009</td><td>0.055</td><td>0.379</td><td>2.417</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.020</td><td>0.128</td><td>0.476</td><td>3.036</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.045</td><td>0.285</td><td>0.605</td><td>3.859</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.088</td><td>0.564</td><td>0.772</td><td>4.928</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.157</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在老户次新效果 - 本轮模型</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.065</td><td>0.152</td><td>0.464</td><td>1.094</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.092</td><td>0.218</td><td>0.507</td><td>1.195</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.121</td><td>0.286</td><td>0.554</td><td>1.306</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.151</td><td>0.356</td><td>0.606</td><td>1.429</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.186</td><td>0.438</td><td>0.662</td><td>1.562</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.225</td><td>0.530</td><td>0.723</td><td>1.705</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.269</td><td>0.634</td><td>0.786</td><td>1.854</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.316</td><td>0.745</td><td>0.856</td><td>2.019</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.368</td><td>0.868</td><td>0.927</td><td>2.186</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.424</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在老户次新效果 - G卡V2</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.089</td><td>0.210</td><td>0.461</td><td>1.088</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.117</td><td>0.275</td><td>0.501</td><td>1.181</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.145</td><td>0.341</td><td>0.544</td><td>1.282</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.175</td><td>0.413</td><td>0.590</td><td>1.391</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.210</td><td>0.495</td><td>0.638</td><td>1.505</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.247</td><td>0.583</td><td>0.689</td><td>1.625</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.288</td><td>0.678</td><td>0.742</td><td>1.750</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.329</td><td>0.777</td><td>0.802</td><td>1.891</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.374</td><td>0.883</td><td>0.872</td><td>2.056</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.424</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在老户次新效果 - G卡V4</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.104</td><td>0.245</td><td>0.460</td><td>1.084</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.124</td><td>0.292</td><td>0.499</td><td>1.177</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.147</td><td>0.346</td><td>0.543</td><td>1.280</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.174</td><td>0.411</td><td>0.590</td><td>1.392</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.204</td><td>0.481</td><td>0.644</td><td>1.519</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.240</td><td>0.565</td><td>0.700</td><td>1.652</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.280</td><td>0.660</td><td>0.760</td><td>1.793</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.324</td><td>0.763</td><td>0.825</td><td>1.946</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.372</td><td>0.878</td><td>0.891</td><td>2.102</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.424</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在老户次新效果 - G卡V5</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.093</td><td>0.220</td><td>0.461</td><td>1.087</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.123</td><td>0.290</td><td>0.499</td><td>1.177</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.153</td><td>0.360</td><td>0.540</td><td>1.274</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.184</td><td>0.433</td><td>0.584</td><td>1.378</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.217</td><td>0.512</td><td>0.631</td><td>1.488</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.253</td><td>0.597</td><td>0.680</td><td>1.604</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.292</td><td>0.689</td><td>0.732</td><td>1.726</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.334</td><td>0.788</td><td>0.783</td><td>1.847</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.377</td><td>0.889</td><td>0.847</td><td>1.996</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.424</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在老户次新效果 - G卡V6</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.069</td><td>0.163</td><td>0.463</td><td>1.093</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.100</td><td>0.235</td><td>0.505</td><td>1.191</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.129</td><td>0.303</td><td>0.551</td><td>1.299</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.161</td><td>0.379</td><td>0.600</td><td>1.414</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.195</td><td>0.460</td><td>0.653</td><td>1.540</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.234</td><td>0.551</td><td>0.710</td><td>1.673</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.275</td><td>0.649</td><td>0.771</td><td>1.819</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.321</td><td>0.757</td><td>0.836</td><td>1.972</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.370</td><td>0.873</td><td>0.907</td><td>2.139</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.424</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在流失户效果 - 本轮模型</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.041</td><td>0.027</td><td>1.107</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.001</td><td>0.056</td><td>0.030</td><td>1.236</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.002</td><td>0.073</td><td>0.033</td><td>1.397</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.002</td><td>0.090</td><td>0.038</td><td>1.607</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.003</td><td>0.110</td><td>0.045</td><td>1.890</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.003</td><td>0.138</td><td>0.055</td><td>2.294</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.004</td><td>0.172</td><td>0.070</td><td>2.933</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.006</td><td>0.234</td><td>0.097</td><td>4.062</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.009</td><td>0.356</td><td>0.163</td><td>6.795</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.024</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在流失户效果 - G卡V2</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.031</td><td>0.027</td><td>1.108</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.001</td><td>0.047</td><td>0.030</td><td>1.238</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.001</td><td>0.061</td><td>0.034</td><td>1.402</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.002</td><td>0.078</td><td>0.039</td><td>1.615</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.003</td><td>0.105</td><td>0.045</td><td>1.895</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.003</td><td>0.137</td><td>0.055</td><td>2.294</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.005</td><td>0.192</td><td>0.069</td><td>2.885</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.007</td><td>0.278</td><td>0.093</td><td>3.889</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.010</td><td>0.427</td><td>0.147</td><td>6.154</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.024</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在流失户效果 - G卡V4</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.200</td><td>0.005</td><td>0.226</td><td>0.029</td><td>1.193</td></tr>
+<tr><td>002</td><td>0.000</td><td>0.005</td><td>0.226</td><td>0.029</td><td>1.193</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.007</td><td>0.280</td><td>0.031</td><td>1.309</td></tr>
+<tr><td>004</td><td>0.104</td><td>0.006</td><td>0.257</td><td>0.036</td><td>1.503</td></tr>
+<tr><td>005</td><td>0.098</td><td>0.007</td><td>0.284</td><td>0.041</td><td>1.722</td></tr>
+<tr><td>006</td><td>0.098</td><td>0.007</td><td>0.296</td><td>0.049</td><td>2.056</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.007</td><td>0.306</td><td>0.063</td><td>2.620</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.008</td><td>0.343</td><td>0.087</td><td>3.632</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.013</td><td>0.554</td><td>0.120</td><td>5.016</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.024</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在流失户效果 - G卡V5</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.104</td><td>0.001</td><td>0.026</td><td>0.027</td><td>1.113</td></tr>
+<tr><td>002</td><td>0.096</td><td>0.001</td><td>0.044</td><td>0.030</td><td>1.239</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.001</td><td>0.058</td><td>0.034</td><td>1.404</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.002</td><td>0.074</td><td>0.039</td><td>1.618</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.002</td><td>0.102</td><td>0.045</td><td>1.898</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.003</td><td>0.128</td><td>0.055</td><td>2.308</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.004</td><td>0.175</td><td>0.070</td><td>2.925</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.006</td><td>0.259</td><td>0.095</td><td>3.965</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.010</td><td>0.409</td><td>0.151</td><td>6.317</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.024</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>全样本 30天发起：在流失户效果 - G卡V6</p>
+<table>
+<tr><th>分组</th><th>占比</th><th>累计发起率</th><th>累计lift</th><th>剩余发起率</th><th>剩余lift</th></tr>
+<tr><td>001</td><td>0.100</td><td>0.001</td><td>0.027</td><td>0.027</td><td>1.108</td></tr>
+<tr><td>002</td><td>0.100</td><td>0.001</td><td>0.036</td><td>0.030</td><td>1.241</td></tr>
+<tr><td>003</td><td>0.100</td><td>0.001</td><td>0.048</td><td>0.034</td><td>1.408</td></tr>
+<tr><td>004</td><td>0.100</td><td>0.002</td><td>0.067</td><td>0.039</td><td>1.622</td></tr>
+<tr><td>005</td><td>0.100</td><td>0.002</td><td>0.091</td><td>0.046</td><td>1.909</td></tr>
+<tr><td>006</td><td>0.100</td><td>0.003</td><td>0.121</td><td>0.056</td><td>2.319</td></tr>
+<tr><td>007</td><td>0.100</td><td>0.004</td><td>0.165</td><td>0.071</td><td>2.949</td></tr>
+<tr><td>008</td><td>0.100</td><td>0.006</td><td>0.233</td><td>0.097</td><td>4.069</td></tr>
+<tr><td>009</td><td>0.100</td><td>0.009</td><td>0.369</td><td>0.160</td><td>6.676</td></tr>
+<tr><td>010</td><td>0.100</td><td>0.024</td><td>1.000</td><td>0.000</td><td>0.000</td></tr>
+</table>
+<p>3、意愿交叉风险（DEV-OOS）</p>
+<ul>
+<li>意愿 x 资产评级矩阵：下方依次为全量口径及分客群（老户次新 e2e3 / 流失户 b2）。</li>
+</ul>
+<p>当前可用全量观察：占比（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.000</td><td>0.001</td><td>0.004</td><td>0.007</td><td>0.021</td><td>0.164</td><td>0.137</td><td>0.333</td></tr>
+<tr><td>中意愿</td><td>0.008</td><td>0.026</td><td>0.048</td><td>0.038</td><td>0.070</td><td>0.124</td><td>0.018</td><td>0.333</td></tr>
+<tr><td>高意愿</td><td>0.015</td><td>0.049</td><td>0.071</td><td>0.083</td><td>0.020</td><td>0.075</td><td>0.020</td><td>0.333</td></tr>
+<tr><td>sum</td><td>0.023</td><td>0.076</td><td>0.123</td><td>0.129</td><td>0.111</td><td>0.363</td><td>0.175</td><td>1.000</td></tr>
+</table>
+<p>当前可用全量观察：30天发起率（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.000</td><td>0.003</td><td>0.002</td><td>0.001</td><td>0.002</td><td>0.003</td><td>0.003</td><td>0.003</td></tr>
+<tr><td>中意愿</td><td>0.037</td><td>0.037</td><td>0.034</td><td>0.031</td><td>0.021</td><td>0.021</td><td>0.027</td><td>0.026</td></tr>
+<tr><td>高意愿</td><td>0.406</td><td>0.436</td><td>0.423</td><td>0.452</td><td>0.408</td><td>0.451</td><td>0.502</td><td>0.442</td></tr>
+<tr><td>sum</td><td>0.272</td><td>0.294</td><td>0.260</td><td>0.301</td><td>0.086</td><td>0.102</td><td>0.061</td><td>0.157</td></tr>
+</table>
+<p>当前可用全量观察：人头风险率（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>中意愿</td><td>0.000</td><td>0.001</td><td>0.001</td><td>0.001</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+<tr><td>高意愿</td><td>0.009</td><td>0.014</td><td>0.014</td><td>0.014</td><td>0.012</td><td>0.012</td><td>0.009</td><td>0.013</td></tr>
+<tr><td>sum</td><td>0.005</td><td>0.009</td><td>0.008</td><td>0.009</td><td>0.002</td><td>0.003</td><td>0.001</td><td>0.004</td></tr>
+</table>
+<p>当前可用全量观察：金额风险（仅意愿维度）</p>
+<table>
+<tr><th>intent_level</th><th>n_samples</th><th>total_principal</th><th>total_overdue</th><th>amount_overdue_rate</th><th>head_risk_count</th><th>head_risk_rate</th></tr>
+<tr><td>低意愿</td><td>163248</td><td>530789.730</td><td>5810.690</td><td>0.011</td><td>2</td><td>0.000</td></tr>
+<tr><td>中意愿</td><td>163247</td><td>9309894.560</td><td>272194.690</td><td>0.029</td><td>64</td><td>0.000</td></tr>
+<tr><td>高意愿</td><td>163248</td><td>173894032.610</td><td>5928186.980</td><td>0.034</td><td>2086</td><td>0.013</td></tr>
+</table>
+<p>老户次新（e2e3）：占比（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.010</td><td>0.048</td><td>0.089</td><td>0.098</td><td>0.016</td><td>0.065</td><td>0.008</td><td>0.333</td></tr>
+<tr><td>中意愿</td><td>0.015</td><td>0.051</td><td>0.071</td><td>0.086</td><td>0.016</td><td>0.076</td><td>0.019</td><td>0.333</td></tr>
+<tr><td>高意愿</td><td>0.013</td><td>0.050</td><td>0.069</td><td>0.088</td><td>0.016</td><td>0.074</td><td>0.025</td><td>0.333</td></tr>
+<tr><td>sum</td><td>0.039</td><td>0.148</td><td>0.228</td><td>0.271</td><td>0.047</td><td>0.214</td><td>0.053</td><td>1.000</td></tr>
+</table>
+<p>老户次新（e2e3）：30天发起率（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.126</td><td>0.121</td><td>0.127</td><td>0.131</td><td>0.143</td><td>0.141</td><td>0.118</td><td>0.131</td></tr>
+<tr><td>中意愿</td><td>0.348</td><td>0.363</td><td>0.365</td><td>0.383</td><td>0.381</td><td>0.389</td><td>0.390</td><td>0.376</td></tr>
+<tr><td>高意愿</td><td>0.747</td><td>0.773</td><td>0.765</td><td>0.772</td><td>0.758</td><td>0.761</td><td>0.758</td><td>0.766</td></tr>
+<tr><td>sum</td><td>0.429</td><td>0.422</td><td>0.392</td><td>0.418</td><td>0.423</td><td>0.442</td><td>0.522</td><td>0.424</td></tr>
+</table>
+<p>流失户（b2）：占比（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.000</td><td>0.000</td><td>0.002</td><td>0.006</td><td>0.013</td><td>0.149</td><td>0.163</td><td>0.333</td></tr>
+<tr><td>中意愿</td><td>0.001</td><td>0.004</td><td>0.015</td><td>0.018</td><td>0.052</td><td>0.185</td><td>0.058</td><td>0.333</td></tr>
+<tr><td>高意愿</td><td>0.015</td><td>0.037</td><td>0.054</td><td>0.035</td><td>0.076</td><td>0.102</td><td>0.014</td><td>0.333</td></tr>
+<tr><td>sum</td><td>0.016</td><td>0.041</td><td>0.070</td><td>0.058</td><td>0.142</td><td>0.437</td><td>0.235</td><td>1.000</td></tr>
+</table>
+<p>流失户（b2）：30天发起率（意愿评级 x 资产评级）</p>
+<table>
+<tr><th>意愿</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>sum</th></tr>
+<tr><td>低意愿</td><td>0.000</td><td>0.000</td><td>0.002</td><td>0.000</td><td>0.001</td><td>0.002</td><td>0.002</td><td>0.002</td></tr>
+<tr><td>中意愿</td><td>0.000</td><td>0.004</td><td>0.005</td><td>0.005</td><td>0.005</td><td>0.006</td><td>0.008</td><td>0.006</td></tr>
+<tr><td>高意愿</td><td>0.088</td><td>0.070</td><td>0.059</td><td>0.050</td><td>0.053</td><td>0.067</td><td>0.117</td><td>0.064</td></tr>
+<tr><td>sum</td><td>0.083</td><td>0.063</td><td>0.046</td><td>0.032</td><td>0.030</td><td>0.019</td><td>0.010</td><td>0.024</td></tr>
+</table>
+<h2>五、模型稳定性</h2>
+<ul>
+<li>本轮模型 PSI 最高的 5 个观测如下：</li>
+</ul>
+<table>
+<tr><th>month</th><th>psi</th><th>n_samples</th><th>score_column</th></tr>
+<tr><td>2026-01</td><td>0.057</td><td>61337</td><td>model_score</td></tr>
+<tr><td>2025-12</td><td>0.044</td><td>61187</td><td>model_score</td></tr>
+<tr><td>2025-11</td><td>0.040</td><td>61575</td><td>model_score</td></tr>
+<tr><td>2025-10</td><td>0.032</td><td>61423</td><td>model_score</td></tr>
+<tr><td>2025-09</td><td>0.021</td><td>61200</td><td>model_score</td></tr>
+</table>
+<h2>六、重要变量</h2>
+<table>
+<tr><th>feature</th><th>中文名</th><th>gain</th><th>split</th></tr>
+<tr><td>d180_apl_ord_days_cnt</td><td>近180天_订单发起天数(去重)</td><td>266671.933</td><td>50</td></tr>
+<tr><td>d360_apl_ord_ddf_mdl_ord_crt_dte_min</td><td>近360天_发起订单距评分日的时间间隔_最小</td><td>183188.190</td><td>100</td></tr>
+<tr><td>first_day_diff_event_result_1_all</td><td>first_day_diff_event_result_1_all</td><td>127139.594</td><td>93</td></tr>
+<tr><td>his_360_day_csh_apl_ord_cnt_his_rto</td><td>近12月历史CASH订单总数/总订单数</td><td>61985.650</td><td>43</td></tr>
+<tr><td>d180_apl_ord_days_cnt_all</td><td>近180天_订单发起天数(去重)（所有业务类型口径统计）</td><td>25105.586</td><td>13</td></tr>
+<tr><td>dau_90d</td><td>dau_90d</td><td>11709.892</td><td>93</td></tr>
+<tr><td>ord_apl_avg_prc_amt_720_day_per_mth</td><td>近720天发起动支订单的动支总金额_单月平均</td><td>7727.379</td><td>49</td></tr>
+<tr><td>d30_apl_ord_days_cnt</td><td>近30天_订单发起天数(去重)</td><td>6670.857</td><td>47</td></tr>
+<tr><td>cnt_avg_ord_span_30d</td><td>cnt_平均订单间隔_30d</td><td>5370.938</td><td>19</td></tr>
+<tr><td>ddf_lst_app_str_tim_to_mdl_tim_sec</td><td>设备启动到评分日时间-秒</td><td>5236.234</td><td>132</td></tr>
+<tr><td>6m_used_lmt_second_der_min</td><td>近6个月额度使用率二阶导数的最小值</td><td>4890.731</td><td>15</td></tr>
+<tr><td>6m_used_lmt_first_der_min</td><td>近6个月额度使用率一阶导数的最小值</td><td>4789.286</td><td>13</td></tr>
+<tr><td>payment_day_6m</td><td>近6个月扣款天数</td><td>4038.475</td><td>8</td></tr>
+<tr><td>clk_cnt_14d</td><td>clk_cnt_14d</td><td>3356.992</td><td>47</td></tr>
+<tr><td>first_day_diff_event_result_0_event_type_loan_all</td><td>first_day_diff_event_result_0_event_type_loan_all</td><td>3327.589</td><td>60</td></tr>
+</table>
+<h2>七、Top变量WOE</h2>
+<ul>
+<li>Top20 WOE 图见 Excel sheet <code>Top变量WOE</code>，PNG 和汇总 CSV 见 <code>reports/woe_top_features/</code> 或训练产物目录。</li>
+</ul>
+<table>
+<tr><th>排名</th><th>变量</th><th>中文名</th><th>Gain</th><th>IV</th></tr>
+<tr><td>1</td><td>d180_apl_ord_days_cnt</td><td>近180天_订单发起天数(去重)</td><td>266671.933</td><td>13.264</td></tr>
+<tr><td>2</td><td>d360_apl_ord_ddf_mdl_ord_crt_dte_min</td><td>近360天_发起订单距评分日的时间间隔_最小</td><td>183188.190</td><td>13.111</td></tr>
+<tr><td>3</td><td>first_day_diff_event_result_1_all</td><td>first_day_diff_event_result_1_all</td><td>127139.594</td><td>11.677</td></tr>
+<tr><td>4</td><td>his_360_day_csh_apl_ord_cnt_his_rto</td><td>近12月历史CASH订单总数/总订单数</td><td>61985.650</td><td>8.647</td></tr>
+<tr><td>5</td><td>d180_apl_ord_days_cnt_all</td><td>近180天_订单发起天数(去重)（所有业务类型口径统计）</td><td>25105.586</td><td>12.975</td></tr>
+<tr><td>6</td><td>dau_90d</td><td>dau_90d</td><td>11709.892</td><td>6.754</td></tr>
+<tr><td>7</td><td>ord_apl_avg_prc_amt_720_day_per_mth</td><td>近720天发起动支订单的动支总金额_单月平均</td><td>7727.379</td><td>6.905</td></tr>
+<tr><td>8</td><td>d30_apl_ord_days_cnt</td><td>近30天_订单发起天数(去重)</td><td>6670.857</td><td>11.892</td></tr>
+<tr><td>9</td><td>cnt_avg_ord_span_30d</td><td>cnt_平均订单间隔_30d</td><td>5370.938</td><td>6.516</td></tr>
+<tr><td>10</td><td>ddf_lst_app_str_tim_to_mdl_tim_sec</td><td>设备启动到评分日时间-秒</td><td>5236.234</td><td>6.700</td></tr>
+<tr><td>11</td><td>6m_used_lmt_second_der_min</td><td>近6个月额度使用率二阶导数的最小值</td><td>4890.731</td><td>7.377</td></tr>
+<tr><td>12</td><td>6m_used_lmt_first_der_min</td><td>近6个月额度使用率一阶导数的最小值</td><td>4789.286</td><td>5.181</td></tr>
+<tr><td>13</td><td>payment_day_6m</td><td>近6个月扣款天数</td><td>4038.475</td><td>7.239</td></tr>
+<tr><td>14</td><td>clk_cnt_14d</td><td>clk_cnt_14d</td><td>3356.992</td><td>5.369</td></tr>
+<tr><td>15</td><td>first_day_diff_event_result_0_event_type_loan_all</td><td>first_day_diff_event_result_0_event_type_loan_all</td><td>3327.589</td><td>6.607</td></tr>
+<tr><td>16</td><td>pst_ord_apl_suc_max_prc_amt_180_day</td><td>近180天成功动支订单的最大动支总金额（复借订单）</td><td>3240.037</td><td>5.957</td></tr>
+<tr><td>17</td><td>rsk_avl_lmt_ch_les_10000_cnt_12m</td><td>近12个月现金贷额度使用率小于10000的次数_v2</td><td>3158.131</td><td>12.075</td></tr>
+<tr><td>18</td><td>d180_suc_ord_days_cnt_all</td><td>近180天_成功交易天数(去重)（所有业务类型口径统计）</td><td>3026.510</td><td>10.281</td></tr>
+<tr><td>19</td><td>d180_apl_ord_ddf_mdl_ord_crt_dte_max</td><td>近180天_发起订单距评分日的时间间隔_最大</td><td>2446.924</td><td>10.163</td></tr>
+<tr><td>20</td><td>avg_avl_lmt_lft_rep_prc_3m_cash_1m</td><td>近1个月现金贷平均指标值(可用额度/未来3个月剩余应还金额)</td><td>2166.416</td><td>8.948</td></tr>
+</table>
+<h2>八、待补充事项</h2>
+<ul>
+<li>当前仍不可补齐：变量分布/分箱图、变量中文描述与业务标签、MOB1/MOB3 历史风险精确定义；这些需要原始特征值、业务字典或未来期还款表现数据。</li>
+<li>详见 <code>model_report_missing_results.md</code>。</li>
+</ul>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.report-body');
+  if (!body) return;
+
+  var idByTitle = [
+    ['总结', 'summary'],
+    ['Summary', 'summary'],
+    ['模型描述', 'model-description'],
+    ['变量筛选', 'feature-selection'],
+    ['核心效果', 'core-comparison'],
+    ['模型效果', 'model-performance'],
+    ['模型稳定性', 'model-stability'],
+    ['重要变量', 'important-features'],
+    ['Top变量WOE', 'top-woe'],
+    ['待补充事项', 'missing-results']
+  ];
+
+  var headings = Array.prototype.slice.call(body.querySelectorAll(':scope > h2'));
+  headings.forEach(function (heading, index) {
+    var section = document.createElement('section');
+    section.className = 'report-section';
+    var title = heading.textContent.trim();
+    var match = idByTitle.find(function (pair) { return title.indexOf(pair[0]) !== -1; });
+    section.id = match ? match[1] : 'section-' + (index + 1);
+
+    var badge = document.createElement('span');
+    badge.className = 'section-number';
+    badge.textContent = String(index + 1);
+    heading.prepend(badge);
+
+    body.insertBefore(section, heading);
+    var current = heading;
+    while (current) {
+      var next = current.nextSibling;
+      section.appendChild(current);
+      if (next && next.nodeType === 1 && next.matches('h2')) break;
+      current = next;
+    }
+  });
+
+  function parseNumeric(text) {
+    var cleaned = String(text || '').replace(/[,%+]/g, '').trim();
+    if (!cleaned || /^N\/A$/i.test(cleaned)) return null;
+    var value = parseFloat(cleaned);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function tableContext(table) {
+    var parts = [];
+    var sectionTitle = table.closest('.report-section') && table.closest('.report-section').querySelector('h2');
+    if (sectionTitle) parts.push(sectionTitle.textContent.trim());
+    var node = table.previousElementSibling;
+    var hops = 0;
+    while (node && hops < 4) {
+      if (/^(H2|H3|P|BLOCKQUOTE|UL)$/i.test(node.tagName)) parts.push(node.textContent.trim());
+      node = node.previousElementSibling;
+      hops += 1;
+    }
+    return parts.join(' | ');
+  }
+
+  function columnValues(table, columnIndex) {
+    return Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).map(function (row) {
+      return parseNumeric(row.children[columnIndex] && row.children[columnIndex].textContent);
+    }).filter(function (value) {
+      return value !== null;
+    });
+  }
+
+  function shouldSkipNumericHeader(header) {
+    return /旧→新|样本数|n_samples|positive|index|序号|排名|split|分组|月份|month|版本|客群|样本$|feature|varname|desc|变量|字段/i.test(header);
+  }
+
+  function heatColor(header, context, value, min, max) {
+    var absMax = Math.max(Math.abs(min), Math.abs(max));
+    var norm = max === min ? 0.75 : (value - min) / (max - min);
+    var alpha = 0.08 + Math.max(0, Math.min(1, norm)) * 0.30;
+    if (/提升|uplift|delta|Δ|gap/i.test(header)) {
+      var deltaStrength = absMax ? Math.min(1, Math.abs(value) / absMax) : 0;
+      var deltaAlpha = 0.08 + deltaStrength * 0.30;
+      if (value > 0) return 'rgba(24,169,87,' + deltaAlpha.toFixed(3) + ')';
+      if (value < 0) return 'rgba(207,68,68,' + deltaAlpha.toFixed(3) + ')';
+      return 'rgba(101,117,138,.10)';
+    }
+    if (/PSI/i.test(header + ' ' + context)) return 'rgba(207,68,68,' + alpha.toFixed(3) + ')';
+    if (/风险|overdue|bad_rate/i.test(header + ' ' + context)) return 'rgba(230,126,34,' + alpha.toFixed(3) + ')';
+    return 'rgba(45,156,219,' + alpha.toFixed(3) + ')';
+  }
+
+  function addHeatScale(table, headers, context, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2) return;
+      var min = Math.min.apply(null, values);
+      var max = Math.max.apply(null, values);
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        cell.classList.add('heat-cell');
+        cell.style.setProperty('--heat-bg', heatColor(headers[columnIndex], context, value, min, max));
+      });
+    });
+  }
+
+  function addDataBars(table, headers, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex).map(Math.abs);
+      if (values.length < 2) return;
+      var max = Math.max.apply(null, values);
+      if (!max) return;
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        var width = Math.max(3, Math.min(100, Math.abs(value) / max * 100));
+        cell.classList.add('bar-cell');
+        if (/lift/i.test(headers[columnIndex])) cell.classList.add('bar-good');
+        if (/剩余|提升/i.test(headers[columnIndex])) cell.classList.add('bar-warn');
+        cell.style.setProperty('--bar-width', width.toFixed(1) + '%');
+      });
+    });
+  }
+
+  function enhanceNumericTable(table, headers, context, changeColumns) {
+    var slopingTable = /sloping|lift|高分10%|累计发起率|剩余发起率/i.test(context + ' ' + headers.join(' '));
+    var comparisonTable = /by月|按月|每月|OOS|整体效果|分客群整体效果|效果对比|AUC|KS/i.test(context);
+    var psiTable = /PSI|稳定性/i.test(context + ' ' + headers.join(' '));
+    var barColumns = [];
+    var heatColumns = [];
+
+    headers.forEach(function (header, columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2 || shouldSkipNumericHeader(header)) return;
+      if (slopingTable && /发起率|lift|提升/i.test(header)) {
+        barColumns.push(columnIndex);
+        return;
+      }
+      if (changeColumns.indexOf(columnIndex) !== -1) {
+        heatColumns.push(columnIndex);
+        return;
+      }
+      if (psiTable && /psi/i.test(header)) {
+        heatColumns.push(columnIndex);
+        return;
+      }
+      if (comparisonTable && (/AUC|KS|本轮|model_score|bad_rate|发起率|风险率/i.test(header) || /AUC|KS/.test(context))) {
+        heatColumns.push(columnIndex);
+      }
+    });
+
+    if (barColumns.length || heatColumns.length) table.closest('.table-wrap').classList.add('visual-table');
+    addDataBars(table, headers, barColumns);
+    addHeatScale(table, headers, context, heatColumns);
+  }
+
+  body.querySelectorAll('table').forEach(function (table) {
+    if (!table.parentElement || table.parentElement.classList.contains('table-wrap')) return;
+    var context = tableContext(table);
+    var wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    if (table.querySelectorAll('th').length >= 7) wrap.classList.add('wide-table');
+    if (table.querySelectorAll('tr').length >= 12) wrap.classList.add('dense-table');
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+
+    var headers = Array.prototype.slice.call(table.querySelectorAll('tr:first-child th')).map(function (th) {
+      return th.textContent.trim();
+    });
+    var changeColumns = headers.reduce(function (acc, header, columnIndex) {
+      if (/提升|gap|delta|uplift|Δ/i.test(header)) acc.push(columnIndex);
+      return acc;
+    }, []);
+
+    table.querySelectorAll('tr').forEach(function (row, rowIndex) {
+      if (rowIndex === 0) return;
+      Array.prototype.slice.call(row.children).forEach(function (cell, columnIndex) {
+        if (changeColumns.indexOf(columnIndex) === -1) return;
+        var value = parseFloat(cell.textContent.replace(/[,%+]/g, ''));
+        if (Number.isNaN(value)) return;
+        if (value > 0) cell.classList.add('is-positive');
+        if (value < 0) cell.classList.add('is-negative');
+        if (value === 0) cell.classList.add('is-neutral');
+      });
+    });
+
+    enhanceNumericTable(table, headers, context, changeColumns);
+  });
+
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.report-section'));
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        navItems.forEach(function (item) {
+          item.classList.toggle('is-active', item.getAttribute('href') === '#' + entry.target.id);
+        });
+      });
+    }, {rootMargin: '-35% 0px -55% 0px', threshold: 0});
+    sections.forEach(function (section) { observer.observe(section); });
+  }
+});
+</script>
+</body></html>

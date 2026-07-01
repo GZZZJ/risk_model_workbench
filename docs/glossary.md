@@ -2,23 +2,34 @@
 
 This glossary defines shared terms for `risk_model_workbench` harness work.
 
-## Run
+## Version
 
-A concrete workflow execution workspace under `projects/<project>/runs/<run_id>/`.
+A concrete model-building workspace under
+`projects/<project>/versions/<version_id>/`. A version contains request,
+configuration snapshots, stage outputs, final artifacts, audit evidence, and
+handoff-ready reports.
+
+## Legacy Run
+
+A pre-version workflow workspace under `projects/<project>/runs/<run_id>/`.
+Legacy runs remain readable and auditable, but new work should initialize a
+version.
 
 ## Stage
 
-A named workflow step tracked in `run_state.yml`.
+A named workflow step tracked in `version_state.yml` or legacy
+`run_state.yml`.
 
 ## Stage Contract
 
 Workflow YAML requirements that define the artifact evidence needed to close a
 stage. Contracts are validated by `rmw workflow validate` and enforced by
-`rmw run audit`.
+`rmw version audit`; legacy `rmw run audit` remains compatible.
 
 ## Artifact Manifest
 
-`audit/artifact_manifest.json`, the registered artifact inventory for a run.
+`audit/artifact_manifest.json`, the registered artifact inventory for a version
+or legacy run.
 Loose files are not closure evidence until registered.
 
 ## Imported Evidence

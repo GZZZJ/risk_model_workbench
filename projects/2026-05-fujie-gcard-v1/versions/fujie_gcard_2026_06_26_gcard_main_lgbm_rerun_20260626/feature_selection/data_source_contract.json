@@ -1,0 +1,8 @@
+{
+  "data_source_mode": "local_feather",
+  "source_table": null,
+  "local_feather_path": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "stage": "feature_prescreen",
+  "created_at": "2026-06-26T10:37:09",
+  "note": "local_feather uses an existing local file and is independent from remote DP pull"
+}

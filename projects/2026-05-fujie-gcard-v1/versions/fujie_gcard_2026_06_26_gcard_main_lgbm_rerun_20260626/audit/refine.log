@@ -1,0 +1,49 @@
+[RMW] 特征精筛 0% | 特征精筛开始执行 | 已用 0秒
+[RMW] 特征精筛 5% | 读取精筛输入变量完成，共 2837 个 | 已用 7秒
+[RMW] 特征精筛 10% | 开始读取特征精筛宽表样本 | 已用 7秒
+[RMW] 特征精筛 -- | 正在读取已确认的本地 feather：feature_refine_wide_sample | 已用 7秒
+[RMW] 特征精筛 -- | 本地 feather 读取完成：feature_refine_wide_sample，489743 行 2857 列 | 已用 14秒
+[DEBUG] base_col=uid, dtype=object, sample=['a6d4b1c8-18e9-4694-b6f2-5e5f3bd54073', '35f6bbe7-04ab-4e3e-8ca1-21e21124059f', '8bd765fd-a946-4541-bef0-f36a527a941a'], non_null=1.0000
+[DEBUG] base_col=mdl_dte, dtype=object, sample=[datetime.date(2026, 1, 15), datetime.date(2025, 6, 10), datetime.date(2025, 8, 19)], non_null=1.0000
+[DEBUG] base_col=ds, dtype=object, sample=['20260114', '20250609', '20250818'], non_null=1.0000
+[DEBUG] base_col=blue_customer_flag, dtype=object, sample=['B2', 'B2', 'E3'], non_null=1.0000
+[DEBUG] base_col=ftr_30d_ord_flag, dtype=int32, sample=[0, 0, 1], non_null=1.0000
+[DEBUG] feature=max_ctn_ovd_day, dtype=float32, sample=[0.0, 0.0, 0.0], non_null=1.0000
+[DEBUG] feature=not_ovd_tqhk_rep_tim_cnt_12m, dtype=float32, sample=[0.0, 0.0, 0.0], non_null=1.0000
+[DEBUG] feature=ddf_mdl_max_not_ovd_tqhk_rep_tim_12m, dtype=float32, sample=[nan, nan, nan], non_null=0.1919
+[PREPROCESS] kept=2563/2837, drops={'low_non_null_rate': 274}
+[STAGE] raw_rows=200000 initial_feat=2837 available=2563 train=75347 valid=24958
+[RMW] 特征精筛 28% | 预处理完成：样本 200000 行，初始变量 2837 个，可用变量 2563 个 | 已用 34秒
+[STAGE] after_global_corr: 1852 (dropped 711)
+[RMW] 特征精筛 40% | 全局相关性筛选完成，保留 1852 个，剔除 711 个 | 已用 16分32秒
+[STAGE] after_d03: 1852 (dropped 0)
+[RMW] 特征精筛 60% | D03 随机重要性完成，保留 1852 个，剔除 0 个 | 已用 16分33秒
+[RMW] 特征精筛 65% | D04 真实重要性第 1/3 轮完成 | 已用 16分53秒
+[RMW] 特征精筛 67% | D04 真实重要性第 2/3 轮完成 | 已用 17分11秒
+[RMW] 特征精筛 70% | D04 真实重要性第 3/3 轮完成 | 已用 17分30秒
+[RMW] 特征精筛 71% | D04 空重要性第 1/20 轮完成 | 已用 17分42秒
+[RMW] 特征精筛 71% | D04 空重要性第 2/20 轮完成 | 已用 17分53秒
+[RMW] 特征精筛 72% | D04 空重要性第 3/20 轮完成 | 已用 18分7秒
+[RMW] 特征精筛 72% | D04 空重要性第 4/20 轮完成 | 已用 18分20秒
+[RMW] 特征精筛 73% | D04 空重要性第 5/20 轮完成 | 已用 18分36秒
+[RMW] 特征精筛 74% | D04 空重要性第 6/20 轮完成 | 已用 18分48秒
+[RMW] 特征精筛 74% | D04 空重要性第 7/20 轮完成 | 已用 19分2秒
+[RMW] 特征精筛 75% | D04 空重要性第 8/20 轮完成 | 已用 19分13秒
+[RMW] 特征精筛 75% | D04 空重要性第 9/20 轮完成 | 已用 19分25秒
+[RMW] 特征精筛 76% | D04 空重要性第 10/20 轮完成 | 已用 19分37秒
+[RMW] 特征精筛 77% | D04 空重要性第 11/20 轮完成 | 已用 19分48秒
+[RMW] 特征精筛 77% | D04 空重要性第 12/20 轮完成 | 已用 19分59秒
+[RMW] 特征精筛 78% | D04 空重要性第 13/20 轮完成 | 已用 20分10秒
+[RMW] 特征精筛 78% | D04 空重要性第 14/20 轮完成 | 已用 20分21秒
+[RMW] 特征精筛 79% | D04 空重要性第 15/20 轮完成 | 已用 20分33秒
+[RMW] 特征精筛 80% | D04 空重要性第 16/20 轮完成 | 已用 20分45秒
+[RMW] 特征精筛 80% | D04 空重要性第 17/20 轮完成 | 已用 20分57秒
+[RMW] 特征精筛 81% | D04 空重要性第 18/20 轮完成 | 已用 21分10秒
+[RMW] 特征精筛 81% | D04 空重要性第 19/20 轮完成 | 已用 21分22秒
+[RMW] 特征精筛 82% | D04 空重要性第 20/20 轮完成 | 已用 21分34秒
+[RMW] 特征精筛 82% | D04 空重要性完成，保留 1028 个，剔除 824 个 | 已用 21分35秒
+[RMW] 特征精筛 84% | D05 基准模型重要性训练开始，输入 1028 个变量 | 已用 21分35秒
+[RMW] 特征精筛 90% | D05 基准模型重要性完成，AUC=0.9333，最终保留 500 个变量 | 已用 21分51秒
+[RMW] 特征精筛 -- | 特征精筛失败：argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType' | 已用 0秒
+feature refine failed: argument should be a str or an os.PathLike object where __fspath__ returns a str, not 'NoneType'
+EXIT=1 11:08:39

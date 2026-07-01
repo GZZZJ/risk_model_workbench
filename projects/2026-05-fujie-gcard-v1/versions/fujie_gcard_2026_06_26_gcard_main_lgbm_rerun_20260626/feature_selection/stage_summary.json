@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-06-26T11:08:37",
+  "wide_table": null,
+  "feather_path": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "data_source_mode": "local_feather",
+  "raw_rows": 200000,
+  "total_rows": 200000,
+  "train_samples": 75347,
+  "valid_samples": 24958,
+  "initial_features": 2837,
+  "available_features": 2563,
+  "after_global_corr": 1852,
+  "d03_mode": "feature_select_v2",
+  "after_d03_random_importance": 1852,
+  "after_d04_null_importance": 1028,
+  "final_features": 500,
+  "d05_valid_auc": 0.9333031650124995,
+  "sampling_where": "ds is not null and final_flag in ('DEV','OOT') and ftr_30d_ord_flag in (0,1) and rand_flag0 < 0.02",
+  "sampling_max_rows": 200000,
+  "configured_peak_multiplier": 4.0,
+  "observed_peak_multiplier": 2.612042843937936,
+  "resource_usage_path": "resource_usage.json"
+}

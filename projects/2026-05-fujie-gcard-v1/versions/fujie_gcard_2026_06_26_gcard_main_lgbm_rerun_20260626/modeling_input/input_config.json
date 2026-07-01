@@ -1,0 +1,26 @@
+{
+  "data_source": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "generated_at": "2026-06-26 11:34:19",
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "train_values": [
+    "DEV"
+  ],
+  "valid_values": [
+    "DEV-OOS"
+  ],
+  "oos_values": [
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "feature_list_source": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/feature_selection/final_features.txt",
+  "feature_count_in_list": 500,
+  "feature_count_in_data": 500,
+  "historical_score_columns": [
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ]
+}

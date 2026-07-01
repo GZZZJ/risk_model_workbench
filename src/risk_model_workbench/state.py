@@ -1,4 +1,8 @@
-"""Run state management for workflow executions."""
+"""Workspace state management for workflow executions.
+
+New workspaces are model versions under ``versions/<version_id>/``. The legacy
+``runs/<run_id>/`` layout remains readable for compatibility.
+"""
 
 from __future__ import annotations
 
@@ -29,8 +33,20 @@ def run_dir(project_dir: str | Path, run_id: str) -> Path:
     return Path(project_dir).resolve() / "runs" / run_id
 
 
+def version_dir(project_dir: str | Path, version_id: str) -> Path:
+    return Path(project_dir).resolve() / "versions" / version_id
+
+
 def state_path(run_path: str | Path) -> Path:
-    return Path(run_path) / "run_state.yml"
+    workspace = Path(run_path)
+    version_state = workspace / "version_state.yml"
+    if version_state.exists():
+        return version_state
+    return workspace / "run_state.yml"
+
+
+def version_state_path(version_path: str | Path) -> Path:
+    return Path(version_path) / "version_state.yml"
 
 
 def create_run_state(
@@ -54,6 +70,33 @@ def create_run_state(
     }
 
 
+def create_version_state(
+    project_dir: str | Path,
+    *,
+    version_id: str,
+    workflow: str,
+    stages: list[str] | None = None,
+    status: str = "running",
+    source_type: str = "workbench",
+    lineage: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    selected_stages = stages or DEFAULT_STAGES
+    state: dict[str, Any] = {
+        "version_id": version_id,
+        "project": str(Path(project_dir)),
+        "workflow": workflow,
+        "source_type": source_type,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "status": status,
+        "current_stage": selected_stages[0] if selected_stages else None,
+        "stages": {stage: {"status": "pending", "artifacts": []} for stage in selected_stages},
+        "decisions": [],
+    }
+    if lineage:
+        state["lineage"] = lineage
+    return state
+
+
 def load_run_state(run_path: str | Path) -> dict[str, Any]:
     path = state_path(run_path)
     with path.open("r", encoding="utf-8") as handle:
@@ -67,6 +110,19 @@ def save_run_state(run_path: str | Path, state: dict[str, Any]) -> Path:
     with path.open("w", encoding="utf-8") as handle:
         yaml.safe_dump(state, handle, allow_unicode=True, sort_keys=False)
     return path
+
+
+def save_version_state(version_path: str | Path, state: dict[str, Any]) -> Path:
+    path = version_state_path(version_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    state["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    with path.open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(state, handle, allow_unicode=True, sort_keys=False)
+    return path
+
+
+def workspace_id(state: dict[str, Any], fallback: str = "") -> str:
+    return str(state.get("version_id") or state.get("run_id") or fallback)
 
 
 def _emit_progress_safely(run_path: str | Path, stage: str, event: str, *, reason: str = "", scaffold: bool = False) -> None:

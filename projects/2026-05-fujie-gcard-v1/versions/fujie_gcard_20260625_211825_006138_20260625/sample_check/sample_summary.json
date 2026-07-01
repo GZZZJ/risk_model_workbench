@@ -1,0 +1,95 @@
+{
+  "total_rows": 973715,
+  "unique_keys": 973715,
+  "duplicate_rate": 0.0,
+  "target_rate": 0.15621408728426694,
+  "splits": [
+    {
+      "final_flag": "DEV",
+      "total": 365051,
+      "positive": 55734,
+      "positive_rate": 0.15267455780151268
+    },
+    {
+      "final_flag": "DEV-OOS",
+      "total": 364823,
+      "positive": 63125,
+      "positive_rate": 0.17302911274782565
+    },
+    {
+      "final_flag": "OOT",
+      "total": 121681,
+      "positive": 15700,
+      "positive_rate": 0.1290258955794249
+    },
+    {
+      "final_flag": "OOT-OOS",
+      "total": 122160,
+      "positive": 17549,
+      "positive_rate": 0.14365586116568435
+    }
+  ],
+  "ds_range": [
+    "20250601",
+    "20260130"
+  ],
+  "ds_count": 48,
+  "monthly_label_distribution": [
+    {
+      "month": "2025-06",
+      "total": 121345,
+      "positive": 21278,
+      "positive_rate": 0.175351271168981,
+      "negative": 100067
+    },
+    {
+      "month": "2025-07",
+      "total": 121313,
+      "positive": 20849,
+      "positive_rate": 0.17186121850090263,
+      "negative": 100464
+    },
+    {
+      "month": "2025-08",
+      "total": 121780,
+      "positive": 21206,
+      "positive_rate": 0.17413368369190343,
+      "negative": 100574
+    },
+    {
+      "month": "2025-09",
+      "total": 121516,
+      "positive": 19505,
+      "positive_rate": 0.1605138417986109,
+      "negative": 102011
+    },
+    {
+      "month": "2025-10",
+      "total": 121787,
+      "positive": 18403,
+      "positive_rate": 0.1511080821434143,
+      "negative": 103384
+    },
+    {
+      "month": "2025-11",
+      "total": 122133,
+      "positive": 17618,
+      "positive_rate": 0.14425257710856199,
+      "negative": 104515
+    },
+    {
+      "month": "2025-12",
+      "total": 121746,
+      "positive": 17068,
+      "positive_rate": 0.14019351765150395,
+      "negative": 104678
+    },
+    {
+      "month": "2026-01",
+      "total": 122095,
+      "positive": 16181,
+      "positive_rate": 0.1325279495474835,
+      "negative": 105914
+    }
+  ]
+}

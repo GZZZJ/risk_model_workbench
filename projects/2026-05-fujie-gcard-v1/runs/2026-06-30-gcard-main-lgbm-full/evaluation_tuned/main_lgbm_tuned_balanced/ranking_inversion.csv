@@ -1,0 +1,6 @@
+﻿score_column,decile_count,inversion_count,is_monotonic_non_decreasing
+model_score,10,0,True
+gcard_v2,10,0,True
+gcard_v4,10,1,False
+gcard_v5,10,0,True
+gcard_v6,10,0,True

@@ -54,10 +54,24 @@ from risk_model_workbench.rules import format_rules, load_workbench_rules, promo
 from risk_model_workbench.state import (
     append_decision,
     create_run_state,
+    create_version_state,
     load_run_state,
     mark_stage_done,
     run_dir,
     save_run_state,
+    save_version_state,
+    version_dir,
+)
+from risk_model_workbench.versioning import (
+    list_versions,
+    load_version_index,
+    migrate_run_to_version,
+    resolve_workspace_dir,
+    save_version_index,
+    standard_run_dirs,
+    suggest_version_id,
+    upsert_version_index,
+    validate_version_id,
 )
 from risk_model_workbench.workflow_contracts import validate_workflow_definition
 from risk_model_workbench.wide_sql import generate_wide_sql
@@ -73,7 +87,18 @@ DEFAULT_WIDE_SUMMARY_OUTPUT = "runs/feature_prescreen/results/prescreen_wide_sql
 
 
 def _run_path(args: argparse.Namespace) -> Path:
-    return run_dir(resolve_project_path(args.project), args.run_id)
+    version_id = getattr(args, "version_id", None)
+    run_id = getattr(args, "run_id", None)
+    if version_id and not run_id:
+        setattr(args, "run_id", version_id)
+    return resolve_workspace_dir(resolve_project_path(args.project), version_id=version_id, run_id=run_id)
+
+
+def _workspace_arg(args: argparse.Namespace) -> str:
+    value = getattr(args, "version_id", None) or getattr(args, "run_id", None)
+    if not value:
+        raise ValueError("either --version-id or --run-id is required")
+    return str(value)
 
 
 def _feature_prescreen_stage(run_path: Path) -> str:
@@ -603,9 +628,11 @@ def cmd_project_validate(args: argparse.Namespace) -> int:
         for key in ["source_table", "id_columns", "target_column", "time_column", "period_column"]:
             if not data.get(key):
                 errors.append(f"missing data.{key}")
-    for directory in ["configs", "queries", "runs", "reports"]:
+    for directory in ["configs", "queries", "reports"]:
         if not (project_dir / directory).exists():
             errors.append(f"missing directory: {directory}")
+    if not (project_dir / "versions").exists() and not (project_dir / "runs").exists():
+        errors.append("missing directory: versions or legacy runs")
 
     if errors:
         print("project validation failed:")
@@ -618,13 +645,20 @@ def cmd_project_validate(args: argparse.Namespace) -> int:
 
 def cmd_project_status(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
+    def _summarize_project_status() -> dict[str, Any]:
+        if args.version_id:
+            return summarize_project(project_dir, run_id=args.run_id, version_id=args.version_id)
+        return summarize_project(project_dir, run_id=args.run_id)
+
     if args.write_state:
-        summary = summarize_project(project_dir, run_id=args.run_id)
+        summary = _summarize_project_status()
     else:
-        summary = _read_only_action("project_status", lambda: summarize_project(project_dir, run_id=args.run_id))
+        summary = _read_only_action("project_status", _summarize_project_status)
     print(format_project_summary(summary), end="")
     if args.write_state:
         command = f"rmw project status --project {args.project}"
+        if args.version_id:
+            command += f" --version-id {args.version_id}"
         if args.run_id:
             command += f" --run-id {args.run_id}"
         path = write_project_state_from_summary(project_dir, summary, commands=[command])
@@ -636,6 +670,7 @@ def cmd_project_update_state(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     state = update_project_state(
         project_dir,
+        active_version_id=args.active_version_id,
         active_run_id=args.active_run_id,
         current_objective=args.objective,
         status=args.status,
@@ -716,7 +751,8 @@ def cmd_rules_list(args: argparse.Namespace) -> int:
 
 def cmd_run_audit(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
-    audit = _read_only_action("run_audit", lambda: audit_run(project_dir, args.run_id, stage=args.stage))
+    workspace_id = _workspace_arg(args)
+    audit = _read_only_action("run_audit", lambda: audit_run(project_dir, workspace_id, stage=args.stage))
     if args.json:
         print(json.dumps(audit, ensure_ascii=False, indent=2))
     else:
@@ -724,6 +760,145 @@ def cmd_run_audit(args: argparse.Namespace) -> int:
     if args.strict and audit.get("verdict") != "complete":
         return 1
     return 0
+
+
+def cmd_version_list(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    index = _read_only_action("version_list", lambda: load_version_index(project_dir))
+    if args.json:
+        print(json.dumps(index, ensure_ascii=False, indent=2))
+        return 0
+    print(f"active_version_id: {index.get('active_version_id', '')}")
+    for item in index.get("versions", []) or []:
+        print(
+            f"- {item.get('version_id')}: "
+            f"status={item.get('status', '')}, "
+            f"source_type={item.get('source_type', '')}, "
+            f"workflow={item.get('workflow', '')}, "
+            f"legacy_run_id={item.get('legacy_run_id', '')}"
+        )
+    return 0
+
+
+def cmd_version_status(args: argparse.Namespace) -> int:
+    args.run_id = None
+    return cmd_status(args)
+
+
+def cmd_version_audit(args: argparse.Namespace) -> int:
+    args.run_id = None
+    return cmd_run_audit(args)
+
+
+def cmd_version_show(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    path = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    state = _read_only_action("version_show", lambda: load_run_state(path))
+    if args.json:
+        print(json.dumps(state, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(yaml.safe_dump(state, allow_unicode=True, sort_keys=False))
+    return 0
+
+
+def cmd_version_migrate_run(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    version_id = args.version_id or suggest_version_id(project_dir, args.run_id)
+    result = migrate_run_to_version(
+        project_dir,
+        run_id=args.run_id,
+        version_id=version_id,
+        source_type=args.source_type,
+        display_name=args.display_name,
+        force=args.force,
+    )
+    print(f"{result['status']}: {result['version_id']}")
+    print(f"version_dir: {result['path']}")
+    return 0
+
+
+def cmd_version_migrate_standard_runs(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    mappings = _load_version_migration_map(args.mapping) if args.mapping else {}
+    results = []
+    for run_path in standard_run_dirs(project_dir):
+        run_id = run_path.name
+        mapping = mappings.get(run_id, {})
+        version_id = mapping.get("version_id") or suggest_version_id(project_dir, run_id)
+        result = migrate_run_to_version(
+            project_dir,
+            run_id=run_id,
+            version_id=version_id,
+            source_type=mapping.get("source_type"),
+            display_name=mapping.get("display_name"),
+            force=args.force,
+        )
+        results.append(result)
+
+    active_version_id = args.active_version_id
+    if not active_version_id and any(item["version_id"] == "fujie_gcard_v7_20260630" for item in results):
+        active_version_id = "fujie_gcard_v7_20260630"
+    if active_version_id:
+        index = load_version_index(project_dir)
+        index["active_version_id"] = active_version_id
+        save_version_index(project_dir, index)
+        update_project_state(project_dir, active_version_id=active_version_id, status="active")
+
+    for result in results:
+        print(f"{result['status']}: {result['version_id']} <- {result['entry'].get('legacy_run_id', '')}")
+    print(f"migrated_count: {len(results)}")
+    if active_version_id:
+        print(f"active_version_id: {active_version_id}")
+    return 0
+
+
+def cmd_version_register_manual(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    validate_version_id(args.version_id)
+    path = version_dir(project_dir, args.version_id)
+    if path.exists() and not args.force:
+        print(f"version already exists: {path}")
+        return 1
+    for directory in ["audit", "reports"]:
+        (path / directory).mkdir(parents=True, exist_ok=True)
+    state = create_version_state(
+        project_dir,
+        version_id=args.version_id,
+        workflow=args.workflow,
+        stages=[],
+        status=args.status,
+        source_type="manual",
+    )
+    save_version_state(path, state)
+    _write_json(path / "audit" / "artifact_manifest.json", {"version": 1, "artifacts": []})
+    _write_text(path / "audit" / "decision_log.md", "# Decision Log\n\n- source_type: manual\n")
+    upsert_version_index(
+        project_dir,
+        {
+            "version_id": args.version_id,
+            "display_name": args.display_name or args.version_id,
+            "source_type": "manual",
+            "status": args.status,
+            "workflow": args.workflow,
+            "path": str(path.relative_to(project_dir)),
+            "created_at": state.get("created_at", ""),
+            "updated_at": state.get("updated_at", ""),
+        },
+        active=args.active,
+    )
+    if args.active:
+        update_project_state(project_dir, active_version_id=args.version_id, status="active")
+    print(f"version_id: {args.version_id}")
+    print(f"version_dir: {path}")
+    return 0
+
+
+def _load_version_migration_map(path_value: str) -> dict[str, dict[str, Any]]:
+    path = Path(path_value)
+    path = path if path.is_absolute() else (REPO_ROOT / path)
+    payload = load_yaml(path)
+    rows = payload.get("migrations", []) if isinstance(payload, dict) else []
+    return {str(item["legacy_run_id"]): dict(item) for item in rows if item.get("legacy_run_id")}
 
 
 def cmd_retrospective_write(args: argparse.Namespace) -> int:
@@ -773,14 +948,19 @@ def cmd_workflow_list(_: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_run_init(args: argparse.Namespace) -> int:
+def _init_workflow_workspace(args: argparse.Namespace, *, as_version: bool) -> int:
     project_dir = resolve_project_path(args.project)
     workflow_file = workflow_path(args.workflow)
     workflow = load_yaml(workflow_file)
-    run_id = args.run_id or make_run_id()
-    path = run_dir(project_dir, run_id)
+    workspace_id = args.version_id if as_version else (args.run_id or make_run_id())
+    if as_version:
+        validate_version_id(workspace_id)
+        path = version_dir(project_dir, workspace_id)
+    else:
+        path = run_dir(project_dir, workspace_id)
     if path.exists() and not args.force:
-        print(f"run already exists: {path}")
+        label = "version" if as_version else "run"
+        print(f"{label} already exists: {path}")
         return 1
 
     for directory in ["configs_snapshot", RUNTIME_CONFIG_DIR, "audit", "tasks", "sample_check", "feature_selection", "modeling", "evaluation", "reports"]:
@@ -789,8 +969,18 @@ def cmd_run_init(args: argparse.Namespace) -> int:
         if config_file.exists():
             shutil.copy2(config_file, path / "configs_snapshot" / config_file.name)
 
-    state = create_run_state(project_dir, run_id=run_id, workflow=workflow.get("name", args.workflow), stages=workflow.get("stages"))
-    save_run_state(path, state)
+    if as_version:
+        state = create_version_state(
+            project_dir,
+            version_id=workspace_id,
+            workflow=workflow.get("name", args.workflow),
+            stages=workflow.get("stages"),
+            source_type=getattr(args, "source_type", "workbench"),
+        )
+        save_version_state(path, state)
+    else:
+        state = create_run_state(project_dir, run_id=workspace_id, workflow=workflow.get("name", args.workflow), stages=workflow.get("stages"))
+        save_run_state(path, state)
     _write_json(path / "audit" / "artifact_manifest.json", {"version": 1, "artifacts": []})
     _write_text(path / "audit" / "command_log.jsonl", "")
     _write_text(path / "audit" / "decision_log.md", f"# Decision Log\n\n- imported: false\n")
@@ -823,9 +1013,36 @@ def cmd_run_init(args: argparse.Namespace) -> int:
         for runtime_path in runtime_paths.values():
             register_artifact(path, "validate_config", runtime_path.relative_to(path), description="Request-materialized runtime config")
     stage_action_done(path, "validate_config")
-    print(f"run_id: {run_id}")
-    print(f"run_dir: {path}")
+    if as_version:
+        upsert_version_index(
+            project_dir,
+            {
+                "version_id": workspace_id,
+                "display_name": getattr(args, "display_name", None) or workspace_id,
+                "source_type": getattr(args, "source_type", "workbench"),
+                "status": "running",
+                "workflow": workflow.get("name", args.workflow),
+                "path": str(path.relative_to(project_dir)),
+                "created_at": state.get("created_at", ""),
+                "updated_at": state.get("updated_at", ""),
+            },
+            active=True,
+        )
+        update_project_state(project_dir, active_version_id=workspace_id, status="active")
+        print(f"version_id: {workspace_id}")
+        print(f"version_dir: {path}")
+    else:
+        print(f"run_id: {workspace_id}")
+        print(f"run_dir: {path}")
     return 0
+
+
+def cmd_run_init(args: argparse.Namespace) -> int:
+    return _init_workflow_workspace(args, as_version=False)
+
+
+def cmd_version_init(args: argparse.Namespace) -> int:
+    return _init_workflow_workspace(args, as_version=True)
 
 
 def cmd_request_validate(args: argparse.Namespace) -> int:
@@ -1284,7 +1501,7 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     reporter = None
     run_path = None
-    if getattr(args, "run_id", None):
+    if getattr(args, "version_id", None) or getattr(args, "run_id", None):
         run_path = _run_path(args)
         stage_action_started(run_path, "build_wide_sql")
         reporter = ProgressReporter(run_path, "build_wide_sql")
@@ -1692,9 +1909,17 @@ def cmd_train(args: argparse.Namespace) -> int:
                 "model.pkl",
                 "score_column_summary.csv",
                 "distillation_summary.json",
+                "tuning_context.json",
+                "tuning_trials.csv",
+                "tuning_summary.json",
+                "best_params.json",
+                "selection_reason.md",
+                "llm_tuning_decisions.md",
             ]:
                 if (output_dir / artifact).exists():
                     register_artifact(path, "train_baseline", f"modeling/{args.experiment}/{artifact}")
+            for artifact in sorted(output_dir.glob("llm_tuning_plan_round_*.json")) + sorted(output_dir.glob("tuning_context_round_*.json")):
+                register_artifact(path, "train_baseline", artifact)
             if score_output.exists():
                 try:
                     register_artifact(path, "train_baseline", score_output)
@@ -1706,6 +1931,25 @@ def cmd_train(args: argparse.Namespace) -> int:
             print(f"train complete: {output_dir}")
             return 0
         except Exception as exc:
+            from risk_model_workbench.modeling.llm_tuning import HostAgentTuningPlanRequired
+
+            if isinstance(exc, HostAgentTuningPlanRequired):
+                payload = {
+                    "status": "advisor_required",
+                    "reason": str(exc),
+                    "experiment": args.experiment,
+                    "algorithm": algorithm,
+                    "plan_path": exc.plan_path,
+                    "context_path": exc.context_path,
+                }
+                _write_json(output_dir / "train_metrics.json", payload)
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+                for artifact in sorted(output_dir.glob("tuning_context*.json")):
+                    register_artifact(path, "train_baseline", artifact)
+                append_decision(path, stage="train_baseline", decision="advisor_required", reason=str(exc))
+                stage_action_failed(path, "train_baseline", str(exc), failure_code="advisor_required")
+                print(f"train advisor required: {exc}", file=sys.stderr)
+                return 2
             payload = {"status": "scaffold", "reason": f"training failed or dependency missing: {exc}", "experiment": args.experiment, "algorithm": algorithm}
     else:
         payload = {
@@ -1869,7 +2113,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         if suffix == ".xlsx":
             continue
         if suffix == ".html":
-            from risk_model_workbench.reporting.excel_report import render_model_report_html
+            from risk_model_workbench.reporting.html_report import render_model_report_html
 
             body = _report_body(target.name)
             _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
@@ -1884,7 +2128,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         if not target.exists():
             body = _report_body(required_name)
             if target.suffix.lower() == ".html":
-                from risk_model_workbench.reporting.excel_report import render_model_report_html
+                from risk_model_workbench.reporting.html_report import render_model_report_html
 
                 _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
             else:
@@ -2032,11 +2276,13 @@ def _add_project_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     validate.set_defaults(func=cmd_project_validate)
     status = project_sub.add_parser("status", help="show project continuity state")
     status.add_argument("--project", required=True)
+    status.add_argument("--version-id", default=None)
     status.add_argument("--run-id", default=None)
     status.add_argument("--write-state", action="store_true", help="write or refresh project_state.yml")
     status.set_defaults(func=cmd_project_status)
     update = project_sub.add_parser("update-state", help="update project_state.yml with handoff metadata")
     update.add_argument("--project", required=True)
+    update.add_argument("--active-version-id", default=None)
     update.add_argument("--active-run-id", default=None)
     update.add_argument("--objective", default=None)
     update.add_argument("--status", default=None)
@@ -2121,6 +2367,87 @@ def _add_workflow_parser(subparsers: argparse._SubParsersAction[argparse.Argumen
     validate.set_defaults(func=cmd_workflow_validate)
 
 
+def _add_workspace_id_args(parser: argparse.ArgumentParser, *, require_run_legacy: bool = False) -> None:
+    parser.add_argument("--version-id", default=None, help="version workspace id")
+    parser.add_argument("--run-id", required=require_run_legacy, default=None, help="legacy run id")
+
+
+def _add_version_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    version = subparsers.add_parser("version", help="version lifecycle commands")
+    version_sub = version.add_subparsers(dest="version_command", required=True)
+
+    init = version_sub.add_parser("init", help="initialize a workflow version")
+    init.add_argument("--project", required=True)
+    init.add_argument("--workflow", required=True)
+    init.add_argument("--version-id", required=True)
+    init.add_argument("--display-name", default=None)
+    init.add_argument("--source-type", default="workbench", choices=["workbench", "imported", "manual"])
+    init.add_argument("--request", default=None, help="optional model request Markdown copied into the version")
+    init.add_argument("--plan", default=None, help="optional execution plan YAML copied into the version")
+    init.add_argument("--force", action="store_true")
+    init.set_defaults(func=cmd_version_init)
+
+    list_cmd = version_sub.add_parser("list", help="list project versions")
+    list_cmd.add_argument("--project", required=True)
+    list_cmd.add_argument("--json", action="store_true")
+    list_cmd.set_defaults(func=cmd_version_list)
+
+    show = version_sub.add_parser("show", help="show version state")
+    show.add_argument("--project", required=True)
+    show.add_argument("--version-id", required=True)
+    show.add_argument("--json", action="store_true")
+    show.set_defaults(func=cmd_version_show)
+
+    status = version_sub.add_parser("status", help="show version state")
+    status.add_argument("--project", required=True)
+    status.add_argument("--version-id", required=True)
+    status.add_argument("--progress", action="store_true", help="show Chinese progress summary and recent events")
+    status.add_argument("--tail", type=int, default=5, help="number of recent progress events to show")
+    status.set_defaults(func=cmd_version_status)
+
+    watch = version_sub.add_parser("watch", help="watch Chinese version progress")
+    watch.add_argument("--project", required=True)
+    watch.add_argument("--version-id", required=True)
+    watch.add_argument("--interval", type=float, default=10.0, help="poll interval in seconds")
+    watch.add_argument("--tail", type=int, default=8, help="number of recent progress events to show")
+    watch.add_argument("--once", action="store_true", help="render once and exit")
+    watch.set_defaults(func=cmd_run_watch)
+
+    audit = version_sub.add_parser("audit", help="audit version or stage closure readiness")
+    audit.add_argument("--project", required=True)
+    audit.add_argument("--version-id", required=True)
+    audit.add_argument("--stage", default=None)
+    audit.add_argument("--strict", action="store_true", help="return non-zero unless the audit verdict is complete")
+    audit.add_argument("--json", action="store_true", help="emit machine-readable audit JSON")
+    audit.set_defaults(func=cmd_version_audit)
+
+    migrate_run = version_sub.add_parser("migrate-run", help="migrate one legacy standard run into a version")
+    migrate_run.add_argument("--project", required=True)
+    migrate_run.add_argument("--run-id", required=True)
+    migrate_run.add_argument("--version-id", default=None)
+    migrate_run.add_argument("--source-type", default=None, choices=["workbench", "imported", "manual"])
+    migrate_run.add_argument("--display-name", default=None)
+    migrate_run.add_argument("--force", action="store_true")
+    migrate_run.set_defaults(func=cmd_version_migrate_run)
+
+    migrate_all = version_sub.add_parser("migrate-standard-runs", help="migrate all legacy standard runs into versions")
+    migrate_all.add_argument("--project", required=True)
+    migrate_all.add_argument("--mapping", default=None)
+    migrate_all.add_argument("--active-version-id", default=None)
+    migrate_all.add_argument("--force", action="store_true")
+    migrate_all.set_defaults(func=cmd_version_migrate_standard_runs)
+
+    manual = version_sub.add_parser("register-manual", help="register a manual historical model version")
+    manual.add_argument("--project", required=True)
+    manual.add_argument("--version-id", required=True)
+    manual.add_argument("--display-name", default=None)
+    manual.add_argument("--workflow", default="manual")
+    manual.add_argument("--status", default="imported", choices=["draft", "running", "candidate", "done", "released", "failed", "imported", "archived"])
+    manual.add_argument("--active", action="store_true")
+    manual.add_argument("--force", action="store_true")
+    manual.set_defaults(func=cmd_version_register_manual)
+
+
 def _add_run_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     run = subparsers.add_parser("run", help="run lifecycle commands")
     run_sub = run.add_subparsers(dest="run_command", required=True)
@@ -2189,7 +2516,7 @@ def _add_feature_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     feature_sub = feature.add_subparsers(dest="feature_command", required=True)
     metadata = feature_sub.add_parser("metadata")
     metadata.add_argument("--project", required=True)
-    metadata.add_argument("--run-id", required=True)
+    _add_workspace_id_args(metadata)
     metadata.add_argument("--tables-file", default=None)
     metadata.add_argument("--config", default=None)
     metadata.set_defaults(func=cmd_feature_metadata)
@@ -2200,7 +2527,7 @@ def _add_feature_parser(subparsers: argparse._SubParsersAction[argparse.Argument
 
     refine = feature_sub.add_parser("refine")
     refine.add_argument("--project", required=True)
-    refine.add_argument("--run-id", required=True)
+    _add_workspace_id_args(refine)
     refine.add_argument("--config", default=None)
     refine.add_argument("--dry-run-sql", action="store_true")
     refine.add_argument("--refresh-dp-cache", action="store_true")
@@ -2211,7 +2538,7 @@ def _add_feature_parser(subparsers: argparse._SubParsersAction[argparse.Argument
 
 def _add_feature_prescreen_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--project", required=True)
-    parser.add_argument("--run-id", required=True)
+    _add_workspace_id_args(parser)
     parser.add_argument("--config", default=None)
     parser.add_argument("--table", action="append")
     parser.add_argument("--max-tables", type=int, default=None)
@@ -2233,6 +2560,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_metadata_parsers(subparsers)
     _add_retrospective_parser(subparsers)
     _add_workflow_parser(subparsers)
+    _add_version_parser(subparsers)
     _add_run_parser(subparsers)
     _add_request_parser(subparsers)
     _add_plan_parser(subparsers)
@@ -2240,7 +2568,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     status = subparsers.add_parser("status", help="show run state")
     status.add_argument("--project", required=True)
-    status.add_argument("--run-id", required=True)
+    _add_workspace_id_args(status)
     status.add_argument("--progress", action="store_true", help="show Chinese progress summary and recent events")
     status.add_argument("--tail", type=int, default=5, help="number of recent progress events to show")
     status.set_defaults(func=cmd_status)
@@ -2249,12 +2577,12 @@ def build_parser() -> argparse.ArgumentParser:
     sample_sub = sample.add_subparsers(dest="sample_command", required=True)
     check = sample_sub.add_parser("check")
     check.add_argument("--project", required=True)
-    check.add_argument("--run-id", required=True)
+    _add_workspace_id_args(check)
     check.set_defaults(func=cmd_sample_check)
 
     train = subparsers.add_parser("train")
     train.add_argument("--project", required=True)
-    train.add_argument("--run-id", required=True)
+    _add_workspace_id_args(train)
     train.add_argument("--experiment", required=True)
     train.add_argument("--input-feather", default=None)
     train.add_argument("--feature-list", default=None)
@@ -2265,20 +2593,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     evaluate = subparsers.add_parser("evaluate")
     evaluate.add_argument("--project", required=True)
-    evaluate.add_argument("--run-id", required=True)
+    _add_workspace_id_args(evaluate)
     evaluate.add_argument("--scores-feather", default=None)
     evaluate.add_argument("--output-dir", default=None)
     evaluate.set_defaults(func=cmd_evaluate)
 
     compare = subparsers.add_parser("compare")
     compare.add_argument("--project", required=True)
-    compare.add_argument("--run-id", required=True)
+    _add_workspace_id_args(compare)
     compare.add_argument("--champion", action="append", default=[])
     compare.set_defaults(func=cmd_compare)
 
     report = subparsers.add_parser("report")
     report.add_argument("--project", required=True)
-    report.add_argument("--run-id", required=True)
+    _add_workspace_id_args(report)
     report.set_defaults(func=cmd_report)
 
     init_project = subparsers.add_parser("init-project", help="create a model project workspace")
@@ -2302,6 +2630,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     build_wide_sql = subparsers.add_parser("build-wide-sql")
     build_wide_sql.add_argument("--project", required=True)
+    build_wide_sql.add_argument("--version-id", default=None, help="optional version id for progress tracking")
     build_wide_sql.add_argument("--run-id", default=None, help="optional run id for progress tracking")
     build_wide_sql.add_argument("--remain-features", default=DEFAULT_PRESCREEN_REMAIN_FEATURES)
     build_wide_sql.add_argument("--sql-output", default=DEFAULT_WIDE_SQL_OUTPUT)

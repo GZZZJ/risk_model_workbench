@@ -1,0 +1,13 @@
+{
+  "train_auc": 0.9539423793530117,
+  "valid_auc": 0.9329282183910251,
+  "train_ks": 0.7659682287726249,
+  "valid_ks": 0.7193833789202295,
+  "train_samples": 183739,
+  "valid_samples": 183480,
+  "train_bad_rate": 0.153195565448816,
+  "valid_bad_rate": 0.17346304774362328,
+  "best_iteration": 537,
+  "train_time_seconds": 44.1,
+  "auc_gap": 0.021014160961986605
+}

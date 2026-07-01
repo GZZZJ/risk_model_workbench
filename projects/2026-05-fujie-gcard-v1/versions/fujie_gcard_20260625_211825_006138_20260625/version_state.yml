@@ -1,0 +1,1928 @@
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+workflow: full_modeling
+created_at: '2026-06-25T21:18:27'
+status: done
+current_stage: report
+stages:
+  validate_config:
+    status: done
+    artifacts:
+    - configs_snapshot
+    - model_request.md
+    - configs_runtime
+    - configs_runtime/project.yml
+    - configs_runtime/sample.yaml
+    - configs_runtime/feature_select.yaml
+    - configs_runtime/refine_features.yaml
+    - configs_runtime/train.yaml
+    - configs_runtime/evaluate.yaml
+    - configs_runtime/report.yaml
+    - configs_runtime/request_runtime.yaml
+    started_at: '2026-06-25T21:18:27'
+    action:
+      id: validate_config
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - configs/*.yml
+      - optional model_request.md
+      - optional execution_plan.yml
+      expected_outputs:
+      - run_state.yml
+      - configs_snapshot/
+      - audit/artifact_manifest.json
+      artifact_rules:
+      - configs_snapshot
+      - configs_snapshot/*
+    finished_at: '2026-06-25T21:18:30'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: configs_snapshot
+        kind: directory
+        source: generated
+        exists: true
+        description: Project config snapshot
+        artifact_rule: configs_snapshot
+        rule_matched: true
+      - path: model_request.md
+        kind: file
+        source: generated
+        exists: false
+        description: Model request copied into run workspace
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime
+        kind: directory
+        source: generated
+        exists: true
+        description: Request-materialized runtime configs
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/project.yml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/sample.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/feature_select.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/refine_features.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/train.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/evaluate.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/report.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/request_runtime.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+    progress:
+      step: action_done
+      status: done
+      message: 配置校验完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T21:18:31'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  sample_check:
+    status: done
+    artifacts:
+    - sample_check/sample_summary.json
+    - sample_check/sample_check_report.md
+    - sample_check/label_distribution.csv
+    - sample_check/sample_split_summary.csv
+    - sample_check/monthly_label_distribution.csv
+    - sample_check/segment_distribution.csv
+    started_at: '2026-06-25T21:24:22'
+    action:
+      id: sample_check
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - configs_snapshot/*
+      expected_outputs:
+      - sample_check/sample_summary.json
+      - sample_check/sample_check_report.md
+      artifact_rules:
+      - sample_check/sample_summary.json
+      - sample_check/sample_check_report.md
+      - sample_check/sample_split_summary.csv
+      - sample_check/label_distribution.csv
+      - sample_check/segment_distribution.csv
+    finished_at: '2026-06-25T21:24:37'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: sample_check/sample_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_summary.json
+        rule_matched: true
+      - path: sample_check/sample_check_report.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_check_report.md
+        rule_matched: true
+      - path: sample_check/label_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/label_distribution.csv
+        rule_matched: true
+      - path: sample_check/sample_split_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_split_summary.csv
+        rule_matched: true
+      - path: sample_check/monthly_label_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: sample_check/segment_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/segment_distribution.csv
+        rule_matched: true
+      decision:
+        stage: sample_check
+        decision: done
+        reason: Sample profiling completed from local data
+        created_at: '2026-06-25T21:24:37'
+    progress:
+      step: action_done
+      status: done
+      message: 样本检查完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T21:24:37'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  feature_metadata:
+    status: done
+    artifacts: []
+    started_at: '2026-06-25T21:33:06'
+    action:
+      id: feature_metadata
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - optional tables file
+      expected_outputs:
+      - feature_metadata/*
+      artifact_rules:
+      - feature_metadata/*
+    progress:
+      step: action_done
+      status: done
+      message: 特征元数据完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T21:42:02'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-25T21:42:02'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts: []
+      decision: null
+  feature_prescreen:
+    status: scaffold
+    artifacts:
+    - feature_selection/data_source_contract.json
+    - feature_selection/execution_environment.json
+    - feature_selection/resource_plan.json
+    - feature_selection/sampling_plan.json
+    - feature_selection/batch_plan.json
+    - feature_selection/profiles/local_feather_profile.json
+    - feature_selection/batches/batch_001_plan.json
+    - feature_selection/batches/batch_002_plan.json
+    - feature_selection/batches/batch_003_plan.json
+    - feature_selection/batches/batch_004_plan.json
+    - feature_selection/batches/batch_005_plan.json
+    - feature_selection/batches/batch_006_plan.json
+    - feature_selection/batches/batch_007_plan.json
+    - feature_selection/batches/batch_008_plan.json
+    - feature_selection/batches/batch_009_plan.json
+    - feature_selection/batches/batch_010_plan.json
+    - feature_selection/batches/batch_011_plan.json
+    - feature_selection/batches/batch_012_plan.json
+    - feature_selection/batches/batch_013_plan.json
+    - feature_selection/batches/batch_014_plan.json
+    - feature_selection/batches/batch_015_plan.json
+    - queries/sql_evidence_manifest.json
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_final_2tqhk_reptim_360d_con_feature_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_12his_rep_pressure_trend_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_30light_cross_heavy_inner_behaviour_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_jqh_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_continue_ovd_days_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_v2_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_v2_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_jqh_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_jqh_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12payment_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_trend_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_jqh_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22order_calculate_stage_order_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22pip_heavy_cross_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_23changzhai_trend_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_25_cross_inner_behaviour_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_26_lending_costs_detail_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_28lbs_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_31light_credit_trade_cross_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_5account_extra_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_jqh_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_dau_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_1_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_2_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_page_view_n_click_cnt_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_ftr_rep_trend_time_series_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_apply_trend_time_series_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_rep_trend_time_series_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_1_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_2_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_3_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_4_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_repayment_deduct_info_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_used_lmt_trend_time_series_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_light_trans_inner_cross_behaviour_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_order_repay_crossed_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_ability_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_will_pressure_derived_new_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_adj_amt_enhanced_aggregation_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_aval_lmt_enhanced_aggregation_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_order_enhanced_aggregation_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_15ai_call_record_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_di_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_trend_features_di_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_di_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_trend_features_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_telemarket_call_info_features_di_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_account_lmt_feature_sample_final_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info2_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info3_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info4_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info5_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info6_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info7_df_feature.sql
+    - queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_final_order_info_df_feature.sql
+    started_at: '2026-06-25T21:42:27'
+    action:
+      id: feature_prescreen
+      kind: stage
+      approval_required: true
+      approval_type: sql_review
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - feature metadata
+      - SQL review approval for DP pull
+      expected_outputs:
+      - feature_selection/prescreen_*
+      - feature_selection/*_run_summary.json
+      - feature_selection/*_final_remain_features.json
+      artifact_rules:
+      - feature_selection/prescreen_*
+      - feature_selection/*_run_summary.json
+      - feature_selection/*_final_remain_features.json
+    progress:
+      step: action_done
+      status: scaffold
+      message: SQL dry run waiting for approval
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T21:43:46'
+      elapsed_seconds: 0.0
+      last_event_status: scaffold
+    finished_at: '2026-06-25T21:43:45'
+    last_result:
+      status: scaffold
+      failure_code: sql_approval_required
+      message: SQL dry run waiting for approval
+      retry_count: 0
+      artifacts:
+      - path: feature_selection/data_source_contract.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/execution_environment.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/resource_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/sampling_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batch_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/profiles/local_feather_profile.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature source profile evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_001_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_002_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_003_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_004_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_005_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_006_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_007_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_008_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_009_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_010_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_011_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_012_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_013_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_014_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_015_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/sql_evidence_manifest.json
+        kind: file
+        source: generated
+        exists: false
+        description: SQL evidence manifest
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_final_2tqhk_reptim_360d_con_feature_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_12his_rep_pressure_trend_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_30light_cross_heavy_inner_behaviour_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_jqh_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_account_lmt_feature_sample_all_final_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_continue_ovd_days_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_derived_v2_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_ability_v2_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_jqh_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_derived_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_jqh_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12his_rep_will_pressure_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_12payment_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_14ftr_rep_pressure_trend_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_jqh_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_16draw_repay_crossed_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22order_calculate_stage_order_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_22pip_heavy_cross_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_23changzhai_trend_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_25_cross_inner_behaviour_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_26_lending_costs_detail_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_28lbs_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_31light_credit_trade_cross_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_5account_extra_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_jqh_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_7fst_9all_10cur_11lst_orders_info_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_dau_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_1_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_device_extra_2_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_8active_page_view_n_click_cnt_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_ftr_rep_trend_time_series_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_apply_trend_time_series_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_his_rep_trend_time_series_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_1_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_2_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_3_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_rep_apply_summary_4_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_repayment_deduct_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_final_used_lmt_trend_time_series_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_dz_model_light_trans_inner_cross_behaviour_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_order_repay_crossed_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_ability_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_dwa_risk_light_rep_will_pressure_derived_new_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_adj_amt_enhanced_aggregation_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_aval_lmt_enhanced_aggregation_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_off_dp_dz_inner_behavior_order_enhanced_aggregation_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_15ai_call_record_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_di_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_call_info_trend_features_di_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_di_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_13collection_notes_trend_features_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dh_model_final_telemarket_call_info_features_di_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_account_lmt_feature_sample_final_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info1_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info2_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info3_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info4_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info5_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info6_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_daily_dcp_trade_feature_info7_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/ads_app_off_feature__dot__ds29531_backtrack_fj_gcard_model_v6_1_pdm_risk_dz_model_final_order_info_df_feature.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated SQL evidence
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+    failure_code: sql_approval_required
+  build_wide_sql:
+    status: done
+    artifacts:
+    - queries/06_build_prescreen_wide_table.sql
+    - feature_selection/prescreen_wide_feature_map.csv
+    - feature_selection/wide_sql_summary.json
+    - queries/sql_evidence_manifest.json
+    - queries/generated/06_build_prescreen_wide_table.sql
+    - feature_selection/sql_review.json
+    started_at: '2026-06-25T21:44:21'
+    action:
+      id: build_wide_sql
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - feature prescreen remaining features
+      - project.yml
+      expected_outputs:
+      - queries/*.sql
+      - feature_selection/wide_sql_summary.json
+      - feature_selection/wide_table_execution.json
+      artifact_rules:
+      - queries/*.sql
+      - feature_selection/*wide*summary.json
+      - feature_selection/wide_table_execution.json
+      - feature_selection/*feature_map.csv
+    progress:
+      step: action_done
+      status: done
+      message: 宽表 SQL 生成完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T21:44:27'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-25T21:44:27'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: queries/06_build_prescreen_wide_table.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated wide-table create SQL
+        artifact_rule: queries/*.sql
+        rule_matched: true
+      - path: feature_selection/prescreen_wide_feature_map.csv
+        kind: file
+        source: generated
+        exists: false
+        description: Wide-table feature output mapping
+        artifact_rule: feature_selection/*feature_map.csv
+        rule_matched: true
+      - path: feature_selection/wide_sql_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: Wide-table SQL generation summary
+        artifact_rule: feature_selection/*wide*summary.json
+        rule_matched: true
+      - path: queries/sql_evidence_manifest.json
+        kind: file
+        source: generated
+        exists: false
+        description: SQL evidence manifest
+        artifact_rule: ''
+        rule_matched: false
+      - path: queries/generated/06_build_prescreen_wide_table.sql
+        kind: file
+        source: generated
+        exists: false
+        description: Generated wide SQL evidence
+        artifact_rule: queries/*.sql
+        rule_matched: true
+      - path: feature_selection/sql_review.json
+        kind: file
+        source: generated
+        exists: false
+        description: Static SQL review result
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+  feature_refine:
+    status: done
+    artifacts:
+    - feature_selection/data_source_contract.json
+    - feature_selection/execution_environment.json
+    - feature_selection/resource_plan.json
+    - feature_selection/sampling_plan.json
+    - feature_selection/batch_plan.json
+    - feature_selection/profiles/local_feather_profile.json
+    - feature_selection/batches/batch_001_plan.json
+    - feature_selection/batches/batch_002_plan.json
+    - feature_selection/batches/batch_003_plan.json
+    - feature_selection/batches/batch_004_plan.json
+    - feature_selection/batches/batch_005_plan.json
+    - feature_selection/batches/batch_006_plan.json
+    - feature_selection/batches/batch_007_plan.json
+    - feature_selection/batches/batch_008_plan.json
+    - feature_selection/batches/batch_009_plan.json
+    - feature_selection/batches/batch_010_plan.json
+    - feature_selection/batches/batch_011_plan.json
+    - feature_selection/batches/batch_012_plan.json
+    - feature_selection/batches/batch_013_plan.json
+    - feature_selection/batches/batch_014_plan.json
+    - feature_selection/batches/batch_015_plan.json
+    - feature_selection/stage_summary.json
+    - feature_selection/feature_stage_summary.json
+    - feature_selection/final_500_features.txt
+    - feature_selection/final_features.txt
+    - feature_selection/resource_usage.json
+    started_at: '2026-06-25T21:44:45'
+    action:
+      id: feature_refine
+      kind: stage
+      approval_required: true
+      approval_type: sql_review
+      retry_policy: never
+      expected_inputs:
+      - training data feather
+      - wide SQL output
+      - SQL review approval for DP pull
+      expected_outputs:
+      - feature_selection/final_features.txt
+      - feature_selection/final_500_features.txt
+      - feature_selection/stage_summary.json
+      artifact_rules:
+      - feature_selection/final_features.txt
+      - feature_selection/final_500_features.txt
+      - feature_selection/*stage_summary.json
+    progress:
+      step: action_done
+      status: done
+      message: 特征精筛完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T22:08:15'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-25T22:08:14'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: feature_selection/data_source_contract.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/execution_environment.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/resource_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/sampling_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batch_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/profiles/local_feather_profile.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature source profile evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_001_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_002_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_003_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_004_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_005_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_006_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_007_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_008_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_009_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_010_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_011_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_012_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_013_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_014_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_015_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/stage_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement stage summary
+        artifact_rule: feature_selection/*stage_summary.json
+        rule_matched: true
+      - path: feature_selection/feature_stage_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement stage summary compatibility copy
+        artifact_rule: feature_selection/*stage_summary.json
+        rule_matched: true
+      - path: feature_selection/final_500_features.txt
+        kind: file
+        source: generated
+        exists: false
+        description: Final refined feature list
+        artifact_rule: feature_selection/final_500_features.txt
+        rule_matched: true
+      - path: feature_selection/final_features.txt
+        kind: file
+        source: generated
+        exists: false
+        description: Final refined feature list
+        artifact_rule: feature_selection/final_features.txt
+        rule_matched: true
+      - path: feature_selection/resource_usage.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement runtime memory usage
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+  train_baseline:
+    status: scaffold
+    artifacts:
+    - modeling/main_lgbm/train_metrics.json
+    started_at: '2026-06-25T22:08:58'
+    action:
+      id: train_baseline
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - training data feather
+      - feature_selection/final_features.txt
+      - project.yml
+      expected_outputs:
+      - modeling/*/metrics_train_valid.json
+      - modeling/*/actual_feature_list.txt
+      - modeling/*/feature_importance.csv
+      artifact_rules:
+      - modeling/*/metrics_train_valid.json
+      - modeling/*/actual_feature_list.txt
+      - modeling/*/feature_importance.csv
+      - modeling/*/train_metrics.json
+    progress:
+      step: action_done
+      status: scaffold
+      message: 'training failed or dependency missing: Cannot perform reduction ''mean''
+        with string dtype'
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T22:10:12'
+      elapsed_seconds: 0.0
+      last_event_status: scaffold
+    finished_at: '2026-06-25T22:10:11'
+    last_result:
+      status: scaffold
+      failure_code: scaffold_only
+      message: 'training failed or dependency missing: Cannot perform reduction ''mean''
+        with string dtype'
+      retry_count: 0
+      artifacts:
+      - path: modeling/main_lgbm/train_metrics.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/train_metrics.json
+        rule_matched: true
+      decision:
+        stage: train_baseline
+        decision: scaffold
+        reason: 'training failed or dependency missing: Cannot perform reduction ''mean''
+          with string dtype'
+        created_at: '2026-06-25T22:10:11'
+    failure_code: scaffold_only
+  evaluate:
+    status: done
+    artifacts:
+    - evaluation/benchmark_uplift.csv
+    - evaluation/business_risk.csv
+    - evaluation/cross_gain_matrix_gcard_v2.csv
+    - evaluation/cross_gain_matrix_gcard_v4.csv
+    - evaluation/cross_gain_matrix_gcard_v5.csv
+    - evaluation/cross_gain_matrix_gcard_v6.csv
+    - evaluation/decile_lift_all.csv
+    - evaluation/decile_lift_all_gcard_v2.csv
+    - evaluation/decile_lift_all_gcard_v4.csv
+    - evaluation/decile_lift_all_gcard_v5.csv
+    - evaluation/decile_lift_all_gcard_v6.csv
+    - evaluation/decile_lift_all_model_score.csv
+    - evaluation/decile_lift_b2.csv
+    - evaluation/decile_lift_b2_gcard_v2.csv
+    - evaluation/decile_lift_b2_gcard_v4.csv
+    - evaluation/decile_lift_b2_gcard_v5.csv
+    - evaluation/decile_lift_b2_gcard_v6.csv
+    - evaluation/decile_lift_b2_model_score.csv
+    - evaluation/decile_lift_e2e3.csv
+    - evaluation/decile_lift_e2e3_gcard_v2.csv
+    - evaluation/decile_lift_e2e3_gcard_v4.csv
+    - evaluation/decile_lift_e2e3_gcard_v5.csv
+    - evaluation/decile_lift_e2e3_gcard_v6.csv
+    - evaluation/decile_lift_e2e3_model_score.csv
+    - evaluation/dimension_metrics.csv
+    - evaluation/evaluation_summary.json
+    - evaluation/feature_gain_summary.csv
+    - evaluation/intent_zc_amount_risk.csv
+    - evaluation/intent_zc_distribution.csv
+    - evaluation/intent_zc_ftr_rate.csv
+    - evaluation/intent_zc_headcount_risk.csv
+    - evaluation/missing_evaluation_requirements.json
+    - evaluation/monthly_metrics.csv
+    - evaluation/overall_metrics.csv
+    - evaluation/ranking_inversion.csv
+    - evaluation/score_psi_by_month.csv
+    - evaluation/segment_metrics.csv
+    started_at: '2026-06-25T22:10:38'
+    action:
+      id: evaluate
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - model scores feather
+      - project.yml
+      expected_outputs:
+      - evaluation/evaluation_summary.json
+      artifact_rules:
+      - evaluation/evaluation_summary.json
+    progress:
+      step: action_done
+      status: done
+      message: 模型评估完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T22:12:01'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-25T22:12:01'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: evaluation/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/business_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/dimension_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/evaluation_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/evaluation_summary.json
+        rule_matched: true
+      - path: evaluation/feature_gain_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_amount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_ftr_rate.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_headcount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/missing_evaluation_requirements.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/monthly_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/overall_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/ranking_inversion.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/score_psi_by_month.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/segment_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      decision:
+        stage: evaluate
+        decision: done
+        reason: Evaluation completed from local score feather
+        created_at: '2026-06-25T22:12:00'
+  compare:
+    status: done
+    artifacts:
+    - evaluation/benchmark_uplift.csv
+    - evaluation/champion_challenger.json
+    started_at: '2026-06-25T22:12:19'
+    action:
+      id: compare
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - evaluation/evaluation_summary.json
+      - optional champion score
+      expected_outputs:
+      - evaluation/champion_challenger.json
+      - evaluation/benchmark_uplift.csv
+      artifact_rules:
+      - evaluation/champion_challenger.json
+      - evaluation/benchmark_uplift.csv
+    finished_at: '2026-06-25T22:12:21'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: evaluation/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/benchmark_uplift.csv
+        rule_matched: true
+      - path: evaluation/champion_challenger.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/champion_challenger.json
+        rule_matched: true
+      decision:
+        stage: compare
+        decision: done
+        reason: Champion/challenger comparison materialized
+        created_at: '2026-06-25T22:12:21'
+    progress:
+      step: action_done
+      status: done
+      message: 冠军挑战者对比完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T22:12:22'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  report:
+    status: scaffold
+    artifacts:
+    - reports/model_report.md
+    - reports/model_card.md
+    - reports/executive_summary.md
+    started_at: '2026-06-25T22:12:30'
+    action:
+      id: report
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - run_state.yml
+      - audit/artifact_manifest.json
+      - modeling artifacts
+      - evaluation artifacts
+      expected_outputs:
+      - reports/model_report.xlsx
+      - reports/model_report.md
+      - reports/model_card.md
+      - reports/executive_summary.md
+      artifact_rules:
+      - reports/model_report.xlsx
+      - reports/model_report.md
+      - reports/model_card.md
+      - reports/executive_summary.md
+    finished_at: '2026-06-25T22:12:37'
+    last_result:
+      status: scaffold
+      failure_code: scaffold_only
+      message: report generated with missing real evaluation artifacts
+      retry_count: 0
+      artifacts:
+      - path: reports/model_report.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_report.md
+        rule_matched: true
+      - path: reports/model_card.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_card.md
+        rule_matched: true
+      - path: reports/executive_summary.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/executive_summary.md
+        rule_matched: true
+      decision:
+        stage: report
+        decision: scaffold
+        reason: report generated with missing real evaluation artifacts
+        created_at: '2026-06-25T22:12:37'
+    failure_code: scaffold_only
+    progress:
+      step: action_done
+      status: scaffold
+      message: report generated with missing real evaluation artifacts
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-25T22:12:38'
+      elapsed_seconds: 0.0
+      last_event_status: scaffold
+decisions:
+- stage: sample_check
+  decision: done
+  reason: Sample profiling completed from local data
+  created_at: '2026-06-25T21:24:37'
+- stage: train_baseline
+  decision: scaffold
+  reason: 'training failed or dependency missing: Cannot perform reduction ''mean''
+    with string dtype'
+  created_at: '2026-06-25T22:10:11'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-06-25T22:12:00'
+- stage: compare
+  decision: done
+  reason: Champion/challenger comparison materialized
+  created_at: '2026-06-25T22:12:21'
+- stage: report
+  decision: excel_scaffold
+  reason: 'Excel report not generated: No module named ''openpyxl'''
+  created_at: '2026-06-25T22:12:37'
+- stage: report
+  decision: scaffold
+  reason: report generated with missing real evaluation artifacts
+  created_at: '2026-06-25T22:12:37'
+updated_at: '2026-07-01T14:31:41'
+version_id: fujie_gcard_20260625_211825_006138_20260625
+source_type: workbench
+lineage:
+  legacy_run_id: '20260625_211825_006138'
+  migrated_from: runs/20260625_211825_006138
+  migrated_at: '2026-07-01T14:31:41'

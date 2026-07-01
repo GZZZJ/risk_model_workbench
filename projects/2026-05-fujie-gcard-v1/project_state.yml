@@ -14,10 +14,11 @@ risks:
 - scaffold artifacts exist and must not be treated as real modeling evidence
 - 训练数据为10%抽样，非全量宽表数据
 version: 1
-updated_at: '2026-06-26T14:27:22'
+updated_at: '2026-07-01T14:31:41'
 last_handoff: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/handoffs/20260609_201140-2026-06-imported-gcard-main-lgbm.md
 last_retrospective: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/retrospectives/20260609_201910-session-2026-06-imported-gcard-main-lgbm.md
 blockers: []
 last_verified_at: '2026-06-25T22:14:11'
 last_verified_commands:
 - rmw project status --project projects/2026-05-fujie-gcard-v1
+active_version_id: fujie_gcard_v7_20260630

@@ -88,6 +88,14 @@ def _request_doc() -> dict:
                 "baseline_importance_filter": {"keep_top_n": 300},
                 "scale_pos_weight": {"mode": "negative_over_positive"},
             },
+            "training": {
+                "mode": "llm_guided_tune",
+                "tuning": {
+                    "max_rounds": 2,
+                    "candidates_per_round": 3,
+                    "max_trials": 6,
+                },
+            },
             "experiments": [
                 {"name": "baseline_all", "method": "xgboost", "segment": "all"},
                 {"name": "baseline_e2e3", "method": "logistic_regression", "segment": "e2e3"},
@@ -146,6 +154,9 @@ def test_materialize_request_runtime_configs_maps_builder_fields(tmp_path):
     assert train["training"]["experiments"][1]["algorithm"] == "logistic_regression"
     assert train["training"]["experiments"][1]["segment_filter"] == "blue_customer_flag in ['E2', 'E3']"
     assert train["training"]["runtime_step_params"]["scale_pos_weight"]["mode"] == "negative_over_positive"
+    assert train["training"]["mode"] == "llm_guided_tune"
+    assert train["training"]["tuning"]["max_rounds"] == 2
+    assert train["training"]["tuning"]["candidates_per_round"] == 3
     assert evaluate["metrics"] == ["auc", "ks", "decile_lift", "ranking_inversion", "psi", "business_risk"]
     assert evaluate["evaluation"]["score_columns"] == ["model_score", "score_v1", "score_v2"]
     assert "zc_level" in evaluate["evaluation"]["segment_columns"]

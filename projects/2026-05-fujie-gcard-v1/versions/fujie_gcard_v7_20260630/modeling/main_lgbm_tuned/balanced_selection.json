@@ -1,0 +1,18 @@
+{
+  "selected_trial": 8,
+  "selected_name": "random_04",
+  "selection_reason": "all four split AUC/KS improved versus original main_lgbm in tuning search",
+  "params": {
+    "learning_rate": 0.0284730863414912,
+    "num_leaves": 63,
+    "max_depth": 7,
+    "min_child_samples": 75,
+    "colsample_bytree": 0.7331205209651076,
+    "subsample": 0.7020237451220523,
+    "bagging_freq": 2,
+    "reg_alpha": 1.1618308562813377e-05,
+    "reg_lambda": 0.0103814092507735,
+    "num_boost_round": 900,
+    "early_stopping_rounds": 80
+  }
+}

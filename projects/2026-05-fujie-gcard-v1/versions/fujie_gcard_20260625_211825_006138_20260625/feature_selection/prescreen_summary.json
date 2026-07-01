@@ -1,0 +1,12 @@
+{
+  "input_features": 2837,
+  "missing_drop": 274,
+  "constant_drop": 0,
+  "coercion_failed": 0,
+  "iv_drop": 878,
+  "psi_drop": 49,
+  "final_remain": 1636,
+  "iv_threshold": 0.005,
+  "psi_threshold": 0.1,
+  "missing_threshold": 0.9
+}

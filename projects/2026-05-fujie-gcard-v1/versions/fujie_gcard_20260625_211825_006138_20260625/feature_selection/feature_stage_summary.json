@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-06-25T22:07:48",
+  "wide_table": "pdm_risk.pdm_risk_fujie_gcard_feature_prescreen_wide_feature_v6_1",
+  "feather_path": "/root/notebook/draft/十分之一的2k维观察样本.feather",
+  "data_source_mode": "local_feather",
+  "raw_rows": 200000,
+  "total_rows": 200000,
+  "train_samples": 74856,
+  "valid_samples": 25045,
+  "initial_features": 2843,
+  "available_features": 2558,
+  "after_global_corr": 1847,
+  "d03_mode": "feature_select_v2",
+  "after_d03_random_importance": 18,
+  "after_d04_null_importance": 18,
+  "final_features": 18,
+  "d05_valid_auc": 0.9287310303260823,
+  "sampling_where": "ds is not null and final_flag in ('DEV','OOT') and ftr_30d_ord_flag in (0,1) and rand_flag0 < 0.02",
+  "sampling_max_rows": 200000,
+  "configured_peak_multiplier": 4.0,
+  "observed_peak_multiplier": 13.785755232740573,
+  "resource_usage_path": "resource_usage.json"
+}

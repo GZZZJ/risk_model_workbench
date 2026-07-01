@@ -1,0 +1,5 @@
+{
+  "status": "scaffold",
+  "reason": "training failed or dependency missing: Cannot perform reduction 'mean' with string dtype",
+  "experiment": "main_lgbm"
+}

@@ -1,0 +1,43 @@
+{
+  "prescreen_remain": 1636,
+  "correlation_removed": 546,
+  "correlation_remain": 1090,
+  "null_importance_removed": 730,
+  "null_importance_remain": 360,
+  "baseline_top_n": 500,
+  "final_features": 360,
+  "filters": {
+    "missing_rate": {
+      "threshold": 0.9,
+      "dropped": 274
+    },
+    "constant_value": {
+      "threshold": 1,
+      "dropped": 0
+    },
+    "iv": {
+      "threshold": 0.005,
+      "dropped": 878
+    },
+    "psi": {
+      "threshold": 0.1,
+      "dropped": 49
+    },
+    "correlation": {
+      "method": "spearman",
+      "threshold": 0.8,
+      "dropped": 546
+    },
+    "null_importance": {
+      "null_rounds": 20,
+      "percentile": 75,
+      "score_threshold": 1.0,
+      "dropped": 730
+    },
+    "baseline_importance": {
+      "importance_type": "gain",
+      "keep_top_n": 500,
+      "dropped": 0
+    }
+  }
+}

@@ -28,6 +28,9 @@ projects/*/runs/**/cache/
 *.~*.xls
 *.~*.docx
 projects/*/runs/**/*.feather
+projects/*/versions/**/*.feather
+projects/*/runs/**/sample.pkl
+projects/*/versions/**/sample.pkl
 
 # Local generated package metadata.
 *.egg-info/

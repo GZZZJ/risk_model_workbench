@@ -1,0 +1,89 @@
+evaluation:
+  label_column: ftr_30d_ord_flag
+  score_columns:
+  - model_score
+  - gcard_v2
+  - gcard_v4
+  - gcard_v5
+  - gcard_v6
+  score_labels:
+    model_score: 本轮模型
+    gcard_v2: G卡V2
+    gcard_v4: G卡V4
+    gcard_v5: G卡V5
+    gcard_v6: G卡V6
+  split_column: final_flag
+  time_column: mdl_dte
+  period_column: ds
+  segment_columns:
+  - blue_customer_flag
+  - zc_level
+  - split
+  - month
+  - segment
+  - decile
+  segment_mapping:
+    blue_customer_flag:
+      B2: 流失户
+      E2: 次新户
+      E3: 老户
+    report_groups:
+      老户次新:
+        filter: blue_customer_flag in ['E2', 'E3']
+      流失户:
+        filter: blue_customer_flag == 'B2'
+  comparison_dimensions:
+  - split
+  - month
+  - segment
+  - decile
+  risk_profile_dimensions:
+  - blue_customer_flag
+  - zc_level
+metrics:
+- auc
+- ks
+- decile_lift
+- ranking_inversion
+- psi
+risk_observation:
+  enabled: true
+  status: pending_mob_definition_confirmation
+  columns:
+  - prc_amt_xz_30d_3m
+  - ovd_amt_xz_30d_3m
+  pending_questions:
+  - MOB1/MOB3人头逾期率的分子、分母、去重主键和观察窗口。
+  - MOB1/MOB3金额逾期率的本金口径、逾期金额口径和是否可直接使用现有金额字段。
+runtime_step_params:
+  feature_quality_prescreen:
+    require_sql_approval: true
+  sql_review_gate:
+    block_on_high_risk: true
+  missing_rate_filter:
+    threshold: 0.9
+  constant_value_filter:
+    max_unique_values: 1
+  iv_filter:
+    min_iv: 0.005
+  correlation_dedup:
+    method: spearman
+    max_abs_corr: 0.8
+  random_noise_importance:
+    mode: feature_select_v2
+    bagging_rounds: 5
+    bagging_fraction: 0.5
+    thresholds: 0.95
+    importance_types:
+    - split
+    - gain
+  null_importance_filter:
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.0
+  baseline_importance_filter:
+    importance_type: gain
+    keep_top_n: 500
+  lightgbm_binary_training:
+    early_stopping_rounds: 50
+    max_auc_gap: 0.02

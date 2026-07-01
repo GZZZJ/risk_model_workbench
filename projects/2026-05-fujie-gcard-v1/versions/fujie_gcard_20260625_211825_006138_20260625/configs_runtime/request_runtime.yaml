@@ -1,0 +1,14 @@
+request_id: 20260625-1740-model-request
+request_path: /root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/requests/20260625-1740-model-request.md
+plan_id: null
+workflow: full_modeling
+data_source_mode: remote_table
+sample_location: pdm_risk.pdm_risk_fujie_gcard_d01_d02_wide_feature_v6_1
+materialized_configs:
+- project.yml
+- sample.yaml
+- feature_select.yaml
+- refine_features.yaml
+- train.yaml
+- evaluate.yaml
+- report.yaml

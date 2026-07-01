@@ -1,0 +1,153 @@
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+workflow: full_modeling
+created_at: '2026-06-15T18:37:34'
+status: running
+current_stage: report
+stages:
+  validate_config:
+    status: pending
+    artifacts:
+    - configs_snapshot
+  sample_check:
+    status: pending
+    artifacts: []
+  feature_metadata:
+    status: pending
+    artifacts: []
+  d01_d02_screening:
+    status: pending
+    artifacts: []
+  build_wide_sql:
+    status: pending
+    artifacts: []
+  feature_refine:
+    status: pending
+    artifacts: []
+  train_baseline:
+    status: scaffold
+    artifacts:
+    - modeling/main_lgbm/train_metrics.json
+    started_at: '2026-06-15T18:37:56'
+    progress:
+      step: stage_done
+      status: scaffold
+      message: 模型训练完成，产物为脚手架或占位结果
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-15T18:51:57'
+      elapsed_seconds: 0.0
+      last_event_status: scaffold
+    finished_at: '2026-06-15T18:51:57'
+  evaluate:
+    status: done
+    artifacts:
+    - evaluation/evaluation_summary.json
+    - evaluation/overall_metrics.csv
+    - evaluation/monthly_metrics.csv
+    - evaluation/segment_metrics.csv
+    - evaluation/benchmark_uplift.csv
+    - evaluation/score_psi_by_month.csv
+    started_at: '2026-06-15T18:52:42'
+    progress:
+      step: stage_done
+      status: done
+      message: 模型评估完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-15T18:56:56'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-15T18:56:56'
+  compare:
+    status: scaffold
+    artifacts:
+    - evaluation/champion_challenger.json
+    started_at: '2026-06-15T18:57:01'
+    progress:
+      step: stage_done
+      status: scaffold
+      message: 冠军挑战者对比完成，产物为脚手架或占位结果
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-15T18:57:02'
+      elapsed_seconds: 0.0
+      last_event_status: scaffold
+    finished_at: '2026-06-15T18:57:02'
+  report:
+    status: done
+    artifacts:
+    - reports/model_report.md
+    - reports/model_card.md
+    - reports/executive_summary.md
+    - reports/model_report.xlsx
+    - reports/model_report.html
+    - reports/model_report_missing_results.md
+    - reports/woe_top_features/images/001_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - reports/woe_top_features/images/002_ord_apl_sum_prc_amt_90_day_WOE.png
+    - reports/woe_top_features/images/003_ord_apl_max_prc_amt_180_day_WOE.png
+    - reports/woe_top_features/images/004_unpaid_principal_future_light_add_heavy_WOE.png
+    - reports/woe_top_features/images/005_his_90_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+    - reports/woe_top_features/images/007_his_360_day_csh_apl_ord_cnt_WOE.png
+    - reports/woe_top_features/images/008_cnt_event_result_1_uid_recent_days_120_WOE.png
+    - reports/woe_top_features/images/009_his_180_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports/woe_top_features/images/010_d360_apl_ord_cnt_all_WOE.png
+    - reports/woe_top_features/images/011_ord_apl_sum_prc_amt_360_day_WOE.png
+    - reports/woe_top_features/images/012_dau_90d_WOE.png
+    - reports/woe_top_features/images/013_cnt_other_info_cash_uid_recent_days_30_WOE.png
+    - reports/woe_top_features/images/014_cnt_avg_ord_span_30d_WOE.png
+    - reports/woe_top_features/images/015_stg_pln_pay_off_sum_prc_amt_1m_WOE.png
+    - reports/woe_top_features/images/016_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+    - reports/woe_top_features/images/017_his_720_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports/woe_top_features/images/018_clk_cnt_14d_WOE.png
+    - reports/woe_top_features/images/019_cnt_avb_lmt_2m_v2_WOE.png
+    - reports/woe_top_features/images/020_d360_max_faqi_prc_amt_divide_rsk_avl_lmt_cash_WOE.png
+    - reports/woe_top_features/woe_top20_summary.csv
+    started_at: '2026-06-16T17:48:24'
+    progress:
+      step: stage_done
+      status: done
+      message: 报告生成完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-06-16T17:48:28'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-06-16T17:48:28'
+decisions:
+- stage: train_baseline
+  decision: scaffold
+  reason: training data not available
+  created_at: '2026-06-15T18:37:39'
+- stage: train_baseline
+  decision: scaffold
+  reason: 'training failed or dependency missing: Cannot perform reduction ''mean''
+    with string dtype'
+  created_at: '2026-06-15T18:51:57'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-06-15T18:56:55'
+- stage: compare
+  decision: scaffold
+  reason: candidate and champion predictions not available
+  created_at: '2026-06-15T18:57:02'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-16T16:59:52'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-16T17:48:28'
+updated_at: '2026-07-01T14:31:40'
+version_id: fujie_gcard_20260615_train_300_20260615
+source_type: workbench
+lineage:
+  legacy_run_id: 20260615_train_300
+  migrated_from: runs/20260615_train_300
+  migrated_at: '2026-07-01T14:31:40'

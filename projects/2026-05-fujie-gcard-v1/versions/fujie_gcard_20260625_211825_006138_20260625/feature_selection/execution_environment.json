@@ -1,0 +1,10 @@
+{
+  "platform": "linux",
+  "data_source_mode": "local_feather",
+  "override": "auto",
+  "override_source": "bypassed",
+  "available": null,
+  "reason": "remote data pull engine bypassed for local_feather mode",
+  "data_pull_engine": null,
+  "created_at": "2026-06-25T22:07:50"
+}

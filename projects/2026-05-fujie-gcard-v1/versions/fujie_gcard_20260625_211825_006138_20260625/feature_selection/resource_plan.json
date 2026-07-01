@@ -1,0 +1,37 @@
+{
+  "data_source_mode": "local_feather",
+  "stage": "feature_refine",
+  "memory": {
+    "total_bytes": 132750516224,
+    "available_bytes": 72659329024,
+    "platform": "linux",
+    "source": "proc_meminfo"
+  },
+  "capacity": {
+    "total_memory_bytes": 132750516224,
+    "available_memory_bytes": 72659329024,
+    "memory_budget_fraction": 0.8,
+    "memory_budget_bytes": 58127463219,
+    "peak_multiplier": 4.0,
+    "matrix_budget_bytes": 14531865804,
+    "feature_column_count": 2843,
+    "required_non_feature_column_count": 20,
+    "bytes_per_numeric_value": 8,
+    "row_width_bytes": 22904,
+    "max_rows": 634468,
+    "formula": "floor((available_memory_bytes * memory_budget_fraction / peak_multiplier) / ((feature_column_count + required_non_feature_column_count) * bytes_per_numeric_value))"
+  },
+  "sampling": {
+    "total_rows": 973715,
+    "max_rows": 634468,
+    "sampling_required": true,
+    "ratio": 0.6515951792875739,
+    "estimated_rows": 634468,
+    "limit": null,
+    "reason": "row count exceeds memory capacity"
+  },
+  "local_source": {
+    "file_size_bytes": 3733981602,
+    "estimated_in_memory_expansion_basis": "row_width_bytes * row_count * peak_multiplier"
+  }
+}

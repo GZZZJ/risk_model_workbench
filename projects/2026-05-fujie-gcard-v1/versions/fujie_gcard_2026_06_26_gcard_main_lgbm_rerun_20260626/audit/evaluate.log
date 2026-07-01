@@ -1,0 +1,16 @@
+[RMW] 模型评估 0% | 模型评估开始执行 | 已用 0秒
+[RMW] 模型评估 8% | 正在读取评分数据：/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/modeling/main_lgbm/scores_all_splits.feather | 已用 0秒
+[RMW] 模型评估 18% | 评分数据读取完成：489743 行 16 列 | 已用 1秒
+[RMW] 模型评估 25% | 开始计算整体指标：4 个样本分组，5 个分数字段 | 已用 1秒
+[RMW] 模型评估 38% | 整体指标完成：4 行 | 已用 6秒
+[RMW] 模型评估 42% | 开始计算月度指标 | 已用 6秒
+[RMW] 模型评估 52% | 月度指标完成：16 行 | 已用 9秒
+[RMW] 模型评估 56% | 开始计算分群指标 | 已用 9秒
+[RMW] 模型评估 64% | 分群指标完成：20 行 | 已用 33秒
+[RMW] 模型评估 68% | 开始生成 decile lift 结果 | 已用 33秒
+[RMW] 模型评估 76% | 开始生成意愿资产交叉观察结果 | 已用 37秒
+[RMW] 模型评估 82% | 开始生成 PSI 稳定性结果 | 已用 40秒
+[RMW] 模型评估 90% | 冠军挑战者对比指标完成：4 行 | 已用 43秒
+[RMW] 模型评估 100% | 模型评估完成：评估 5 个分数字段，总样本 489743 行 | 已用 43秒
+[RMW] 模型评估 100% | 模型评估完成 | 已用 0秒
+evaluation complete: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/runs/2026-06-26-gcard-main-lgbm-rerun/evaluation/evaluation_summary.json

@@ -1,0 +1,168 @@
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+workflow: imported_gcard_main_lgbm
+created_at: '2026-06-09T11:09:33'
+status: imported
+current_stage: feature_refine
+stages:
+  validate_config:
+    status: done
+    artifacts:
+    - configs_snapshot/train.yaml
+    finished_at: '2026-06-09T11:09:34'
+  sample_check:
+    status: done
+    artifacts:
+    - sample_check/sample_split_summary.csv
+    - sample_check/label_distribution.csv
+    - sample_check/segment_distribution.csv
+    finished_at: '2026-06-09T11:09:34'
+  feature_metadata:
+    status: pending
+    artifacts: []
+  feature_prescreen:
+    status: pending
+    artifacts: []
+  build_wide_sql:
+    status: pending
+    artifacts: []
+  feature_refine:
+    status: scaffold
+    artifacts:
+    - feature_selection/final_features.txt
+    - feature_selection/feature_availability.csv
+    - feature_selection/feature_stage_summary.json
+    finished_at: '2026-06-12T17:53:50'
+    started_at: '2026-06-12T17:53:49'
+  train_baseline:
+    status: done
+    artifacts:
+    - modeling_input/input_config.json
+    - modeling_input/input_schema.csv
+    - modeling/main_lgbm/model.pkl
+    - modeling/main_lgbm/metrics_train_valid.json
+    - modeling/main_lgbm/feature_importance.csv
+    - modeling/main_lgbm/feature_drop_detail.csv
+    - modeling/main_lgbm/actual_feature_list.txt
+    - modeling/main_lgbm/preprocessing.json
+    - modeling/main_lgbm/run_config.json
+    finished_at: '2026-06-09T11:09:34'
+  evaluate:
+    status: done
+    artifacts:
+    - evaluation/evaluation_summary.json
+    - evaluation/overall_metrics.csv
+    - evaluation/monthly_metrics.csv
+    - evaluation/segment_metrics.csv
+    - evaluation/decile_lift_all.csv
+    - evaluation/decile_lift_all_gcard_v2.csv
+    - evaluation/decile_lift_all_gcard_v4.csv
+    - evaluation/decile_lift_all_gcard_v5.csv
+    - evaluation/decile_lift_all_gcard_v6.csv
+    - evaluation/decile_lift_all_model_score.csv
+    - evaluation/decile_lift_b2.csv
+    - evaluation/decile_lift_b2_gcard_v2.csv
+    - evaluation/decile_lift_b2_gcard_v4.csv
+    - evaluation/decile_lift_b2_gcard_v5.csv
+    - evaluation/decile_lift_b2_gcard_v6.csv
+    - evaluation/decile_lift_b2_model_score.csv
+    - evaluation/decile_lift_e2e3.csv
+    - evaluation/decile_lift_e2e3_gcard_v2.csv
+    - evaluation/decile_lift_e2e3_gcard_v4.csv
+    - evaluation/decile_lift_e2e3_gcard_v5.csv
+    - evaluation/decile_lift_e2e3_gcard_v6.csv
+    - evaluation/decile_lift_e2e3_model_score.csv
+    - evaluation/intent_zc_amount_risk.csv
+    - evaluation/intent_zc_distribution.csv
+    - evaluation/intent_zc_ftr_rate.csv
+    - evaluation/intent_zc_headcount_risk.csv
+    - evaluation/score_psi_by_month.csv
+    - evaluation/monthly_segment_metrics_oos_by_version.csv
+    finished_at: '2026-06-09T11:09:34'
+  compare:
+    status: done
+    artifacts:
+    - evaluation/benchmark_uplift.csv
+    finished_at: '2026-06-09T11:09:34'
+  report:
+    status: done
+    artifacts:
+    - reports/model_report.xlsx
+    - reports/model_report.md
+    - reports/model_card.md
+    - reports/executive_summary.md
+    - reports/model_report_missing_results.md
+    - reports/model_report.html
+    finished_at: '2026-06-09T19:26:42'
+    started_at: '2026-06-09T19:26:39'
+decisions:
+- stage: train_baseline
+  decision: imported
+  reason: 本 run 从远端真实复借 G 卡 main_lgbm 训练、评估和报告产物导入，不是当前环境重新执行。
+  created_at: '2026-06-09T11:09:34'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T11:09:36'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T11:54:04'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T13:02:50'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T13:03:44'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T13:52:41'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T15:05:37'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T17:18:49'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T17:28:54'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T17:36:56'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T18:16:15'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T18:34:37'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T18:44:01'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T18:58:20'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T19:07:03'
+- stage: report
+  decision: done
+  reason: Excel report generated from standard train and evaluation artifacts
+  created_at: '2026-06-09T19:26:42'
+updated_at: '2026-07-01T14:31:40'
+version_id: fujie_gcard_2026_06_imported_gcard_main_lgbm
+source_type: imported
+lineage:
+  legacy_run_id: 2026-06-imported-gcard-main-lgbm
+  migrated_from: runs/2026-06-imported-gcard-main-lgbm
+  migrated_at: '2026-07-01T14:31:40'

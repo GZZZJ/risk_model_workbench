@@ -1,0 +1,214 @@
+feature_select:
+  engine: feature-select-v2
+  mode: local_file
+  skill_path: ../../vendor/feature-select-v2
+  output_dir: runs/{run_id}/feature_select
+  scale_note: 候选特征预计15000+，样本量几百万级；必须随机抽样并分批处理特征。
+  current_screening_note: 当前特征初筛按特征表单独筛选，取数条件固定为 rand_flag0 < 0.1 and final_flag in
+    ('DEV','OOT')。
+  metadata:
+    tables_file: configs/feature_tables.txt
+    output_dir: data/profile/feature_metadata
+    docs_path: docs/特征表清单.md
+    sample_columns:
+    - sample_row_num
+    - uid
+    - mdl_dte
+    - blue_customer_flag
+    - ftr_30d_ord_flag
+    - ftr_30d_ord_amt
+    - prc_amt_xz_30d_3m
+    - ovd_amt_xz_30d_3m
+    - liushi_days
+    - due_date_flag
+    - final_flag
+    - fq_diff_grp
+    - mob_group
+    - zc_level
+    - gd_lmt_grp
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+    - rand_flag0
+    - rand_flag1
+    - rand_flag2
+    - rand_flag3
+    - rand_flag4
+    - rand_flag5
+    - ds
+    exclude_columns: []
+  prescreen:
+    feature_columns: data/profile/feature_metadata/feature_columns.csv
+    output_dir: runs/feature_prescreen
+    target_col: ftr_30d_ord_flag
+    split_col: final_flag
+    train_value: DEV
+    valid_value: OOT
+    round_num: 500
+    random_seed: 0
+    workers: 4
+    sampling:
+      partition_col: ds
+      train_partitions:
+      - '20250630'
+      - '20250731'
+      - '20250831'
+      - '20250930'
+      - '20251031'
+      - '20251130'
+      valid_partitions:
+      - '20251231'
+      - '20260131'
+      where: rand_flag0 < 0.1 and final_flag in ('DEV','OOT')
+    dp_feather:
+      data_dir: data/local/dp_feather/feature_prescreen
+      metadata_dir: data/profile/dp_feather_datasets/feature_prescreen
+    thresholds:
+      empty: 0.9
+      iv: 0.005
+      corr: 0.8
+  steps:
+  - d01
+  - d02
+  - d03
+  - d05
+  - d07
+  - d08
+  thresholds:
+    iv: 0.005
+    empty: 0.9
+    corr: 0.8
+    psi: 0.1
+  feature_info:
+    table_or_path: data/profile/feature_metadata/feature_columns.csv
+    required_columns:
+    - feature_name
+    - feature_comment
+    - category_name
+  bigtable:
+    table_list: configs/feature_tables.txt
+    metadata_dir: data/profile/feature_metadata
+    tables: []
+    local_files: []
+    expected_feature_count: 15028
+    source_status: backtracked_tables_profiled
+  wide_table:
+    base_table: pdm_risk.pdm_risk_fujie_gcard_d01_d02_wide_feature_v6_1
+    output_table: pdm_risk.pdm_risk_fujie_gcard_feature_prescreen_wide_feature_v6_1
+    join_keys:
+    - uid
+    - mdl_dte
+    base_columns:
+    - uid
+    - mdl_dte
+    - ds
+    - blue_customer_flag
+    - ftr_30d_ord_flag
+    - ftr_30d_ord_amt
+    - prc_amt_xz_30d_3m
+    - ovd_amt_xz_30d_3m
+    - final_flag
+    - zc_level
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+    - rand_flag0
+    - rand_flag1
+    - rand_flag2
+    - rand_flag3
+    - rand_flag4
+    - rand_flag5
+    base_where: ds is not null
+    feature_where: ds is not null
+    remain_features_path: runs/feature_prescreen/results/prescreen_final_remain_features.json
+    sql_output: queries/06_build_prescreen_wide_table.sql
+    feature_map_output: runs/feature_prescreen/results/prescreen_wide_feature_map.csv
+  params:
+    D01_PARAMS:
+      random_num: 3000000
+      random_seed: 0
+      round_num: 500
+    D02_PARAMS:
+      random_num: 5000000
+      random_seed: 0
+    D03_D06_PARAMS:
+      ins_random_num: 3000000
+      oos_random_num: 1000000
+      random_seed: 0
+    D07_D08_PARAMS:
+      random_num: 5000000
+      random_seed: 0
+  train_baseline_model: true
+  runtime_request:
+    data_source_mode: remote_table
+    sample_location: pdm_risk.pdm_risk_fujie_gcard_d01_d02_wide_feature_v6_1
+    stage_steps:
+      sample_check:
+      - field_contract
+      - key_uniqueness
+      - monthly_label_distribution
+      - segment_distribution
+      feature_metadata:
+      - feature_metadata_export
+      feature_prescreen:
+      - feature_quality_prescreen
+      build_wide_sql:
+      - wide_sql_generation
+      - sql_review_gate
+      feature_refine:
+      - feature_availability_filter
+      - missing_rate_filter
+      - constant_value_filter
+      - iv_filter
+      - correlation_dedup
+      - random_noise_importance
+      - null_importance_filter
+      - baseline_importance_filter
+      train_baseline:
+      - lightgbm_binary_training
+      evaluate:
+      - auc_ks
+      - decile_lift
+      - monthly_stability
+      - score_psi
+      - segment_metrics
+      - cross_gain_matrix
+      - feature_gain_summary
+      compare:
+      - champion_challenger
+      report:
+      - model_report
+    step_params:
+      feature_quality_prescreen:
+        require_sql_approval: true
+      sql_review_gate:
+        block_on_high_risk: true
+      missing_rate_filter:
+        threshold: 0.9
+      constant_value_filter:
+        max_unique_values: 1
+      iv_filter:
+        min_iv: 0.005
+      correlation_dedup:
+        method: spearman
+        max_abs_corr: 0.8
+      random_noise_importance:
+        mode: feature_select_v2
+        bagging_rounds: 5
+        bagging_fraction: 0.5
+        thresholds: 0.95
+        importance_types:
+        - split
+        - gain
+      null_importance_filter:
+        null_rounds: 20
+        null_percentile: 75
+        score_threshold: 1.0
+      baseline_importance_filter:
+        importance_type: gain
+        keep_top_n: 500
+      lightgbm_binary_training:
+        early_stopping_rounds: 50
+        max_auc_gap: 0.02

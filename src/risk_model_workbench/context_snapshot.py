@@ -13,7 +13,8 @@ from risk_model_workbench.paths import workflow_path
 from risk_model_workbench.progress import load_progress_summary
 from risk_model_workbench.project_state import audit_run, load_project_state
 from risk_model_workbench.run_evidence import load_run_evidence
-from risk_model_workbench.state import run_dir
+from risk_model_workbench.state import workspace_id
+from risk_model_workbench.versioning import resolve_workspace_dir
 
 
 def build_context_snapshot(project_dir: str | Path, run_id: str) -> dict[str, Any]:
@@ -22,18 +23,22 @@ def build_context_snapshot(project_dir: str | Path, run_id: str) -> dict[str, An
     selected_run = evidence.run_path
     run_state = evidence.run_state
     contract_source = evidence.contract_source
+    selected_id = workspace_id(run_state, run_id)
+    workspace_rel = selected_run.relative_to(project_path)
+    state_filename = "version_state.yml" if (selected_run / "version_state.yml").exists() else "run_state.yml"
 
     return {
         "version": 1,
         "generated_at": _now(),
         "project": str(project_path.resolve()),
-        "run_id": run_id,
+        "version_id": run_state.get("version_id", ""),
+        "run_id": run_state.get("run_id", run_id),
         "sources": [
             "project_state.yml",
-            f"runs/{run_id}/run_state.yml",
-            f"runs/{run_id}/audit/artifact_manifest.json",
+            str(workspace_rel / state_filename),
+            str(workspace_rel / "audit" / "artifact_manifest.json"),
             contract_source,
-            f"runs/{run_id}/audit/progress_summary.json",
+            str(workspace_rel / "audit" / "progress_summary.json"),
             "project_facts.yml",
         ],
         "project_state": load_project_state(project_path),
@@ -42,7 +47,7 @@ def build_context_snapshot(project_dir: str | Path, run_id: str) -> dict[str, An
         "workflow": _workflow_payload(evidence.workflow, evidence.stage_contracts, contract_source),
         "run_state": run_state,
         "artifact_manifest": _compact_manifest(evidence.manifest),
-        "latest_audit": audit_run(project_path, run_id),
+        "latest_audit": audit_run(project_path, selected_id),
         "decision_log": list(run_state.get("decisions", []))[-20:],
         "progress_summary": load_progress_summary(selected_run),
         "facts": list_facts(project_path),
@@ -57,7 +62,7 @@ def write_context_snapshot(
     markdown: bool = False,
 ) -> tuple[Path, Path | None]:
     project_path = Path(project_dir)
-    selected_run = run_dir(project_path, run_id)
+    selected_run = resolve_workspace_dir(project_path, run_id=run_id)
     snapshot = build_context_snapshot(project_path, run_id)
     output_path = Path(output) if output else selected_run / "audit" / "context_snapshot.json"
     if not output_path.is_absolute():
@@ -75,11 +80,14 @@ def write_context_snapshot(
 
 
 def format_context_snapshot(snapshot: dict[str, Any]) -> str:
+    title_id = snapshot.get("version_id") or snapshot.get("run_id")
     lines = [
-        f"# Context Snapshot - {snapshot.get('run_id')}",
+        f"# Context Snapshot - {title_id}",
         "",
         f"- generated_at: {snapshot.get('generated_at')}",
         f"- project: {snapshot.get('project')}",
+        f"- version_id: {snapshot.get('version_id') or ''}",
+        f"- run_id: {snapshot.get('run_id') or ''}",
         f"- audit_verdict: {(snapshot.get('latest_audit') or {}).get('verdict')}",
         "",
         "## Sources",

@@ -1,0 +1,198 @@
+{
+  "project": {
+    "name": "2026-05-fujie-gcard-v1",
+    "display_name": "复借G卡",
+    "scenario": "复借意愿"
+  },
+  "basis": {
+    "primary_refine_source": "feature_refine_feather",
+    "feather_path": "/root/notebook/draft/十分之一观察样本.feather",
+    "initial_feature_count": 15028,
+    "sample_rows": 50000,
+    "train_samples": 37451,
+    "valid_samples": 12549,
+    "d05_valid_auc": 0.9292298928479013,
+    "stage_summary": "runs/feature_refine_feather/stage_summary.json"
+  },
+  "feature_select_v2_alignment": {
+    "status": "concept_aligned_not_exact_reimplementation",
+    "summary": "当前复借G卡 Feather 主线借鉴 feature-select-v2 的随机重要性、Null Importance、Top Importance 思路，但阈值和局部实现为项目内自定义。",
+    "local_reference_paths": [
+      "my-skills/develop/feature-select-v2",
+      "vendor/feature-select-v2"
+    ],
+    "current_project_config": "configs/refine_features.yaml"
+  },
+  "screening_rows": [
+    {
+      "step": "初始",
+      "method": "初始候选变量总数：70张特征表，共15,028个字段级候选变量",
+      "remaining_features": 15028,
+      "source": "runs/d01_d02_batch_select/results/d01_d02_run_summary.json"
+    },
+    {
+      "step": 1,
+      "method": "分表基础预筛：缺失率 < 0.95，相关性 < 0.80，IV >= 0.005",
+      "remaining_features": 2958,
+      "source": "runs/d01_d02_batch_select/results/d01_d02_run_summary.json"
+    },
+    {
+      "step": 2,
+      "method": "稳定性筛选：DEV vs OOT，PSI <= 0.10",
+      "remaining_features": 2843,
+      "source": "runs/d01_d02_batch_select/results/d01_d02_run_summary.json"
+    },
+    {
+      "step": 3,
+      "method": "Feather观察样本可用特征：50,000行，过滤缺失率过低和常量字段",
+      "remaining_features": 2825,
+      "source": "runs/feature_refine_feather/stage_summary.json"
+    },
+    {
+      "step": 4,
+      "method": "全局相关性去重：相关性阈值 0.80，按单变量AUC保留更强特征",
+      "remaining_features": 1945,
+      "source": "runs/feature_refine_feather/stage_summary.json"
+    },
+    {
+      "step": 5,
+      "method": "随机噪声重要性筛选：3轮，5个随机噪声特征，存活率 >= 0.50",
+      "remaining_features": 96,
+      "source": "runs/feature_refine_feather/stage_summary.json"
+    },
+    {
+      "step": 6,
+      "method": "空标签重要性筛选：20轮空标签，空标签重要性75分位，score >= 1.00",
+      "remaining_features": 96,
+      "source": "runs/feature_refine_feather/stage_summary.json"
+    },
+    {
+      "step": 7,
+      "method": "基线模型重要性筛选：LightGBM gain importance，保留前500个，valid AUC=0.9292",
+      "remaining_features": 96,
+      "source": "runs/feature_refine_feather/final_500_features.txt"
+    }
+  ],
+  "top_features": [
+    {
+      "rank": 1,
+      "feature": "ord_apl_sum_prc_amt_90_day",
+      "gain": 40417.353327035904,
+      "split": 10
+    },
+    {
+      "rank": 2,
+      "feature": "ord_apl_max_prc_amt_180_day",
+      "gain": 33925.33762741089,
+      "split": 21
+    },
+    {
+      "rank": 3,
+      "feature": "d360_apl_ord_ddf_mdl_ord_crt_dte_min",
+      "gain": 24635.26468205452,
+      "split": 66
+    },
+    {
+      "rank": 4,
+      "feature": "unpaid_principal_future_light_add_heavy",
+      "gain": 14684.51038056612,
+      "split": 30
+    },
+    {
+      "rank": 5,
+      "feature": "d180_apl_ord_days_cnt_all",
+      "gain": 8441.133394956589,
+      "split": 24
+    },
+    {
+      "rank": 6,
+      "feature": "ord_apl_sum_prc_amt_360_day",
+      "gain": 7986.739725351334,
+      "split": 38
+    },
+    {
+      "rank": 7,
+      "feature": "his_180_day_csh_apl_ord_cnt_his_rto",
+      "gain": 3895.5049476623535,
+      "split": 8
+    },
+    {
+      "rank": 8,
+      "feature": "dau_90d",
+      "gain": 3044.96014213562,
+      "split": 60
+    },
+    {
+      "rank": 9,
+      "feature": "his_360_day_csh_apl_ord_cnt",
+      "gain": 2549.226490020752,
+      "split": 17
+    },
+    {
+      "rank": 10,
+      "feature": "d360_apl_ord_cnt_all",
+      "gain": 2464.591413974762,
+      "split": 13
+    },
+    {
+      "rank": 11,
+      "feature": "cnt_event_result_1_uid_recent_days_120",
+      "gain": 2224.276693344116,
+      "split": 24
+    },
+    {
+      "rank": 12,
+      "feature": "his_360_day_csh_apl_ord_cnt_his_rto",
+      "gain": 1754.5247049331665,
+      "split": 14
+    },
+    {
+      "rank": 13,
+      "feature": "ddf_lst_app_str_tim_to_mdl_tim_sec",
+      "gain": 1702.738429069519,
+      "split": 86
+    },
+    {
+      "rank": 14,
+      "feature": "cnt_other_info_cash_uid_recent_days_30",
+      "gain": 1569.689866065979,
+      "split": 15
+    },
+    {
+      "rank": 15,
+      "feature": "cnt_avg_ord_span_30d",
+      "gain": 1459.9426250457764,
+      "split": 23
+    },
+    {
+      "rank": 16,
+      "feature": "d90_aplord_suc_month_cnt",
+      "gain": 943.5442066192627,
+      "split": 12
+    },
+    {
+      "rank": 17,
+      "feature": "clk_cnt_14d",
+      "gain": 797.8499491214752,
+      "split": 33
+    },
+    {
+      "rank": 18,
+      "feature": "rsk_avl_lmt_ch_les_500_cnt_12m",
+      "gain": 752.1607961654663,
+      "split": 16
+    },
+    {
+      "rank": 19,
+      "feature": "stg_pln_max_rep_prc_1m_his",
+      "gain": 693.6483540534973,
+      "split": 13
+    },
+    {
+      "rank": 20,
+      "feature": "m1_stg_pln_d0_rep_apl_cnt",
+      "gain": 617.0217266082764,
+      "split": 15
+    }
+  ]
+}

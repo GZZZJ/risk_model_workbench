@@ -1,0 +1,70 @@
+# Training config for 复借G卡 main model (round: 2026-06)
+#
+# This round trains ONE main model (main_lgbm) on new data with new features.
+# Segment columns are used ONLY for evaluation slices, NOT for separate training.
+
+training:
+  default_algorithm: lightgbm
+  random_seed: 0
+  feature_list_path: runs/modeling_feature_set/feature_list.txt
+  label_column: ftr_30d_ord_flag
+  split_column: final_flag
+  train_values: ["DEV"]
+  valid_values: ["OOT"]
+  oos_values: ["DEV-OOS", "OOT-OOS"]
+
+  experiments:
+    - name: main_lgbm
+      display_name: 复借G卡主模型
+      segment: all
+      algorithm: lightgbm
+      sample_weight: null
+
+# Sample data configuration
+input:
+  feather_path: /root/notebook/draft/筛选300维度特征样本_f32.feather
+  id_columns:
+    - uid
+    - mdl_dte
+  base_columns:
+    - uid
+    - mdl_dte
+    - ds
+    - final_flag
+    - blue_customer_flag
+    - zc_level
+    - ftr_30d_ord_flag
+    - ftr_30d_ord_amt
+    - prc_amt_xz_30d_3m
+    - ovd_amt_xz_30d_3m
+    - rand_flag0
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+  label_column: ftr_30d_ord_flag
+  split_column: final_flag
+  historical_score_columns:
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+
+preprocessing:
+  missing_sentinels: [-999, -998]
+  min_non_null_rate: 0.01
+  drop_constant: true
+
+lightgbm:
+  objective: binary
+  metric: auc
+  learning_rate: 0.05
+  num_leaves: 31
+  max_depth: 5
+  min_child_samples: 100
+  subsample: 0.7
+  colsample_bytree: 0.7
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  num_boost_round: 1000
+  early_stopping_rounds: 50

@@ -1,0 +1,563 @@
+version: 1
+plan_id: 20260625-1740-model-request_plan
+request_id: 20260625-1740-model-request
+request_path: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/requests/2026-06-26-gcard-main-lgbm-rerun.md
+project: projects/2026-05-fujie-gcard-v1
+workflow: full_modeling
+scenario_profile: fujie_gcard_main_lgbm
+stage_steps:
+  sample_check:
+  - field_contract
+  - key_uniqueness
+  - monthly_label_distribution
+  - segment_distribution
+  feature_metadata:
+  - feature_metadata_export
+  feature_prescreen:
+  - feature_quality_prescreen
+  build_wide_sql:
+  - wide_sql_generation
+  - sql_review_gate
+  feature_refine:
+  - feature_availability_filter
+  - missing_rate_filter
+  - constant_value_filter
+  - iv_filter
+  - correlation_dedup
+  - null_importance_filter
+  - baseline_importance_filter
+  train_baseline:
+  - lightgbm_binary_training
+  evaluate:
+  - auc_ks
+  - decile_lift
+  - monthly_stability
+  - score_psi
+  - segment_metrics
+  - cross_gain_matrix
+  - feature_gain_summary
+  compare:
+  - champion_challenger
+  report:
+  - model_report
+step_params:
+  auc_ks: {}
+  baseline_importance_filter:
+    importance_type: gain
+    keep_top_n: 500
+  champion_challenger: {}
+  constant_value_filter:
+    max_unique_values: 1
+  correlation_dedup:
+    method: spearman
+    max_abs_corr: 0.8
+  cross_gain_matrix:
+    bins: 10
+  decile_lift:
+    bins: 10
+  feature_availability_filter: {}
+  feature_gain_summary: {}
+  feature_metadata_export: {}
+  feature_quality_prescreen:
+    require_sql_approval: true
+  field_contract: {}
+  iv_filter:
+    min_iv: 0.005
+  key_uniqueness: {}
+  lightgbm_binary_training:
+    early_stopping_rounds: 50
+    max_auc_gap: 0.02
+  missing_rate_filter:
+    threshold: 0.9
+  model_report: {}
+  monthly_label_distribution:
+    min_samples_per_month: 50
+  monthly_stability:
+    min_samples: 50
+  null_importance_filter:
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.0
+  score_psi:
+    bins: 10
+    warn_psi: 0.2
+  segment_distribution: {}
+  segment_metrics: {}
+  sql_review_gate:
+    block_on_high_risk: true
+  wide_sql_generation: {}
+resolved_steps:
+- id: auc_ks
+  stage: evaluate
+  description: Evaluate AUC and KS by split.
+  default_params: {}
+  source_reference: RMW evaluation flow
+  implementation_status: implemented
+- id: baseline_importance_filter
+  stage: feature_refine
+  description: Train a baseline model and keep important features by LightGBM gain
+    ranking.
+  default_params:
+    importance_type: gain
+    keep_top_n: 500
+  source_reference: Fujie GCard D05 baseline importance flow
+  implementation_status: implemented
+- id: champion_challenger
+  stage: compare
+  description: Compare current model score with configured champion scores.
+  default_params: {}
+  source_reference: RMW compare flow
+  implementation_status: implemented
+- id: constant_value_filter
+  stage: feature_refine
+  description: Drop constant or near-constant features using the configured unique-value
+    threshold.
+  default_params:
+    max_unique_values: 1
+  source_reference: Fujie GCard constant-value filtering flow
+  implementation_status: implemented
+- id: correlation_dedup
+  stage: feature_refine
+  description: Deduplicate highly correlated features, preferring stronger IV.
+  default_params:
+    method: spearman
+    max_abs_corr: 0.8
+  source_reference: AIAgent DZ in-loan modeling SOP
+  implementation_status: implemented
+- id: cross_gain_matrix
+  stage: evaluate
+  description: Evaluate 10x10 cross-gain against a baseline score.
+  default_params:
+    bins: 10
+  source_reference: AIAgent DQ feature gain and evaluation SOPs
+  implementation_status: implemented
+- id: decile_lift
+  stage: evaluate
+  description: Evaluate decile lift and risk ordering.
+  default_params:
+    bins: 10
+  source_reference: RMW evaluation flow
+  implementation_status: implemented
+- id: feature_availability_filter
+  stage: feature_refine
+  description: Keep only executable model features and remove id, label, split, score,
+    random, and other non-feature columns.
+  default_params: {}
+  source_reference: Fujie GCard feature availability and base-column exclusion flow
+  implementation_status: implemented
+- id: feature_gain_summary
+  stage: evaluate
+  description: Summarize new-feature uplift and contribution.
+  default_params: {}
+  source_reference: AIAgent feature gain evaluation SOP
+  implementation_status: implemented
+- id: feature_metadata_export
+  stage: feature_metadata
+  description: Export feature table and column metadata.
+  default_params: {}
+  source_reference: RMW feature metadata flow
+  implementation_status: implemented
+- id: feature_quality_prescreen
+  stage: feature_prescreen
+  description: Run coarse feature quality and stability prescreening or SQL dry run.
+  default_params:
+    require_sql_approval: true
+  source_reference: RMW feature prescreening flow
+  implementation_status: implemented
+- id: field_contract
+  stage: sample_check
+  description: Confirm required id, time, split, target, and feature fields.
+  default_params: {}
+  source_reference: 'AIAgent domain SOP: field definition checks'
+  implementation_status: implemented
+- id: iv_filter
+  stage: feature_refine
+  description: Drop features below the configured IV threshold.
+  default_params:
+    min_iv: 0.005
+  source_reference: AIAgent three-domain feature selection defaults
+  implementation_status: implemented
+- id: key_uniqueness
+  stage: sample_check
+  description: Check sample primary-key uniqueness and duplicate columns.
+  default_params: {}
+  source_reference: 'AIAgent domain SOP: duplicate and uniqueness checks'
+  implementation_status: implemented
+- id: lightgbm_binary_training
+  stage: train_baseline
+  description: Train a standard binary LightGBM model.
+  default_params:
+    early_stopping_rounds: 50
+    max_auc_gap: 0.02
+  source_reference: AIAgent three-domain model training defaults
+  implementation_status: implemented
+- id: missing_rate_filter
+  stage: feature_refine
+  description: Drop features above the configured missing-rate threshold.
+  default_params:
+    threshold: 0.9
+  source_reference: AIAgent three-domain feature selection defaults
+  implementation_status: implemented
+- id: model_report
+  stage: report
+  description: Generate model report, model card, and executive summary.
+  default_params: {}
+  source_reference: RMW report flow
+  implementation_status: implemented
+- id: monthly_label_distribution
+  stage: sample_check
+  description: Profile monthly sample size and target distribution.
+  default_params:
+    min_samples_per_month: 50
+  source_reference: 'AIAgent domain SOP: monthly sample statistics'
+  implementation_status: implemented
+- id: monthly_stability
+  stage: evaluate
+  description: Evaluate monthly AUC/KS stability.
+  default_params:
+    min_samples: 50
+  source_reference: RMW evaluation flow
+  implementation_status: implemented
+- id: null_importance_filter
+  stage: feature_refine
+  description: Filter features whose real importance does not beat shuffled-label
+    null importance.
+  default_params:
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.0
+  source_reference: Fujie GCard D04 null importance flow
+  implementation_status: implemented
+- id: score_psi
+  stage: evaluate
+  description: Evaluate monthly score distribution PSI.
+  default_params:
+    bins: 10
+    warn_psi: 0.2
+  source_reference: RMW evaluation flow
+  implementation_status: implemented
+- id: segment_distribution
+  stage: sample_check
+  description: Profile configured business segment distribution.
+  default_params: {}
+  source_reference: Fujie GCard sample audit artifacts
+  implementation_status: implemented
+- id: segment_metrics
+  stage: evaluate
+  description: Evaluate model performance by configured business segments.
+  default_params: {}
+  source_reference: RMW evaluation flow
+  implementation_status: implemented
+- id: sql_review_gate
+  stage: build_wide_sql
+  description: Review SQL for leakage, join explosion, null handling, and unsafe logic.
+  default_params:
+    block_on_high_risk: true
+  source_reference: AIAgent code review SOP
+  implementation_status: implemented
+- id: wide_sql_generation
+  stage: build_wide_sql
+  description: Generate wide-table SQL and feature mapping from remaining features.
+  default_params: {}
+  source_reference: RMW wide SQL generation flow
+  implementation_status: implemented
+planned_steps: []
+created_at: '2026-06-26T10:29:01'
+run_id_placeholder: <run_id>
+tasks:
+- task_id: sample_check_profile
+  type: sample_check
+  status: pending
+  workspace: tasks/sample_check_profile
+  depends_on: []
+  command:
+    executable: rmw
+    args:
+    - sample
+    - check
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - sample_check/sample_summary.json
+  - sample_check/sample_check_report.md
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - field_contract
+  - key_uniqueness
+  - monthly_label_distribution
+  - segment_distribution
+  step_params:
+    field_contract: {}
+    key_uniqueness: {}
+    monthly_label_distribution:
+      min_samples_per_month: 50
+    segment_distribution: {}
+- task_id: sample_check_stability
+  type: sample_check
+  status: pending
+  workspace: tasks/sample_check_stability
+  depends_on: []
+  command:
+    executable: rmw
+    args:
+    - sample
+    - check
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - sample_check/sample_summary.json
+  - sample_check/sample_check_report.md
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - field_contract
+  - key_uniqueness
+  - monthly_label_distribution
+  - segment_distribution
+  step_params:
+    field_contract: {}
+    key_uniqueness: {}
+    monthly_label_distribution:
+      min_samples_per_month: 50
+    segment_distribution: {}
+- task_id: feature_metadata
+  type: feature_selection
+  status: pending
+  workspace: tasks/feature_metadata
+  depends_on:
+  - sample_check_stability
+  command:
+    executable: rmw
+    args:
+    - feature
+    - metadata
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - feature_selection/feature_table_summary.csv
+  - feature_selection/feature_columns.csv
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - feature_metadata_export
+  step_params:
+    feature_metadata_export: {}
+- task_id: feature_prescreen
+  type: feature_selection
+  status: pending
+  workspace: tasks/feature_prescreen
+  depends_on:
+  - feature_metadata
+  command:
+    executable: rmw
+    args:
+    - feature
+    - prescreen
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+    - --dry-run-sql
+  outputs:
+  - feature_selection/prescreen_run_summary.json
+  - feature_selection/prescreen_final_remain_features.json
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - feature_quality_prescreen
+  step_params:
+    feature_quality_prescreen:
+      require_sql_approval: true
+- task_id: build_wide_sql
+  type: feature_selection
+  status: pending
+  workspace: tasks/build_wide_sql
+  depends_on:
+  - feature_prescreen
+  command:
+    executable: rmw
+    args:
+    - build-wide-sql
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - queries/06_build_prescreen_wide_table.sql
+  - feature_selection/wide_sql_summary.json
+  - feature_selection/prescreen_wide_feature_map.csv
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - wide_sql_generation
+  - sql_review_gate
+  step_params:
+    wide_sql_generation: {}
+    sql_review_gate:
+      block_on_high_risk: true
+- task_id: feature_refine
+  type: feature_selection
+  status: pending
+  workspace: tasks/feature_refine
+  depends_on:
+  - build_wide_sql
+  command:
+    executable: rmw
+    args:
+    - feature
+    - refine
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+    - --dry-run-sql
+  outputs:
+  - feature_selection/stage_summary.json
+  - feature_selection/final_features.txt
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - feature_availability_filter
+  - missing_rate_filter
+  - constant_value_filter
+  - iv_filter
+  - correlation_dedup
+  - null_importance_filter
+  - baseline_importance_filter
+  step_params:
+    feature_availability_filter: {}
+    missing_rate_filter:
+      threshold: 0.9
+    constant_value_filter:
+      max_unique_values: 1
+    iv_filter:
+      min_iv: 0.005
+    correlation_dedup:
+      method: spearman
+      max_abs_corr: 0.8
+    null_importance_filter:
+      null_rounds: 20
+      null_percentile: 75
+      score_threshold: 1.0
+    baseline_importance_filter:
+      importance_type: gain
+      keep_top_n: 500
+- task_id: train_main_lgbm
+  type: train
+  status: pending
+  workspace: tasks/train_main_lgbm
+  depends_on:
+  - feature_refine
+  command:
+    executable: rmw
+    args:
+    - train
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+    - --experiment
+    - main_lgbm
+  outputs:
+  - modeling/main_lgbm/model.pkl
+  - modeling/main_lgbm/prediction.parquet
+  - modeling/main_lgbm/train_metrics.json
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - lightgbm_binary_training
+  step_params:
+    lightgbm_binary_training:
+      early_stopping_rounds: 50
+      max_auc_gap: 0.02
+- task_id: evaluate_final
+  type: evaluate
+  status: pending
+  workspace: tasks/evaluate_final
+  depends_on:
+  - train_main_lgbm
+  command:
+    executable: rmw
+    args:
+    - evaluate
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - evaluation/evaluation_summary.json
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - auc_ks
+  - decile_lift
+  - monthly_stability
+  - score_psi
+  - segment_metrics
+  - cross_gain_matrix
+  - feature_gain_summary
+  step_params:
+    auc_ks: {}
+    decile_lift:
+      bins: 10
+    monthly_stability:
+      min_samples: 50
+    score_psi:
+      bins: 10
+      warn_psi: 0.2
+    segment_metrics: {}
+    cross_gain_matrix:
+      bins: 10
+    feature_gain_summary: {}
+- task_id: compare_final
+  type: compare
+  status: pending
+  workspace: tasks/compare_final
+  depends_on:
+  - evaluate_final
+  command:
+    executable: rmw
+    args:
+    - compare
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+    - --champion
+    - gcard_v2
+    - --champion
+    - gcard_v4
+    - --champion
+    - gcard_v5
+    - --champion
+    - gcard_v6
+  outputs:
+  - evaluation/champion_challenger.json
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - champion_challenger
+  step_params:
+    champion_challenger: {}
+- task_id: report_final
+  type: report
+  status: pending
+  workspace: tasks/report_final
+  depends_on:
+  - compare_final
+  command:
+    executable: rmw
+    args:
+    - report
+    - --project
+    - projects/2026-05-fujie-gcard-v1
+    - --run-id
+    - <run_id>
+  outputs:
+  - reports/model_report.md
+  - reports/model_card.md
+  - reports/executive_summary.md
+  scenario_profile: fujie_gcard_main_lgbm
+  step_ids:
+  - model_report
+  step_params:
+    model_report: {}
+improvement_log: audit/improvement_candidates.md

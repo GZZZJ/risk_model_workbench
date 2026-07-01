@@ -1,0 +1,9 @@
+{
+  "status": "done",
+  "reason": "",
+  "champion": "gcard_v6",
+  "champions": [
+    "gcard_v6"
+  ],
+  "benchmark_uplift": "evaluation/benchmark_uplift.csv"
+}

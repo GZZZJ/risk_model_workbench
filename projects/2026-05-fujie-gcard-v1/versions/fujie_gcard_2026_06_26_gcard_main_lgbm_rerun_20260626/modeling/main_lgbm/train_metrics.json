@@ -1,0 +1,18 @@
+{
+  "status": "done",
+  "metrics": {
+    "train_auc": 0.9454782172964716,
+    "valid_auc": 0.9324850770704717,
+    "train_ks": 0.7486010109781718,
+    "valid_ks": 0.7164854495218125,
+    "train_samples": 183739,
+    "valid_samples": 183480,
+    "train_bad_rate": 0.153195565448816,
+    "valid_bad_rate": 0.17346304774362328,
+    "best_iteration": 303,
+    "train_time_seconds": 24.2,
+    "auc_gap": 0.012993140225999955
+  },
+  "experiment": "main_lgbm",
+  "algorithm": "lightgbm"
+}

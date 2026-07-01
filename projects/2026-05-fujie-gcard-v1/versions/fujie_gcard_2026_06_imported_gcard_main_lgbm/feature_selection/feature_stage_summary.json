@@ -1,0 +1,15 @@
+{
+  "source": "feature_refine_feather",
+  "original_candidate_features": 15028,
+  "d01_kept_features": 2958,
+  "d02_kept_features": 2843,
+  "feather_available_features": 2825,
+  "after_global_corr": 1945,
+  "after_d03_random_importance": 96,
+  "after_d04_null_importance": 96,
+  "final_training_features": 96,
+  "filtering_method": "global_corr + D03 random importance + D04 null importance + D05 top importance",
+  "features_available_in_data": 96,
+  "missing_features": 0,
+  "potential_leakage_flags": "unpaid_principal_future_light_add_heavy contains \"future\" prefix"
+}

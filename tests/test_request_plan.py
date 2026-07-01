@@ -137,6 +137,21 @@ def test_custom_training_requires_project_entrypoint():
     assert any("custom training requires" in error for error in result["errors"])
 
 
+def test_training_mode_validation_accepts_llm_guided_tune():
+    result = validate_model_request(
+        _request_doc(training={"mode": "llm_guided_tune", "tuning": {"max_rounds": 2, "candidates_per_round": 3}})
+    )
+
+    assert result["status"] == "ok"
+
+
+def test_training_mode_validation_rejects_unknown_mode():
+    result = validate_model_request(_request_doc(training={"mode": "unknown_tune"}))
+
+    assert result["status"] == "failed"
+    assert "unsupported training.mode" in result["errors"][0]
+
+
 def test_builder_visible_steps_have_executor_task_binding():
     request_doc = _request_doc(scenario_profile="acquisition_conversion")
 

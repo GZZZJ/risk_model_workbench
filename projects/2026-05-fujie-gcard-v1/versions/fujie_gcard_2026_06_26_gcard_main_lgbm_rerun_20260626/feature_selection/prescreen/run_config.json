@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-06-26 10:37:04",
+  "project_dir": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1",
+  "feature_columns": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/data/profile/feature_metadata/feature_columns.csv",
+  "feature_select_code_dir": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/vendor/feature-select-v2/scripts/code",
+  "thresholds": {
+    "quality": {
+      "empty": 0.9,
+      "corr": 0.8,
+      "iv": 0.005
+    },
+    "psi": 0.1
+  },
+  "sampling": {
+    "partition_col": "ds",
+    "where": "rand_flag0 < 0.1 and final_flag in ('DEV','OOT')",
+    "quality_sample": "final_flag = 'DEV'",
+    "stability_compare": "DEV vs OOT"
+  },
+  "partitions": {
+    "train": [
+      "20250630",
+      "20250731",
+      "20250831",
+      "20250930",
+      "20251031",
+      "20251130"
+    ],
+    "valid": [
+      "20251231",
+      "20260131"
+    ]
+  },
+  "target_col": "ftr_30d_ord_flag",
+  "split_col": "final_flag",
+  "workers": 4
+}

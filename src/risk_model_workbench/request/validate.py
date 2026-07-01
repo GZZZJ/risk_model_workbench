@@ -49,6 +49,7 @@ METHOD_ALIASES = {
 
 SUPPORTED_METRICS = {"auc", "ks", "decile_lift", "ranking_inversion", "psi", "business_risk"}
 SUPPORTED_REPORT_EXTENSIONS = {"", ".md", ".markdown", ".html", ".xlsx", ".json"}
+SUPPORTED_TRAINING_MODES = {"single_train", "fixed", "baseline", "llm_guided_tune", "llm-guided-tune", "llm_guided"}
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -110,6 +111,25 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
             errors.append(f"unsupported training method in experiments[{index}]: {method}")
         if method == "custom" and not _custom_entrypoint(project_config):
             errors.append("custom training requires training.custom_entrypoint or custom_training.entrypoint in project config")
+
+    training = metadata.get("training") or {}
+    if "training" in metadata and not isinstance(metadata.get("training"), dict):
+        errors.append("training must be a mapping")
+    elif isinstance(training, dict):
+        mode = str(training.get("mode") or "").strip().lower()
+        if mode and mode not in SUPPORTED_TRAINING_MODES:
+            errors.append(f"unsupported training.mode: {mode}")
+        tuning = training.get("tuning") or {}
+        if "tuning" in training and not isinstance(tuning, dict):
+            errors.append("training.tuning must be a mapping")
+        elif isinstance(tuning, dict):
+            for key in ["max_rounds", "candidates_per_round", "max_trials"]:
+                if key in tuning:
+                    try:
+                        if int(tuning[key]) < 1:
+                            errors.append(f"training.tuning.{key} must be >= 1")
+                    except (TypeError, ValueError):
+                        errors.append(f"training.tuning.{key} must be an integer")
 
     workflow = metadata.get("workflow", "full_modeling")
     if workflow and not workflow_path(str(workflow)).exists():

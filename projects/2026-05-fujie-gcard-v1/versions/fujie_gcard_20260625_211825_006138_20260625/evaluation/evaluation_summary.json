@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-06-26 13:04:11",
+  "scores_source": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/runs/20260625_211825_006138/evaluation/optuna_scores_enriched.feather",
+  "score_columns_evaluated": [
+    "model_score",
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ],
+  "requested_metrics": [
+    "auc",
+    "ks",
+    "decile_lift",
+    "ranking_inversion",
+    "psi"
+  ],
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "splits_evaluated": [
+    "DEV",
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "n_total_samples": 973715,
+  "n_score_columns": 5,
+  "missing_requirements": [
+    {
+      "kind": "dimension",
+      "column": "split",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "month",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "segment",
+      "reason": "missing from score table"
+    },
+    {
+      "kind": "dimension",
+      "column": "decile",
+      "reason": "missing from score table"
+    }
+  ],
+  "dimension_columns_evaluated": [
+    "blue_customer_flag",
+    "zc_level"
+  ],
+  "overall_metrics": {
+    "model_score": {
+      "DEV": {
+        "auc": 0.95348294315833,
+        "ks": 0.7651539174791273
+      },
+      "DEV-OOS": {
+        "auc": 0.9337692615702715,
+        "ks": 0.7219671364761916
+      },
+      "OOT": {
+        "auc": 0.9357900839334439,
+        "ks": 0.7363096618027375
+      },
+      "OOT-OOS": {
+        "auc": 0.9306553026728805,
+        "ks": 0.7190086524672934
+      }
+    },
+    "gcard_v2": {
+      "DEV": {
+        "auc": 0.9292208260205501,
+        "ks": 0.7136370327558772
+      },
+      "DEV-OOS": {
+        "auc": 0.9260616762859801,
+        "ks": 0.7029652053085593
+      },
+      "OOT": {
+        "auc": 0.9281304265862041,
+        "ks": 0.7173208865368634
+      },
+      "OOT-OOS": {
+        "auc": 0.9213720818800136,
+        "ks": 0.6977453304465322
+      }
+    },
+    "gcard_v4": {
+      "DEV": {
+        "auc": 0.9246031120607758,
+        "ks": 0.707026064378672
+      },
+      "DEV-OOS": {
+        "auc": 0.9214902975600452,
+        "ks": 0.6943712704701916
+      },
+      "OOT": {
+        "auc": 0.9231770478143638,
+        "ks": 0.7091854677615197
+      },
+      "OOT-OOS": {
+        "auc": 0.9167101587724888,
+        "ks": 0.685445584942804
+      }
+    },
+    "gcard_v5": {
+      "DEV": {
+        "auc": 0.9260800577324911,
+        "ks": 0.7084929862207363
+      },
+      "DEV-OOS": {
+        "auc": 0.9235418674329696,
+        "ks": 0.7003486911736339
+      },
+      "OOT": {
+        "auc": 0.9268891305297663,
+        "ks": 0.7131283278333089
+      },
+      "OOT-OOS": {
+        "auc": 0.9201311500172812,
+        "ks": 0.6936208025525775
+      }
+    },
+    "gcard_v6": {
+      "DEV": {
+        "auc": 0.9364342470676208,
+        "ks": 0.7296092953841975
+      },
+      "DEV-OOS": {
+        "auc": 0.9335425779986268,
+        "ks": 0.7195937848017843
+      },
+      "OOT": {
+        "auc": 0.9355616338393068,
+        "ks": 0.7341663506924718
+      },
+      "OOT-OOS": {
+        "auc": 0.9296665096302585,
+        "ks": 0.7162446623622785
+      }
+    }
+  },
+  "output_dir": "/root/notebook/自动化建模/jy-model-agent/projects/2026-05-fujie-gcard-v1/runs/20260625_211825_006138/evaluation"
+}

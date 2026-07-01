@@ -1,0 +1,30 @@
+{
+  "train_auc": 0.95348294315833,
+  "valid_auc": 0.9337692615702715,
+  "oot_auc": 0.9333055918255209,
+  "train_ks": 0.7651539174791273,
+  "valid_ks": 0.7219671364761916,
+  "oot_ks": 0.7275379941003055,
+  "auc_gap": 0.01971368158805853,
+  "best_iteration": 747,
+  "num_features": 679,
+  "train_rows": 365051,
+  "valid_rows": 364823,
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "boosting_type": "gbdt",
+    "num_leaves": 105,
+    "learning_rate": 0.011414424744267267,
+    "feature_fraction": 0.57213311764246,
+    "bagging_fraction": 0.8198450774446986,
+    "bagging_freq": 3,
+    "min_child_samples": 75,
+    "lambda_l1": 6.193645809865819e-06,
+    "lambda_l2": 1.4053047392238685e-07,
+    "feature_pre_filter": false,
+    "verbose": -1,
+    "seed": 42,
+    "n_jobs": 8
+  }
+}
