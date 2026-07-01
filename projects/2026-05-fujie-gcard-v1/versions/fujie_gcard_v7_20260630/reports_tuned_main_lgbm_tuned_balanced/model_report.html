@@ -460,7 +460,7 @@ code{
   <h1>复借G卡模型报告</h1>
   <div class="hero-meta">
     <span>生成日期：2026-07-01</span>
-    <span>Run：2026-06-30-gcard-main-lgbm-full</span>
+    <span>Run：fujie_gcard_v7_20260630</span>
     <span>标签：<code>ftr_30d_ord_flag</code></span>
     <span>算法：lightgbm</span>
   </div>
@@ -485,14 +485,14 @@ code{
 <ul><li>最新月 PSI：本轮 <strong>0.052</strong>，G卡V6 <strong>0.051</strong>。</li><li>主口径：30天发起标签 <code>ftr_30d_ord_flag</code>，关注 AUC、KS、sloping、PSI。</li><li>MOB/金额风险、变量分箱明细和业务字典仍以后文待补充说明为准。</li></ul>
   </div>
 </div>
-<h2>一、模型描述</h2>
+<h2>模型描述</h2>
 <ul>
 <li>模型目标：预测配置标签字段 <code>ftr_30d_ord_flag</code>。</li>
 <li>建模样本：训练集 DEV，验证集 DEV-OOS，OOS DEV-OOS、OOT、OOT-OOS。</li>
 <li>算法：lightgbm；最终入模变量 500 个；best iteration 322。</li>
 <li>验证集效果：AUC 0.933，KS 0.719，Train/Valid AUC gap 0.019。</li>
 </ul>
-<h2>二、变量筛选过程</h2>
+<h2>变量筛选过程</h2>
 <table>
 <tr><th>步骤</th><th>筛选方法</th><th>剩余变量个数</th></tr>
 <tr><td>1</td><td>原始候选变量总数</td><td>2837</td></tr>
@@ -507,7 +507,7 @@ code{
 <ul>
 <li>训练预处理保留 500/500 个变量；剔除 0 个变量。</li>
 </ul>
-<h2>三、核心效果与历史版本对比</h2>
+<h2>核心效果与历史版本对比</h2>
 <ul>
 <li>OOT-OOS：本轮模型 AUC 0.930、KS 0.719；相对 G卡V2 KS 提升 0.018，相对 G卡V4 KS 提升 0.031，相对 G卡V5 KS 提升 0.026，相对 G卡V6 KS 提升 0.003。</li>
 </ul>
@@ -525,7 +525,7 @@ code{
 <tr><td>OOT</td><td>0.935</td><td>0.734</td><td>0.016</td><td>0.024</td><td>0.019</td><td>0.000</td></tr>
 <tr><td>OOT-OOS</td><td>0.930</td><td>0.719</td><td>0.018</td><td>0.031</td><td>0.026</td><td>0.003</td></tr>
 </table>
-<h2>四、模型效果</h2>
+<h2>模型效果</h2>
 <p>1、每月效果（OOS）</p>
 <table>
 <tr><th>序号</th><th>结论</th></tr>
@@ -900,7 +900,7 @@ code{
 <tr><td>高意愿</td><td>0.088</td><td>0.070</td><td>0.060</td><td>0.051</td><td>0.053</td><td>0.067</td><td>0.117</td><td>0.065</td></tr>
 <tr><td>sum</td><td>0.083</td><td>0.063</td><td>0.046</td><td>0.032</td><td>0.030</td><td>0.019</td><td>0.010</td><td>0.024</td></tr>
 </table>
-<h2>五、模型稳定性</h2>
+<h2>模型稳定性</h2>
 <ul>
 <li>本轮模型 PSI 最高的 5 个观测如下：</li>
 </ul>
@@ -912,7 +912,7 @@ code{
 <tr><td>2025-10</td><td>0.029</td><td>61423</td><td>model_score</td></tr>
 <tr><td>2025-09</td><td>0.020</td><td>61200</td><td>model_score</td></tr>
 </table>
-<h2>六、重要变量</h2>
+<h2>重要变量</h2>
 <table>
 <tr><th>feature</th><th>中文名</th><th>gain</th><th>split</th></tr>
 <tr><td>d180_apl_ord_days_cnt</td><td>近180天_订单发起天数(去重)</td><td>390325.557</td><td>113</td></tr>
@@ -931,7 +931,7 @@ code{
 <tr><td>clk_cnt_14d</td><td>clk_cnt_14d</td><td>4640.890</td><td>108</td></tr>
 <tr><td>ord_apl_avg_prc_amt_720_day_per_mth</td><td>近720天发起动支订单的动支总金额_单月平均</td><td>4588.928</td><td>62</td></tr>
 </table>
-<h2>七、Top变量WOE</h2>
+<h2>Top变量WOE</h2>
 <ul>
 <li>Top20 WOE 图见 Excel sheet <code>Top变量WOE</code>，PNG 和汇总 CSV 见 <code>reports/woe_top_features/</code> 或训练产物目录。</li>
 </ul>
@@ -958,7 +958,7 @@ code{
 <tr><td>19</td><td>avg_avl_lmt_lft_rep_prc_3m_cash_1m</td><td>近1个月现金贷平均指标值(可用额度/未来3个月剩余应还金额)</td><td>3305.564</td><td>8.948</td></tr>
 <tr><td>20</td><td>rsk_avl_lmt_ch_les_10000_cnt_12m</td><td>近12个月现金贷额度使用率小于10000的次数_v2</td><td>3172.502</td><td>12.075</td></tr>
 </table>
-<h2>八、待补充事项</h2>
+<h2>待补充事项</h2>
 <ul>
 <li>当前仍不可补齐：变量分布/分箱图、变量中文描述与业务标签、MOB1/MOB3 历史风险精确定义；这些需要原始特征值、业务字典或未来期还款表现数据。</li>
 <li>详见 <code>model_report_missing_results.md</code>。</li>

@@ -34,6 +34,8 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
             "| 指标 | 提升 |",
             "|---|---|",
             "| KS | +0.030 |",
+            "",
+            "### 二、模型效果",
         ]
     )
 
@@ -44,6 +46,10 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
     assert '<aside class="sidebar"' in html
     assert 'href="#model-description"' in html
     assert '<main class="report-shell">' in html
+    assert "<h2>模型描述</h2>" in html
+    assert "一、模型描述" not in html
+    assert '<h3 class="section-subtitle">模型效果</h3>' in html
+    assert "二、模型效果" not in html
     assert "<code>target</code>" in html
     assert "<table>" in html
 

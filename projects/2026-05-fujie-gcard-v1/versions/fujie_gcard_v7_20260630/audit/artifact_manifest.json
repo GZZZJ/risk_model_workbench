@@ -1835,50 +1835,6 @@
       "registered_at": "2026-06-30T18:31:35"
     },
     {
-      "path": "reports/model_report.xlsx",
-      "size_bytes": 4541715,
-      "mtime": "2026-06-30T18:31:42",
-      "sha256": "b66df2958aa95c1f685c0a7388b5045ee4fff9a57ed35a4010c9893f368765fe",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T18:31:42"
-    },
-    {
-      "path": "reports/model_report.md",
-      "size_bytes": 33475,
-      "mtime": "2026-06-30T18:31:42",
-      "sha256": "7b493de3d52c45287eb6081a3328e1a370f82d593fddbca4423c81bc58af04f2",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T18:31:43"
-    },
-    {
-      "path": "reports/model_report.html",
-      "size_bytes": 61022,
-      "mtime": "2026-06-30T18:31:42",
-      "sha256": "60df552cf595829f2c2dd55bbcc20ff83f1ea435f1d0777ea977448da3999e20",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T18:31:43"
-    },
-    {
-      "path": "reports/model_report_missing_results.md",
-      "size_bytes": 1841,
-      "mtime": "2026-06-30T18:31:42",
-      "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "",
-      "registered_at": "2026-06-30T18:31:44"
-    },
-    {
       "path": "reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
       "size_bytes": 231316,
       "mtime": "2026-06-30T16:45:34",
@@ -4057,61 +4013,6 @@
       "registered_at": "2026-07-01T12:28:17"
     },
     {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx",
-      "size_bytes": 4534559,
-      "mtime": "2026-07-01T12:53:33",
-      "sha256": "65aa792fd71b1b0ff0f80d55af650f01ad6a0f91068041fe24c4553f667d7e72",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T12:54:48"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.md",
-      "size_bytes": 33319,
-      "mtime": "2026-07-01T12:53:33",
-      "sha256": "54fa34ef0eb461ea3f7b020fed7a7cda1ace17eb75834b7d323233354545abab",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T12:54:48"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.html",
-      "size_bytes": 63645,
-      "mtime": "2026-07-01T12:53:33",
-      "sha256": "c9d628ad3494e85da4442a6aa1a7895728201106b054c7bbfb8e6499fa389e82",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T12:54:48"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md",
-      "size_bytes": 1841,
-      "mtime": "2026-07-01T12:53:33",
-      "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T12:54:48"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/report_scope.json",
-      "size_bytes": 381,
-      "mtime": "2026-07-01T12:53:33",
-      "sha256": "ba0c177118f7ef5f448e5b784e9bb67261070286799ca14bf30c5ae7582f4f08",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T12:54:49"
-    },
-    {
       "path": "reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
       "size_bytes": 231092,
       "mtime": "2026-07-01T12:26:13",
@@ -4341,7 +4242,106 @@
       "source": "generated",
       "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
       "registered_at": "2026-07-01T12:54:55"
+    },
+    {
+      "path": "reports/model_report.xlsx",
+      "size_bytes": 4541718,
+      "mtime": "2026-07-01T16:36:12",
+      "sha256": "90eb60c552d1bdf6534ffb3a4fc4de22eb71507528628d5d259d18a66438e892",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-07-01T16:37:32"
+    },
+    {
+      "path": "reports/model_report.md",
+      "size_bytes": 33475,
+      "mtime": "2026-07-01T16:36:12",
+      "sha256": "b563ca781ece679e055873b783f9f9e724e750703fe2fc56c057eb86214fcecf",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-07-01T16:37:33"
+    },
+    {
+      "path": "reports/model_report.html",
+      "size_bytes": 63709,
+      "mtime": "2026-07-01T16:36:12",
+      "sha256": "e6305283b61b65240056760a83ce97dba17227aec0289a4a4e51c4c838f8fe3b",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-07-01T16:37:33"
+    },
+    {
+      "path": "reports/model_report_missing_results.md",
+      "size_bytes": 1841,
+      "mtime": "2026-07-01T16:36:12",
+      "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "",
+      "registered_at": "2026-07-01T16:37:34"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx",
+      "size_bytes": 4534560,
+      "mtime": "2026-07-01T16:35:51",
+      "sha256": "9c14c406a6d05d4556a5421f27b63eda021f58c60d84308969af6bfc2b2856a9",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T16:37:34"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.md",
+      "size_bytes": 33319,
+      "mtime": "2026-07-01T16:35:51",
+      "sha256": "54fa34ef0eb461ea3f7b020fed7a7cda1ace17eb75834b7d323233354545abab",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T16:37:35"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.html",
+      "size_bytes": 63589,
+      "mtime": "2026-07-01T16:35:51",
+      "sha256": "5bf7f89a52b5be1ad414e587dba1500fb483cdeff08c46385cedaede78310009",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T16:37:35"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md",
+      "size_bytes": 1841,
+      "mtime": "2026-07-01T16:35:51",
+      "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T16:37:35"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/report_scope.json",
+      "size_bytes": 381,
+      "mtime": "2026-07-01T12:53:33",
+      "sha256": "ba0c177118f7ef5f448e5b784e9bb67261070286799ca14bf30c5ae7582f4f08",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T16:37:36"
     }
   ],
-  "updated_at": "2026-07-01T12:54:55"
+  "updated_at": "2026-07-01T16:37:36"
 }

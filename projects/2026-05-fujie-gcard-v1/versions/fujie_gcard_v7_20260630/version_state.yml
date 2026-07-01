@@ -3481,7 +3481,7 @@ decisions:
   reason: Generated and registered report from modeling/main_lgbm_tuned_balanced and
     evaluation_tuned/main_lgbm_tuned_balanced artifacts.
   created_at: '2026-07-01T12:54:55'
-updated_at: '2026-07-01T14:31:40'
+updated_at: '2026-07-01T16:37:36'
 version_id: fujie_gcard_v7_20260630
 source_type: workbench
 lineage:

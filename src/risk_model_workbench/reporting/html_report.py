@@ -126,7 +126,7 @@ def _report_nav_items(markdown: str, *, include_gcard_summary: bool) -> list[tup
     for line in markdown.splitlines():
         if not line.startswith("## "):
             continue
-        title = line[3:].strip()
+        title = _strip_heading_order_prefix(line[3:].strip())
         if include_gcard_summary and title.startswith("Summary"):
             title = "总结"
         label = _nav_label(title)
@@ -226,12 +226,14 @@ def _markdown_body_to_report_html(
         if line.startswith("## "):
             close_ul()
             close_table()
-            html_lines.append(f"<h2>{_inline_markdown_to_html(line[3:].strip())}</h2>")
+            title = _strip_heading_order_prefix(line[3:].strip())
+            html_lines.append(f"<h2>{_inline_markdown_to_html(title)}</h2>")
             continue
         if line.startswith("### "):
             close_ul()
             close_table()
-            html_lines.append(f'<h3 class="section-subtitle">{_inline_markdown_to_html(line[4:].strip())}</h3>')
+            title = _strip_heading_order_prefix(line[4:].strip())
+            html_lines.append(f'<h3 class="section-subtitle">{_inline_markdown_to_html(title)}</h3>')
             continue
         if line.startswith("- "):
             close_table()
@@ -278,6 +280,15 @@ def _inline_markdown_to_html(text: str) -> str:
     escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
     return escaped
+
+
+def _strip_heading_order_prefix(title: str) -> str:
+    """Remove display-only ordered heading prefixes before HTML section numbering."""
+    return re.sub(
+        r"^\s*(?:[一二三四五六七八九十百]+|[0-9]+|[A-Za-z])(?:、|\.|．)\s*",
+        "",
+        title,
+    ).strip()
 
 
 def _render_gcard_summary_grid(*, eval_dir: Path | None, run_config: dict[str, Any], score_labels: dict[str, str]) -> str:
