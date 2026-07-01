@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import sys
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -219,7 +221,110 @@ class _TMLMetaClient:
         }
 
 
-def load_dp_client():
+class _DpMcpMetaClient:
+    """Meta client via sh_dp_mcp HTTP MCP (``get_dp_table_meta``).
+
+    No tmlpatch dependency; returns the same ``{columns, des, name}`` shape as
+    ``_TMLMetaClient._parse_desc`` so ``main()`` consumes it unchanged.
+    """
+
+    def __init__(self, url: str, api_key: str, timeout: int = 30):
+        self._url = url
+        self._api_key = api_key
+        self._timeout = timeout
+
+    def get_table_meta(self, full_table_name: str) -> dict:
+        project, table = split_table(full_table_name)
+        payload = json.dumps(
+            {
+                "jsonrpc": "2.0",
+                "method": "tools/call",
+                "id": 1,
+                "params": {
+                    "name": "get_dp_table_meta",
+                    "arguments": {"projectName": project, "tableName": table},
+                },
+            }
+        ).encode("utf-8")
+        request = urllib.request.Request(
+            self._url,
+            data=payload,
+            method="POST",
+            headers={"Content-Type": "application/json", "X-CJJ-MCP-API-KEY": self._api_key},
+        )
+        with urllib.request.urlopen(request, timeout=self._timeout) as response:
+            raw = response.read().decode("utf-8")
+        envelope = json.loads(raw)
+        result = envelope.get("result") or {}
+        if result.get("isError"):
+            raise RuntimeError(f"sh_dp_mcp returned an error result for {full_table_name}")
+        text_blobs = result.get("content") or []
+        if not text_blobs:
+            raise RuntimeError(f"sh_dp_mcp returned no content for {full_table_name}")
+        data = json.loads(text_blobs[0].get("text", "{}")).get("data") or {}
+        columns = [
+            {
+                "name": column.get("name", ""),
+                "type": column.get("type", ""),
+                "comment": column.get("comment") or "",
+            }
+            for column in data.get("columns", [])
+        ]
+        return {
+            "columns": columns,
+            "des": data.get("des") or "",
+            "name": data.get("name") or full_table_name,
+        }
+
+
+class _FallbackMetaClient:
+    """Try the primary meta client; on failure, fall back per-table."""
+
+    def __init__(self, primary, fallback):
+        self._primary = primary
+        self._fallback = fallback
+
+    def get_table_meta(self, full_table_name: str) -> dict:
+        try:
+            return self._primary.get_table_meta(full_table_name)
+        except Exception as exc:
+            if self._fallback is None:
+                raise
+            print(
+                f"[feature_metadata] MCP meta client failed for {full_table_name} ({exc}); "
+                "falling back to TMLSQLClient for this table.",
+                file=sys.stderr,
+            )
+            return self._fallback.get_table_meta(full_table_name)
+
+
+def _resolve_dp_mcp_config():
+    """Return ``(url, api_key)`` for sh_dp_mcp from env or ``~/.claude.json``, else ``None``.
+
+    Priority: ``SH_DP_MCP_URL`` + ``SH_DP_MCP_API_KEY`` env vars, then
+    ``~/.claude.json`` ``mcpServers.sh_dp_mcp`` (auto-probe a Claude-configured env).
+    """
+    url = os.environ.get("SH_DP_MCP_URL")
+    api_key = os.environ.get("SH_DP_MCP_API_KEY")
+    if url and api_key:
+        return url, api_key
+    claude_cfg = Path.home() / ".claude.json"
+    if claude_cfg.exists():
+        try:
+            cfg = json.loads(claude_cfg.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            cfg = {}
+        mcp = (cfg.get("mcpServers") or {}).get("sh_dp_mcp") or {}
+        url = url or mcp.get("url")
+        headers = mcp.get("headers") or {}
+        api_key = api_key or headers.get("X-CJJ-MCP-API-KEY")
+    if url and api_key:
+        return url, api_key
+    return None
+
+
+def _legacy_meta_client():
+    """Return dp_cli or TMLSQLClient meta client; raise ImportError if neither available."""
     try:
         from dp_cli import create_clients
 
@@ -227,14 +332,30 @@ def load_dp_client():
         return dp
     except ImportError:
         pass
+    return _TMLMetaClient()  # raises ImportError if tmlpatch missing
 
+
+def load_dp_client():
+    mcp_cfg = _resolve_dp_mcp_config()
+    if mcp_cfg:
+        try:
+            legacy = _legacy_meta_client()
+        except ImportError:
+            legacy = None  # MCP path only; no legacy fallback available
+        print("[feature_metadata] meta source: sh_dp_mcp (MCP)", file=sys.stderr)
+        if legacy is not None:
+            return _FallbackMetaClient(_DpMcpMetaClient(*mcp_cfg), legacy)
+        return _DpMcpMetaClient(*mcp_cfg)
     try:
-        return _TMLMetaClient()
+        client = _legacy_meta_client()
     except ImportError as exc:
         raise SystemExit(
-            "Neither dp_cli nor TMLSQLClient is available. "
-            "Install one of them to read table metadata."
+            "Neither sh_dp_mcp nor dp_cli/TMLSQLClient is available. "
+            "Set SH_DP_MCP_URL + SH_DP_MCP_API_KEY (or configure ~/.claude.json "
+            "mcpServers.sh_dp_mcp), or install tmlpatch/dp_cli."
         ) from exc
+    print("[feature_metadata] meta source: TMLSQLClient", file=sys.stderr)
+    return client
 
 
 def write_csv(path: Path, rows: list[dict], fieldnames: list[str]) -> None:

@@ -427,39 +427,6 @@
       "registered_at": "2026-06-30T13:55:29"
     },
     {
-      "path": "feature_metadata/feature_tables_meta.json",
-      "size_bytes": 3405977,
-      "mtime": "2026-06-30T14:41:45",
-      "sha256": "ee5a0ff9f8434b6e5e9603e5b568c62209b04805135ce4afdb8f9107043c046d",
-      "stage": "feature_metadata",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature metadata export",
-      "registered_at": "2026-06-30T14:41:46"
-    },
-    {
-      "path": "feature_metadata/feature_table_summary.csv",
-      "size_bytes": 20589,
-      "mtime": "2026-06-30T14:41:45",
-      "sha256": "07d54d2de28ea8426a7d6e86d4e081e3ab824a1fab05cacd272876df89ee7842",
-      "stage": "feature_metadata",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature metadata export",
-      "registered_at": "2026-06-30T14:41:46"
-    },
-    {
-      "path": "feature_metadata/feature_columns.csv",
-      "size_bytes": 3755075,
-      "mtime": "2026-06-30T14:41:45",
-      "sha256": "24721ad466809bf1b22f916517d4a68f2ec2b7358bad920c85b70246260be3a5",
-      "stage": "feature_metadata",
-      "kind": "file",
-      "source": "generated",
-      "description": "Feature metadata export",
-      "registered_at": "2026-06-30T14:41:46"
-    },
-    {
       "path": "feature_selection/data_source_contract.json",
       "size_bytes": 309,
       "mtime": "2026-06-30T16:44:31",
@@ -2361,7 +2328,40 @@
       "source": "generated",
       "description": "",
       "registered_at": "2026-06-30T18:32:08"
+    },
+    {
+      "path": "feature_metadata/feature_tables_meta.json",
+      "size_bytes": 3396737,
+      "mtime": "2026-07-01T10:47:24",
+      "sha256": "f1f71a80a4cbe7e97a5a57604649e4950f7b280951f4dd89d8e1bb8935399c39",
+      "stage": "feature_metadata",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature metadata export",
+      "registered_at": "2026-07-01T10:47:25"
+    },
+    {
+      "path": "feature_metadata/feature_table_summary.csv",
+      "size_bytes": 20659,
+      "mtime": "2026-07-01T10:47:24",
+      "sha256": "ea8d0eecd09c9ab8eeecd17a30b1b4e7a039c8229bb34b890ab3d3b99612b9ea",
+      "stage": "feature_metadata",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature metadata export",
+      "registered_at": "2026-07-01T10:47:25"
+    },
+    {
+      "path": "feature_metadata/feature_columns.csv",
+      "size_bytes": 3755075,
+      "mtime": "2026-07-01T10:47:24",
+      "sha256": "24721ad466809bf1b22f916517d4a68f2ec2b7358bad920c85b70246260be3a5",
+      "stage": "feature_metadata",
+      "kind": "file",
+      "source": "generated",
+      "description": "Feature metadata export",
+      "registered_at": "2026-07-01T10:47:25"
     }
   ],
-  "updated_at": "2026-06-30T18:32:08"
+  "updated_at": "2026-07-01T10:47:25"
 }
