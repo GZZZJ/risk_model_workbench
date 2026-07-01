@@ -139,8 +139,8 @@ def test_imported_excel_report_layout(tmp_path):
     assert _find_cell(ws, "在全客群 OOS by月效果（DEV-OOS + OOT-OOS）") is not None
     assert _find_cell(ws, "在老户次新 OOS by月效果（DEV-OOS + OOT-OOS）") is not None
     assert _find_cell(ws, "在流失户 OOS by月效果（DEV-OOS + OOT-OOS）") is not None
-    assert _find_cell(ws, "DEV-OOS 2025-06") is not None
-    assert _find_cell(ws, "OOT-OOS 2026-01") is not None
+    assert _find_cell(ws, "2025-06 DEV-OOS") is not None
+    assert _find_cell(ws, "2026-01 OOT-OOS") is not None
     metric_cell = _cell_below_header(ws, "本轮模型")
     assert metric_cell is not None
     assert metric_cell.number_format == "0.000"
@@ -213,7 +213,7 @@ def test_train_300_report_uses_current_run_training_features(tmp_path):
     assert "runs/feature_refine_feather/stage_summary.json" not in report_text
 
     assert "全客群 by月效果（KS）" in report_text
-    assert "分客群整体效果（AUC）" in report_text
+    assert "老户次新整体效果（AUC）" in report_text
     assert "2、模型sloping" in report_text
     assert "3、意愿交叉风险（DEV-OOS）" in report_text
     assert "最终入模" in report_html

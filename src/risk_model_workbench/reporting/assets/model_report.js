@@ -122,8 +122,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function addPlainCells(table, columnIndex) {
+    Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+      var cell = row.children[columnIndex];
+      if (cell) cell.classList.add('plain-cell');
+    });
+  }
+
   function enhanceNumericTable(table, headers, context, changeColumns) {
-    var slopingTable = /sloping|lift|高分10%|累计发起率|剩余发起率/i.test(context + ' ' + headers.join(' '));
+    var slopingTable = /sloping|累计发起率|剩余发起率|累计lift|剩余lift/i.test(context + ' ' + headers.join(' '));
     var comparisonTable = /by月|按月|每月|OOS|整体效果|分客群整体效果|效果对比|AUC|KS/i.test(context);
     var psiTable = /PSI|稳定性/i.test(context + ' ' + headers.join(' '));
     var barColumns = [];
@@ -132,19 +139,24 @@ document.addEventListener('DOMContentLoaded', function () {
     headers.forEach(function (header, columnIndex) {
       var values = columnValues(table, columnIndex);
       if (values.length < 2 || shouldSkipNumericHeader(header)) return;
-      if (slopingTable && /发起率|lift|提升/i.test(header)) {
-        barColumns.push(columnIndex);
+      if (slopingTable) {
+        if (/占比/.test(header) || /^剩余/i.test(header)) {
+          addPlainCells(table, columnIndex);
+          return;
+        }
+        if (/发起率|lift|提升/i.test(header) && !/^剩余/i.test(header)) {
+          barColumns.push(columnIndex);
+        }
         return;
       }
       if (changeColumns.indexOf(columnIndex) !== -1) {
-        heatColumns.push(columnIndex);
         return;
       }
       if (psiTable && /psi/i.test(header)) {
         heatColumns.push(columnIndex);
         return;
       }
-      if (comparisonTable && (/AUC|KS|本轮|model_score|bad_rate|发起率|风险率/i.test(header) || /AUC|KS/.test(context))) {
+      if (comparisonTable && (/AUC|KS|model_score|bad_rate|发起率|风险率/i.test(header) || /AUC|KS/.test(context))) {
         heatColumns.push(columnIndex);
       }
     });
@@ -185,6 +197,79 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     enhanceNumericTable(table, headers, context, changeColumns);
+  });
+
+  function tableWrapAfterTitle(titleNode) {
+    var node = titleNode && titleNode.nextElementSibling;
+    while (node) {
+      if (node.classList && node.classList.contains('table-wrap')) return node;
+      if (/^(H2|H3|P)$/i.test(node.tagName)) return null;
+      node = node.nextElementSibling;
+    }
+    return null;
+  }
+
+  function pairAdjacentTables(titleMatcher) {
+    var titles = Array.prototype.slice.call(body.querySelectorAll('p,h3'));
+    titles.forEach(function (titleNode) {
+      var firstTitle = titleNode.textContent.trim();
+      var pairTitle = titleMatcher(firstTitle);
+      if (!pairTitle || titleNode.dataset.pairedTable === '1') return;
+      var firstWrap = tableWrapAfterTitle(titleNode);
+      if (!firstWrap) return;
+      var searchNode = firstWrap.nextElementSibling;
+      while (searchNode) {
+        if (/^H2$/i.test(searchNode.tagName)) return;
+        if ((/^(P|H3)$/i.test(searchNode.tagName)) && searchNode.textContent.trim() === pairTitle) {
+          var secondWrap = tableWrapAfterTitle(searchNode);
+          if (!secondWrap) return;
+          var group = document.createElement('div');
+          group.className = 'paired-tables';
+          var firstPanel = document.createElement('div');
+          firstPanel.className = 'paired-table-panel';
+          var secondPanel = document.createElement('div');
+          secondPanel.className = 'paired-table-panel';
+          titleNode.parentNode.insertBefore(group, titleNode);
+          group.appendChild(firstPanel);
+          group.appendChild(secondPanel);
+          firstPanel.appendChild(titleNode);
+          firstPanel.appendChild(firstWrap);
+          secondPanel.appendChild(searchNode);
+          secondPanel.appendChild(secondWrap);
+          titleNode.dataset.pairedTable = '1';
+          searchNode.dataset.pairedTable = '1';
+          return;
+        }
+        searchNode = searchNode.nextElementSibling;
+      }
+    });
+  }
+
+  pairAdjacentTables(function (title) {
+    if (title === '全客群 by月效果（KS）') return '全客群 by月效果（AUC）';
+    var segmentMatch = title.match(/^(老户次新|老户|次新|流失户)整体效果（KS）$/);
+    if (segmentMatch) return segmentMatch[1] + '整体效果（AUC）';
+    return '';
+  });
+
+  var slopingGroups = {};
+  Array.prototype.slice.call(body.querySelectorAll('p')).forEach(function (titleNode) {
+    var title = titleNode.textContent.trim();
+    var match = title.match(/^全样本 30天发起：在(.+?)效果 - /);
+    if (!match) return;
+    var wrap = tableWrapAfterTitle(titleNode);
+    if (!wrap) return;
+    var key = match[1];
+    if (!slopingGroups[key]) {
+      slopingGroups[key] = document.createElement('div');
+      slopingGroups[key].className = 'paired-tables sloping-pair';
+      titleNode.parentNode.insertBefore(slopingGroups[key], titleNode);
+    }
+    var panel = document.createElement('div');
+    panel.className = 'paired-table-panel';
+    slopingGroups[key].appendChild(panel);
+    panel.appendChild(titleNode);
+    panel.appendChild(wrap);
   });
 
   var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));

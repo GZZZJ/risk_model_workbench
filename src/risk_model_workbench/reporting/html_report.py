@@ -300,6 +300,7 @@ def _render_gcard_summary_grid(*, eval_dir: Path | None, run_config: dict[str, A
         )
     compare_score = "gcard_v6"
     compare_label = score_labels.get(compare_score, compare_score)
+    model_label = score_labels.get("model_score", "本轮模型")
     overall = _read_csv(eval_dir / "overall_metrics.csv")
     segment = _read_csv(eval_dir / "segment_metrics.csv")
     psi = _read_csv(eval_dir / "score_psi_by_month.csv")
@@ -317,6 +318,7 @@ def _render_gcard_summary_grid(*, eval_dir: Path | None, run_config: dict[str, A
                     run_config=run_config,
                     compare_score=compare_score,
                     compare_label=compare_label,
+                    model_label=model_label,
                 ),
                 css_class="purple",
             ),
@@ -408,13 +410,14 @@ def _gcard_stability_boundary_summary(
     run_config: dict[str, Any],
     compare_score: str,
     compare_label: str,
+    model_label: str,
 ) -> str:
     items = []
     model_psi = _latest_psi(psi, "model_score")
     compare_psi = _latest_psi(psi, compare_score)
     if model_psi is not None or compare_psi is not None:
         items.append(
-            f"<li>最新月 PSI：本轮 <strong>{_fmt_metric(model_psi)}</strong>，"
+            f"<li>最新月 PSI：{escape(model_label)} <strong>{_fmt_metric(model_psi)}</strong>，"
             f"{escape(compare_label)} <strong>{_fmt_metric(compare_psi)}</strong>。</li>"
         )
     label = run_config.get("label_column")

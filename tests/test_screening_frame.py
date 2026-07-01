@@ -51,7 +51,7 @@ def test_screening_steps_renders_d01_d02_counts_in_local_feather(tmp_path):
     # d01/d02 now computed locally → real counts, with honest "全表" labels
     assert by_method["分表基础预筛：缺失率、相关性、IV（全表，local feather）"] == 2400
     assert by_method["稳定性筛选：DEV vs OOT PSI（全表，local feather）"] == 2350
-    assert by_method["最终训练特征"] == 500
+    assert by_method["选取Top500特征入模"] == 500
 
 
 def test_screening_steps_local_feather_funnel_is_monotonic(tmp_path):

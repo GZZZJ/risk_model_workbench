@@ -26,6 +26,16 @@
 | `evaluation/intent_zc_headcount_risk.csv` | 全量观察口径意愿资产人头风险矩阵 |
 
 
+## 已补齐 — 历史版本横向对比
+
+覆盖 score_version：`model_score`。
+
+| 产出文件 | 内容 |
+|---|---|
+| `evaluation/intent_zc_segment_distribution_by_version.csv` | 各版本老户/流失户 DEV-OOS 意愿资产占比矩阵 |
+| `evaluation/intent_zc_segment_ftr_rate_by_version.csv` | 各版本老户/流失户 DEV-OOS 30天发起率矩阵 |
+| `evaluation/intent_zc_segment_amount_risk_by_version.csv` | 各版本老户/流失户 DEV-OOS 新增订单3期金额逾期率矩阵 |
+
 
 ## 已补齐 — Top20 变量 WOE
 

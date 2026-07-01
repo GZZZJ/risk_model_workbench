@@ -138,15 +138,18 @@ def _build_report_context(
 
     project_display_name = project_config.get("project", {}).get("display_name") or (project_path.name if project_path else "Model")
     eval_cfg = evaluate_config.get("evaluation", {}) if isinstance(evaluate_config.get("evaluation"), dict) else {}
+    report_root = loaded_report_config.get("report", {}) if isinstance(loaded_report_config.get("report"), dict) else {}
     score_columns = eval_cfg.get("score_columns") or ["model_score"]
     score_labels = {"model_score": "本轮模型"}
     configured_labels = eval_cfg.get("score_labels") or {}
     if isinstance(configured_labels, dict):
         score_labels.update({str(key): str(value) for key, value in configured_labels.items()})
+    report_labels = loaded_report_config.get("score_labels") or report_root.get("score_labels") or {}
+    if isinstance(report_labels, dict):
+        score_labels.update({str(key): str(value) for key, value in report_labels.items()})
     for score_column in score_columns:
         score_labels.setdefault(str(score_column), str(score_column))
 
-    report_root = loaded_report_config.get("report", {}) if isinstance(loaded_report_config.get("report"), dict) else {}
     report_title = report_root.get("title") or f"{project_display_name}模型报告"
     project_root = project_config.get("project", {}) if isinstance(project_config.get("project"), dict) else {}
     project_name = str(project_root.get("name") or (project_path.name if project_path else ""))
@@ -305,7 +308,7 @@ def _build_gcard_summary_sheet(
         )
     if monthly is not None and not monthly.empty:
         oos_monthly = monthly[monthly["final_flag"].isin(["DEV-OOS", "OOT-OOS"])].copy() if "final_flag" in monthly.columns else monthly.copy()
-        oos_monthly["_period_label"] = oos_monthly["final_flag"].astype(str) + " " + oos_monthly["mdl_month"].astype(str)
+        oos_monthly["_period_label"] = oos_monthly["mdl_month"].astype(str) + " " + oos_monthly["final_flag"].astype(str)
         row = _write_summary_table_pair(
             ws,
             row,
@@ -393,13 +396,14 @@ def _write_summary_table_pair(
 
 def _gcard_model_description_frame(*, train_dir: Path, feature_dir: Path, run_config: dict[str, Any], metrics: dict[str, Any]) -> pd.DataFrame:
     warnings = _feature_list_warnings(train_dir)
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     rows = [
         ("标签字段", run_config.get("label_column", "ftr_30d_ord_flag")),
         ("Y定义", "观察日后30天内是否发起订单"),
         ("训练/验证/OOS", f"{_fmt_list(run_config.get('train_values', []))} / {_fmt_list(run_config.get('valid_values', []))} / {_fmt_list(run_config.get('oos_values', []))}"),
         ("算法", run_config.get("algorithm", "N/A")),
         ("入模特征数", _feature_count(train_dir, feature_dir) or run_config.get("actual_feature_count", "N/A")),
-        ("对比对象", "本轮 model_score vs 旧版全客群 G卡V6"),
+        ("对比对象", f"{model_label} model_score vs 旧版全客群 G卡V6"),
         ("Best iteration", run_config.get("best_iteration", "N/A")),
         ("Valid AUC / KS", f"{_fmt_metric(metrics.get('valid_auc'))} / {_fmt_metric(metrics.get('valid_ks'))}"),
     ]
@@ -539,7 +543,8 @@ def _gcard_metric_comparison_frame(
         columns["样本数"] = display["n_samples"]
     if include_bad_rate and "bad_rate" in display.columns:
         columns["30天发起率"] = display["bad_rate"]
-    columns[f"本轮{metric_label}"] = display[model_col]
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
+    columns[f"{model_label} {metric_label}"] = display[model_col]
     columns[f"{VERSION_LABELS.get(compare_score, compare_score)} {metric_label}"] = display[compare_col]
     columns[f"{metric_label}提升"] = pd.to_numeric(display[model_col], errors="coerce") - pd.to_numeric(display[compare_col], errors="coerce")
     return pd.DataFrame(columns)
@@ -596,13 +601,14 @@ def _gcard_intent_summary_frame(*, eval_dir: Path, compare_score: str) -> pd.Dat
     if distribution is None or ftr_rate is None or amount_risk is None:
         return pd.DataFrame()
     rows = []
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     for intent in ["低意愿", "中意愿", "高意愿"]:
         row: dict[str, Any] = {"意愿档": intent}
-        for score_column, prefix in [("model_score", "本轮"), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
-            row[f"{prefix}样本数"] = _intent_metric_value(distribution, intent, "n_samples", score_column)
-            row[f"{prefix}金额逾期率"] = _intent_metric_value(amount_risk, intent, "amount_overdue_rate", score_column)
-            row[f"{prefix}人头风险率"] = _intent_metric_value(amount_risk, intent, "head_risk_rate", score_column)
-            row[f"{prefix}FTR"] = _intent_metric_value(ftr_rate, intent, "ftr_30d_rate", score_column)
+        for score_column, prefix in [("model_score", model_label), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
+            row[f"{prefix} 样本数"] = _intent_metric_value(distribution, intent, "n_samples", score_column)
+            row[f"{prefix} 金额逾期率"] = _intent_metric_value(amount_risk, intent, "amount_overdue_rate", score_column)
+            row[f"{prefix} 人头风险率"] = _intent_metric_value(amount_risk, intent, "head_risk_rate", score_column)
+            row[f"{prefix} FTR"] = _intent_metric_value(ftr_rate, intent, "ftr_30d_rate", score_column)
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -627,14 +633,15 @@ def _gcard_psi_summary_frame(*, psi: pd.DataFrame | None, compare_score: str) ->
     if psi is None or psi.empty:
         return pd.DataFrame()
     rows = []
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     for month in sorted(str(value) for value in psi["month"].dropna().unique().tolist()):
         row = {"月份": month}
-        for score_column, prefix in [("model_score", "本轮"), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
+        for score_column, prefix in [("model_score", model_label), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
             subset = psi[(psi["month"].astype(str) == month) & (psi["score_column"] == score_column)] if "score_column" in psi.columns else psi[psi["month"].astype(str) == month]
             if subset.empty:
                 continue
             row[f"{prefix} PSI"] = subset.iloc[0].get("psi")
-            row[f"{prefix}样本数"] = subset.iloc[0].get("n_samples")
+            row[f"{prefix} 样本数"] = subset.iloc[0].get("n_samples")
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -654,7 +661,8 @@ def _gcard_psi_bin_detail_frame(*, eval_dir: Path, compare_score: str) -> pd.Dat
         return pd.DataFrame()
     base_month, latest_month = months[0], months[-1]
     rows = []
-    for score_column, prefix in [("model_score", "本轮"), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
+    for score_column, prefix in [("model_score", model_label), (compare_score, VERSION_LABELS.get(compare_score, compare_score))]:
         if "score_column" not in detail.columns:
             sub = detail[detail["month"].astype(str) == latest_month]
         else:
@@ -790,7 +798,7 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
 
     if monthly is not None and not monthly.empty:
         oos_monthly = monthly[monthly["final_flag"].isin(["DEV-OOS", "OOT-OOS"])].copy() if "final_flag" in monthly.columns else monthly.copy()
-        oos_monthly["_period_label"] = oos_monthly["final_flag"].astype(str) + " " + oos_monthly["mdl_month"].astype(str)
+        oos_monthly["_period_label"] = oos_monthly["mdl_month"].astype(str) + " " + oos_monthly["final_flag"].astype(str)
         lines.extend(["", "### 五、OOS 按月效果", ""])
         lines.append("OOS 按月 AUC")
         lines.extend(_markdown_table(_gcard_metric_comparison_frame(oos_monthly, row_col="_period_label", metric="auc", row_label="样本月份", compare_score=compare_score, include_bad_rate=True), limit=20))
@@ -802,7 +810,8 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
     lines.extend(_markdown_table(_gcard_top_decile_summary_frame(eval_dir=eval_dir, compare_score=compare_score)))
 
     if psi is not None and not psi.empty:
-        lines.extend(["", "### 七、模型稳定性", "", "> PSI 为本轮模型分数月度汇总；分箱明细（base/current 占比 + PSI component）见下表。", ""])
+        model_label = VERSION_LABELS.get("model_score", "本轮模型")
+        lines.extend(["", "### 七、模型稳定性", "", f"> PSI 为 {model_label} 分数月度汇总；分箱明细（base/current 占比 + PSI component）见下表。", ""])
         lines.extend(_markdown_table(_gcard_psi_summary_frame(psi=psi, compare_score=compare_score), limit=20))
         bin_frame = _gcard_psi_bin_detail_frame(eval_dir=eval_dir, compare_score=compare_score)
         if not bin_frame.empty:
@@ -827,11 +836,12 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
 def _gcard_summary_conclusion_frame(*, overall: pd.DataFrame | None, compare_score: str) -> pd.DataFrame:
     row = _row_by_value(overall, "final_flag", "OOT-OOS")
     compare_label = VERSION_LABELS.get(compare_score, compare_score)
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     if row:
         ks_diff = _to_float(row.get("model_score_ks")) - _to_float(row.get(f"{compare_score}_ks")) if None not in [_to_float(row.get("model_score_ks")), _to_float(row.get(f"{compare_score}_ks"))] else None
         auc_diff = _to_float(row.get("model_score_auc")) - _to_float(row.get(f"{compare_score}_auc")) if None not in [_to_float(row.get("model_score_auc")), _to_float(row.get(f"{compare_score}_auc"))] else None
         core = (
-            f"OOT-OOS 全客群：本轮 KS {_fmt_metric(row.get('model_score_ks'))} vs {compare_label} {_fmt_metric(row.get(f'{compare_score}_ks'))}"
+            f"OOT-OOS 全客群：{model_label} KS {_fmt_metric(row.get('model_score_ks'))} vs {compare_label} {_fmt_metric(row.get(f'{compare_score}_ks'))}"
             f"，提升 {_fmt_pp(ks_diff)} 个百分点；AUC {_fmt_metric(row.get('model_score_auc'))} vs {compare_label} {_fmt_metric(row.get(f'{compare_score}_auc'))}"
             f"，提升 {_fmt_pp(auc_diff)} 个百分点。"
         )
@@ -849,6 +859,7 @@ def _gcard_summary_conclusion_frame(*, overall: pd.DataFrame | None, compare_sco
 
 def _gcard_top_decile_summary_frame(*, eval_dir: Path, compare_score: str) -> pd.DataFrame:
     rows = []
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     for segment_label, segment_key in SEGMENT_FILES.items():
         model = _gcard_top_decile_stat(eval_dir=eval_dir, segment_key=segment_key, score_column="model_score")
         compare = _gcard_top_decile_stat(eval_dir=eval_dir, segment_key=segment_key, score_column=compare_score)
@@ -857,10 +868,10 @@ def _gcard_top_decile_summary_frame(*, eval_dir: Path, compare_score: str) -> pd
         rows.append(
             {
                 "客群": segment_label,
-                "本轮高分10%发起率": model.get("bad_rate") if model else None,
+                f"{model_label} 高分10%发起率": model.get("bad_rate") if model else None,
                 f"{VERSION_LABELS.get(compare_score, compare_score)}高分10%发起率": compare.get("bad_rate") if compare else None,
                 "发起率提升": (model.get("bad_rate") - compare.get("bad_rate")) if model and compare else None,
-                "本轮累计lift": model.get("cum_lift") if model else None,
+                f"{model_label} 累计lift": model.get("cum_lift") if model else None,
                 f"{VERSION_LABELS.get(compare_score, compare_score)}累计lift": compare.get("cum_lift") if compare else None,
             }
         )
@@ -1111,6 +1122,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
 
     comparison_scores = _comparison_score_columns()
     primary_comparison_scores = comparison_scores[-2:] if len(comparison_scores) >= 2 else comparison_scores
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
 
     if segment is not None and not segment.empty:
         for idx, segment_name in enumerate(["老户次新", "流失户"], start=1):
@@ -1123,7 +1135,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
                 compare_text = "未配置可比 champion 分数"
             add(
                 "1、每月效果（OOS）",
-                f"（{idx}）在 OOT-OOS 样本上{segment_name}客群上，本轮全客群模型 KS "
+                f"（{idx}）在 OOT-OOS 样本上{segment_name}客群上，{model_label}全客群模型 KS "
                 f"{_fmt_metric(row.get('model_score_ks'))}；{compare_text}。",
             )
         overall = segment[(segment["segment"] == "全客群") & (segment["final_flag"] == "OOT-OOS")]
@@ -1134,7 +1146,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
                 overall_compare_text = "未配置可比 champion 分数"
             add(
                 "1、每月效果（OOS）",
-                "（3）在 OOT-OOS 样本上全客群整体看，本轮模型 KS "
+                f"（3）在 OOT-OOS 样本上全客群整体看，{model_label} KS "
                 f"{_fmt_metric(row.get('model_score_ks'))}，{overall_compare_text}。",
             )
         if primary_comparison_scores:
@@ -1142,7 +1154,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
             add(
                 "1、每月效果（OOS）",
                 "（4）当前 run 未注册老户次新/流失户专属模型得分，无法复刻历史文档中的“分客群建模 KS”对比；"
-                f"本摘要仅比较本轮全客群模型与已注册的 {labels} 历史版本。",
+                f"本摘要仅比较{model_label}全客群模型与已注册的 {labels} 历史版本。",
             )
 
     if monthly_oos is not None and not monthly_oos.empty:
@@ -1161,7 +1173,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
             add(
                 "1、每月效果（OOS）",
                 "（5）DEV-OOS 与 OOT-OOS 已拼接到【模型效果-每月效果】中横向比较；"
-                f"OOT-OOS 本轮模型 by 月结果为：{'；'.join(month_texts)}。",
+                f"OOT-OOS {model_label} by 月结果为：{'；'.join(month_texts)}。",
             )
 
     if decile is not None and not decile.empty:
@@ -1177,7 +1189,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
             )
             add(
                 "2、模型sloping",
-                f"（{idx}）在 OOT-OOS 样本上{segment_name}客群高分10%分层，本轮模型30天发起率"
+                f"（{idx}）在 OOT-OOS 样本上{segment_name}客群高分10%分层，{model_label}30天发起率"
                 f"{_fmt_percent(model_stat['bad_rate'])}、lift {_fmt_metric(model_stat['lift'])}；"
                 f"{compare_text}。",
             )
@@ -1207,9 +1219,9 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
             )
             add(
                 "3、意愿交叉风险（DEV-OOS）",
-                f"（{idx}）{segment_name}客群上，本轮低意愿30天发起率{_fmt_percent(model_low_ftr)}、"
+                f"（{idx}）{segment_name}客群上，{model_label}低意愿30天发起率{_fmt_percent(model_low_ftr)}、"
                 f"高意愿30天发起率{_fmt_percent(model_high_ftr)}；"
-                f"{ftr_compare}；高意愿新增订单3期金额逾期率本轮{_fmt_percent(model_high_risk)}，"
+                f"{ftr_compare}；高意愿新增订单3期金额逾期率{model_label}{_fmt_percent(model_high_risk)}，"
                 f"{risk_compare}。",
             )
 
@@ -1839,6 +1851,7 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
         d03_label = "随机噪声重要性筛选：剔除弱于噪声的真实特征"
     is_local = stage_summary.get("data_source_mode") == "local_feather"
     if is_local:
+        final_label = f"选取Top{stage_summary.get('final_features', 'N/A')}特征入模"
         # Local-feather funnel reflects refine's actual compute order (monotone):
         # initial → available(missing/constant) → d01(IV/corr whole-frame) → d02(PSI DEV-vs-OOT) → global_corr → d03 → d04 → final.
         # d01/d02 labels are honestly marked whole-feather (remote d01/d02 are per-table DP).
@@ -1850,9 +1863,10 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
             ("全局相关性去重：按单变量AUC保留更强特征", "after_global_corr"),
             (d03_label, "after_d03_random_importance"),
             ("空标签重要性筛选：保留显著高于空标签分布的特征", "after_d04_null_importance"),
-            ("最终训练特征", "final_features"),
+            (final_label, "final_features"),
         ]
     else:
+        final_label = f"选取Top{stage_summary.get('final_features', 'N/A')}特征入模"
         # Remote legacy order: per-table d01/d02 happen at prescreen (before feather availability).
         rows = [
             ("原始候选变量总数", "initial_features"),
@@ -1862,7 +1876,7 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
             ("全局相关性去重：按单变量AUC保留更强特征", "after_global_corr"),
             (d03_label, "after_d03_random_importance"),
             ("空标签重要性筛选：保留显著高于空标签分布的特征", "after_d04_null_importance"),
-            ("最终训练特征", "final_features"),
+            (final_label, "final_features"),
         ]
     return pd.DataFrame(
         {
@@ -1873,10 +1887,18 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
     )
 
 
-def _metric_comparison_frame(frame: pd.DataFrame, *, row_col: str, metric: str, row_label: str) -> pd.DataFrame:
+def _metric_comparison_frame(
+    frame: pd.DataFrame,
+    *,
+    row_col: str,
+    metric: str,
+    row_label: str,
+    score_columns: list[str] | None = None,
+) -> pd.DataFrame:
     cols = [row_col]
     rename = {row_col: row_label}
-    for score_column in SCORE_COLUMNS:
+    ordered_scores = score_columns or SCORE_COLUMNS
+    for score_column in ordered_scores:
         source_col = f"{score_column}_{metric}"
         if source_col in frame.columns:
             cols.append(source_col)
@@ -1895,12 +1917,18 @@ def _metric_comparison_frame_long(frame: pd.DataFrame, *, row_col: str, metric: 
     return display.rename(columns={row_col: row_label, **{score: VERSION_LABELS.get(score, score) for score in SCORE_COLUMNS}})
 
 
-def _metric_comparison_frame_oos_by_month(frame: pd.DataFrame, *, metric: str, row_label: str) -> pd.DataFrame:
+def _metric_comparison_frame_oos_by_month(
+    frame: pd.DataFrame,
+    *,
+    metric: str,
+    row_label: str,
+    score_columns: list[str] | None = None,
+) -> pd.DataFrame:
     required = {"final_flag", "mdl_month", "score_version", metric}
     if frame.empty or not required.issubset(frame.columns):
         return pd.DataFrame()
     working = frame.copy()
-    working["_period_label"] = working["final_flag"].astype(str) + " " + working["mdl_month"].astype(str)
+    working["_period_label"] = working["mdl_month"].astype(str) + " " + working["final_flag"].astype(str)
     period_order = (
         working[["_period_label", "final_flag", "mdl_month"]]
         .drop_duplicates()
@@ -1910,9 +1938,10 @@ def _metric_comparison_frame_oos_by_month(frame: pd.DataFrame, *, metric: str, r
     pivot = working.pivot_table(index="_period_label", columns="score_version", values=metric, aggfunc="first").reset_index()
     pivot.columns.name = None
     display = period_order[["_period_label"]].merge(pivot, on="_period_label", how="left")
-    ordered_cols = ["_period_label"] + [score for score in SCORE_COLUMNS if score in display.columns]
+    ordered_scores = score_columns or SCORE_COLUMNS
+    ordered_cols = ["_period_label"] + [score for score in ordered_scores if score in display.columns]
     return display[ordered_cols].rename(
-        columns={"_period_label": row_label, **{score: VERSION_LABELS.get(score, score) for score in SCORE_COLUMNS}}
+        columns={"_period_label": row_label, **{score: VERSION_LABELS.get(score, score) for score in ordered_scores}}
     )
 
 
@@ -1920,10 +1949,13 @@ def _sloping_display_frame(frame: pd.DataFrame) -> pd.DataFrame:
     display = frame.copy().sort_values("decile", ascending=True).reset_index(drop=True)
     required = {"decile", "n_samples", "bad"}
     if not required.issubset(display.columns):
+        pct = display.get("pct")
+        if pct is not None:
+            pct = pd.to_numeric(pct, errors="coerce").map(_fmt_percent)
         return pd.DataFrame(
             {
                 "分组": [_sloping_group_label(row) for row in display.itertuples(index=False)],
-                "占比": display.get("pct"),
+                "占比": pct,
                 "累计发起率": display.get("cum_bad_rate"),
                 "累计lift": display.get("cum_lift"),
                 "剩余发起率": display.get("remaining_bad_rate"),
@@ -1947,7 +1979,7 @@ def _sloping_display_frame(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "分组": [_sloping_group_label(row) for row in display.itertuples(index=False)],
-            "占比": n_samples / total_n if total_n else 0,
+            "占比": (n_samples / total_n).map(_fmt_percent) if total_n else "0.0%",
             "累计发起率": cum_rate,
             "累计lift": cum_rate / total_rate if total_rate else 0,
             "剩余发起率": remaining_rate,
@@ -2452,7 +2484,14 @@ def _write_model_reports(
     if benchmark is not None:
         display_cols = ["final_flag", "model_score_auc", "model_score_ks"]
         display_cols.extend(f"ks_uplift_vs_{score}" for score in _comparison_score_columns())
-        lines.extend(_markdown_table(benchmark[[col for col in display_cols if col in benchmark.columns]]))
+        display_benchmark = benchmark[[col for col in display_cols if col in benchmark.columns]].copy()
+        display_benchmark = display_benchmark.rename(
+            columns={
+                f"ks_uplift_vs_{score}": f"相对{str(score).replace('gcard_', '').upper()}版本提升"
+                for score in _comparison_score_columns()
+            }
+        )
+        lines.extend(_markdown_table(display_benchmark))
         lines.append("")
 
     lines.extend(["## 四、模型效果", ""])
@@ -2462,6 +2501,7 @@ def _write_model_reports(
 
     lines.extend(["## 五、模型稳定性", ""])
     if psi is not None and not psi.empty:
+        model_label = VERSION_LABELS.get("model_score", "本轮模型")
         if model_score_stability is not None and not model_score_stability.empty:
             max_psi = (
                 model_score_stability[["mdl_month", "month_psi"]]
@@ -2469,13 +2509,13 @@ def _write_model_reports(
                 .sort_values("month_psi", ascending=False)
                 .head(5)
             )
-            lines.append("- 本轮模型稳定性已补齐分箱占比、分箱发起率和 PSI 组件；月度 PSI 最高的 5 个观测如下：")
+            lines.append(f"- {model_label}稳定性已补齐分箱占比、分箱发起率和 PSI 组件；月度 PSI 最高的 5 个观测如下：")
             lines.extend(_markdown_table(max_psi))
         else:
             if "score_column" in psi.columns:
                 psi = psi[psi["score_column"] == "model_score"].copy()
             max_psi = psi.sort_values("psi", ascending=False).head(5)
-            lines.append("- 本轮模型 PSI 最高的 5 个观测如下：")
+            lines.append(f"- {model_label} PSI 最高的 5 个观测如下：")
             lines.extend(_markdown_table(max_psi))
     lines.extend(
         [
@@ -2545,6 +2585,7 @@ def _append_module_conclusions_markdown(lines: list[str], eval_dir: Path, module
 
 
 def _append_monthly_effect_markdown(lines: list[str], eval_dir: Path) -> None:
+    focused_scores = [score for score in ["model_score", "gcard_v6"] if score in SCORE_COLUMNS]
     monthly_segment_oos = _read_csv(eval_dir / "monthly_segment_metrics_oos_by_version.csv")
     monthly = _read_csv(eval_dir / "monthly_metrics.csv")
     segment = _read_csv(eval_dir / "segment_metrics.csv")
@@ -2570,50 +2611,92 @@ def _append_monthly_effect_markdown(lines: list[str], eval_dir: Path) -> None:
             if subset.empty:
                 continue
             lines.append(f"在{segment_name} OOS by月效果（KS）")
-            lines.extend(_markdown_table(_metric_comparison_frame_oos_by_month(subset, metric="ks", row_label="样本月份"), limit=50))
+            lines.extend(
+                _markdown_table(
+                    _metric_comparison_frame_oos_by_month(
+                        subset,
+                        metric="ks",
+                        row_label="样本月份",
+                        score_columns=focused_scores,
+                    ),
+                    limit=50,
+                )
+            )
             lines.append("")
             lines.append(f"在{segment_name} OOS by月效果（AUC）")
-            lines.extend(_markdown_table(_metric_comparison_frame_oos_by_month(subset, metric="auc", row_label="样本月份"), limit=50))
+            lines.extend(
+                _markdown_table(
+                    _metric_comparison_frame_oos_by_month(
+                        subset,
+                        metric="auc",
+                        row_label="样本月份",
+                        score_columns=focused_scores,
+                    ),
+                    limit=50,
+                )
+            )
             lines.append("")
     elif monthly is not None and not monthly.empty:
         working = monthly.copy()
-        working["_period_label"] = working["final_flag"].astype(str) + " " + working["mdl_month"].astype(str)
+        if "final_flag" in working.columns:
+            working = working[working["final_flag"].isin(["DEV-OOS", "OOT-OOS"])].copy()
+        working["_period_label"] = working["mdl_month"].astype(str) + " " + working["final_flag"].astype(str)
         lines.append("全客群 by月效果（KS）")
-        lines.extend(_markdown_table(_metric_comparison_frame(working, row_col="_period_label", metric="ks", row_label="样本月份"), limit=80))
+        lines.extend(
+            _markdown_table(
+                _metric_comparison_frame(
+                    working,
+                    row_col="_period_label",
+                    metric="ks",
+                    row_label="样本月份",
+                    score_columns=focused_scores,
+                ),
+                limit=80,
+            )
+        )
         lines.append("")
         lines.append("全客群 by月效果（AUC）")
-        lines.extend(_markdown_table(_metric_comparison_frame(working, row_col="_period_label", metric="auc", row_label="样本月份"), limit=80))
+        lines.extend(
+            _markdown_table(
+                _metric_comparison_frame(
+                    working,
+                    row_col="_period_label",
+                    metric="auc",
+                    row_label="样本月份",
+                    score_columns=focused_scores,
+                ),
+                limit=80,
+            )
+        )
         lines.append("")
 
     if segment is not None and not segment.empty:
-        lines.append("分客群整体效果（KS）")
-        segment_ks_rows = []
-        for segment_name in ["全客群", "老户次新", "老户", "次新", "流失户"]:
+        for segment_name in ["老户次新", "老户", "次新", "流失户"]:
             subset = segment[segment["segment"] == segment_name].copy()
             if subset.empty:
                 continue
-            table = _metric_comparison_frame(subset, row_col="final_flag", metric="ks", row_label="样本")
-            if table.empty:
-                continue
-            table.insert(0, "客群", segment_name)
-            segment_ks_rows.extend(table.to_dict("records"))
-        if segment_ks_rows:
-            lines.extend(_markdown_table(pd.DataFrame(segment_ks_rows), limit=80))
-            lines.append("")
-        lines.append("分客群整体效果（AUC）")
-        segment_auc_rows = []
-        for segment_name in ["全客群", "老户次新", "老户", "次新", "流失户"]:
-            subset = segment[segment["segment"] == segment_name].copy()
-            if subset.empty:
-                continue
-            table = _metric_comparison_frame(subset, row_col="final_flag", metric="auc", row_label="样本")
-            if table.empty:
-                continue
-            table.insert(0, "客群", segment_name)
-            segment_auc_rows.extend(table.to_dict("records"))
-        if segment_auc_rows:
-            lines.extend(_markdown_table(pd.DataFrame(segment_auc_rows), limit=80))
-            lines.append("")
+            ks_table = _metric_comparison_frame(
+                subset,
+                row_col="final_flag",
+                metric="ks",
+                row_label="样本",
+                score_columns=focused_scores,
+            )
+            auc_table = _metric_comparison_frame(
+                subset,
+                row_col="final_flag",
+                metric="auc",
+                row_label="样本",
+                score_columns=focused_scores,
+            )
+            if not ks_table.empty:
+                lines.append(f"{segment_name}整体效果（KS）")
+                lines.extend(_markdown_table(ks_table, limit=20))
+                lines.append("")
+            if not auc_table.empty:
+                lines.append(f"{segment_name}整体效果（AUC）")
+                lines.extend(_markdown_table(auc_table, limit=20))
+                lines.append("")
 
     if feb_apr is not None and not feb_apr.empty:
         lines.append("2026年2-4月外推验证（全客群）")
@@ -2628,12 +2711,13 @@ def _append_monthly_effect_markdown(lines: list[str], eval_dir: Path) -> None:
 
 
 def _append_sloping_markdown(lines: list[str], eval_dir: Path) -> None:
+    focused_scores = [score for score in ["model_score", "gcard_v6"] if score in SCORE_COLUMNS]
     versioned = _read_csv(eval_dir / "decile_lift_bins_by_version.csv")
     if versioned is None or versioned.empty:
         available = [
             (segment_name, segment_key, score_column)
             for segment_name, segment_key in SEGMENT_FILES.items()
-            for score_column in SCORE_COLUMNS
+            for score_column in focused_scores
             if (eval_dir / f"decile_lift_{segment_key}_{score_column}.csv").exists()
             or (score_column == "model_score" and (eval_dir / f"decile_lift_{segment_key}.csv").exists())
         ]
@@ -2660,7 +2744,7 @@ def _append_sloping_markdown(lines: list[str], eval_dir: Path) -> None:
             continue
         lines.append(f"OOT-OOS 30天发起：在{segment_name}效果")
         lines.append("")
-        for score_column in SCORE_COLUMNS:
+        for score_column in focused_scores:
             subset = subset_segment[subset_segment["score_version"] == score_column].copy()
             if subset.empty:
                 continue
@@ -2756,6 +2840,7 @@ def _fmt_list(values: Any) -> str:
 def _metric_sentence(label: str, row: dict[str, Any]) -> str:
     if not row:
         return f"- {label} 暂无可用 benchmark 指标。"
+    model_label = VERSION_LABELS.get("model_score", "本轮模型")
     comparisons = []
     for score_column in _comparison_score_columns():
         uplift = row.get(f"ks_uplift_vs_{score_column}")
@@ -2763,7 +2848,7 @@ def _metric_sentence(label: str, row: dict[str, Any]) -> str:
             comparisons.append(f"相对 {VERSION_LABELS.get(score_column, score_column)} KS 提升 {_fmt_metric(uplift)}")
     comparison_text = "，".join(comparisons) if comparisons else "未配置可比 champion 分数"
     return (
-        f"- {label}：本轮模型 AUC {_fmt_metric(row.get('model_score_auc'))}、KS {_fmt_metric(row.get('model_score_ks'))}；"
+        f"- {label}：{model_label} AUC {_fmt_metric(row.get('model_score_auc'))}、KS {_fmt_metric(row.get('model_score_ks'))}；"
         f"{comparison_text}。"
     )
 

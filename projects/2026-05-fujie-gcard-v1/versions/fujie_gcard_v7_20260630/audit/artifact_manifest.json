@@ -4288,50 +4288,6 @@
       "registered_at": "2026-07-01T16:37:34"
     },
     {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx",
-      "size_bytes": 4534560,
-      "mtime": "2026-07-01T16:35:51",
-      "sha256": "9c14c406a6d05d4556a5421f27b63eda021f58c60d84308969af6bfc2b2856a9",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T16:37:34"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.md",
-      "size_bytes": 33319,
-      "mtime": "2026-07-01T16:35:51",
-      "sha256": "54fa34ef0eb461ea3f7b020fed7a7cda1ace17eb75834b7d323233354545abab",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T16:37:35"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.html",
-      "size_bytes": 63589,
-      "mtime": "2026-07-01T16:35:51",
-      "sha256": "5bf7f89a52b5be1ad414e587dba1500fb483cdeff08c46385cedaede78310009",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T16:37:35"
-    },
-    {
-      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md",
-      "size_bytes": 1841,
-      "mtime": "2026-07-01T16:35:51",
-      "sha256": "9b5f032cc17171c90725064bf1c73599e29744cc461691d03078c861c3d3cf40",
-      "stage": "report",
-      "kind": "file",
-      "source": "generated",
-      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
-      "registered_at": "2026-07-01T16:37:35"
-    },
-    {
       "path": "reports_tuned_main_lgbm_tuned_balanced/report_scope.json",
       "size_bytes": 381,
       "mtime": "2026-07-01T12:53:33",
@@ -4341,7 +4297,84 @@
       "source": "generated",
       "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
       "registered_at": "2026-07-01T16:37:36"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx",
+      "size_bytes": 4535551,
+      "mtime": "2026-07-01T17:49:08",
+      "sha256": "45f28a9dbaae7578b2a8ab0c1d475fde4d1e1d54bf45fd0ee5b1ee2f8fad4ff1",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T17:49:59"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.md",
+      "size_bytes": 23889,
+      "mtime": "2026-07-01T17:49:08",
+      "sha256": "a5ee35d92b32e6d7b0879b30ce850d03e59b3ef66673e0984dbc72a06582d44a",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T17:50:00"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report.html",
+      "size_bytes": 51657,
+      "mtime": "2026-07-01T17:49:08",
+      "sha256": "cd61bb3e255bd2de47c56b1485df9ac37f9d2a451163a92fbbe1a8344371a409",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T17:50:00"
+    },
+    {
+      "path": "reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md",
+      "size_bytes": 2338,
+      "mtime": "2026-07-01T17:49:08",
+      "sha256": "62f41a75444391c14e1f98c62ade627630d4f841d44b7082795edc7893769041",
+      "stage": "report",
+      "kind": "file",
+      "source": "generated",
+      "description": "Tuned balanced challenger report for main_lgbm_tuned_balanced",
+      "registered_at": "2026-07-01T17:50:00"
+    },
+    {
+      "path": "evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_segment_distribution_by_version.csv",
+      "size_bytes": 4245,
+      "mtime": "2026-07-01T17:30:52",
+      "sha256": "041e3da397accf86a09be604650d05c5a69a85fa7d6a68915c86ca54d831778f",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "DEV-OOS 老户/流失户意愿 x 资产评级矩阵 for tuned balanced report",
+      "registered_at": "2026-07-01T17:50:01"
+    },
+    {
+      "path": "evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_segment_ftr_rate_by_version.csv",
+      "size_bytes": 4588,
+      "mtime": "2026-07-01T17:30:52",
+      "sha256": "a8d3bb1b8b1baf0464ac39a03420eebc221251a2d537a4a0e36060f514a52526",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "DEV-OOS 老户/流失户意愿 x 资产评级矩阵 for tuned balanced report",
+      "registered_at": "2026-07-01T17:50:02"
+    },
+    {
+      "path": "evaluation_tuned/main_lgbm_tuned_balanced/intent_zc_segment_amount_risk_by_version.csv",
+      "size_bytes": 5645,
+      "mtime": "2026-07-01T17:30:52",
+      "sha256": "0df54e1eded2d346674fb07d8486ca4c147f7caa6f1133e40c4d498726bb5970",
+      "stage": "evaluate",
+      "kind": "file",
+      "source": "generated",
+      "description": "DEV-OOS 老户/流失户意愿 x 资产评级矩阵 for tuned balanced report",
+      "registered_at": "2026-07-01T17:50:02"
     }
   ],
-  "updated_at": "2026-07-01T16:37:36"
+  "updated_at": "2026-07-01T17:50:02"
 }
