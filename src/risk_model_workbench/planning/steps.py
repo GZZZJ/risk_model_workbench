@@ -8,6 +8,8 @@ from typing import Any
 
 import yaml
 
+from risk_model_workbench.request.training import effective_training_config, llm_guided_tuning_enabled
+
 
 KNOWN_STAGES = {
     "validate_config",
@@ -216,6 +218,14 @@ STEP_REGISTRY: dict[str, dict[str, Any]] = {
         "description": "Train a standard binary LightGBM model.",
         "default_params": {"early_stopping_rounds": 50, "max_auc_gap": 0.02},
         "source_reference": "AIAgent three-domain model training defaults",
+        "implementation_status": "implemented",
+    },
+    "llm_guided_tuning": {
+        "id": "llm_guided_tuning",
+        "stage": "train_baseline",
+        "description": "Run bounded host-agent LightGBM candidate tuning and select the final trial by metric guardrails.",
+        "default_params": {"max_rounds": 2, "candidates_per_round": 4, "max_trials": 8},
+        "source_reference": "RMW host-agent tuning flow",
         "implementation_status": "implemented",
     },
     "scale_pos_weight": {
@@ -689,6 +699,7 @@ def resolve_step_configuration(
     project_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """Resolve profile defaults plus request-level step overrides."""
+    project_config = _load_project_yaml(project_path)
     profile = infer_scenario_profile(metadata, project_path)
     if profile not in PROFILE_STAGE_STEPS:
         raise ValueError(f"unknown scenario_profile: {profile}")
@@ -702,6 +713,12 @@ def resolve_step_configuration(
         if stage_name not in KNOWN_STAGES:
             raise ValueError(f"unknown stage in stage_steps: {stage_name}")
         stage_steps[stage_name] = _normalize_step_ids(_as_list(raw_steps))
+
+    effective_training = effective_training_config(metadata, project_config)
+    if llm_guided_tuning_enabled(effective_training):
+        train_steps = stage_steps.setdefault("train_baseline", [])
+        if "llm_guided_tuning" not in train_steps:
+            train_steps.append("llm_guided_tuning")
 
     unknown_steps = sorted({step for steps in stage_steps.values() for step in steps if step not in STEP_REGISTRY})
     if unknown_steps:
@@ -720,6 +737,9 @@ def resolve_step_configuration(
     for step_id in used_steps:
         params = deepcopy(STEP_REGISTRY[step_id].get("default_params", {}))
         params.update(deepcopy(PROFILE_STEP_PARAMS.get(profile, {}).get(step_id, {})))
+        if step_id == "llm_guided_tuning":
+            tuning_params = effective_training.get("tuning") if isinstance(effective_training.get("tuning"), dict) else {}
+            params.update(deepcopy(tuning_params))
         if step_id in request_params:
             if not isinstance(request_params[step_id], dict):
                 raise ValueError(f"step_params.{step_id} must be a mapping")

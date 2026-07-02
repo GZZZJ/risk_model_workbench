@@ -18,6 +18,10 @@ from risk_model_workbench.request.data_source import (
 )
 from risk_model_workbench.planning.steps import resolve_step_configuration
 from risk_model_workbench.request.splits import check_split_consistency
+from risk_model_workbench.request.training import (
+    request_disables_project_llm_tuning,
+    tuning_disable_reason,
+)
 
 
 REQUIRED_FIELDS = [
@@ -74,6 +78,29 @@ def _custom_entrypoint(project_config: dict[str, Any]) -> Any:
     )
 
 
+def _validate_training_config(prefix: str, training: Any, errors: list[str]) -> None:
+    if not isinstance(training, dict):
+        errors.append(f"{prefix} must be a mapping")
+        return
+    mode = str(training.get("mode") or "").strip().lower()
+    if mode and mode not in SUPPORTED_TRAINING_MODES:
+        errors.append(f"unsupported {prefix}.mode: {mode}")
+    tuning = training.get("tuning") or {}
+    if "tuning" in training and not isinstance(tuning, dict):
+        errors.append(f"{prefix}.tuning must be a mapping")
+    elif isinstance(tuning, dict):
+        tuning_mode = str(tuning.get("mode") or "").strip().lower()
+        if tuning_mode and tuning_mode not in SUPPORTED_TRAINING_MODES:
+            errors.append(f"unsupported {prefix}.tuning.mode: {tuning_mode}")
+        for key in ["max_rounds", "candidates_per_round", "max_trials"]:
+            if key in tuning:
+                try:
+                    if int(tuning[key]) < 1:
+                        errors.append(f"{prefix}.tuning.{key} must be >= 1")
+                except (TypeError, ValueError):
+                    errors.append(f"{prefix}.tuning.{key} must be an integer")
+
+
 def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path | None = None) -> dict[str, Any]:
     """Return validation errors and warnings for a parsed model request."""
     metadata = request_doc.get("metadata", {})
@@ -90,6 +117,8 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
         else:
             project_config = load_yaml(config_path)
             configured_ids = project_config.get("data", {}).get("id_columns") or []
+            if "training_defaults" in project_config:
+                _validate_training_config("training_defaults", project_config.get("training_defaults"), errors)
 
     for field in REQUIRED_FIELDS:
         if field not in metadata or metadata.get(field) in (None, "", []):
@@ -117,20 +146,9 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
     if "training" in metadata and not isinstance(metadata.get("training"), dict):
         errors.append("training must be a mapping")
     elif isinstance(training, dict):
-        mode = str(training.get("mode") or "").strip().lower()
-        if mode and mode not in SUPPORTED_TRAINING_MODES:
-            errors.append(f"unsupported training.mode: {mode}")
-        tuning = training.get("tuning") or {}
-        if "tuning" in training and not isinstance(tuning, dict):
-            errors.append("training.tuning must be a mapping")
-        elif isinstance(tuning, dict):
-            for key in ["max_rounds", "candidates_per_round", "max_trials"]:
-                if key in tuning:
-                    try:
-                        if int(tuning[key]) < 1:
-                            errors.append(f"training.tuning.{key} must be >= 1")
-                    except (TypeError, ValueError):
-                        errors.append(f"training.tuning.{key} must be an integer")
+        _validate_training_config("training", training, errors)
+        if project_config and request_disables_project_llm_tuning(metadata, project_config) and not tuning_disable_reason(metadata):
+            errors.append("training.disable_tuning_reason is required when disabling project llm_guided_tune default")
 
     workflow = metadata.get("workflow", "full_modeling")
     if workflow and not workflow_path(str(workflow)).exists():

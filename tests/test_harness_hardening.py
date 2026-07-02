@@ -116,6 +116,24 @@ def test_audit_blocks_missing_scaffold_and_imported_evidence(tmp_path):
     assert main(["run", "audit", "--project", str(project), "--run-id", "imported_run", "--stage", "sample_check", "--strict"]) == 1
 
 
+def test_audit_requires_tuning_evidence_when_llm_tuning_enabled(tmp_path):
+    project = _make_project(tmp_path)
+    run_path = _init_run(project, "tuning_missing")
+    train_cfg = run_path / "configs_runtime" / "train.yaml"
+    train_cfg.parent.mkdir(parents=True, exist_ok=True)
+    train_cfg.write_text("training:\n  mode: llm_guided_tune\n", encoding="utf-8")
+    model_dir = run_path / "modeling" / "main_lgbm"
+    model_dir.mkdir(parents=True, exist_ok=True)
+    (model_dir / "train_metrics.json").write_text('{"status": "done"}\n', encoding="utf-8")
+    register_artifact(run_path, "train_baseline", "modeling/main_lgbm/train_metrics.json")
+    mark_stage_done(run_path, "train_baseline")
+
+    audit = audit_run(project, "tuning_missing", stage="train_baseline")
+
+    assert audit["verdict"] == "incomplete"
+    assert any("llm tuning artifact missing" in issue for issue in audit["stages"][0]["issues"])
+
+
 def test_lesson_promote_and_rules_list_are_idempotent(tmp_path, monkeypatch, capsys):
     project = _make_project(tmp_path)
     rules_path = tmp_path / "workbench_rules.yml"

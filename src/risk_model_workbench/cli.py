@@ -50,6 +50,7 @@ from risk_model_workbench.project_state import (
 )
 from risk_model_workbench.request import parse_model_request, validate_model_request
 from risk_model_workbench.request.materialize import RUNTIME_CONFIG_DIR, materialize_request_runtime_configs
+from risk_model_workbench.request.training import merge_training_config, project_training_defaults
 from risk_model_workbench.rules import format_rules, load_workbench_rules, promote_lesson_to_rule
 from risk_model_workbench.state import (
     append_decision,
@@ -1882,10 +1883,13 @@ def cmd_train(args: argparse.Namespace) -> int:
     config_path = Path(config_arg) if config_arg else project_dir / "configs" / "train.yaml"
     config_path = config_path if config_path.is_absolute() else project_dir / config_path
     train_config = load_yaml(config_path) if config_path.exists() else {}
-    runtime_experiment = _experiment_config(train_config, args.experiment) if train_config else {"name": args.experiment, "algorithm": "lightgbm"}
-    algorithm = _normal_algorithm(runtime_experiment.get("algorithm") or runtime_experiment.get("method"))
-    effective_config = deepcopy(train_config)
     project_cfg = _load_runtime_project_config(project_dir, path)
+    effective_config = deepcopy(train_config)
+    defaults = project_training_defaults(project_cfg)
+    if defaults:
+        effective_config["training"] = merge_training_config(defaults, effective_config.get("training", {}))
+    runtime_experiment = _experiment_config(effective_config, args.experiment) if effective_config else {"name": args.experiment, "algorithm": "lightgbm"}
+    algorithm = _normal_algorithm(runtime_experiment.get("algorithm") or runtime_experiment.get("method"))
     if effective_config:
         effective_config["runtime_experiment"] = runtime_experiment
         effective_config["runtime_step_params"] = effective_config.get("training", {}).get("runtime_step_params", {})

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from risk_model_workbench.harness.errors import (
     UNKNOWN,
 )
 from risk_model_workbench.paths import REPO_ROOT, project_config_path
+from risk_model_workbench.request.training import llm_guided_tuning_enabled
 from risk_model_workbench.rules import summarize_rules
 from risk_model_workbench.run_evidence import load_run_evidence
 from risk_model_workbench.state import load_run_state, run_dir
@@ -591,6 +593,8 @@ def _audit_stage(
     issues.extend(f"registered artifact does not exist: {item}" for item in missing_files)
     if status in {"done", "scaffold"}:
         issues.extend(audit_contract_artifacts(contract, manifest_items, run_path))
+        if name == "train_baseline":
+            issues.extend(_audit_tuning_artifacts(manifest_items, run_path))
 
     if status in {"pending", "running", "failed", "missing"}:
         verdict = "open"
@@ -626,6 +630,45 @@ def _audit_stage(
         "failure_codes": failure_codes,
         "issues": issues,
     }
+
+
+def _audit_tuning_artifacts(manifest_items: list[dict[str, Any]], run_path: str | Path) -> list[str]:
+    if not _runtime_train_uses_llm_tuning(run_path):
+        return []
+    required_patterns = [
+        "modeling/*/tuning_summary.json",
+        "modeling/*/tuning_trials.csv",
+        "modeling/*/best_params.json",
+        "modeling/*/llm_tuning_decisions.md",
+    ]
+    issues = []
+    for pattern in required_patterns:
+        if not _manifest_pattern_satisfied(pattern, manifest_items, run_path):
+            issues.append(f"llm tuning artifact missing or not registered: {pattern}")
+    return issues
+
+
+def _runtime_train_uses_llm_tuning(run_path: str | Path) -> bool:
+    train_cfg = _load_runtime_train_config(run_path)
+    training = train_cfg.get("training") if isinstance(train_cfg.get("training"), dict) else {}
+    return llm_guided_tuning_enabled(training)
+
+
+def _load_runtime_train_config(run_path: str | Path) -> dict[str, Any]:
+    for name in ["train.yaml", "train.yml"]:
+        path = Path(run_path) / "configs_runtime" / name
+        if path.exists():
+            try:
+                data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            except (OSError, yaml.YAMLError):
+                return {}
+            return data if isinstance(data, dict) else {}
+    return {}
+
+
+def _manifest_pattern_satisfied(pattern: str, manifest_items: list[dict[str, Any]], run_path: str | Path) -> bool:
+    matches = [item for item in manifest_items if fnmatch(str(item.get("path", "")), pattern)]
+    return any(artifact_exists(run_path, item) for item in matches)
 
 
 def _classify_stage_failure(*, status: str, verdict: str, issues: list[str]) -> list[str]:

@@ -64,6 +64,21 @@ champions:
 current_model:
   candidate_score_column: model_score
 
+training_defaults:
+  mode: llm_guided_tune
+  tuning:
+    max_rounds: 2
+    candidates_per_round: 4
+    max_trials: 8
+    objective:
+      primary_metric: valid_ks
+      secondary_metric: valid_auc
+    guardrails:
+      max_train_valid_auc_gap: 0.03
+    advisor:
+      mode: host_agent
+      fallback_to_heuristic: true
+
 segments:
   - name: all
     display_name: 全客群

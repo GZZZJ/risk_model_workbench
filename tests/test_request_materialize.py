@@ -178,6 +178,54 @@ def test_materialize_request_runtime_configs_maps_builder_fields(tmp_path):
     assert report["report"]["targets"][0]["score_labels"] == {"model_score": "G卡V8", "gcard_v6": "G卡V6"}
 
 
+def test_materialize_inherits_project_training_defaults(tmp_path):
+    project_dir = tmp_path / "project"
+    run_dir = project_dir / "runs" / "run1"
+    _write_project(project_dir)
+    project_yml = project_dir / "project.yml"
+    project_yml.write_text(
+        project_yml.read_text(encoding="utf-8")
+        + "\ntraining_defaults:\n"
+        + "  mode: llm_guided_tune\n"
+        + "  tuning:\n"
+        + "    max_rounds: 2\n"
+        + "    candidates_per_round: 4\n"
+        + "    max_trials: 8\n",
+        encoding="utf-8",
+    )
+    request_doc = _request_doc()
+    request_doc["metadata"].pop("training")
+
+    materialize_request_runtime_configs(request_doc=request_doc, project_dir=project_dir, run_dir=run_dir)
+
+    train = yaml.safe_load((run_dir / "configs_runtime" / "train.yaml").read_text(encoding="utf-8"))
+    assert train["training"]["mode"] == "llm_guided_tune"
+    assert train["training"]["tuning"]["candidates_per_round"] == 4
+
+
+def test_materialize_request_can_disable_project_training_defaults(tmp_path):
+    project_dir = tmp_path / "project"
+    run_dir = project_dir / "runs" / "run1"
+    _write_project(project_dir)
+    project_yml = project_dir / "project.yml"
+    project_yml.write_text(
+        project_yml.read_text(encoding="utf-8")
+        + "\ntraining_defaults:\n"
+        + "  mode: llm_guided_tune\n"
+        + "  tuning:\n"
+        + "    max_rounds: 2\n",
+        encoding="utf-8",
+    )
+    request_doc = _request_doc()
+    request_doc["metadata"]["training"] = {"mode": "single_train", "disable_tuning_reason": "本次只验证样本口径"}
+
+    materialize_request_runtime_configs(request_doc=request_doc, project_dir=project_dir, run_dir=run_dir)
+
+    train = yaml.safe_load((run_dir / "configs_runtime" / "train.yaml").read_text(encoding="utf-8"))
+    assert train["training"]["mode"] == "single_train"
+    assert "tuning" not in train["training"]
+
+
 def test_materialize_remote_table_mode_overrides_project_raw_path(tmp_path):
     project_dir = tmp_path / "project"
     run_dir = project_dir / "runs" / "run1"

@@ -51,6 +51,10 @@ def test_create_execution_plan_from_request():
     assert "random_noise_importance" in plan["stage_steps"]["feature_refine"]
     assert "null_importance_filter" in plan["stage_steps"]["feature_refine"]
     assert "baseline_importance_filter" in plan["stage_steps"]["feature_refine"]
+    assert "llm_guided_tuning" in plan["stage_steps"]["train_baseline"]
+    train_task = next(task for task in plan["tasks"] if task["task_id"] == "train_baseline_all")
+    assert "llm_guided_tuning" in train_task["step_ids"]
+    assert "modeling/baseline_all/tuning_summary.json" in train_task["outputs"]
     assert plan["step_params"]["constant_value_filter"]["max_unique_values"] == 1
     assert "hier_ranknet_training" not in {step for steps in plan["stage_steps"].values() for step in steps}
     assert not plan["planned_steps"]
@@ -150,6 +154,21 @@ def test_training_mode_validation_rejects_unknown_mode():
 
     assert result["status"] == "failed"
     assert "unsupported training.mode" in result["errors"][0]
+
+
+def test_project_default_tuning_can_be_disabled_with_reason():
+    request_doc = _request_doc(training={"mode": "single_train"})
+    missing_reason = validate_model_request(request_doc, Path("projects/2026-05-fujie-gcard-v1"))
+
+    assert missing_reason["status"] == "failed"
+    assert "training.disable_tuning_reason is required" in missing_reason["errors"][0]
+
+    request_doc["metadata"]["training"]["disable_tuning_reason"] = "本次只验证数据口径，不做参数搜索"
+    result = validate_model_request(request_doc, Path("projects/2026-05-fujie-gcard-v1"))
+    plan = create_execution_plan(request_doc, "projects/2026-05-fujie-gcard-v1")
+
+    assert result["status"] == "ok"
+    assert "llm_guided_tuning" not in plan["stage_steps"]["train_baseline"]
 
 
 def test_builder_visible_steps_have_executor_task_binding():

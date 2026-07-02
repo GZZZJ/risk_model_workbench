@@ -49,3 +49,6 @@ my-skills/
 
 # Jupyter auto-generated checkpoints.
 .ipynb_checkpoints/
+
+# Stray root-level workspace from running rmw without --project in the repo root.
+/project/

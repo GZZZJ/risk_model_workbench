@@ -236,6 +236,15 @@ def create_execution_plan(request_doc: dict[str, Any], project_path: str | Path)
     train_dep = feature_task_ids[-1:] or sample_task_ids[-1:]
     train_task_ids: list[str] = []
     train_step_ids = implemented_step_ids_for_stage(step_config, "train_baseline")
+    tuning_outputs = []
+    if "llm_guided_tuning" in train_step_ids:
+        tuning_outputs = [
+            "tuning_context.json",
+            "tuning_trials.csv",
+            "tuning_summary.json",
+            "best_params.json",
+            "llm_tuning_decisions.md",
+        ]
     if "train_baseline" in workflow_stages:
         for experiment in _experiments_from_metadata(metadata):
             name = experiment.get("name") if isinstance(experiment, dict) else str(experiment)
@@ -251,7 +260,8 @@ def create_execution_plan(request_doc: dict[str, Any], project_path: str | Path)
                         f"modeling/{name}/model.pkl",
                         f"modeling/{name}/prediction.parquet",
                         f"modeling/{name}/train_metrics.json",
-                    ],
+                    ]
+                    + [f"modeling/{name}/{output}" for output in tuning_outputs],
                     scenario_profile=scenario_profile,
                     step_ids=train_step_ids,
                     step_params=step_params_for(step_config, train_step_ids),
