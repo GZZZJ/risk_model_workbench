@@ -963,6 +963,42 @@ def _init_workflow_workspace(args: argparse.Namespace, *, as_version: bool) -> i
         print(f"{label} already exists: {path}")
         return 1
 
+    # Parse + validate BEFORE scaffolding so a validation failure leaves no
+    # orphan workspace on disk (no half-created directory, no version_index
+    # entry, no stale stage state). Parsing reads the request file and does not
+    # depend on the workspace path.
+    request_doc: dict[str, Any] | None = None
+    request_path: Path | None = None
+    if getattr(args, "request", None):
+        request_path = Path(args.request)
+        request_path = request_path if request_path.is_absolute() else (REPO_ROOT / request_path)
+        if request_path.exists():
+            request_doc = parse_model_request(request_path)
+    plan_payload: dict[str, Any] | None = None
+    plan_path: Path | None = None
+    if getattr(args, "plan", None):
+        plan_path = Path(args.plan)
+        plan_path = plan_path if plan_path.is_absolute() else (REPO_ROOT / plan_path)
+        if plan_path.exists():
+            plan_payload = load_yaml(plan_path)
+    _request_warnings: list[str] = []
+    if request_doc:
+        # Gate the producer: validate the request before materializing, so a bad
+        # split config (time-out leaking into validation) is caught at the entry
+        # instead of silently written into runtime train.yaml.
+        try:
+            validation = validate_model_request(request_doc, project_dir)
+        except Exception as exc:
+            print(f"cannot init workspace; request validation failed: {exc}")
+            return 1
+        blocking = _split_blocking_errors(validation, args)
+        if blocking:
+            print("cannot init workspace; request validation failed:")
+            for error in blocking:
+                print(f"- {error}")
+            return 1
+        _request_warnings = validation["warnings"]
+
     for directory in ["configs_snapshot", RUNTIME_CONFIG_DIR, "audit", "tasks", "sample_check", "feature_selection", "modeling", "evaluation", "reports"]:
         (path / directory).mkdir(parents=True, exist_ok=True)
     for config_file in [project_config_path(project_dir), *sorted((project_dir / "configs").glob("*.y*ml"))]:
@@ -986,28 +1022,21 @@ def _init_workflow_workspace(args: argparse.Namespace, *, as_version: bool) -> i
     _write_text(path / "audit" / "decision_log.md", f"# Decision Log\n\n- imported: false\n")
     stage_action_started(path, "validate_config")
     register_artifact(path, "validate_config", "configs_snapshot", kind="directory", description="Project config snapshot")
-    request_doc: dict[str, Any] | None = None
-    plan_payload: dict[str, Any] | None = None
-    if getattr(args, "request", None):
-        request_path = Path(args.request)
-        request_path = request_path if request_path.is_absolute() else (REPO_ROOT / request_path)
-        if request_path.exists():
-            shutil.copy2(request_path, path / "model_request.md")
-            register_artifact(path, "validate_config", "model_request.md", description="Model request copied into run workspace")
-            request_doc = parse_model_request(request_path)
-    if getattr(args, "plan", None):
-        plan_path = Path(args.plan)
-        plan_path = plan_path if plan_path.is_absolute() else (REPO_ROOT / plan_path)
-        if plan_path.exists():
-            shutil.copy2(plan_path, path / "execution_plan.yml")
-            register_artifact(path, "validate_config", "execution_plan.yml", description="Execution plan copied into run workspace")
-            plan_payload = load_yaml(plan_path)
+    if request_path is not None and request_path.exists():
+        shutil.copy2(request_path, path / "model_request.md")
+        register_artifact(path, "validate_config", "model_request.md", description="Model request copied into run workspace")
+    if plan_path is not None and plan_path.exists():
+        shutil.copy2(plan_path, path / "execution_plan.yml")
+        register_artifact(path, "validate_config", "execution_plan.yml", description="Execution plan copied into run workspace")
     if request_doc:
+        for warning in _request_warnings:
+            print(f"warning: {warning}")
         runtime_paths = materialize_request_runtime_configs(
             request_doc=request_doc,
             project_dir=project_dir,
             run_dir=path,
             plan=plan_payload,
+            strict=not getattr(args, "skip_split_check", False),
         )
         register_artifact(path, "validate_config", RUNTIME_CONFIG_DIR, kind="directory", description="Request-materialized runtime configs")
         for runtime_path in runtime_paths.values():
@@ -1045,6 +1074,26 @@ def cmd_version_init(args: argparse.Namespace) -> int:
     return _init_workflow_workspace(args, as_version=True)
 
 
+def _split_blocking_errors(result: dict[str, Any], args: argparse.Namespace) -> list[str]:
+    """Combine structural errors with split errors, honoring --skip-split-check.
+
+    Split errors (time-out pollution / empty in-time split) block by default;
+    under --skip-split-check they are downgraded to printed warnings so an
+    explicit escape hatch exists for urgent/exploratory runs. Structural errors
+    always block regardless of the flag.
+    """
+    blocking = list(result.get("errors", []))
+    split_errors = result.get("split_errors", [])
+    if not split_errors:
+        return blocking
+    if getattr(args, "skip_split_check", False):
+        for err in split_errors:
+            print(f"warning (split, suppressed by --skip-split-check): {err}")
+    else:
+        blocking.extend(split_errors)
+    return blocking
+
+
 def cmd_request_validate(args: argparse.Namespace) -> int:
     request_path = Path(args.request)
     request_path = request_path if request_path.is_absolute() else (REPO_ROOT / request_path)
@@ -1056,15 +1105,16 @@ def cmd_request_validate(args: argparse.Namespace) -> int:
         print(f"request validation failed: {exc}")
         return 1
 
-    if result["errors"]:
+    blocking = _split_blocking_errors(result, args)
+    if blocking:
         print("request validation failed:")
-        for error in result["errors"]:
+        for error in blocking:
             print(f"- {error}")
     else:
         print(f"request validation ok: {request_path}")
     for warning in result["warnings"]:
         print(f"warning: {warning}")
-    return 0 if not result["errors"] else 1
+    return 0 if not blocking else 1
 
 
 def cmd_plan_create(args: argparse.Namespace) -> int:
@@ -1073,9 +1123,10 @@ def cmd_plan_create(args: argparse.Namespace) -> int:
     request_path = request_path if request_path.is_absolute() else (REPO_ROOT / request_path)
     request_doc = parse_model_request(request_path)
     validation = validate_model_request(request_doc, project_dir)
-    if validation["errors"]:
+    blocking = _split_blocking_errors(validation, args)
+    if blocking:
         print("cannot create plan; request validation failed:")
-        for error in validation["errors"]:
+        for error in blocking:
             print(f"- {error}")
         return 1
 
@@ -1834,11 +1885,11 @@ def cmd_train(args: argparse.Namespace) -> int:
     runtime_experiment = _experiment_config(train_config, args.experiment) if train_config else {"name": args.experiment, "algorithm": "lightgbm"}
     algorithm = _normal_algorithm(runtime_experiment.get("algorithm") or runtime_experiment.get("method"))
     effective_config = deepcopy(train_config)
+    project_cfg = _load_runtime_project_config(project_dir, path)
     if effective_config:
         effective_config["runtime_experiment"] = runtime_experiment
         effective_config["runtime_step_params"] = effective_config.get("training", {}).get("runtime_step_params", {})
         input_cfg = effective_config.setdefault("input", {})
-        project_cfg = _load_runtime_project_config(project_dir, path)
         data_cfg = project_cfg.get("data", {})
         if data_cfg.get("time_column"):
             input_cfg.setdefault("time_column", data_cfg.get("time_column"))
@@ -1846,6 +1897,36 @@ def cmd_train(args: argparse.Namespace) -> int:
             input_cfg.setdefault("period_column", data_cfg.get("period_column"))
         if data_cfg.get("segment_columns"):
             input_cfg.setdefault("segment_columns", data_cfg.get("segment_columns"))
+    # Train-time split guard: the request/init gate protects only the
+    # request->materialize path. This is the last line of defense for paths that
+    # bypass materialization — legacy configs/train.yaml fallback (which may
+    # hardcode valid_values:[OOT]), explicit --config, a configs_runtime
+    # polluted under a prior --skip-split-check, or a hand-edited runtime config.
+    _raw_valid = effective_config.get("training", {}).get("valid_values")
+    if not isinstance(_raw_valid, list):
+        _raw_valid = [] if _raw_valid is None else [_raw_valid]
+    _valid_for_early_stop = [str(v) for v in _raw_valid if str(v)]
+    if _valid_for_early_stop:
+        from risk_model_workbench.request.splits import resolve_split_values as _resolve_split_values
+
+        _oot_labels = set(_resolve_split_values({}, project_cfg)["oot"]["values"])
+        _polluting = sorted(set(_valid_for_early_stop) & _oot_labels)
+        if _polluting:
+            _reason = (
+                f"training.valid_values {_valid_for_early_stop} 含时间外标签 {_polluting} "
+                f"(oot={sorted(_oot_labels)})；早停验证集不得用时间外样本，会污染时间外评估。"
+                f"修复 config 的 training.valid_values，或用 --skip-split-check 显式承担风险。"
+            )
+            if getattr(args, "skip_split_check", False):
+                print(f"warning (split, suppressed by --skip-split-check): {_reason}")
+            else:
+                _guard_dir = path / "modeling" / args.experiment
+                _guard_dir.mkdir(parents=True, exist_ok=True)
+                _write_json(_guard_dir / "train_metrics.json", {"status": "failed", "reason": _reason, "experiment": args.experiment, "algorithm": algorithm})
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+                stage_action_failed(path, "train_baseline", _reason)
+                print(f"train blocked: {_reason}", file=sys.stderr)
+                return 1
     configured_input = train_config.get("input", {}).get("feather_path")
     input_feather = Path(args.input_feather or configured_input or "")
     if input_feather and not input_feather.is_absolute():
@@ -2068,12 +2149,228 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def _as_config_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _report_root(report_config: dict[str, Any]) -> dict[str, Any]:
+    return _as_config_dict(report_config.get("report"))
+
+
+def _report_score_labels(report_config: dict[str, Any], target: dict[str, Any] | None = None) -> dict[str, str]:
+    root = _report_root(report_config)
+    labels: dict[str, str] = {}
+    for source in [report_config, root, target or {}]:
+        display_name = source.get("model_display_name") or source.get("model_name")
+        if display_name:
+            labels["model_score"] = str(display_name)
+        raw_labels = source.get("score_labels") or {}
+        if isinstance(raw_labels, dict):
+            labels.update({str(key): str(value) for key, value in raw_labels.items() if str(value) != ""})
+    return labels
+
+
+def _report_score_columns(report_config: dict[str, Any], evaluate_config: dict[str, Any], target: dict[str, Any] | None = None) -> list[str]:
+    root = _report_root(report_config)
+    eval_root = _as_config_dict(evaluate_config.get("evaluation"))
+    raw = (target or {}).get("score_columns") or report_config.get("score_columns") or root.get("score_columns") or eval_root.get("score_columns")
+    return _as_string_list(raw) or ["model_score"]
+
+
+def _report_outputs(report_config: dict[str, Any], target: dict[str, Any] | None = None) -> list[str]:
+    root = _report_root(report_config)
+    raw = (target or {}).get("outputs") or report_config.get("outputs") or root.get("outputs")
+    return _as_string_list(raw) or ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]
+
+
+def _configured_report_targets(report_config: dict[str, Any], selected: str | None = None) -> list[dict[str, Any]]:
+    root = _report_root(report_config)
+    raw_targets = root.get("targets") or report_config.get("targets") or []
+    if not isinstance(raw_targets, list):
+        return []
+    targets: list[dict[str, Any]] = []
+    for index, item in enumerate(raw_targets, start=1):
+        if not isinstance(item, dict):
+            continue
+        target = deepcopy(item)
+        target_name = str(target.get("name") or target.get("experiment") or f"target_{index}").strip()
+        if not target_name:
+            continue
+        if selected and target_name != selected:
+            continue
+        target["name"] = target_name
+        if "score_labels" not in target:
+            inherited_labels = _report_score_labels(report_config)
+            if inherited_labels:
+                target["score_labels"] = inherited_labels
+        targets.append(target)
+    return targets
+
+
+def _resolve_workspace_path(workspace: Path, value: Any) -> Path:
+    path = Path(str(value))
+    return path if path.is_absolute() else workspace / path
+
+
+def _report_generation_config(
+    report_config: dict[str, Any],
+    *,
+    evaluate_config: dict[str, Any],
+    target: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    config = deepcopy(report_config)
+    root = deepcopy(_report_root(config))
+    labels = _report_score_labels(config, target)
+    score_columns = _report_score_columns(config, evaluate_config, target)
+    outputs = _report_outputs(config, target)
+    if target:
+        for key in ["model_display_name", "model_name", "title"]:
+            if target.get(key):
+                root[key] = target[key]
+                config[key] = target[key]
+    if labels:
+        root["score_labels"] = labels
+        config["score_labels"] = labels
+    if score_columns:
+        root["score_columns"] = score_columns
+        config["score_columns"] = score_columns
+    if outputs:
+        root["outputs"] = outputs
+        config["outputs"] = outputs
+    if root:
+        config["report"] = root
+    return config
+
+
+def _target_train_dir(workspace: Path, target: dict[str, Any], fallback_train_dir: Path | None) -> Path:
+    if target.get("train_dir"):
+        return _resolve_workspace_path(workspace, target["train_dir"])
+    experiment = str(target.get("experiment") or "").strip()
+    if experiment:
+        return workspace / "modeling" / experiment
+    if fallback_train_dir is not None:
+        return fallback_train_dir
+    return workspace / "modeling" / "main_lgbm"
+
+
+def _target_eval_dir(workspace: Path, target: dict[str, Any]) -> Path:
+    if target.get("eval_dir"):
+        return _resolve_workspace_path(workspace, target["eval_dir"])
+    experiment = str(target.get("experiment") or "").strip()
+    if experiment and (workspace / "evaluation_tuned" / experiment).exists():
+        return workspace / "evaluation_tuned" / experiment
+    return workspace / "evaluation"
+
+
+def _target_output_dir(workspace: Path, target: dict[str, Any]) -> Path:
+    if target.get("output_dir"):
+        return _resolve_workspace_path(workspace, target["output_dir"])
+    name = str(target.get("name") or "").strip()
+    return workspace / (f"reports_{name}" if name and name != "default" else "reports")
+
+
+def _target_report_scope(
+    *,
+    workspace: Path,
+    target: dict[str, Any],
+    train_dir: Path,
+    eval_dir: Path,
+    output_dir: Path,
+    outputs: list[str],
+) -> dict[str, Any]:
+    def rel(path: Path) -> str:
+        try:
+            return path.relative_to(workspace).as_posix()
+        except ValueError:
+            return path.as_posix()
+
+    return {
+        "report_scope": target.get("description") or target.get("name") or "model report",
+        "target": target.get("name"),
+        "experiment": target.get("experiment"),
+        "train_dir": rel(train_dir),
+        "eval_dir": rel(eval_dir),
+        "output_dir": rel(output_dir),
+        "outputs": outputs,
+        "score_labels": target.get("score_labels"),
+    }
+
+
+def _generate_excel_report_for_target(
+    *,
+    workspace: Path,
+    project_dir: Path,
+    target: dict[str, Any],
+    report_config: dict[str, Any],
+    evaluate_config: dict[str, Any],
+    fallback_train_dir: Path | None,
+) -> Path | None:
+    from risk_model_workbench.reporting.excel_report import generate_excel_report
+
+    train_dir = _target_train_dir(workspace, target, fallback_train_dir)
+    eval_dir = _target_eval_dir(workspace, target)
+    output_dir = _target_output_dir(workspace, target)
+    input_dir = _resolve_workspace_path(workspace, target.get("input_dir") or "modeling_input")
+    feature_dir = _resolve_workspace_path(workspace, target.get("feature_dir") or "feature_selection")
+    if not (train_dir / "metrics_train_valid.json").exists():
+        append_decision(workspace, stage="report", decision="report_target_skipped", reason=f"{target.get('name')}: missing train metrics at {train_dir}")
+        return None
+    if not (eval_dir / "evaluation_summary.json").exists():
+        append_decision(workspace, stage="report", decision="report_target_skipped", reason=f"{target.get('name')}: missing evaluation summary at {eval_dir}")
+        return None
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _copy_woe_artifacts(train_dir / "woe_top_features", output_dir / "woe_top_features")
+    generation_config = _report_generation_config(report_config, evaluate_config=evaluate_config, target=target)
+    excel_path = generate_excel_report(
+        eval_dir=eval_dir,
+        train_dir=train_dir,
+        input_dir=input_dir,
+        feature_dir=feature_dir,
+        output_path=output_dir / "model_report.xlsx",
+        project_dir=project_dir,
+        report_config=generation_config,
+    )
+    outputs = [
+        "model_report.html",
+        "model_report.md",
+        "model_report.xlsx",
+        "model_report_missing_results.md",
+    ]
+    scope_path = _write_json(
+        output_dir / "report_scope.json",
+        _target_report_scope(
+            workspace=workspace,
+            target=target,
+            train_dir=train_dir,
+            eval_dir=eval_dir,
+            output_dir=output_dir,
+            outputs=outputs,
+        ),
+    )
+    register_artifact(workspace, "report", scope_path)
+    register_artifact(workspace, "report", excel_path)
+    for sidecar in [
+        excel_path.with_name("model_report.md"),
+        excel_path.with_name("model_report.html"),
+        excel_path.with_name("model_report_missing_results.md"),
+    ]:
+        if sidecar.exists():
+            register_artifact(workspace, "report", sidecar)
+    _register_woe_artifacts(workspace, "report", output_dir / "woe_top_features")
+    append_decision(workspace, stage="report", decision="report_target_done", reason=f"{target.get('name')}: generated {excel_path}")
+    return excel_path
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     path = _run_path(args)
     stage_action_started(path, "report")
     report_path = _runtime_config_path(path, project_dir, "report")
     report_config = load_yaml(report_path) if report_path.exists() else {}
+    evaluate_path = _runtime_config_path(path, project_dir, "evaluate")
+    evaluate_config = load_yaml(evaluate_path) if evaluate_path.exists() else {}
+    selected_target = getattr(args, "report_target", None)
     sections = report_config.get("sections") or report_config.get("report", {}).get("sections") or []
     outputs = report_config.get("outputs") or report_config.get("report", {}).get("outputs") or ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]
     report_steps = _as_string_list((report_config.get("report") or {}).get("stage_steps"))
@@ -2107,65 +2404,66 @@ def cmd_report(args: argparse.Namespace) -> int:
             return "# Credit Product Report\n\nstatus: scaffold\n\nCredit product evaluation outputs were requested; missing artifacts are listed in the run manifest.\n"
         return text
 
-    for output_name in outputs:
-        target = path / "reports" / Path(output_name).name
-        suffix = target.suffix.lower()
-        if suffix == ".xlsx":
-            continue
-        if suffix == ".html":
-            from risk_model_workbench.reporting.html_report import render_model_report_html
-
-            body = _report_body(target.name)
-            _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
-        elif suffix == ".json":
-            _write_json(target, {"status": "scaffold", "run_id": args.run_id, "sections": sections, "artifact_manifest": str(manifest_path.relative_to(path))})
-        else:
-            _write_text(target, _report_body(target.name))
-        generated_report_paths.append(target)
-
-    for required_name in ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]:
-        target = path / "reports" / required_name
-        if not target.exists():
-            body = _report_body(required_name)
-            if target.suffix.lower() == ".html":
+    if not selected_target:
+        for output_name in outputs:
+            target = path / "reports" / Path(output_name).name
+            suffix = target.suffix.lower()
+            if suffix == ".xlsx":
+                continue
+            if suffix == ".html":
                 from risk_model_workbench.reporting.html_report import render_model_report_html
 
+                body = _report_body(target.name)
                 _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
+            elif suffix == ".json":
+                _write_json(target, {"status": "scaffold", "run_id": args.run_id, "sections": sections, "artifact_manifest": str(manifest_path.relative_to(path))})
             else:
-                _write_text(target, body)
+                _write_text(target, _report_body(target.name))
             generated_report_paths.append(target)
+
+        for required_name in ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]:
+            target = path / "reports" / required_name
+            if not target.exists():
+                body = _report_body(required_name)
+                if target.suffix.lower() == ".html":
+                    from risk_model_workbench.reporting.html_report import render_model_report_html
+
+                    _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
+                else:
+                    _write_text(target, body)
+                generated_report_paths.append(target)
     for artifact_path in generated_report_paths:
         register_artifact(path, "report", artifact_path)
     train_dirs = [item for item in (path / "modeling").glob("*") if item.is_dir() and (item / "metrics_train_valid.json").exists()]
-    excel_path = None
-    if (path / "evaluation" / "evaluation_summary.json").exists() and train_dirs:
-        try:
-            from risk_model_workbench.reporting.excel_report import generate_excel_report
+    all_configured_targets = _configured_report_targets(report_config)
+    targets = _configured_report_targets(report_config, selected_target)
+    if selected_target and all_configured_targets and not targets:
+        stage_action_failed(path, "report", f"unknown report target: {selected_target}")
+        print(f"unknown report target: {selected_target}", file=sys.stderr)
+        return 1
+    if not targets:
+        targets = [{"name": selected_target or "default", "output_dir": "reports"}]
 
-            _copy_woe_artifacts(train_dirs[0] / "woe_top_features", path / "reports" / "woe_top_features")
-            excel_path = generate_excel_report(
-                eval_dir=path / "evaluation",
-                train_dir=train_dirs[0],
-                input_dir=path / "modeling_input",
-                feature_dir=path / "feature_selection",
-                output_path=path / "reports" / "model_report.xlsx",
+    excel_paths: list[Path] = []
+    fallback_train_dir = sorted(train_dirs)[0] if train_dirs else None
+    for target in targets:
+        try:
+            excel_path = _generate_excel_report_for_target(
+                workspace=path,
                 project_dir=project_dir,
+                target=target,
+                report_config=report_config,
+                evaluate_config=evaluate_config,
+                fallback_train_dir=fallback_train_dir,
             )
-            register_artifact(path, "report", excel_path)
-            for sidecar in [
-                excel_path.with_name("model_report.md"),
-                excel_path.with_name("model_report.html"),
-                excel_path.with_name("model_report_missing_results.md"),
-            ]:
-                if sidecar.exists():
-                    register_artifact(path, "report", sidecar)
-            _register_woe_artifacts(path, "report", path / "reports" / "woe_top_features")
+            if excel_path is not None:
+                excel_paths.append(excel_path)
         except Exception as exc:
-            append_decision(path, stage="report", decision="excel_scaffold", reason=f"Excel report not generated: {exc}")
-    if excel_path:
-        append_decision(path, stage="report", decision="done", reason="Excel report generated from standard train and evaluation artifacts")
+            append_decision(path, stage="report", decision="excel_scaffold", reason=f"{target.get('name')}: Excel report not generated: {exc}")
+    if excel_paths:
+        append_decision(path, stage="report", decision="done", reason=f"Excel report generated for {len(excel_paths)} report target(s)")
         stage_action_done(path, "report")
-        print(f"report complete: {excel_path}")
+        print("report complete: " + ", ".join(str(item) for item in excel_paths))
     else:
         append_decision(path, stage="report", decision="scaffold", reason="report generated with missing real evaluation artifacts")
         stage_action_done(path, "report", scaffold=True, message="report generated with missing real evaluation artifacts")
@@ -2385,6 +2683,7 @@ def _add_version_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     init.add_argument("--request", default=None, help="optional model request Markdown copied into the version")
     init.add_argument("--plan", default=None, help="optional execution plan YAML copied into the version")
     init.add_argument("--force", action="store_true")
+    init.add_argument("--skip-split-check", action="store_true", help="跳过 splits 一致性校验(时间外样本不得进验证集)——仅紧急/探索场景")
     init.set_defaults(func=cmd_version_init)
 
     list_cmd = version_sub.add_parser("list", help="list project versions")
@@ -2458,6 +2757,7 @@ def _add_run_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPars
     init.add_argument("--request", default=None, help="optional model request Markdown copied into the run")
     init.add_argument("--plan", default=None, help="optional execution plan YAML copied into the run")
     init.add_argument("--force", action="store_true")
+    init.add_argument("--skip-split-check", action="store_true", help="跳过 splits 一致性校验(时间外样本不得进验证集)——仅紧急/探索场景")
     init.set_defaults(func=cmd_run_init)
     imported = run_sub.add_parser("import-gcard-artifacts", help="legacy/example: import existing Fujie GCard artifacts")
     imported.add_argument("--project", default="projects/2026-05-fujie-gcard-v1")
@@ -2498,6 +2798,7 @@ def _add_request_parser(subparsers: argparse._SubParsersAction[argparse.Argument
     validate = request_sub.add_parser("validate", help="validate a model request Markdown file")
     validate.add_argument("--request", required=True)
     validate.add_argument("--project", default=None)
+    validate.add_argument("--skip-split-check", action="store_true", help="跳过 splits 一致性校验(时间外样本不得进验证集)——仅紧急/探索场景")
     validate.set_defaults(func=cmd_request_validate)
 
 
@@ -2508,6 +2809,7 @@ def _add_plan_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPar
     create.add_argument("--project", required=True)
     create.add_argument("--request", required=True)
     create.add_argument("--output", default=None)
+    create.add_argument("--skip-split-check", action="store_true", help="跳过 splits 一致性校验(时间外样本不得进验证集)——仅紧急/探索场景")
     create.set_defaults(func=cmd_plan_create)
 
 
@@ -2589,6 +2891,7 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--score-output", default=None)
     train.add_argument("--input-dir", default=None)
     train.add_argument("--config", default=None)
+    train.add_argument("--skip-split-check", action="store_true", help="跳过 valid_values 时间外污染校验——仅紧急/探索场景")
     train.set_defaults(func=cmd_train)
 
     evaluate = subparsers.add_parser("evaluate")
@@ -2607,6 +2910,7 @@ def build_parser() -> argparse.ArgumentParser:
     report = subparsers.add_parser("report")
     report.add_argument("--project", required=True)
     _add_workspace_id_args(report)
+    report.add_argument("--report-target", default=None, help="optional report target name from report.targets")
     report.set_defaults(func=cmd_report)
 
     init_project = subparsers.add_parser("init-project", help="create a model project workspace")
@@ -2621,7 +2925,7 @@ def build_parser() -> argparse.ArgumentParser:
     new_run.add_argument("--project", required=True)
     new_run.add_argument("--step", default="legacy")
     new_run.add_argument("--note", default="")
-    new_run.set_defaults(func=lambda args: cmd_run_init(argparse.Namespace(project=args.project, workflow="full_modeling", run_id=None, request=None, plan=None, force=False)))
+    new_run.set_defaults(func=lambda args: cmd_run_init(argparse.Namespace(project=args.project, workflow="full_modeling", run_id=None, request=None, plan=None, force=False, skip_split_check=False)))
 
     screening_summary = subparsers.add_parser("feature-screening-summary")
     screening_summary.add_argument("--project", required=True)

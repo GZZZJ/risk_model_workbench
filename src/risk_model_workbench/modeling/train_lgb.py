@@ -199,7 +199,9 @@ def train_lightgbm_from_feather(
         )
 
     train_values = train_cfg.get("train_values", ["DEV"])
-    valid_values = train_cfg.get("valid_values", ["OOT"])
+    # 默认用 in-time OOS（DEV-OOS）兜底，不能用 OOT：OOT/OOT-OOS 是时间外样本，
+    # 一旦默认进入 valid_sets 会参与早停/调参选优，污染时间外评估。
+    valid_values = train_cfg.get("valid_values", ["DEV-OOS"])
     oos_values = train_cfg.get("oos_values", ["DEV-OOS", "OOT-OOS"])
     train_mask = raw[split_col].isin(train_values) & raw[label_col].isin([0, 1])
     valid_mask = raw[split_col].isin(valid_values) & raw[label_col].isin([0, 1])

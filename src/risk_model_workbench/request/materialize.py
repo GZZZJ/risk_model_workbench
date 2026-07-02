@@ -9,6 +9,11 @@ from typing import Any
 from risk_model_workbench.config import dump_yaml, load_yaml
 from risk_model_workbench.paths import project_config_path
 from risk_model_workbench.request.data_source import LOCAL_FEATHER, resolve_data_source_mode, sample_location as request_sample_location
+from risk_model_workbench.request.splits import (
+    DEFAULT_OOS_VALUES,
+    SplitValidationError,
+    check_split_consistency,
+)
 
 
 RUNTIME_CONFIG_DIR = "configs_runtime"
@@ -51,19 +56,6 @@ def _config(project_dir: Path, name: str) -> dict[str, Any]:
         if path.exists():
             return load_yaml(path)
     return {}
-
-
-def _split_values(metadata: dict[str, Any], project_cfg: dict[str, Any], key: str) -> list[str]:
-    splits = metadata.get("splits") if isinstance(metadata.get("splits"), dict) else {}
-    if isinstance(splits.get(key), dict):
-        values = _string_list(splits[key].get("values"))
-        if values:
-            return values
-    if key == "dev":
-        return _string_list(project_cfg.get("split", {}).get("ins_values") or ["DEV"])
-    if key == "oos":
-        return _string_list(project_cfg.get("split", {}).get("oos_values") or ["DEV-OOS"])
-    return _string_list(project_cfg.get("split", {}).get("oot_values") or ["OOT"])
 
 
 def _looks_like_local_data(value: str) -> bool:
@@ -128,6 +120,38 @@ def _score_columns(metadata: dict[str, Any], project_cfg: dict[str, Any]) -> lis
     return list(dict.fromkeys(["model_score", *champions]))
 
 
+def _report_score_labels(report_meta: dict[str, Any]) -> dict[str, str]:
+    labels: dict[str, str] = {}
+    display_name = str(report_meta.get("model_display_name") or report_meta.get("model_name") or "").strip()
+    if display_name:
+        labels["model_score"] = display_name
+    raw_labels = report_meta.get("score_labels") or {}
+    if isinstance(raw_labels, dict):
+        labels.update({str(key): str(value) for key, value in raw_labels.items() if str(value) != ""})
+    return labels
+
+
+def _report_targets(report_meta: dict[str, Any], inherited_score_labels: dict[str, str]) -> list[dict[str, Any]]:
+    targets = []
+    raw_targets = report_meta.get("targets") or []
+    if not isinstance(raw_targets, list):
+        return targets
+    for item in raw_targets:
+        if not isinstance(item, dict):
+            continue
+        target = deepcopy(item)
+        target_labels = dict(inherited_score_labels)
+        target_display_name = str(target.get("model_display_name") or target.get("model_name") or "").strip()
+        if target_display_name:
+            target_labels["model_score"] = target_display_name
+        if isinstance(target.get("score_labels"), dict):
+            target_labels.update({str(key): str(value) for key, value in target["score_labels"].items() if str(value) != ""})
+        if target_labels:
+            target["score_labels"] = target_labels
+        targets.append(target)
+    return targets
+
+
 def _write_runtime_config(run_dir: Path, name: str, payload: dict[str, Any]) -> Path:
     path = run_dir / RUNTIME_CONFIG_DIR / name
     dump_yaml(payload, path)
@@ -140,12 +164,20 @@ def materialize_request_runtime_configs(
     project_dir: str | Path,
     run_dir: str | Path,
     plan: dict[str, Any] | None = None,
+    strict: bool = True,
 ) -> dict[str, Path]:
     """Write request-derived runtime configs into a run workspace.
 
     The project workspace remains unchanged. Runtime configs are intentionally
     normal YAML files so every stage can consume them through the same config
     loaders used for project-level defaults.
+
+    When ``strict`` is True (default), split consistency is enforced: an oos/oot
+    intersection or empty in-time split raises ``SplitValidationError`` instead
+    of silently producing a runtime config that would leak time-out samples into
+    early stopping. The CLI passes ``strict=False`` only under an explicit
+    ``--skip-split-check`` escape hatch; direct (non-CLI) callers always get the
+    strict default.
     """
     project_path = Path(project_dir).resolve()
     run_path = Path(run_dir).resolve()
@@ -158,9 +190,17 @@ def materialize_request_runtime_configs(
     report_cfg = _config(project_path, "report")
     sample_cfg = _config(project_path, "sample")
 
-    dev_values = _split_values(metadata, project_cfg, "dev")
-    oos_values = _split_values(metadata, project_cfg, "oos")
-    oot_values = _split_values(metadata, project_cfg, "oot")
+    # Single resolution + consistency check shared with validate_model_request,
+    # so the entry gate and the producer can never disagree on what each split
+    # resolves to. In strict mode, oos∩oot / empty in-time splits raise here too
+    # (defense for any caller that bypasses request validation).
+    split_check = check_split_consistency(metadata, project_cfg)
+    if strict and split_check["errors"]:
+        raise SplitValidationError("; ".join(split_check["errors"]))
+    _resolved = split_check["resolved"]
+    dev_values = _resolved["dev"]["values"]
+    oos_values = _resolved["oos"]["values"]
+    oot_values = _resolved["oot"]["values"]
     id_columns = _string_list(metadata.get("id_columns") or project_cfg.get("data", {}).get("id_columns"))
     target_column = str(metadata.get("target_column") or project_cfg.get("data", {}).get("target_column") or "")
     split_column = str(metadata.get("split_column") or project_cfg.get("data", {}).get("split_column") or project_cfg.get("split", {}).get("source_column") or "")
@@ -390,17 +430,23 @@ def materialize_request_runtime_configs(
                 "sample_weight": item.get("sample_weight"),
             }
         )
+    # Defense in depth: even under strict=False (--skip-split-check skips the
+    # block), strip time-out labels from the early-stopping validation set so
+    # the persisted runtime config can never silently feed OOT to early stopping.
+    _oot_set = set(oot_values)
+    _safe_valid_oos = [value for value in oos_values if value not in _oot_set]
     training_override = {
         "training": {
             "label_column": target_column,
             "split_column": split_column,
             "train_values": dev_values,
-            # Early-stopping validation must NOT use OOT: OOT is the held-out time
-            # window for final generalization evaluation, and using it to pick
-            # best_iter leaks into (and over-optimistically inflates) the OOT AUC.
-            # Prefer the in-sample OOS split (DEV-OOS) for early stopping.
-            "valid_values": oos_values[:1] or oot_values[:1],
-            "oos_values": oos_values + oot_values,
+            # Early-stopping validation must not use OOT: OOT is the held-out
+            # time window for final generalization evaluation, and using it to
+            # pick best_iter leaks into (and over-optimistically inflates) the
+            # OOT AUC. _safe_valid_oos above already removed any oos∩oot labels;
+            # the DEFAULT_OOS fallback only guards an all-stripped oos.
+            "valid_values": _safe_valid_oos[:1] or list(DEFAULT_OOS_VALUES),
+            "oos_values": list(dict.fromkeys(oos_values + oot_values)),
             "experiments": experiments,
             "candidate_targets": _string_list(metadata.get("candidate_targets")),
             "sample_variants": _string_list(metadata.get("sample_variants")),
@@ -452,19 +498,32 @@ def materialize_request_runtime_configs(
         report_outputs.append("model_recovery_report.md")
     if "credit_product_report" in report_stage_steps and "credit_product_report.md" not in report_outputs:
         report_outputs.append("credit_product_report.md")
+    report_score_labels = _report_score_labels(report_meta)
+    report_targets = _report_targets(report_meta, report_score_labels)
+    report_runtime_payload: dict[str, Any] = {
+        "sections": _string_list(report_meta.get("sections")),
+        "outputs": report_outputs,
+        "output_formats": _infer_output_formats(report_outputs),
+        "stage_steps": report_stage_steps,
+    }
+    if report_meta.get("model_display_name") or report_meta.get("model_name"):
+        report_runtime_payload["model_display_name"] = str(report_meta.get("model_display_name") or report_meta.get("model_name"))
+    if report_score_labels:
+        report_runtime_payload["score_labels"] = report_score_labels
+    if report_targets:
+        report_runtime_payload["targets"] = report_targets
     runtime_report = _deep_merge(
         report_cfg,
         {
-            "report": {
-                "sections": _string_list(report_meta.get("sections")),
-                "outputs": report_outputs,
-                "output_formats": _infer_output_formats(report_outputs),
-                "stage_steps": report_stage_steps,
-            },
+            "report": report_runtime_payload,
             "sections": _string_list(report_meta.get("sections")),
             "outputs": report_outputs,
         },
     )
+    if report_score_labels:
+        runtime_report["score_labels"] = report_score_labels
+    if report_targets:
+        runtime_report["targets"] = report_targets
 
     runtime_sample = _deep_merge(
         sample_cfg,

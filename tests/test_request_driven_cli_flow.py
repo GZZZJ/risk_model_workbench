@@ -99,7 +99,19 @@ def test_request_driven_synthetic_flow_runs_local_outputs(tmp_path):
             "comparison_dimensions": ["final_flag"],
             "risk_profile_dimensions": ["blue_customer_flag", "zc_level"],
         },
-        "reports": {"sections": ["model_performance", "risk_profile"], "outputs": ["model_report.md", "model_report.html"]},
+        "reports": {
+            "model_display_name": "Pytest Challenger",
+            "score_labels": {"score_v1": "Champion V1"},
+            "sections": ["model_performance", "risk_profile"],
+            "outputs": ["model_report.md", "model_report.html"],
+            "targets": [
+                {
+                    "name": "tuned_logit",
+                    "experiment": "logit_all",
+                    "output_dir": "reports_tuned_logit",
+                }
+            ],
+        },
     }
     request_path = project_dir / "request.md"
     request_path.write_text("---\n" + yaml.safe_dump(request_meta, allow_unicode=True, sort_keys=False) + "---\n", encoding="utf-8")
@@ -119,3 +131,9 @@ def test_request_driven_synthetic_flow_runs_local_outputs(tmp_path):
     assert (run_dir / "evaluation" / "dimension_metrics.csv").exists()
     assert (run_dir / "evaluation" / "champion_challenger.json").exists()
     assert (run_dir / "reports" / "model_report.html").exists()
+    assert (run_dir / "reports_tuned_logit" / "model_report.html").exists()
+    tuned_html = (run_dir / "reports_tuned_logit" / "model_report.html").read_text(encoding="utf-8")
+    assert "Pytest Challenger" in tuned_html
+    scope = yaml.safe_load((run_dir / "reports_tuned_logit" / "report_scope.json").read_text(encoding="utf-8"))
+    assert scope["target"] == "tuned_logit"
+    assert scope["train_dir"] == "modeling/logit_all"

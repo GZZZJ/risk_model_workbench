@@ -285,6 +285,38 @@ def test_experiment_description_derives_baseline_experiment():
     assert "train_baseline_from_description" in task_ids
 
 
+def test_report_targets_are_validated():
+    request_doc = _request_doc(
+        reports={
+            "outputs": ["model_report.md"],
+            "score_labels": {"model_score": "G卡V8"},
+            "targets": [
+                {
+                    "name": "tuned_main",
+                    "experiment": "main_lgbm_tuned",
+                    "train_dir": "modeling/main_lgbm_tuned",
+                    "eval_dir": "evaluation_tuned/main_lgbm_tuned",
+                    "output_dir": "reports_tuned_main_lgbm_tuned",
+                }
+            ],
+        }
+    )
+
+    result = validate_model_request(request_doc, Path("projects/2026-05-fujie-gcard-v1"))
+
+    assert result["status"] == "ok"
+
+
+def test_report_targets_reject_bad_shape():
+    request_doc = _request_doc(reports={"outputs": ["model_report.md"], "targets": [{"eval_dir": 123}]})
+
+    result = validate_model_request(request_doc, Path("projects/2026-05-fujie-gcard-v1"))
+
+    assert result["status"] == "failed"
+    assert "reports.targets[1].name is required" in result["errors"]
+    assert "reports.targets[1].eval_dir must be a string" in result["errors"]
+
+
 def test_cli_request_validate_and_plan_create(tmp_path):
     output = tmp_path / "execution_plan.yml"
     assert main(

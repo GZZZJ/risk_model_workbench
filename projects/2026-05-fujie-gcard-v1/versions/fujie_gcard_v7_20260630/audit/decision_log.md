@@ -22,3 +22,10 @@
 - 2026-07-01T12:27:00 [train_baseline] done: lightgbm training completed from local feather data
 - 2026-07-01T12:28:18 [evaluate] done: Evaluation completed from local score feather
 - 2026-07-01T12:54:55 [report] generated_tuned_balanced_report: Generated and registered report from modeling/main_lgbm_tuned_balanced and evaluation_tuned/main_lgbm_tuned_balanced artifacts.
+- 2026-07-02T11:04:48 [report] report_target_done: tuned_main_lgbm_tuned_balanced: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx
+- 2026-07-02T11:04:49 [report] done: Excel report generated for 1 report target(s)
+- 2026-07-02T11:08:44 [report] report_target_done: default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports/model_report.xlsx
+- 2026-07-02T11:08:44 [report] done: Excel report generated for 1 report target(s)
+- 2026-07-02T11:09:46 [report] report_target_done: default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports/model_report.xlsx
+- 2026-07-02T11:10:13 [report] report_target_done: tuned_main_lgbm_tuned_balanced: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx
+- 2026-07-02T11:10:13 [report] done: Excel report generated for 2 report target(s)

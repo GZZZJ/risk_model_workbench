@@ -107,8 +107,19 @@ def _request_doc() -> dict:
                 "risk_profile_dimensions": ["blue_customer_flag", "zc_level"],
             },
             "reports": {
+                "model_display_name": "G卡V8",
+                "score_labels": {"gcard_v6": "G卡V6"},
                 "sections": ["sample_overview", "model_performance", "risk_profile"],
                 "outputs": ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"],
+                "targets": [
+                    {
+                        "name": "tuned_main",
+                        "experiment": "main_lgbm_tuned",
+                        "train_dir": "modeling/main_lgbm_tuned",
+                        "eval_dir": "evaluation_tuned/main_lgbm_tuned",
+                        "output_dir": "reports_tuned_main_lgbm_tuned",
+                    }
+                ],
             },
         },
         "body": "",
@@ -161,6 +172,10 @@ def test_materialize_request_runtime_configs_maps_builder_fields(tmp_path):
     assert evaluate["evaluation"]["score_columns"] == ["model_score", "score_v1", "score_v2"]
     assert "zc_level" in evaluate["evaluation"]["segment_columns"]
     assert report["report"]["output_formats"] == ["markdown", "html"]
+    assert report["report"]["model_display_name"] == "G卡V8"
+    assert report["report"]["score_labels"] == {"model_score": "G卡V8", "gcard_v6": "G卡V6"}
+    assert report["report"]["targets"][0]["name"] == "tuned_main"
+    assert report["report"]["targets"][0]["score_labels"] == {"model_score": "G卡V8", "gcard_v6": "G卡V6"}
 
 
 def test_materialize_remote_table_mode_overrides_project_raw_path(tmp_path):

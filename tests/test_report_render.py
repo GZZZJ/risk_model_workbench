@@ -2,11 +2,13 @@ from pathlib import Path
 import base64
 import shutil
 
+import pandas as pd
 from openpyxl import load_workbook
 
 from risk_model_workbench.cli import main
 from risk_model_workbench.reporting.excel_report import (
     REPORT_SHEETS,
+    _markdown_table,
     generate_excel_report,
     render_model_report_html as legacy_render_model_report_html,
 )
@@ -66,6 +68,30 @@ def test_html_report_loads_style_and_script_assets():
     assert ".report-shell" in style
     assert "DOMContentLoaded" in script
     assert "enhanceNumericTable" in script
+
+
+def test_markdown_table_localizes_headers_and_percentages():
+    lines = _markdown_table(
+        pd.DataFrame(
+            [
+                {
+                    "final_flag": "DEV",
+                    "n_samples": 1000,
+                    "bad_rate": 0.153,
+                    "feature": "feature_a",
+                    "gain": 12.3,
+                    "split": 4,
+                    "score_column": "model_score",
+                }
+            ]
+        )
+    )
+    rendered = "\n".join(lines)
+
+    assert "| 样本 | 样本数 | 30天发起率 | 变量 | 重要性增益 | 分裂次数 | 分数版本 |" in rendered
+    assert "| DEV | 1000 | 15.3% | feature_a | 12.300 | 4 |" in rendered
+    assert "final_flag" not in rendered
+    assert "bad_rate" not in rendered
 
 
 def test_gcard_summary_final_conclusion_changes_when_uplift_is_large(tmp_path):
@@ -220,6 +246,9 @@ def test_imported_excel_report_layout(tmp_path):
     assert "3、意愿交叉风险（DEV-OOS）" in report_text
     assert "老户 - 占比 - 本轮模型" in report_text
     assert "## Summary（新版模型 vs G卡V6）" in report_text
+    assert "| 样本 | 样本数 | 正样本数 | 30天发起率 |" in report_text
+    assert "| final_flag |" not in report_text
+    assert "30天发起率 |" in report_text and "%" in report_text
 
     assert len(workbook["模型效果-模型sloping"].conditional_formatting) == 0
     assert len(workbook["模型效果-意愿交叉风险（DEV-OOS）"].conditional_formatting) > 0
@@ -292,6 +321,12 @@ def test_report_embeds_top_feature_woe_sheet(tmp_path):
                 "feature,rank,gain,split_importance,bin_order,bin_label,lower_bound,upper_bound,is_missing_bin,split_value,good,bad,total,bad_rate,pop_pct,woe,iv_component,status,skip_reason",
                 "feature_a,1,30,5,0,Missing,,,True,DEV,10,1,11,0.0909,0.1,-1.2,0.02,ok,",
                 "feature_a,1,30,5,1,\"(-inf, 1]\",-inf,1,False,DEV,5,5,10,0.5,0.2,0.5,0.01,ok,",
+                "feature_a,1,30,5,0,Missing,,,True,DEV-OOS,12,2,14,0.1429,0.12,-1.1,0.02,ok,",
+                "feature_a,1,30,5,1,\"(-inf, 1]\",-inf,1,False,DEV-OOS,7,6,13,0.4615,0.22,0.4,0.01,ok,",
+                "feature_a,1,30,5,0,Missing,,,True,OOT,9,1,10,0.1,0.09,-1.0,0.02,ok,",
+                "feature_a,1,30,5,1,\"(-inf, 1]\",-inf,1,False,OOT,6,4,10,0.4,0.2,0.3,0.01,ok,",
+                "feature_a,1,30,5,0,Missing,,,True,OOT-OOS,8,2,10,0.2,0.1,-0.9,0.02,ok,",
+                "feature_a,1,30,5,1,\"(-inf, 1]\",-inf,1,False,OOT-OOS,5,5,10,0.5,0.2,0.2,0.01,ok,",
             ]
         )
         + "\n",
@@ -317,10 +352,17 @@ def test_report_embeds_top_feature_woe_sheet(tmp_path):
     report_text = output_path.with_name("model_report.md").read_text(encoding="utf-8")
     assert "## 七、Top变量WOE" in report_text
     assert "feature_a" in report_text
-    assert "![Top 1: feature_a（中文名未匹配）](woe_top_features/images/001_feature_a_WOE.png)" in report_text
+    assert '<figure class="report-image woe-svg-card">' in report_text
+    assert '<svg class="woe-svg"' in report_text
+    assert "DEV-OOS WOE" in report_text
+    assert "OOT-OOS 占比" in report_text
+    assert "woe_top_features/images/001_feature_a_WOE.png" not in report_text
 
     report_html = output_path.with_name("model_report.html").read_text(encoding="utf-8")
-    assert '<img src="woe_top_features/images/001_feature_a_WOE.png" alt="Top 1: feature_a（中文名未匹配）">' in report_html
+    assert '<svg class="woe-svg"' in report_html
+    assert "DEV-OOS WOE" in report_html
+    assert "OOT-OOS 占比" in report_html
+    assert '<img src="woe_top_features/images/001_feature_a_WOE.png"' not in report_html
     assert "中文名缺失说明：未加载到变量中文名映射" in report_html
 
 

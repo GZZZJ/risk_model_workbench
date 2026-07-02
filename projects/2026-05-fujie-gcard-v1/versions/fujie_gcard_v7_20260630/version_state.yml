@@ -2,7 +2,7 @@ project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-f
 workflow: full_modeling
 created_at: '2026-06-30T13:53:15'
 status: done
-current_stage: evaluate
+current_stage: report
 stages:
   validate_config:
     status: done
@@ -3023,7 +3023,8 @@ stages:
     - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
     - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
     - reports_tuned_main_lgbm_tuned_balanced/woe_top_features/woe_top20_summary.csv
-    started_at: '2026-06-30T18:31:32'
+    - reports/report_scope.json
+    started_at: '2026-07-02T11:08:57'
     action:
       id: report
       kind: stage
@@ -3047,7 +3048,7 @@ stages:
       - reports/model_report.html
       - reports/model_card.md
       - reports/executive_summary.md
-    finished_at: '2026-06-30T18:32:09'
+    finished_at: '2026-07-02T11:10:14'
     last_result:
       status: done
       failure_code: ''
@@ -3383,11 +3384,200 @@ stages:
         description: ''
         artifact_rule: ''
         rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/model_report.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/model_report.html
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/model_report_missing_results.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/report_scope.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/005_d30_d60_apl_ord_cnt_rat_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/007_dau_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/008_pmt_crd_amt_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/009_pmt_crd_amt_3m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/010_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/011_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/012_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/013_stg_pln_max_prc_amt_12m_ftr_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/014_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/015_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/016_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/017_his_30d_app_str_ctn_v2_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/018_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports_tuned_main_lgbm_tuned_balanced/woe_top_features/woe_top20_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/report_scope.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
       decision:
         stage: report
         decision: done
-        reason: Excel report generated from standard train and evaluation artifacts
-        created_at: '2026-06-30T18:32:09'
+        reason: Excel report generated for 2 report target(s)
+        created_at: '2026-07-02T11:10:13'
     progress:
       step: action_done
       status: done
@@ -3395,7 +3585,7 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-06-30T18:32:09'
+      heartbeat_at: '2026-07-02T11:10:15'
       elapsed_seconds: 0.0
       last_event_status: done
 decisions:
@@ -3484,7 +3674,35 @@ decisions:
   reason: Generated and registered report from modeling/main_lgbm_tuned_balanced and
     evaluation_tuned/main_lgbm_tuned_balanced artifacts.
   created_at: '2026-07-01T12:54:55'
-updated_at: '2026-07-01T18:44:14'
+- stage: report
+  decision: report_target_done
+  reason: 'tuned_main_lgbm_tuned_balanced: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx'
+  created_at: '2026-07-02T11:04:48'
+- stage: report
+  decision: done
+  reason: Excel report generated for 1 report target(s)
+  created_at: '2026-07-02T11:04:49'
+- stage: report
+  decision: report_target_done
+  reason: 'default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports/model_report.xlsx'
+  created_at: '2026-07-02T11:08:44'
+- stage: report
+  decision: done
+  reason: Excel report generated for 1 report target(s)
+  created_at: '2026-07-02T11:08:44'
+- stage: report
+  decision: report_target_done
+  reason: 'default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports/model_report.xlsx'
+  created_at: '2026-07-02T11:09:46'
+- stage: report
+  decision: report_target_done
+  reason: 'tuned_main_lgbm_tuned_balanced: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v7_20260630/reports_tuned_main_lgbm_tuned_balanced/model_report.xlsx'
+  created_at: '2026-07-02T11:10:13'
+- stage: report
+  decision: done
+  reason: Excel report generated for 2 report target(s)
+  created_at: '2026-07-02T11:10:13'
+updated_at: '2026-07-02T11:10:15'
 version_id: fujie_gcard_v7_20260630
 source_type: workbench
 lineage:

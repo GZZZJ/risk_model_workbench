@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from html import escape
@@ -140,11 +141,15 @@ def _build_report_context(
     project_display_name = project_config.get("project", {}).get("display_name") or (project_path.name if project_path else "Model")
     eval_cfg = evaluate_config.get("evaluation", {}) if isinstance(evaluate_config.get("evaluation"), dict) else {}
     report_root = loaded_report_config.get("report", {}) if isinstance(loaded_report_config.get("report"), dict) else {}
-    score_columns = eval_cfg.get("score_columns") or ["model_score"]
+    report_score_columns = loaded_report_config.get("score_columns") or report_root.get("score_columns")
+    score_columns = report_score_columns or eval_cfg.get("score_columns") or ["model_score"]
     score_labels = {"model_score": "本轮模型"}
     configured_labels = eval_cfg.get("score_labels") or {}
     if isinstance(configured_labels, dict):
         score_labels.update({str(key): str(value) for key, value in configured_labels.items()})
+    model_display_name = loaded_report_config.get("model_display_name") or report_root.get("model_display_name")
+    if model_display_name:
+        score_labels["model_score"] = str(model_display_name)
     report_labels = loaded_report_config.get("score_labels") or report_root.get("score_labels") or {}
     if isinstance(report_labels, dict):
         score_labels.update({str(key): str(value) for key, value in report_labels.items()})
@@ -812,7 +817,7 @@ def _gcard_summary_markdown_lines(*, train_dir: Path, eval_dir: Path, feature_di
 
     if psi is not None and not psi.empty:
         model_label = VERSION_LABELS.get("model_score", "本轮模型")
-        lines.extend(["", "### 七、模型稳定性", "", f"> PSI 为 {model_label} 分数月度汇总；分箱明细（base/current 占比 + PSI component）见下表。", ""])
+        lines.extend(["", "### 七、模型稳定性", "", f"> PSI 为 {model_label} 分数月度汇总；分箱明细（基线/当期占比 + PSI贡献）见下表。", ""])
         lines.extend(_markdown_table(_gcard_psi_summary_frame(psi=psi, compare_score=compare_score), limit=20))
         bin_frame = _gcard_psi_bin_detail_frame(eval_dir=eval_dir, compare_score=compare_score)
         if not bin_frame.empty:
@@ -1311,6 +1316,14 @@ def _to_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _truthy(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None or pd.isna(value):
+        return False
+    return str(value).strip().lower() in {"1", "true", "t", "yes", "y"}
 
 
 def _build_monthly_effect_sheet(ws, *, eval_dir: Path) -> None:
@@ -1883,6 +1896,230 @@ def _missing_feature_name_note(features: list[str], name_map: dict[str, str] | N
     suffix = f"；共 {len(missing)} 个变量未匹配" if len(missing) > 10 else ""
     suffix_gap = " " if re.search(r"[A-Za-z0-9]$", scope) else ""
     return f"> 中文名缺失说明：在{scope}{suffix_gap}中，以下变量未在变量字典中匹配到中文名：{shown}{suffix}。"
+
+
+def _woe_svg_figure(feature_rows: pd.DataFrame, *, rank: int, feature: str, caption: str) -> str:
+    """Render a compact inline SVG WOE chart for the HTML report."""
+    rows = feature_rows.copy()
+    if "bin_order" in rows.columns:
+        rows["_bin_order"] = pd.to_numeric(rows["bin_order"], errors="coerce").fillna(9999)
+        rows = rows.sort_values("_bin_order")
+    rows = rows.dropna(subset=["woe", "pop_pct"], how="any") if {"woe", "pop_pct"}.issubset(rows.columns) else rows
+    if rows.empty:
+        return ""
+
+    split_col = "split_value" if "split_value" in rows.columns else "split" if "split" in rows.columns else None
+    if split_col:
+        rows["_split_label"] = rows[split_col].fillna("DEV").astype(str)
+    else:
+        rows["_split_label"] = "DEV"
+    preferred_splits = ["DEV", "DEV-OOS", "OOT", "OOT-OOS"]
+    present_splits = [str(value) for value in rows["_split_label"].dropna().unique().tolist()]
+    split_order = [split for split in preferred_splits if split in present_splits]
+    split_order.extend(sorted(split for split in present_splits if split not in split_order))
+    if not split_order:
+        return ""
+
+    split_palette = {
+        "DEV": "#2f80ed",
+        "DEV-OOS": "#2f9e44",
+        "OOT": "#f2994a",
+        "OOT-OOS": "#eb5757",
+    }
+    fallback_palette = ["#2f80ed", "#2f9e44", "#f2994a", "#eb5757", "#7b61ff", "#00a0a0"]
+    split_colors = {
+        split: split_palette.get(split, fallback_palette[index % len(fallback_palette)])
+        for index, split in enumerate(split_order)
+    }
+
+    chart_rows_by_split: dict[str, list[dict[str, Any]]] = {split: [] for split in split_order}
+    bin_meta: dict[str, dict[str, Any]] = {}
+    for row_index, row in rows.iterrows():
+        woe = _to_float(row.get("woe"))
+        pop_pct = _to_float(row.get("pop_pct"))
+        bad_rate = _to_float(row.get("bad_rate"))
+        if woe is None or pop_pct is None:
+            continue
+        split = str(row.get("_split_label") or "DEV")
+        if split not in chart_rows_by_split:
+            chart_rows_by_split[split] = []
+            split_order.append(split)
+            split_colors[split] = fallback_palette[(len(split_order) - 1) % len(fallback_palette)]
+        bin_order_value = _to_float(row.get("_bin_order"))
+        bin_order_sort = bin_order_value if bin_order_value is not None else float(row_index)
+        bin_key = f"bin:{bin_order_sort:g}:{row.get('bin_label') or row.get('bin_order') or row_index}"
+        label = str(row.get("bin_label") or row.get("bin_order") or "")
+        item = {
+            "key": bin_key,
+            "order": bin_order_sort,
+            "label": label,
+            "split": split,
+            "woe": woe,
+            "pop_pct": pop_pct,
+            "bad_rate": bad_rate,
+            "total": row.get("total"),
+            "iv": _to_float(row.get("iv_component")),
+            "gain": _to_float(row.get("gain")),
+            "is_missing": _truthy(row.get("is_missing_bin")) or label.lower() == "missing",
+        }
+        chart_rows_by_split[split].append(item)
+        if bin_key not in bin_meta or split == "DEV":
+            bin_meta[bin_key] = {"order": bin_order_sort, "label": label}
+
+    chart_rows_by_split = {split: items for split, items in chart_rows_by_split.items() if items}
+    split_order = [split for split in split_order if split in chart_rows_by_split]
+    if not split_order:
+        return ""
+
+    bin_keys = [key for key, _ in sorted(bin_meta.items(), key=lambda pair: pair[1]["order"])]
+    if not bin_keys:
+        return ""
+    bin_index = {key: index for index, key in enumerate(bin_keys)}
+    items_by_split_and_bin = {
+        split: {item["key"]: item for item in items}
+        for split, items in chart_rows_by_split.items()
+    }
+
+    width, height = 920, 450
+    left, right, top, bottom = 62, 72, 86, 98
+    plot_w = width - left - right
+    plot_h = height - top - bottom
+    n = len(bin_keys)
+    all_items = [item for items in chart_rows_by_split.values() for item in items]
+    woe_values = [item["woe"] for item in all_items]
+    woe_min_raw, woe_max_raw = min(woe_values), max(woe_values)
+    woe_span = max(woe_max_raw - woe_min_raw, 1.0)
+    y_min = math.floor(woe_min_raw - woe_span * 0.08)
+    y_max = math.ceil(woe_max_raw + woe_span * 0.08)
+    if y_min >= y_max:
+        y_min, y_max = y_min - 1.0, y_max + 1.0
+    pop_max_raw = max([item["pop_pct"] for item in all_items] + [0.01])
+    pop_axis_max = max(0.1, math.ceil(pop_max_raw * 10) / 10)
+
+    def x_at(index: int) -> float:
+        return left + (index + 0.5) * plot_w / n
+
+    def y_at(value: float) -> float:
+        return top + (y_max - value) / (y_max - y_min) * plot_h
+
+    def pop_y_at(value: float) -> float:
+        return top + (pop_axis_max - value) / pop_axis_max * plot_h
+
+    zero_y = y_at(0)
+    group_w = plot_w / n * 0.74
+    series_count = max(len(split_order), 1)
+    series_step = group_w / series_count
+    bar_w = max(5.0, min(18.0, series_step * 0.78))
+    dev_items = chart_rows_by_split.get("DEV") or chart_rows_by_split.get(split_order[0], [])
+    total_iv = sum(item["iv"] for item in dev_items if item["iv"] is not None)
+    gain_value = next((item["gain"] for item in all_items if item["gain"] is not None), None)
+    missing_dev_pct = next((item["pop_pct"] for item in dev_items if item.get("is_missing")), None)
+    subtitle_bits: list[str] = []
+    if gain_value is not None:
+        subtitle_bits.append(f"Gain={gain_value:.3f}")
+    subtitle_bits.append(f"IV={total_iv:.4f}")
+    if missing_dev_pct is not None:
+        subtitle_bits.append(f"Missing(DEV)={missing_dev_pct:.1%}")
+    subtitle = "  ".join(subtitle_bits)
+
+    y_ticks = [y_min + (y_max - y_min) * idx / 4 for idx in range(5)]
+    if y_min < 0 < y_max:
+        closest_zero_idx = min(range(len(y_ticks)), key=lambda idx: abs(y_ticks[idx]))
+        y_ticks[closest_zero_idx] = 0.0
+    pop_ticks = [0.0, pop_axis_max / 2, pop_axis_max]
+
+    parts = [
+        '<figure class="report-image woe-svg-card">',
+        f"<svg class=\"woe-svg\" viewBox=\"0 0 {width} {height}\" role=\"img\" aria-label=\"{escape(caption, quote=True)}\">",
+        f"<title>{escape(caption)}</title>",
+        f"<text x=\"18\" y=\"24\" class=\"woe-title\">{escape(_truncate_svg_label(caption, 62))}</text>",
+        f"<text x=\"18\" y=\"43\" class=\"woe-subtitle\">{escape(subtitle)}</text>",
+        f"<line x1=\"{left}\" y1=\"{top}\" x2=\"{left}\" y2=\"{top + plot_h}\" class=\"woe-axis\"/>",
+        f"<line x1=\"{left}\" y1=\"{top + plot_h}\" x2=\"{left + plot_w}\" y2=\"{top + plot_h}\" class=\"woe-axis\"/>",
+        f"<line x1=\"{left + plot_w}\" y1=\"{top}\" x2=\"{left + plot_w}\" y2=\"{top + plot_h}\" class=\"woe-axis\"/>",
+        f"<line x1=\"{left}\" y1=\"{zero_y:.1f}\" x2=\"{left + plot_w}\" y2=\"{zero_y:.1f}\" class=\"woe-zero\"/>",
+        f"<text x=\"16\" y=\"{top + plot_h / 2:.1f}\" class=\"woe-axis-title\" transform=\"rotate(-90 16 {top + plot_h / 2:.1f})\">WOE</text>",
+        f"<text x=\"{width - 18}\" y=\"{top + plot_h / 2:.1f}\" class=\"woe-axis-title\" transform=\"rotate(90 {width - 18} {top + plot_h / 2:.1f})\">样本占比</text>",
+    ]
+    legend_x = left + 2
+    legend_y = 59
+    legend_step = 176
+    for index, split in enumerate(split_order):
+        color = split_colors[split]
+        x = legend_x + index * legend_step
+        parts.append(
+            f"<line x1=\"{x}\" y1=\"{legend_y}\" x2=\"{x + 22}\" y2=\"{legend_y}\" class=\"woe-line\" style=\"stroke:{color}\"/>"
+            f"<circle cx=\"{x + 11}\" cy=\"{legend_y}\" r=\"3\" class=\"woe-point\" style=\"stroke:{color}\"/>"
+            f"<text x=\"{x + 28}\" y=\"{legend_y + 4}\" class=\"woe-legend\">{escape(split)} WOE</text>"
+            f"<rect x=\"{x + 92}\" y=\"{legend_y - 6}\" width=\"12\" height=\"9\" class=\"woe-bar\" style=\"fill:{color};stroke:{color};fill-opacity:.32;stroke-opacity:.62\"/>"
+            f"<text x=\"{x + 110}\" y=\"{legend_y + 4}\" class=\"woe-legend\">{escape(split)} 占比</text>"
+        )
+
+    for tick in y_ticks:
+        y = y_at(tick)
+        parts.append(f"<line x1=\"{left}\" y1=\"{y:.1f}\" x2=\"{left + plot_w}\" y2=\"{y:.1f}\" class=\"woe-grid\"/>")
+        parts.append(f"<text x=\"{left - 8}\" y=\"{y + 4:.1f}\" class=\"woe-y-label\">{tick:.1f}</text>")
+    for tick in pop_ticks:
+        y = pop_y_at(tick)
+        parts.append(f"<text x=\"{left + plot_w + 8}\" y=\"{y + 4:.1f}\" class=\"woe-pop-label\">{tick:.0%}</text>")
+
+    for bin_key in bin_keys:
+        i = bin_index[bin_key]
+        x = x_at(i)
+        label = _truncate_svg_label(bin_meta[bin_key]["label"], 16)
+        parts.append(
+            f"<text x=\"{x:.1f}\" y=\"{top + plot_h + 20}\" class=\"woe-x-label\" "
+            f"transform=\"rotate(-38 {x:.1f} {top + plot_h + 20})\">{escape(label)}</text>"
+        )
+        for split_index, split in enumerate(split_order):
+            item = items_by_split_and_bin.get(split, {}).get(bin_key)
+            if not item:
+                continue
+            color = split_colors[split]
+            bar_x = x - group_w / 2 + split_index * series_step + (series_step - bar_w) / 2
+            bar_y = pop_y_at(item["pop_pct"])
+            bar_h = top + plot_h - bar_y
+            tooltip = (
+                f"{split} | {item['label']} | WOE {item['woe']:.3f} | 占比 {item['pop_pct']:.1%}"
+                + (f" | 发起率 {item['bad_rate']:.1%}" if item["bad_rate"] is not None else "")
+                + (f" | 样本数 {item['total']}" if item["total"] not in (None, "") else "")
+            )
+            parts.append(
+                f"<g><title>{escape(tooltip)}</title>"
+                f"<rect x=\"{bar_x:.1f}\" y=\"{bar_y:.1f}\" width=\"{bar_w:.1f}\" height=\"{bar_h:.1f}\" "
+                f"class=\"woe-bar\" style=\"fill:{color};stroke:{color};fill-opacity:.30;stroke-opacity:.55\"/>"
+                "</g>"
+            )
+
+    for split in split_order:
+        color = split_colors[split]
+        points = [
+            (x_at(bin_index[item["key"]]), y_at(item["woe"]), item)
+            for item in sorted(chart_rows_by_split[split], key=lambda row: bin_index.get(row["key"], 9999))
+            if item["key"] in bin_index
+        ]
+        if not points:
+            continue
+        polyline = " ".join(f"{x:.1f},{y:.1f}" for x, y, _ in points)
+        parts.append(f"<polyline points=\"{polyline}\" class=\"woe-line\" style=\"stroke:{color}\"/>")
+        for x, y, item in points:
+            tooltip = (
+                f"{split} | {item['label']} | WOE {item['woe']:.3f} | 占比 {item['pop_pct']:.1%}"
+                + (f" | 发起率 {item['bad_rate']:.1%}" if item["bad_rate"] is not None else "")
+                + (f" | 样本数 {item['total']}" if item["total"] not in (None, "") else "")
+            )
+            parts.append(
+                f"<g><title>{escape(tooltip)}</title>"
+                f"<circle cx=\"{x:.1f}\" cy=\"{y:.1f}\" r=\"3.4\" class=\"woe-point\" style=\"stroke:{color}\"/>"
+                "</g>"
+            )
+    parts.extend(["</svg>", f"<figcaption>{escape(caption)}</figcaption>", "</figure>"])
+    return "".join(parts)
+
+
+def _truncate_svg_label(value: str, max_chars: int) -> str:
+    value = str(value)
+    return value if len(value) <= max_chars else value[: max_chars - 1] + "…"
 
 
 def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> pd.DataFrame:
@@ -2596,7 +2833,7 @@ def _write_model_reports(
         ]
     )
     if woe_summary is not None and not woe_summary.empty and "status" in woe_summary.columns and (woe_summary["status"] == "ok").any():
-        lines.append("- 以下展示 Top20 入模变量的真实 WOE 图；完整分箱数据见 Excel sheet `Top变量WOE` 和 `woe_top_features/woe_top20_summary.csv`。")
+        lines.append("- 以下展示 Top20 入模变量的 WOE 图；图形由 `woe_top_features/woe_top20_summary.csv` 在 HTML 中直接绘制，不依赖本地 PNG 图片。")
         woe_features = (
             woe_summary[woe_summary["status"] == "ok"]
             .groupby(["rank", "feature"], as_index=False)
@@ -2604,26 +2841,26 @@ def _write_model_reports(
             .rename(columns={"rank": "排名", "feature": "变量", "gain": "Gain", "iv_component": "IV"})
             .sort_values("排名")
         )
-        image_dir = (woe_summary_path.parent / "images") if woe_summary_path is not None else (train_dir / "woe_top_features" / "images")
         shown_features: list[str] = []
-        missing_images: list[str] = []
+        missing_charts: list[str] = []
         for _, item in woe_features.head(20).iterrows():
             rank = int(item["排名"])
             feature = str(item["变量"])
-            image_path = _find_woe_image(image_dir, rank)
-            if image_path is None:
-                missing_images.append(feature)
-                continue
-            shown_features.append(feature)
             chinese_name = _feature_chinese_name(feature, name_map)
             caption = f"Top {rank}: {feature}"
             if chinese_name:
                 caption += f"（{chinese_name}）"
             else:
                 caption += "（中文名未匹配）"
-            lines.append(f"![{caption}]({_relative_markdown_path(image_path, output_path.parent)})")
-        if missing_images:
-            lines.append("> WOE 图片缺失说明：以下变量已有 WOE 汇总数据，但未找到对应 PNG 图片：" + "、".join(missing_images[:10]) + "。")
+            feature_rows = woe_summary[(woe_summary["status"] == "ok") & (woe_summary["rank"] == rank) & (woe_summary["feature"].astype(str) == feature)].copy()
+            svg_figure = _woe_svg_figure(feature_rows, rank=rank, feature=feature, caption=caption)
+            if not svg_figure:
+                missing_charts.append(feature)
+                continue
+            shown_features.append(feature)
+            lines.append(svg_figure)
+        if missing_charts:
+            lines.append("> WOE 图缺失说明：以下变量已有 WOE 汇总数据，但未能生成可展示图形：" + "、".join(missing_charts[:10]) + "。")
         missing_name_note = _missing_feature_name_note(shown_features, name_map, "Top变量WOE 展示图")
         if missing_name_note:
             lines.append(missing_name_note)
@@ -2861,14 +3098,14 @@ def _append_intent_risk_markdown(lines: list[str], eval_dir: Path) -> None:
         lines.append("")
         if basic_distribution is not None and not basic_distribution.empty:
             lines.append("当前可用全量观察：占比（意愿评级 x 资产评级）")
-            lines.extend(_markdown_table(_intent_sum_matrix(basic_distribution, "pct"), limit=20))
+            lines.extend(_markdown_table(_intent_sum_matrix(basic_distribution, "pct"), limit=20, percent_all_numeric=True))
             lines.append("")
             lines.append("当前可用全量观察：30天发起率（意愿评级 x 资产评级）")
-            lines.extend(_markdown_table(_intent_rate_matrix(basic_distribution, "bad", "n_samples"), limit=20))
+            lines.extend(_markdown_table(_intent_rate_matrix(basic_distribution, "bad", "n_samples"), limit=20, percent_all_numeric=True))
             lines.append("")
         if basic_head_risk is not None and not basic_head_risk.empty:
             lines.append("当前可用全量观察：人头风险率（意愿评级 x 资产评级）")
-            lines.extend(_markdown_table(_intent_rate_matrix(basic_head_risk, "head_risk_count", "n_samples"), limit=20))
+            lines.extend(_markdown_table(_intent_rate_matrix(basic_head_risk, "head_risk_count", "n_samples"), limit=20, percent_all_numeric=True))
             lines.append("")
         if basic_amount_risk is not None and not basic_amount_risk.empty:
             lines.append("当前可用全量观察：金额风险（仅意愿维度）")
@@ -2879,10 +3116,10 @@ def _append_intent_risk_markdown(lines: list[str], eval_dir: Path) -> None:
             if seg_dist is None or seg_dist.empty:
                 continue
             lines.append(f"{seg_label}：占比（意愿评级 x 资产评级）")
-            lines.extend(_markdown_table(_intent_sum_matrix(seg_dist, "pct"), limit=20))
+            lines.extend(_markdown_table(_intent_sum_matrix(seg_dist, "pct"), limit=20, percent_all_numeric=True))
             lines.append("")
             lines.append(f"{seg_label}：30天发起率（意愿评级 x 资产评级）")
-            lines.extend(_markdown_table(_intent_rate_matrix(seg_dist, "bad", "n_samples"), limit=20))
+            lines.extend(_markdown_table(_intent_rate_matrix(seg_dist, "bad", "n_samples"), limit=20, percent_all_numeric=True))
             lines.append("")
         return
     lines.extend(["3、意愿交叉风险（DEV-OOS）", ""])
@@ -2906,7 +3143,7 @@ def _append_intent_risk_markdown(lines: list[str], eval_dir: Path) -> None:
                 if subset.empty:
                     continue
                 lines.append(f"{segment_name} - {metric_label} - {VERSION_LABELS.get(score_column, score_column)}")
-                lines.extend(_markdown_table(_intent_version_matrix(subset, value_col), limit=20))
+                lines.extend(_markdown_table(_intent_version_matrix(subset, value_col), limit=20, percent_all_numeric=True))
                 lines.append("")
 
 
@@ -2941,28 +3178,102 @@ def _row_by_value(frame: pd.DataFrame | None, column: str, value: Any) -> dict[s
     return matched.iloc[0].to_dict()
 
 
-def _markdown_table(frame: pd.DataFrame, *, limit: int = 20) -> list[str]:
+def _markdown_table(frame: pd.DataFrame, *, limit: int = 20, percent_all_numeric: bool = False) -> list[str]:
     if frame.empty:
         return ["暂无可用数据"]
     display = frame.head(limit).copy()
-    display = display.rename(columns={col: str(col) for col in display.columns})
+    columns = [str(col) for col in display.columns]
     rows = []
-    headers = [str(col) for col in display.columns]
+    headers = [_markdown_column_label(col) for col in columns]
     rows.append("| " + " | ".join(headers) + " |")
     rows.append("| " + " | ".join(["---"] * len(headers)) + " |")
     for item in display.itertuples(index=False):
-        rows.append("| " + " | ".join(_fmt_markdown_cell(value) for value in item) + " |")
+        rows.append(
+            "| "
+            + " | ".join(
+                _fmt_markdown_cell(value, column_name=column, display_name=header, percent=percent_all_numeric)
+                for value, column, header in zip(item, columns, headers)
+            )
+            + " |"
+        )
     if len(frame) > limit:
         rows.append(f"\n> 仅展示前 {limit} 行，完整明细见 Excel。")
     return rows
 
 
-def _fmt_markdown_cell(value: Any) -> str:
+def _fmt_markdown_cell(value: Any, *, column_name: str, display_name: str, percent: bool = False) -> str:
     if value is None or pd.isna(value):
         return ""
+    if column_name in {"score_column", "score_version"}:
+        return VERSION_LABELS.get(str(value), str(value)).replace("|", "\\|")
+    if _markdown_column_is_percent(column_name, display_name) or percent:
+        try:
+            return f"{float(value):.1%}"
+        except (TypeError, ValueError):
+            return str(value).replace("|", "\\|")
     if isinstance(value, float):
         return f"{value:.3f}"
     return str(value).replace("|", "\\|")
+
+
+def _markdown_column_label(column_name: str) -> str:
+    column = str(column_name)
+    lowered = column.lower()
+    direct_labels = {
+        "final_flag": "样本",
+        "n_samples": "样本数",
+        "positive": "正样本数",
+        "bad_rate": "30天发起率",
+        "month": "月份",
+        "mdl_month": "月份",
+        "month_psi": "月度PSI",
+        "psi": "PSI",
+        "n": "样本数",
+        "score_column": "分数版本",
+        "score_version": "分数版本",
+        "feature": "变量",
+        "varname": "变量",
+        "desc": "中文名",
+        "index": "排名",
+        "gain": "重要性增益",
+        "gain占比": "增益占比",
+        "split": "分裂次数",
+        "cum_lift": "累计提升倍数",
+        "remaining_lift": "剩余提升倍数",
+        "累计lift": "累计提升倍数",
+        "剩余lift": "剩余提升倍数",
+        "model_auc": f"{VERSION_LABELS.get('model_score', '本轮模型')} AUC",
+        "model_ks": f"{VERSION_LABELS.get('model_score', '本轮模型')} KS",
+        "v6_auc": "G卡V6 AUC",
+        "v6_ks": "G卡V6 KS",
+        "ks_uplift": "KS提升",
+        "sample_pct": "占比",
+        "ftr_30d_rate": "30天发起率",
+        "amount_overdue_rate": "新增订单3期金额逾期率",
+        "head_risk_rate": "人头风险率",
+        "pop_pct": "样本占比",
+        "iv_component": "IV贡献",
+    }
+    if column in direct_labels:
+        return direct_labels[column]
+    score_match = re.fullmatch(r"(.+)_(auc|ks)", lowered)
+    if score_match:
+        score_name, metric = score_match.groups()
+        return f"{VERSION_LABELS.get(score_name, score_name)} {metric.upper()}"
+    if lowered.startswith("ks_uplift_vs_"):
+        score_name = column[len("ks_uplift_vs_") :]
+        return f"相对{VERSION_LABELS.get(score_name, score_name)} KS提升"
+    return column
+
+
+def _markdown_column_is_percent(column_name: str, display_name: str) -> bool:
+    lowered = str(column_name).lower()
+    display = str(display_name)
+    if any(token in lowered for token in ["rate", "ratio", "pct"]) or any(token in display for token in ["率", "占比"]):
+        return not any(token in lowered for token in ["auc", "ks", "psi", "lift", "iv"])
+    if any(token in lowered for token in ["auc", "ks", "psi", "lift", "gain", "iv"]):
+        return False
+    return False
 
 
 def _fmt_metric(value: Any) -> str:
@@ -3144,7 +3455,10 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _read_csv(path: Path) -> pd.DataFrame | None:
     if not path.exists():
         return None
-    return pd.read_csv(path, encoding="utf-8-sig")
+    try:
+        return pd.read_csv(path, encoding="utf-8-sig")
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
 
 
 def _first_existing(*paths: Path) -> Path | None:

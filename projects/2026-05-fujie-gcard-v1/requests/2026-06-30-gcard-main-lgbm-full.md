@@ -150,6 +150,13 @@ evaluation:
     - zc_level
 
 reports:
+  model_display_name: G卡V7
+  score_labels:
+    model_score: G卡V7
+    gcard_v2: G卡V2
+    gcard_v4: G卡V4
+    gcard_v5: G卡V5
+    gcard_v6: G卡V6
   sections:
     - sample_overview
     - feature_screening
@@ -163,6 +170,28 @@ reports:
     - model_report.md
     - model_card.md
     - executive_summary.md
+  targets:
+    - name: default
+      description: standard model report
+      experiment: main_lgbm
+      train_dir: modeling/main_lgbm
+      eval_dir: evaluation
+      output_dir: reports
+      score_labels:
+        model_score: G卡V7
+        gcard_v2: G卡V2
+        gcard_v4: G卡V4
+        gcard_v5: G卡V5
+        gcard_v6: G卡V6
+    - name: tuned_main_lgbm_tuned_balanced
+      description: tuned challenger report
+      experiment: main_lgbm_tuned_balanced
+      train_dir: modeling/main_lgbm_tuned_balanced
+      eval_dir: evaluation_tuned/main_lgbm_tuned_balanced
+      output_dir: reports_tuned_main_lgbm_tuned_balanced
+      score_labels:
+        model_score: G卡V7
+        gcard_v6: G卡V6
 ---
 
 # 建模目标

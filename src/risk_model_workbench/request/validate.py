@@ -17,6 +17,7 @@ from risk_model_workbench.request.data_source import (
     sample_location,
 )
 from risk_model_workbench.planning.steps import resolve_step_configuration
+from risk_model_workbench.request.splits import check_split_consistency
 
 
 REQUIRED_FIELDS = [
@@ -179,6 +180,40 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
                 unsupported_outputs.append(str(output))
         if unsupported_outputs:
             errors.append(f"unsupported report output type: {', '.join(unsupported_outputs)}")
+    if isinstance(reports, dict):
+        score_labels = reports.get("score_labels")
+        if "score_labels" in reports and not isinstance(score_labels, dict):
+            errors.append("reports.score_labels must be a mapping")
+        targets = reports.get("targets") or []
+        if "targets" in reports and not isinstance(targets, list):
+            errors.append("reports.targets must be a list")
+        elif isinstance(targets, list):
+            seen_targets: set[str] = set()
+            for index, target in enumerate(targets, start=1):
+                if not isinstance(target, dict):
+                    errors.append(f"reports.targets[{index}] must be a mapping")
+                    continue
+                target_name = str(target.get("name") or "").strip()
+                if not target_name:
+                    errors.append(f"reports.targets[{index}].name is required")
+                elif target_name in seen_targets:
+                    errors.append(f"duplicate reports.targets name: {target_name}")
+                seen_targets.add(target_name)
+                target_labels = target.get("score_labels")
+                if "score_labels" in target and not isinstance(target_labels, dict):
+                    errors.append(f"reports.targets[{index}].score_labels must be a mapping")
+                for field in ["train_dir", "eval_dir", "output_dir", "experiment"]:
+                    if field in target and target.get(field) not in (None, "") and not isinstance(target.get(field), str):
+                        errors.append(f"reports.targets[{index}].{field} must be a string")
+                unsupported_target_outputs = []
+                for output in _as_list(target.get("outputs")):
+                    suffix = Path(str(output)).suffix.lower()
+                    if suffix not in SUPPORTED_REPORT_EXTENSIONS:
+                        unsupported_target_outputs.append(str(output))
+                if unsupported_target_outputs:
+                    errors.append(
+                        f"unsupported report output type in reports.targets[{index}]: {', '.join(unsupported_target_outputs)}"
+                    )
 
     try:
         step_config = resolve_step_configuration(metadata, project_dir)
@@ -208,8 +243,16 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
     elif not request_ids and not configured_ids:
         errors.append("missing required field: id_columns (not found in request or project.yml)")
 
+    # Split consistency: time-out (oot) must never feed the in-time validation
+    # set (oos) used by early stopping / tuning. Errors are returned under a
+    # dedicated "split_errors" key so the CLI can downgrade them to warnings via
+    # --skip-split-check without touching structural errors.
+    split_check = check_split_consistency(metadata, project_config or {})
+    warnings.extend(split_check["warnings"])
+
     return {
-        "status": "ok" if not errors else "failed",
+        "status": "ok" if not errors and not split_check["errors"] else "failed",
         "errors": errors,
+        "split_errors": split_check["errors"],
         "warnings": warnings,
     }

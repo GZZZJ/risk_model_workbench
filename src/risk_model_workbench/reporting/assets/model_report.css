@@ -322,6 +322,80 @@ blockquote{
   border-radius:6px;
   background:#fff;
 }
+.report-image .woe-svg{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  border:1px solid #e5ebf0;
+  border-radius:6px;
+  background:#fff;
+}
+.woe-title{
+  fill:#172433;
+  font-size:15px;
+  font-weight:850;
+}
+.woe-subtitle{
+  fill:#667384;
+  font-size:11px;
+}
+.woe-axis{
+  stroke:#9aa8b6;
+  stroke-width:1;
+}
+.woe-grid{
+  stroke:#e4eaf0;
+  stroke-width:1;
+}
+.woe-zero{
+  stroke:#8291a2;
+  stroke-width:1;
+  stroke-dasharray:4 4;
+}
+.woe-bar{
+  fill:rgba(65,111,147,.36);
+  stroke:rgba(65,111,147,.58);
+  stroke-width:.8;
+}
+.woe-line{
+  fill:none;
+  stroke:#c66a1d;
+  stroke-width:2.4;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+.woe-point{
+  fill:#fff;
+  stroke:#c66a1d;
+  stroke-width:2;
+}
+.woe-axis-title{
+  fill:#405064;
+  font-size:11px;
+  font-weight:750;
+  text-anchor:middle;
+}
+.woe-y-label{
+  fill:#667384;
+  font-size:10px;
+  text-anchor:end;
+}
+.woe-pop-label{
+  fill:#667384;
+  font-size:10px;
+  text-anchor:start;
+}
+.woe-x-label{
+  fill:#4a5a6e;
+  font-size:9px;
+  text-anchor:end;
+}
+.woe-legend{
+  fill:#405064;
+  font-size:10px;
+  font-weight:750;
+}
 .report-image figcaption{
   margin-top:8px;
   color:#405064;

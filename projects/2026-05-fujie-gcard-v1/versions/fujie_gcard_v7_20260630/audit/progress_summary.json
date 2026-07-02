@@ -1,30 +1,32 @@
 {
   "version": 1,
-  "run_id": "2026-06-30-gcard-main-lgbm-full",
-  "updated_at": "2026-07-01T12:28:19",
-  "stage": "evaluate",
-  "stage_label": "模型评估",
+  "version_id": "fujie_gcard_v7_20260630",
+  "run_id": "fujie_gcard_v7_20260630",
+  "updated_at": "2026-07-02T11:10:15",
+  "stage": "report",
+  "stage_label": "报告生成",
   "latest_event": {
-    "timestamp": "2026-07-01T12:28:19",
-    "run_id": "2026-06-30-gcard-main-lgbm-full",
-    "stage": "evaluate",
+    "timestamp": "2026-07-02T11:10:15",
+    "version_id": "fujie_gcard_v7_20260630",
+    "run_id": "fujie_gcard_v7_20260630",
+    "stage": "report",
     "step": "action_done",
     "status": "done",
-    "message": "模型评估完成",
+    "message": "报告生成完成",
     "current": null,
     "total": null,
     "percent": 100.0,
     "elapsed_seconds": 0.0,
     "eta_seconds": null,
     "metrics": {
-      "action_id": "evaluate",
+      "action_id": "report",
       "failure_code": "",
       "retry_count": 0,
-      "artifact_count": 139,
+      "artifact_count": 74,
       "decision": "done"
     },
     "level": "info",
-    "pid": 8808
+    "pid": 93127
   },
   "stages": {
     "validate_config": {
@@ -269,8 +271,9 @@
       "stage": "report",
       "stage_label": "报告生成",
       "latest_event": {
-        "timestamp": "2026-06-30T18:32:09",
-        "run_id": "2026-06-30-gcard-main-lgbm-full",
+        "timestamp": "2026-07-02T11:10:15",
+        "version_id": "fujie_gcard_v7_20260630",
+        "run_id": "fujie_gcard_v7_20260630",
         "stage": "report",
         "step": "action_done",
         "status": "done",
@@ -284,13 +287,13 @@
           "action_id": "report",
           "failure_code": "",
           "retry_count": 0,
-          "artifact_count": 47,
+          "artifact_count": 74,
           "decision": "done"
         },
         "level": "info",
-        "pid": 27072
+        "pid": 93127
       },
-      "updated_at": "2026-06-30T18:32:09"
+      "updated_at": "2026-07-02T11:10:15"
     }
   }
 }

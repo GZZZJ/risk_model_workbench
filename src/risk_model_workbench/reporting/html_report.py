@@ -268,6 +268,14 @@ def _markdown_body_to_report_html(
                 tag = "td"
             html_lines.append("<tr>" + "".join(f"<{tag}>{_inline_markdown_to_html(cell)}</{tag}>" for cell in cells) + "</tr>")
             continue
+        if stripped.startswith('<figure class="report-image') and stripped.endswith("</figure>"):
+            close_ul()
+            close_table()
+            if not in_image_grid:
+                html_lines.append('<div class="report-image-grid">')
+                in_image_grid = True
+            html_lines.append(stripped)
+            continue
         image_match = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", stripped)
         if image_match:
             close_ul()
@@ -403,7 +411,7 @@ def _gcard_top_decile_summary_table(*, eval_dir: Path, compare_score: str) -> st
         rows.append(
             "<tr>"
             f"<td>{escape(segment_name)}</td>"
-            f"<td>{_metric_arrow(compare_rate, model_rate)}</td>"
+            f"<td>{_metric_arrow(compare_rate, model_rate, formatter=_fmt_percent_metric)}</td>"
             f"<td>{_fmt_signed_pp(_delta(model_rate, compare_rate))}</td>"
             "</tr>"
         )
@@ -524,8 +532,9 @@ def _delta(new_value: Any, old_value: Any) -> float | None:
     return new_float - old_float
 
 
-def _metric_arrow(old_value: Any, new_value: Any) -> str:
-    return f"{_fmt_metric(old_value)}→{_fmt_metric(new_value)}"
+def _metric_arrow(old_value: Any, new_value: Any, *, formatter: Any | None = None) -> str:
+    value_formatter = formatter or _fmt_metric
+    return f"{value_formatter(old_value)}→{value_formatter(new_value)}"
 
 
 def _fmt_signed_pp(value: Any) -> str:
@@ -533,6 +542,13 @@ def _fmt_signed_pp(value: Any) -> str:
     if numeric is None:
         return "N/A"
     return f"{numeric * 100:+.1f}pp"
+
+
+def _fmt_percent_metric(value: Any) -> str:
+    numeric = _to_float(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric:.1%}"
 
 
 def _report_html_style() -> str:
