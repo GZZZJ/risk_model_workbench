@@ -246,7 +246,7 @@ h3.section-subtitle{
 .report-section h3.section-subtitle:nth-of-type(4n){background:#f4f1fb;color:#654c9a;border-color:#ddd4f0}
 .summary-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
 }
 .summary-card{
@@ -298,9 +298,41 @@ blockquote{
   background:#f5f8fb;
   color:#4c5c69;
 }
+.report-image-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin:12px 0 20px;
+}
+.report-image{
+  min-width:0;
+  margin:0;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow-soft);
+}
+.report-image img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  border:1px solid #e5ebf0;
+  border-radius:6px;
+  background:#fff;
+}
+.report-image figcaption{
+  margin-top:8px;
+  color:#405064;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
 .table-wrap{
   width:100%;
-  overflow:auto;
+  overflow:visible;
   margin:12px 0 20px;
   border:1px solid var(--line);
   border-radius:8px;
@@ -326,7 +358,8 @@ blockquote{
 }
 table{
   width:100%;
-  min-width:720px;
+  min-width:0;
+  table-layout:fixed;
   border-collapse:separate;
   border-spacing:0;
   font-size:13px;
@@ -339,7 +372,9 @@ th,td{
   padding:8px 10px;
   text-align:right;
   vertical-align:middle;
-  white-space:nowrap;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 tr:last-child td{border-bottom:0}
 th:last-child,td:last-child{border-right:0}
@@ -357,7 +392,7 @@ td:first-child,th:first-child{
   z-index:2;
   text-align:left;
   max-width:340px;
-  min-width:128px;
+  min-width:0;
   white-space:normal;
   word-break:break-word;
   overflow-wrap:anywhere;
@@ -373,7 +408,9 @@ tbody tr:hover td{background:#eef5fb}
 tbody tr:hover td:first-child{background:#eef5fb}
 .dense-table table{font-size:12px}
 .dense-table th,.dense-table td{padding:7px 8px}
-.wide-table table{min-width:1040px}
+.wide-table table{min-width:0}
+.paired-table-panel table{font-size:12px}
+.paired-table-panel th,.paired-table-panel td{padding:6px 5px}
 .visual-table{border-color:#ccd9df}
 .heat-cell,.bar-cell{
   position:relative;
@@ -400,6 +437,93 @@ tbody tr:hover td.plain-cell{
   background:#fff!important;
   background-image:none!important;
 }
+.intent-note{
+  margin:4px 0 14px;
+  padding:8px 11px;
+  border:1px solid #cfdbe6;
+  border-left:4px solid var(--accent);
+  border-radius:6px;
+  background:#f6f9fb;
+  color:#435365;
+  font-size:13px;
+}
+.intent-cohort-title{
+  display:block;
+  margin:18px 0 8px;
+  color:#111820;
+  font-weight:850;
+  font-size:15px;
+}
+.intent-risk-card{
+  margin:10px 0 18px;
+}
+.intent-matrix-caption{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+  margin:0 0 6px;
+  color:#1b2633;
+  font-size:13px;
+  font-weight:850;
+}
+.intent-matrix-caption span{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:3px 8px;
+  border:1px solid #cfdbe6;
+  border-radius:5px;
+  background:#f5f8fb;
+}
+.intent-risk-card .table-wrap{
+  margin:0;
+  border-color:#202020;
+  border-radius:0;
+  box-shadow:none;
+}
+.intent-risk-card table{
+  table-layout:fixed;
+  min-width:0;
+  font-size:12px;
+  border-collapse:collapse;
+}
+.intent-risk-card th,
+.intent-risk-card td{
+  padding:4px 6px;
+  border:1px solid #202020;
+  text-align:center;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.intent-risk-card th:first-child,
+.intent-risk-card td:first-child{
+  position:static;
+  min-width:0;
+  max-width:none;
+  text-align:center;
+}
+.intent-risk-card th{
+  position:static;
+  top:auto;
+  z-index:auto;
+  background:#f4f6f8;
+  color:#111820;
+}
+.intent-risk-card .intent-super-head th{
+  background:#fff;
+  color:#111820;
+  font-weight:850;
+}
+.intent-risk-card .intent-version-cell{
+  background:#fff!important;
+  color:#111820;
+  font-weight:800;
+}
+.intent-risk-card tr:last-child td{
+  border-bottom:1px solid #202020;
+}
 code{
   padding:2px 5px;
   border-radius:4px;
@@ -421,6 +545,7 @@ code{
   .report-body{padding:16px}
   .summary-grid{grid-template-columns:1fr}
   .paired-tables{grid-template-columns:1fr}
+  .report-image-grid{grid-template-columns:1fr}
   .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .nav-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .nav-note{display:none}

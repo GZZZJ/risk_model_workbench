@@ -35,6 +35,8 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
             "|---|---|",
             "| KS | +0.030 |",
             "",
+            "![Top 1: feature_a](woe_top_features/images/001_feature_a_WOE.png)",
+            "",
             "### 二、模型效果",
         ]
     )
@@ -52,6 +54,8 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
     assert "二、模型效果" not in html
     assert "<code>target</code>" in html
     assert "<table>" in html
+    assert '<div class="report-image-grid">' in html
+    assert '<img src="woe_top_features/images/001_feature_a_WOE.png" alt="Top 1: feature_a">' in html
 
 
 def test_html_report_loads_style_and_script_assets():
@@ -62,6 +66,35 @@ def test_html_report_loads_style_and_script_assets():
     assert ".report-shell" in style
     assert "DOMContentLoaded" in script
     assert "enhanceNumericTable" in script
+
+
+def test_gcard_summary_final_conclusion_changes_when_uplift_is_large(tmp_path):
+    eval_dir = tmp_path / "evaluation"
+    eval_dir.mkdir()
+    (eval_dir / "overall_metrics.csv").write_text(
+        "\n".join(
+            [
+                "final_flag,model_score_auc,model_score_ks,gcard_v6_auc,gcard_v6_ks",
+                "DEV-OOS,0.936,0.735,0.934,0.720",
+                "OOT-OOS,0.934,0.732,0.930,0.716",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    markdown = "\n".join(["# Demo", "", "生成日期：2026-07-01", "", "## Summary（新版模型 vs G卡V6）", ""])
+
+    html = render_model_report_html(
+        markdown,
+        eval_dir=eval_dir,
+        include_gcard_summary=True,
+        score_labels={"model_score": "G卡V8", "gcard_v6": "G卡V6"},
+    )
+
+    assert "最终结论" in html
+    assert "效果提升较明显" in html
+    assert "<strong>可作为候选版本进入上线评审或灰度验证。</strong>" in html
+    assert "不建议将该模型单独作为独立版本上线" not in html
 
 
 def test_report_scaffold():
@@ -103,6 +136,10 @@ def test_imported_excel_report_layout(tmp_path):
     assert '<main class="report-shell">' in report_html
     assert '<div class="summary-grid">' in report_html
     assert "summary-card" in report_html
+    assert "最终结论" in report_html
+    assert "提升不明显" in report_html
+    assert "<strong>不建议将该模型单独作为独立版本上线。</strong>" in report_html
+    assert "稳定性与边界" not in report_html
     assert "model_score vs G卡V6" in report_html
     assert "report-section" in report_html
     assert "table-wrap" in report_html
@@ -159,7 +196,7 @@ def test_imported_excel_report_layout(tmp_path):
 
     intent = workbook["模型效果-意愿交叉风险（DEV-OOS）"]
     assert _find_cell(intent, "3、意愿交叉风险（DEV-OOS）") is not None
-    assert _find_cell_contains(intent, "高、中、低意愿评级") is not None
+    assert _find_cell_contains(intent, "高、中、低意愿评级") is None
     assert _find_cell(intent, "老户 - 占比 - 本轮模型") is not None
     assert _find_cell(intent, "老户 - 占比 - G卡V6") is not None
     assert _find_cell(intent, "流失户 - 新增订单3期金额逾期率 - G卡V6") is not None
@@ -280,6 +317,11 @@ def test_report_embeds_top_feature_woe_sheet(tmp_path):
     report_text = output_path.with_name("model_report.md").read_text(encoding="utf-8")
     assert "## 七、Top变量WOE" in report_text
     assert "feature_a" in report_text
+    assert "![Top 1: feature_a（中文名未匹配）](woe_top_features/images/001_feature_a_WOE.png)" in report_text
+
+    report_html = output_path.with_name("model_report.html").read_text(encoding="utf-8")
+    assert '<img src="woe_top_features/images/001_feature_a_WOE.png" alt="Top 1: feature_a（中文名未匹配）">' in report_html
+    assert "中文名缺失说明：未加载到变量中文名映射" in report_html
 
 
 def _write_tiny_png(path: Path) -> None:

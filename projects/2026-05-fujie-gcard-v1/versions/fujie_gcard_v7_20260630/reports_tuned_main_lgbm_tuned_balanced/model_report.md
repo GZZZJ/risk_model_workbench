@@ -390,10 +390,6 @@ OOS 按月 KS
 
 3、意愿交叉风险（DEV-OOS）
 
-| 序号 | 结论 |
-| --- | --- |
-| 1 | （1）高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。 |
-
 老户 DEV-OOS 意愿 x 资产评级
 
 占比
@@ -474,46 +470,46 @@ OOS 按月 KS
 | feature | 中文名 | gain | split |
 | --- | --- | --- | --- |
 | d180_apl_ord_days_cnt | 近180天_订单发起天数(去重) | 390325.557 | 113 |
-| first_day_diff_event_result_1_all | first_day_diff_event_result_1_all | 200988.714 | 186 |
+| first_day_diff_event_result_1_all |  | 200988.714 | 186 |
 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 近360天_发起订单距评分日的时间间隔_最小 | 74347.560 | 212 |
 | his_360_day_csh_apl_ord_cnt_his_rto | 近12月历史CASH订单总数/总订单数 | 72331.487 | 81 |
 | d30_d60_apl_ord_cnt_rat | 近30天/近60天_发起订单数_的比例 | 52955.830 | 10 |
 | d180_apl_ord_days_cnt_all | 近180天_订单发起天数(去重)（所有业务类型口径统计） | 19128.948 | 41 |
-| dau_90d | dau_90d | 14052.768 | 166 |
+| dau_90d |  | 14052.768 | 166 |
 | pmt_crd_amt_1m | 近1个月单张银行卡最大扣款金额 | 11614.072 | 41 |
 | pmt_crd_amt_3m | 近3个月单张银行卡最大扣款金额 | 8446.183 | 32 |
 | cnt_avg_ord_span_30d | cnt_平均订单间隔_30d | 8369.491 | 53 |
 | ddf_lst_app_str_tim_to_mdl_tim_sec | 设备启动到评分日时间-秒 | 6892.132 | 278 |
 | d30_apl_ord_days_cnt | 近30天_订单发起天数(去重) | 6468.948 | 82 |
 | stg_pln_max_prc_amt_12m_ftr | 未来近12个月的最大应还本金金额 | 5926.201 | 19 |
-| clk_cnt_14d | clk_cnt_14d | 4640.890 | 108 |
+| clk_cnt_14d |  | 4640.890 | 108 |
 | ord_apl_avg_prc_amt_720_day_per_mth | 近720天发起动支订单的动支总金额_单月平均 | 4588.928 | 62 |
+> 中文名缺失说明：在重要变量 Top15 中，以下变量未在变量字典中匹配到中文名：first_day_diff_event_result_1_all、dau_90d、clk_cnt_14d。
 
 ## 七、Top变量WOE
 
-- Top20 WOE 图见 Excel sheet `Top变量WOE`，PNG 和汇总 CSV 见 `reports/woe_top_features/` 或训练产物目录。
-| 排名 | 变量 | 中文名 | Gain | IV |
-| --- | --- | --- | --- | --- |
-| 1 | d180_apl_ord_days_cnt | 近180天_订单发起天数(去重) | 390325.557 | 13.264 |
-| 2 | first_day_diff_event_result_1_all | first_day_diff_event_result_1_all | 200988.714 | 11.677 |
-| 3 | d360_apl_ord_ddf_mdl_ord_crt_dte_min | 近360天_发起订单距评分日的时间间隔_最小 | 74347.560 | 13.111 |
-| 4 | his_360_day_csh_apl_ord_cnt_his_rto | 近12月历史CASH订单总数/总订单数 | 72331.487 | 8.647 |
-| 5 | d30_d60_apl_ord_cnt_rat | 近30天/近60天_发起订单数_的比例 | 52955.830 | 12.288 |
-| 6 | d180_apl_ord_days_cnt_all | 近180天_订单发起天数(去重)（所有业务类型口径统计） | 19128.948 | 12.975 |
-| 7 | dau_90d | dau_90d | 14052.768 | 6.754 |
-| 8 | pmt_crd_amt_1m | 近1个月单张银行卡最大扣款金额 | 11614.072 | 4.774 |
-| 9 | pmt_crd_amt_3m | 近3个月单张银行卡最大扣款金额 | 8446.183 | 7.260 |
-| 10 | cnt_avg_ord_span_30d | cnt_平均订单间隔_30d | 8369.491 | 6.516 |
-| 11 | ddf_lst_app_str_tim_to_mdl_tim_sec | 设备启动到评分日时间-秒 | 6892.132 | 6.700 |
-| 12 | d30_apl_ord_days_cnt | 近30天_订单发起天数(去重) | 6468.948 | 11.892 |
-| 13 | stg_pln_max_prc_amt_12m_ftr | 未来近12个月的最大应还本金金额 | 5926.201 | 6.108 |
-| 14 | clk_cnt_14d | clk_cnt_14d | 4640.890 | 5.369 |
-| 15 | ord_apl_avg_prc_amt_720_day_per_mth | 近720天发起动支订单的动支总金额_单月平均 | 4588.928 | 6.905 |
-| 16 | d180_apl_ord_ddf_mdl_ord_crt_dte_max | 近180天_发起订单距评分日的时间间隔_最大 | 4433.168 | 10.163 |
-| 17 | his_30d_app_str_ctn_v2 | 过去30天APP启动次数 | 3742.279 | 7.092 |
-| 18 | first_day_diff_event_result_0_event_type_loan_all | first_day_diff_event_result_0_event_type_loan_all | 3343.519 | 6.607 |
-| 19 | avg_avl_lmt_lft_rep_prc_3m_cash_1m | 近1个月现金贷平均指标值(可用额度/未来3个月剩余应还金额) | 3305.564 | 8.948 |
-| 20 | rsk_avl_lmt_ch_les_10000_cnt_12m | 近12个月现金贷额度使用率小于10000的次数_v2 | 3172.502 | 12.075 |
+- 以下展示 Top20 入模变量的真实 WOE 图；完整分箱数据见 Excel sheet `Top变量WOE` 和 `woe_top_features/woe_top20_summary.csv`。
+![Top 1: d180_apl_ord_days_cnt（近180天_订单发起天数(去重)）](woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png)
+![Top 2: first_day_diff_event_result_1_all（中文名未匹配）](woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png)
+![Top 3: d360_apl_ord_ddf_mdl_ord_crt_dte_min（近360天_发起订单距评分日的时间间隔_最小）](woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png)
+![Top 4: his_360_day_csh_apl_ord_cnt_his_rto（近12月历史CASH订单总数/总订单数）](woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png)
+![Top 5: d30_d60_apl_ord_cnt_rat（近30天/近60天_发起订单数_的比例）](woe_top_features/images/005_d30_d60_apl_ord_cnt_rat_WOE.png)
+![Top 6: d180_apl_ord_days_cnt_all（近180天_订单发起天数(去重)（所有业务类型口径统计））](woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png)
+![Top 7: dau_90d（中文名未匹配）](woe_top_features/images/007_dau_90d_WOE.png)
+![Top 8: pmt_crd_amt_1m（近1个月单张银行卡最大扣款金额）](woe_top_features/images/008_pmt_crd_amt_1m_WOE.png)
+![Top 9: pmt_crd_amt_3m（近3个月单张银行卡最大扣款金额）](woe_top_features/images/009_pmt_crd_amt_3m_WOE.png)
+![Top 10: cnt_avg_ord_span_30d（cnt_平均订单间隔_30d）](woe_top_features/images/010_cnt_avg_ord_span_30d_WOE.png)
+![Top 11: ddf_lst_app_str_tim_to_mdl_tim_sec（设备启动到评分日时间-秒）](woe_top_features/images/011_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png)
+![Top 12: d30_apl_ord_days_cnt（近30天_订单发起天数(去重)）](woe_top_features/images/012_d30_apl_ord_days_cnt_WOE.png)
+![Top 13: stg_pln_max_prc_amt_12m_ftr（未来近12个月的最大应还本金金额）](woe_top_features/images/013_stg_pln_max_prc_amt_12m_ftr_WOE.png)
+![Top 14: clk_cnt_14d（中文名未匹配）](woe_top_features/images/014_clk_cnt_14d_WOE.png)
+![Top 15: ord_apl_avg_prc_amt_720_day_per_mth（近720天发起动支订单的动支总金额_单月平均）](woe_top_features/images/015_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png)
+![Top 16: d180_apl_ord_ddf_mdl_ord_crt_dte_max（近180天_发起订单距评分日的时间间隔_最大）](woe_top_features/images/016_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png)
+![Top 17: his_30d_app_str_ctn_v2（过去30天APP启动次数）](woe_top_features/images/017_his_30d_app_str_ctn_v2_WOE.png)
+![Top 18: first_day_diff_event_result_0_event_type_loan_all（中文名未匹配）](woe_top_features/images/018_first_day_diff_event_result_0_event_type_loan_all_WOE.png)
+![Top 19: avg_avl_lmt_lft_rep_prc_3m_cash_1m（近1个月现金贷平均指标值(可用额度/未来3个月剩余应还金额)）](woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png)
+![Top 20: rsk_avl_lmt_ch_les_10000_cnt_12m（近12个月现金贷额度使用率小于10000的次数_v2）](woe_top_features/images/020_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png)
+> 中文名缺失说明：在Top变量WOE 展示图中，以下变量未在变量字典中匹配到中文名：first_day_diff_event_result_1_all、dau_90d、clk_cnt_14d、first_day_diff_event_result_0_event_type_loan_all。
 
 ## 八、待补充事项
 

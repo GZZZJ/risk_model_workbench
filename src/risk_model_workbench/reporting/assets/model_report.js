@@ -272,6 +272,121 @@ document.addEventListener('DOMContentLoaded', function () {
     panel.appendChild(wrap);
   });
 
+  function formatPercentCell(cell) {
+    var raw = String(cell.textContent || '').trim();
+    if (!raw || raw.indexOf('%') !== -1) return;
+    var value = parseFloat(raw.replace(/,/g, ''));
+    if (!Number.isFinite(value)) return;
+    cell.textContent = (value * 100).toFixed(2) + '%';
+  }
+
+  function decorateIntentMatrix(table, metric, scoreLabel) {
+    if (!table || table.dataset.intentDecorated === '1') return;
+    table.dataset.intentDecorated = '1';
+    table.classList.add('intent-matrix');
+
+    var headerRow = table.querySelector('tr');
+    if (!headerRow) return;
+    var originalColumnCount = headerRow.children.length;
+
+    var superRow = document.createElement('tr');
+    superRow.className = 'intent-super-head';
+    var metricHead = document.createElement('th');
+    metricHead.colSpan = 2;
+    metricHead.textContent = metric;
+    var assetHead = document.createElement('th');
+    assetHead.colSpan = Math.max(1, originalColumnCount - 1);
+    assetHead.textContent = '资产评级';
+    superRow.appendChild(metricHead);
+    superRow.appendChild(assetHead);
+    table.tBodies[0].insertBefore(superRow, headerRow);
+
+    var sideHead = document.createElement('th');
+    sideHead.textContent = '模型';
+    headerRow.insertBefore(sideHead, headerRow.firstElementChild);
+    if (headerRow.children[1]) headerRow.children[1].textContent = '意愿';
+    var lastHeader = headerRow.children[headerRow.children.length - 1];
+    if (lastHeader && lastHeader.textContent.trim() === '合计') lastHeader.textContent = 'sum';
+
+    var bodyRows = Array.prototype.slice.call(table.querySelectorAll('tr')).slice(2);
+    if (bodyRows.length) {
+      var versionCell = document.createElement('td');
+      versionCell.className = 'intent-version-cell';
+      versionCell.rowSpan = bodyRows.length;
+      versionCell.textContent = scoreLabel;
+      bodyRows[0].insertBefore(versionCell, bodyRows[0].firstElementChild);
+    }
+    bodyRows.forEach(function (row) {
+      var dataOffset = row.querySelector('.intent-version-cell') ? 2 : 1;
+      Array.prototype.slice.call(row.querySelectorAll('td')).slice(dataOffset).forEach(formatPercentCell);
+      var first = row.children[0];
+      if (first && first.textContent.trim() === '合计') first.textContent = 'sum';
+      var second = row.children[1];
+      if (second && second.textContent.trim() === '合计') second.textContent = 'sum';
+    });
+  }
+
+  function normalizeIntentRiskSection() {
+    var intentTitle = Array.prototype.slice.call(body.querySelectorAll('p')).find(function (node) {
+      return node.textContent.trim() === '3、意愿交叉风险（DEV-OOS）';
+    });
+    if (!intentTitle) return;
+
+    var node = intentTitle.nextElementSibling;
+    if (node && node.classList && node.classList.contains('table-wrap') && node.textContent.indexOf('高、中、低意愿评级') !== -1) {
+      node.remove();
+      node = intentTitle.nextElementSibling;
+    }
+
+    if (node && /^(P|BLOCKQUOTE)$/i.test(node.tagName) && node.textContent.indexOf('高、中、低意愿评级') !== -1) {
+      node.className = 'intent-note';
+      node.textContent = '说明：高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。';
+    } else {
+      var note = document.createElement('p');
+      note.className = 'intent-note';
+      note.textContent = '说明：高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。';
+      intentTitle.insertAdjacentElement('afterend', note);
+    }
+
+    Array.prototype.slice.call(body.querySelectorAll('p')).forEach(function (paragraph) {
+      var text = paragraph.textContent.trim();
+      var cohortMatch = text.match(/^(老户|流失户) DEV-OOS 意愿 x 资产评级$/);
+      if (cohortMatch) {
+        paragraph.className = 'intent-cohort-title';
+        paragraph.textContent = cohortMatch[1];
+        return;
+      }
+
+      var tableTitleMatch = text.match(/^(老户|流失户) - (占比|30天发起率|新增订单3期金额逾期率) - (.+)$/);
+      if (!tableTitleMatch) return;
+      var cohort = tableTitleMatch[1];
+      var metric = tableTitleMatch[2];
+      var scoreLabel = tableTitleMatch[3];
+      var metricNode = paragraph.previousElementSibling;
+      var tableWrap = tableWrapAfterTitle(paragraph);
+      if (!tableWrap) return;
+      var table = tableWrap.querySelector('table');
+      decorateIntentMatrix(table, metric, scoreLabel);
+
+      var card = document.createElement('div');
+      card.className = 'intent-risk-card';
+      var caption = document.createElement('div');
+      caption.className = 'intent-matrix-caption';
+      [cohort, metric, scoreLabel].forEach(function (label) {
+        var span = document.createElement('span');
+        span.textContent = label;
+        caption.appendChild(span);
+      });
+      card.appendChild(caption);
+      paragraph.parentNode.insertBefore(card, metricNode && metricNode.textContent.trim() === metric ? metricNode : paragraph);
+      if (metricNode && metricNode.textContent.trim() === metric) metricNode.remove();
+      paragraph.remove();
+      card.appendChild(tableWrap);
+    });
+  }
+
+  normalizeIntentRiskSection();
+
   var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
   var sections = Array.prototype.slice.call(document.querySelectorAll('.report-section'));
   if ('IntersectionObserver' in window) {

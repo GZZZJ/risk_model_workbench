@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from html import escape
 from pathlib import Path
@@ -1021,6 +1022,7 @@ def _build_woe_sheet(ws, *, train_dir: Path, report_dir: Path) -> None:
     if summary_path is None:
         _write_note(ws, 1, "WOE charts require row-level feature values. No registered Top feature WOE artifacts were found.")
         return
+    summary_path = _sync_woe_artifacts_to_report_dir(summary_path, report_dir)
 
     summary = _read_csv(summary_path)
     if summary is None or summary.empty:
@@ -1195,8 +1197,7 @@ def _model_conclusion_summary(eval_dir: Path) -> pd.DataFrame:
             )
 
     if ftr_rate is not None and amount_risk is not None and not ftr_rate.empty and not amount_risk.empty:
-        add("3、意愿交叉风险（DEV-OOS）", "（1）高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。")
-        for idx, segment_name in enumerate(["老户", "流失户"], start=2):
+        for idx, segment_name in enumerate(["老户", "流失户"], start=1):
             model_low_ftr = _intent_total_value(ftr_rate, segment_name, "低意愿", "ftr_30d_rate", "model_score")
             model_high_ftr = _intent_total_value(ftr_rate, segment_name, "高意愿", "ftr_30d_rate", "model_score")
             model_high_risk = _intent_total_value(amount_risk, segment_name, "高意愿", "amount_overdue_rate", "model_score")
@@ -1831,6 +1832,59 @@ def _find_woe_image(image_dir: Path, rank: int) -> Path | None:
     return matches[0] if matches else None
 
 
+def _sync_woe_artifacts_to_report_dir(summary_path: Path, report_dir: Path) -> Path:
+    """Keep the HTML report package self-contained when WOE artifacts came from training."""
+    import shutil
+
+    target_dir = report_dir / "woe_top_features"
+    source_dir = summary_path.parent
+    if source_dir.resolve() == target_dir.resolve():
+        return summary_path
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_summary = target_dir / summary_path.name
+    shutil.copy2(summary_path, target_summary)
+
+    source_images = source_dir / "images"
+    if source_images.exists():
+        target_images = target_dir / "images"
+        target_images.mkdir(parents=True, exist_ok=True)
+        for image_path in sorted(source_images.glob("*.png")):
+            shutil.copy2(image_path, target_images / image_path.name)
+    return target_summary
+
+
+def _relative_markdown_path(path: Path, base_dir: Path) -> str:
+    try:
+        return path.resolve().relative_to(base_dir.resolve()).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def _feature_chinese_name(feature: str, name_map: dict[str, str] | None) -> str:
+    if not name_map:
+        return ""
+    name = str(name_map.get(feature, "") or "").strip()
+    if not name or not re.search(r"[\u4e00-\u9fff]", name):
+        return ""
+    return name
+
+
+def _missing_feature_name_note(features: list[str], name_map: dict[str, str] | None, scope: str) -> str | None:
+    unique_features = list(dict.fromkeys(str(feature) for feature in features if str(feature)))
+    if not unique_features:
+        return None
+    if not name_map:
+        return f"> 中文名缺失说明：未加载到变量中文名映射，{scope}仅展示英文变量名。"
+    missing = [feature for feature in unique_features if not _feature_chinese_name(feature, name_map)]
+    if not missing:
+        return None
+    shown = "、".join(missing[:10])
+    suffix = f"；共 {len(missing)} 个变量未匹配" if len(missing) > 10 else ""
+    suffix_gap = " " if re.search(r"[A-Za-z0-9]$", scope) else ""
+    return f"> 中文名缺失说明：在{scope}{suffix_gap}中，以下变量未在变量字典中匹配到中文名：{shown}{suffix}。"
+
+
 def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> pd.DataFrame:
     process = _read_feature_screening_process(feature_dir, allow_legacy_fallback=_legacy_screening_process_allowed(feature_dir))
     if process:
@@ -2410,6 +2464,8 @@ def _write_model_reports(
     name_map = _load_feature_name_map(project_dir)
     sample_split = _read_csv(sample_dir / "sample_split_summary.csv")
     woe_summary_path = _find_woe_summary(train_dir=train_dir, report_dir=output_path.parent)
+    if woe_summary_path is not None:
+        woe_summary_path = _sync_woe_artifacts_to_report_dir(woe_summary_path, output_path.parent)
     woe_summary = _read_csv(woe_summary_path) if woe_summary_path else None
 
     md_path = output_path.with_name("model_report.md")
@@ -2527,8 +2583,11 @@ def _write_model_reports(
     if importance is not None:
         top_imp = importance.head(15).copy()
         if name_map:
-            top_imp.insert(1, "中文名", top_imp["feature"].map(name_map).fillna(""))
+            top_imp.insert(1, "中文名", top_imp["feature"].map(lambda feature: _feature_chinese_name(str(feature), name_map)))
         lines.extend(_markdown_table(top_imp))
+        missing_name_note = _missing_feature_name_note(top_imp["feature"].astype(str).tolist(), name_map, "重要变量 Top15")
+        if missing_name_note:
+            lines.append(missing_name_note)
         lines.append("")
     lines.extend(
         [
@@ -2537,17 +2596,37 @@ def _write_model_reports(
         ]
     )
     if woe_summary is not None and not woe_summary.empty and "status" in woe_summary.columns and (woe_summary["status"] == "ok").any():
-        lines.append("- Top20 WOE 图见 Excel sheet `Top变量WOE`，PNG 和汇总 CSV 见 `reports/woe_top_features/` 或训练产物目录。")
-        display = (
+        lines.append("- 以下展示 Top20 入模变量的真实 WOE 图；完整分箱数据见 Excel sheet `Top变量WOE` 和 `woe_top_features/woe_top20_summary.csv`。")
+        woe_features = (
             woe_summary[woe_summary["status"] == "ok"]
             .groupby(["rank", "feature"], as_index=False)
             .agg({"gain": "first", "iv_component": "sum"})
             .rename(columns={"rank": "排名", "feature": "变量", "gain": "Gain", "iv_component": "IV"})
             .sort_values("排名")
         )
-        if name_map:
-            display.insert(2, "中文名", display["变量"].map(name_map).fillna(""))
-        lines.extend(_markdown_table(display, limit=20))
+        image_dir = (woe_summary_path.parent / "images") if woe_summary_path is not None else (train_dir / "woe_top_features" / "images")
+        shown_features: list[str] = []
+        missing_images: list[str] = []
+        for _, item in woe_features.head(20).iterrows():
+            rank = int(item["排名"])
+            feature = str(item["变量"])
+            image_path = _find_woe_image(image_dir, rank)
+            if image_path is None:
+                missing_images.append(feature)
+                continue
+            shown_features.append(feature)
+            chinese_name = _feature_chinese_name(feature, name_map)
+            caption = f"Top {rank}: {feature}"
+            if chinese_name:
+                caption += f"（{chinese_name}）"
+            else:
+                caption += "（中文名未匹配）"
+            lines.append(f"![{caption}]({_relative_markdown_path(image_path, output_path.parent)})")
+        if missing_images:
+            lines.append("> WOE 图片缺失说明：以下变量已有 WOE 汇总数据，但未找到对应 PNG 图片：" + "、".join(missing_images[:10]) + "。")
+        missing_name_note = _missing_feature_name_note(shown_features, name_map, "Top变量WOE 展示图")
+        if missing_name_note:
+            lines.append(missing_name_note)
         lines.append("")
     else:
         lines.append("- 暂无 Top20 WOE 图；该产物需要训练阶段保留 row-level 特征值后生成。")

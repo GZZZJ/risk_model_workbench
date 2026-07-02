@@ -64,7 +64,7 @@ def render_model_report_html(
                 for idx, (item_id, label) in enumerate(nav_items, start=1)
             ],
             "  </nav>",
-            '  <div class="nav-note">表格支持横向滚动；提升类指标已按正负变化着色。</div>',
+            '  <div class="nav-note">表格已自适应页面宽度；提升类指标按正负变化着色。</div>',
             "</aside>",
             '<main class="report-shell">',
             '<header class="report-hero">',
@@ -191,6 +191,7 @@ def _markdown_body_to_report_html(
     html_lines: list[str] = []
     in_ul = False
     in_table = False
+    in_image_grid = False
     skip_summary = False
 
     def close_ul() -> None:
@@ -205,6 +206,12 @@ def _markdown_body_to_report_html(
             html_lines.append("</table>")
             in_table = False
 
+    def close_image_grid() -> None:
+        nonlocal in_image_grid
+        if in_image_grid:
+            html_lines.append("</div>")
+            in_image_grid = False
+
     for line in markdown.splitlines():
         if skip_summary and not line.startswith("## "):
             continue
@@ -215,10 +222,12 @@ def _markdown_body_to_report_html(
         if line.startswith("# ") or stripped.startswith("生成日期："):
             close_ul()
             close_table()
+            close_image_grid()
             continue
         if include_gcard_summary and line.startswith("## ") and line[3:].strip().startswith("Summary"):
             close_ul()
             close_table()
+            close_image_grid()
             html_lines.append("<h2>总结</h2>")
             html_lines.append(_render_gcard_summary_grid(eval_dir=eval_dir, run_config=run_config, score_labels=score_labels))
             skip_summary = True
@@ -226,17 +235,20 @@ def _markdown_body_to_report_html(
         if line.startswith("## "):
             close_ul()
             close_table()
+            close_image_grid()
             title = _strip_heading_order_prefix(line[3:].strip())
             html_lines.append(f"<h2>{_inline_markdown_to_html(title)}</h2>")
             continue
         if line.startswith("### "):
             close_ul()
             close_table()
+            close_image_grid()
             title = _strip_heading_order_prefix(line[4:].strip())
             html_lines.append(f'<h3 class="section-subtitle">{_inline_markdown_to_html(title)}</h3>')
             continue
         if line.startswith("- "):
             close_table()
+            close_image_grid()
             if not in_ul:
                 html_lines.append("<ul>")
                 in_ul = True
@@ -244,6 +256,7 @@ def _markdown_body_to_report_html(
             continue
         if line.startswith("| ") and line.endswith(" |"):
             close_ul()
+            close_image_grid()
             cells = [cell.strip() for cell in line.strip("|").split("|")]
             if _is_markdown_table_separator(cells):
                 continue
@@ -255,19 +268,38 @@ def _markdown_body_to_report_html(
                 tag = "td"
             html_lines.append("<tr>" + "".join(f"<{tag}>{_inline_markdown_to_html(cell)}</{tag}>" for cell in cells) + "</tr>")
             continue
+        image_match = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", stripped)
+        if image_match:
+            close_ul()
+            close_table()
+            if not in_image_grid:
+                html_lines.append('<div class="report-image-grid">')
+                in_image_grid = True
+            alt_text = image_match.group(1).strip()
+            image_src = image_match.group(2).strip()
+            html_lines.append(
+                '<figure class="report-image">'
+                f'<img src="{escape(image_src, quote=True)}" alt="{escape(alt_text, quote=True)}">'
+                f"<figcaption>{_inline_markdown_to_html(alt_text)}</figcaption>"
+                "</figure>"
+            )
+            continue
         if line.startswith("> "):
             close_ul()
             close_table()
+            close_image_grid()
             html_lines.append(f"<blockquote>{_inline_markdown_to_html(line[2:].strip())}</blockquote>")
             continue
 
         close_ul()
         close_table()
         if stripped:
+            close_image_grid()
             html_lines.append(f"<p>{_inline_markdown_to_html(stripped)}</p>")
 
     close_ul()
     close_table()
+    close_image_grid()
     return "\n".join(html_lines)
 
 
@@ -312,13 +344,12 @@ def _render_gcard_summary_grid(*, eval_dir: Path | None, run_config: dict[str, A
             _summary_card_html("高分段表现", _gcard_top_decile_summary_table(eval_dir=eval_dir, compare_score=compare_score), css_class="green"),
             _summary_card_html("分客群切片", _gcard_segment_slice_summary(segment=segment, compare_score=compare_score), css_class="orange"),
             _summary_card_html(
-                "稳定性与边界",
-                _gcard_stability_boundary_summary(
-                    psi=psi,
-                    run_config=run_config,
+                "最终结论",
+                _gcard_final_conclusion_summary(
+                    overall=overall,
                     compare_score=compare_score,
-                    compare_label=compare_label,
                     model_label=model_label,
+                    compare_label=compare_label,
                 ),
                 css_class="purple",
             ),
@@ -425,6 +456,50 @@ def _gcard_stability_boundary_summary(
         items.append(f"<li>主口径：30天发起标签 <code>{escape(str(label))}</code>，关注 AUC、KS、sloping、PSI。</li>")
     items.append("<li>MOB/金额风险、变量分箱明细和业务字典仍以后文待补充说明为准。</li>")
     return "<ul>" + "".join(items) + "</ul>"
+
+
+def _gcard_final_conclusion_summary(
+    *,
+    overall: Any,
+    compare_score: str,
+    model_label: str,
+    compare_label: str,
+) -> str:
+    oot_oos = _row_by_value(overall, "final_flag", "OOT-OOS")
+    dev_oos = _row_by_value(overall, "final_flag", "DEV-OOS")
+    ks_delta = _delta(oot_oos.get("model_score_ks"), oot_oos.get(f"{compare_score}_ks")) if oot_oos else None
+    auc_delta = _delta(oot_oos.get("model_score_auc"), oot_oos.get(f"{compare_score}_auc")) if oot_oos else None
+    dev_ks_delta = _delta(dev_oos.get("model_score_ks"), dev_oos.get(f"{compare_score}_ks")) if dev_oos else None
+
+    if ks_delta is None:
+        items = [
+            f"{escape(model_label)} 与 {escape(compare_label)} 缺少 OOT-OOS KS 对比证据。",
+            "<strong>不建议基于当前报告单独做上线结论。</strong>",
+            "需先补齐核心评估指标，再结合策略收益、稳定性和上线成本评审。",
+        ]
+    elif ks_delta >= 0.01 and (auc_delta is None or auc_delta >= -0.001) and (dev_ks_delta is None or dev_ks_delta >= -0.002):
+        items = [
+            f"{escape(model_label)} 相较 {escape(compare_label)} 在 OOT-OOS KS 提升 {_fmt_signed_pp(ks_delta)}，效果提升较明显。",
+            "<strong>可作为候选版本进入上线评审或灰度验证。</strong>",
+            "仍需结合 PSI、分客群表现、策略收益和上线成本确认最终上线方案。",
+        ]
+    elif ks_delta >= 0.005:
+        items = [
+            f"{escape(model_label)} 相较 {escape(compare_label)} 在 OOT-OOS KS 提升 {_fmt_signed_pp(ks_delta)}，有一定增益但强度有限。",
+            "<strong>不建议仅凭当前模型效果直接单独上线。</strong>",
+            "建议纳入版本方案评审，并结合稳定性、分客群收益和策略成本做取舍。",
+        ]
+    else:
+        items = [
+            f"{escape(model_label)} 模型效果相较 {escape(compare_label)} 提升不明显。",
+            "<strong>不建议将该模型单独作为独立版本上线。</strong>",
+            "建议先结合策略收益、稳定性和上线成本复核，再决定是否纳入后续统一版本方案。",
+        ]
+    return (
+        "<ul>"
+        + "".join(f"<li>{item}</li>" for item in items)
+        + "</ul>"
+    )
 
 
 def _latest_psi(psi: Any, score_column: str) -> Any:
