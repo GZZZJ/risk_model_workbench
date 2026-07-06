@@ -12,6 +12,8 @@ references:
   gcard_workbook: ../../docs/legacy/复借G卡模型文档.xlsx
   feature_select_v2: ../../vendor/feature-select-v2
   glossary: docs/名词口径.md
+  sampling_logic: docs/样本与取样口径.md
+  sampling_sql_lineage: docs/复借G卡取样逻辑.sql
 
 data:
   source_table: ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_sample
