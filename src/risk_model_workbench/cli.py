@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import shutil
 import sys
 import time
@@ -119,6 +120,263 @@ def _write_json(path: Path, payload: dict[str, Any]) -> Path:
         json.dump(payload, handle, ensure_ascii=False, indent=2, default=str)
         handle.write("\n")
     return path
+
+
+def _now_iso() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _count_text_lines(path: Path) -> int | None:
+    try:
+        if not path.is_file():
+            return None
+        return len([line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()])
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _build_train_plan(
+    *,
+    workspace: Path,
+    experiment: str,
+    algorithm: str,
+    config_path: Path,
+    train_config: dict[str, Any],
+    effective_config: dict[str, Any],
+    input_feather: Path,
+    feature_list: Path,
+    score_output: Path,
+    input_snapshot_dir: Path,
+    skip_split_check: bool,
+) -> dict[str, Any]:
+    training = effective_config.get("training") if isinstance(effective_config.get("training"), dict) else {}
+    tuning = training.get("tuning") if isinstance(training.get("tuning"), dict) else {}
+    runtime_experiment = effective_config.get("runtime_experiment") if isinstance(effective_config.get("runtime_experiment"), dict) else {}
+    input_ready = input_feather.is_file()
+    feature_ready = feature_list.is_file()
+    config_ready = bool(train_config)
+    mode = str(training.get("mode") or tuning.get("mode") or "single_train")
+    return {
+        "status": "ready" if input_ready and feature_ready and config_ready else "not_ready",
+        "workspace": str(workspace),
+        "experiment": experiment,
+        "algorithm": algorithm,
+        "training_mode": mode,
+        "config": {"path": str(config_path), "exists": config_path.exists(), "keys": sorted(train_config.keys())},
+        "input_feather": {"path": str(input_feather), "exists": input_feather.exists(), "is_file": input_ready},
+        "feature_list": {
+            "path": str(feature_list),
+            "exists": feature_list.exists(),
+            "is_file": feature_ready,
+            "feature_count": _count_text_lines(feature_list),
+        },
+        "outputs": {
+            "score_output": str(score_output),
+            "input_snapshot_dir": str(input_snapshot_dir),
+            "modeling_dir": str(workspace / "modeling" / experiment),
+        },
+        "splits": {
+            "train_values": training.get("train_values", ["DEV"]),
+            "valid_values": training.get("valid_values", ["DEV-OOS"]),
+            "oos_values": training.get("oos_values", ["DEV-OOS", "OOT-OOS"]),
+            "skip_split_check": skip_split_check,
+        },
+        "tuning": {
+            "enabled": mode in {"llm_guided_tune", "llm-guided-tune", "llm_guided"},
+            "max_rounds": tuning.get("max_rounds"),
+            "candidates_per_round": tuning.get("candidates_per_round"),
+            "max_trials": tuning.get("max_trials"),
+        },
+        "runtime_experiment": runtime_experiment,
+        "will_train": input_ready and feature_ready and config_ready,
+    }
+
+
+def _train_plan_markdown(plan: dict[str, Any]) -> str:
+    rows = [
+        ("Status", plan.get("status")),
+        ("Experiment", plan.get("experiment")),
+        ("Algorithm", plan.get("algorithm")),
+        ("Training mode", plan.get("training_mode")),
+        ("Config", (plan.get("config") or {}).get("path")),
+        ("Input feather", (plan.get("input_feather") or {}).get("path")),
+        ("Input ready", (plan.get("input_feather") or {}).get("is_file")),
+        ("Feature list", (plan.get("feature_list") or {}).get("path")),
+        ("Feature count", (plan.get("feature_list") or {}).get("feature_count")),
+        ("Will train", plan.get("will_train")),
+    ]
+    lines = [
+        "# Training Plan",
+        "",
+        "| Item | Value |",
+        "| --- | --- |",
+    ]
+    lines.extend(f"| {key} | {_format_md_value(value)} |" for key, value in rows)
+    splits = plan.get("splits") or {}
+    lines.extend(
+        [
+            "",
+            "## Split Values",
+            "",
+            f"- train_values: `{_format_md_value(splits.get('train_values'))}`",
+            f"- valid_values: `{_format_md_value(splits.get('valid_values'))}`",
+            f"- oos_values: `{_format_md_value(splits.get('oos_values'))}`",
+            f"- skip_split_check: `{_format_md_value(splits.get('skip_split_check'))}`",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _write_train_plan(output_dir: Path, plan: dict[str, Any]) -> tuple[Path, Path]:
+    json_path = _write_json(output_dir / "train_plan.json", plan)
+    md_path = output_dir / "train_plan.md"
+    md_path.write_text(_train_plan_markdown(plan), encoding="utf-8")
+    return json_path, md_path
+
+
+def _write_training_status(
+    output_dir: Path,
+    *,
+    status: str,
+    experiment: str,
+    algorithm: str,
+    message: str,
+    percent: float | None = None,
+    failure_code: str = "",
+    error_type: str = "",
+    error_message: str = "",
+    metrics: dict[str, Any] | None = None,
+    completed: bool = False,
+) -> dict[str, Any]:
+    path = output_dir / "training_status.json"
+    previous = _read_json(path)
+    now = _now_iso()
+    payload = {
+        "status": status,
+        "experiment": experiment,
+        "algorithm": algorithm,
+        "pid": os.getpid(),
+        "started_at": previous.get("started_at") or now,
+        "heartbeat_at": now,
+        "completed_at": now if completed else previous.get("completed_at", ""),
+        "percent": percent,
+        "message": message,
+        "failure_code": failure_code,
+        "error_type": error_type,
+        "error_message": error_message,
+        "metrics": metrics or {},
+    }
+    _write_json(path, payload)
+    return payload
+
+
+class _TrainingStatusProgressReporter:
+    """Mirror training progress events into modeling/<experiment>/training_status.json."""
+
+    def __init__(self, reporter: ProgressReporter, output_dir: Path, *, experiment: str, algorithm: str) -> None:
+        self._reporter = reporter
+        self._output_dir = output_dir
+        self._experiment = experiment
+        self._algorithm = algorithm
+
+    def emit(self, **kwargs: Any) -> dict[str, Any]:
+        status = str(kwargs.get("status") or "running")
+        try:
+            _write_training_status(
+                self._output_dir,
+                status=status,
+                experiment=self._experiment,
+                algorithm=self._algorithm,
+                message=str(kwargs.get("message") or ""),
+                percent=kwargs.get("percent"),
+                metrics=kwargs.get("metrics") if isinstance(kwargs.get("metrics"), dict) else {},
+                completed=status in {"done", "failed", "scaffold"},
+            )
+        except Exception:
+            pass
+        return self._reporter.emit(**kwargs)
+
+
+def _write_training_summary(
+    output_dir: Path,
+    *,
+    status_payload: dict[str, Any],
+    plan: dict[str, Any],
+    metrics: dict[str, Any] | None = None,
+) -> Path:
+    metrics = metrics or status_payload.get("metrics") or {}
+    run_config = _read_json(output_dir / "run_config.json")
+    params = run_config.get("params") if isinstance(run_config.get("params"), dict) else {}
+    lines = [
+        "# Training Summary",
+        "",
+        "| Item | Value |",
+        "| --- | --- |",
+        f"| Status | {_format_md_value(status_payload.get('status'))} |",
+        f"| Experiment | {_format_md_value(status_payload.get('experiment') or plan.get('experiment'))} |",
+        f"| Algorithm | {_format_md_value(status_payload.get('algorithm') or plan.get('algorithm'))} |",
+        f"| Training mode | {_format_md_value(run_config.get('training_mode') or plan.get('training_mode'))} |",
+        f"| Message | {_format_md_value(status_payload.get('message'))} |",
+        f"| Input feather | {_format_md_value((plan.get('input_feather') or {}).get('path'))} |",
+        f"| Feature list | {_format_md_value((plan.get('feature_list') or {}).get('path'))} |",
+        f"| Candidate features | {_format_md_value(run_config.get('candidate_feature_count') or (plan.get('feature_list') or {}).get('feature_count'))} |",
+        f"| Actual features | {_format_md_value(run_config.get('actual_feature_count'))} |",
+        f"| Train values | {_format_md_value((plan.get('splits') or {}).get('train_values'))} |",
+        f"| Valid values | {_format_md_value((plan.get('splits') or {}).get('valid_values'))} |",
+        f"| Train AUC | {_format_md_value(metrics.get('train_auc'))} |",
+        f"| Valid AUC | {_format_md_value(metrics.get('valid_auc'))} |",
+        f"| Train KS | {_format_md_value(metrics.get('train_ks'))} |",
+        f"| Valid KS | {_format_md_value(metrics.get('valid_ks'))} |",
+        f"| AUC gap | {_format_md_value(metrics.get('auc_gap'))} |",
+    ]
+    if status_payload.get("error_message"):
+        lines.extend(
+            [
+                "",
+                "## Failure",
+                "",
+                f"- failure_code: `{_format_md_value(status_payload.get('failure_code'))}`",
+                f"- error_type: `{_format_md_value(status_payload.get('error_type'))}`",
+                f"- error_message: `{_format_md_value(status_payload.get('error_message'))}`",
+            ]
+        )
+    if params:
+        lines.extend(["", "## Parameters", "", "| Parameter | Value |", "| --- | --- |"])
+        for key in sorted(params):
+            lines.append(f"| {key} | {_format_md_value(params[key])} |")
+    lines.extend(
+        [
+            "",
+            "## Evidence",
+            "",
+            f"- train_metrics: `{output_dir / 'train_metrics.json'}`",
+            f"- training_status: `{output_dir / 'training_status.json'}`",
+            f"- feature_importance: `{output_dir / 'feature_importance.csv'}`",
+            "",
+        ]
+    )
+    path = output_dir / "training_summary.md"
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def _format_md_value(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        return f"{value:.6g}"
+    if isinstance(value, (list, tuple, dict)):
+        return json.dumps(value, ensure_ascii=False, default=str)
+    return str(value).replace("|", "\\|")
 
 
 def _write_text(path: Path, text: str) -> Path:
@@ -1901,6 +2159,34 @@ def cmd_train(args: argparse.Namespace) -> int:
             input_cfg.setdefault("period_column", data_cfg.get("period_column"))
         if data_cfg.get("segment_columns"):
             input_cfg.setdefault("segment_columns", data_cfg.get("segment_columns"))
+    configured_input = train_config.get("input", {}).get("feather_path")
+    input_feather = Path(args.input_feather or configured_input or "")
+    if input_feather and not input_feather.is_absolute():
+        input_feather = project_dir / input_feather
+    feature_list = Path(args.feature_list or train_config.get("training", {}).get("feature_list_path", "runs/modeling_feature_set/feature_list.txt"))
+    if not feature_list.is_absolute():
+        feature_list = project_dir / feature_list
+    output_dir = path / "modeling" / args.experiment
+    score_output = Path(args.score_output or path / "modeling" / args.experiment / "scores_all_splits.feather")
+    if not score_output.is_absolute():
+        score_output = project_dir / score_output
+    input_snapshot_dir = Path(args.input_dir or path / "modeling_input")
+    if not input_snapshot_dir.is_absolute():
+        input_snapshot_dir = project_dir / input_snapshot_dir
+    train_plan = _build_train_plan(
+        workspace=path,
+        experiment=args.experiment,
+        algorithm=algorithm,
+        config_path=config_path,
+        train_config=train_config,
+        effective_config=effective_config,
+        input_feather=input_feather,
+        feature_list=feature_list,
+        score_output=score_output,
+        input_snapshot_dir=input_snapshot_dir,
+        skip_split_check=bool(getattr(args, "skip_split_check", False)),
+    )
+
     # Train-time split guard: the request/init gate protects only the
     # request->materialize path. This is the last line of defense for paths that
     # bypass materialization — legacy configs/train.yaml fallback (which may
@@ -1924,39 +2210,75 @@ def cmd_train(args: argparse.Namespace) -> int:
             if getattr(args, "skip_split_check", False):
                 print(f"warning (split, suppressed by --skip-split-check): {_reason}")
             else:
-                _guard_dir = path / "modeling" / args.experiment
-                _guard_dir.mkdir(parents=True, exist_ok=True)
-                _write_json(_guard_dir / "train_metrics.json", {"status": "failed", "reason": _reason, "experiment": args.experiment, "algorithm": algorithm})
+                output_dir.mkdir(parents=True, exist_ok=True)
+                _write_json(output_dir / "train_metrics.json", {"status": "failed", "reason": _reason, "experiment": args.experiment, "algorithm": algorithm})
+                status_payload = _write_training_status(
+                    output_dir,
+                    status="failed",
+                    experiment=args.experiment,
+                    algorithm=algorithm,
+                    message=_reason,
+                    failure_code="data_missing",
+                    error_type="SplitValidationError",
+                    error_message=_reason,
+                    completed=True,
+                )
+                _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan)
                 register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_status.json")
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_summary.md")
                 stage_action_failed(path, "train_baseline", _reason)
                 print(f"train blocked: {_reason}", file=sys.stderr)
                 return 1
-    configured_input = train_config.get("input", {}).get("feather_path")
-    input_feather = Path(args.input_feather or configured_input or "")
-    if input_feather and not input_feather.is_absolute():
-        input_feather = project_dir / input_feather
-    feature_list = Path(args.feature_list or train_config.get("training", {}).get("feature_list_path", "runs/modeling_feature_set/feature_list.txt"))
-    if not feature_list.is_absolute():
-        feature_list = project_dir / feature_list
-    output_dir = path / "modeling" / args.experiment
-    score_output = Path(args.score_output or path / "modeling" / args.experiment / "scores_all_splits.feather")
-    if not score_output.is_absolute():
-        score_output = project_dir / score_output
-    input_snapshot_dir = Path(args.input_dir or path / "modeling_input")
-    if not input_snapshot_dir.is_absolute():
-        input_snapshot_dir = project_dir / input_snapshot_dir
+
+    if getattr(args, "plan_only", False):
+        _write_train_plan(output_dir, train_plan)
+        for artifact in ["train_plan.json", "train_plan.md"]:
+            register_artifact(path, "train_baseline", f"modeling/{args.experiment}/{artifact}")
+        append_decision(path, stage="train_baseline", decision="plan_only", reason="training plan preview generated; model training was not executed")
+        stage_action_done(path, "train_baseline", scaffold=True, message="training plan preview only")
+        print(f"train plan written: {output_dir / 'train_plan.md'}")
+        return 0
 
     if algorithm == "custom" and not (train_config.get("custom_training", {}).get("entrypoint") or train_config.get("training", {}).get("custom_entrypoint")):
         reason = "custom training requires training.custom_entrypoint or custom_training.entrypoint in project/runtime config"
         payload = {"status": "failed", "reason": reason, "experiment": args.experiment, "algorithm": algorithm}
         _write_json(output_dir / "train_metrics.json", payload)
+        status_payload = _write_training_status(
+            output_dir,
+            status="failed",
+            experiment=args.experiment,
+            algorithm=algorithm,
+            message=reason,
+            failure_code="data_missing",
+            error_type="ConfigurationError",
+            error_message=reason,
+            completed=True,
+        )
+        _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan)
         register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+        register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_status.json")
+        register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_summary.md")
         stage_action_failed(path, "train_baseline", reason)
         print(f"train failed: {reason}", file=sys.stderr)
         return 1
 
-    if input_feather and Path(input_feather).exists() and feature_list.exists() and train_config:
+    if input_feather and Path(input_feather).is_file() and feature_list.is_file() and train_config:
         try:
+            _write_training_status(
+                output_dir,
+                status="running",
+                experiment=args.experiment,
+                algorithm=algorithm,
+                message="training started",
+                percent=0,
+            )
+            train_progress = _TrainingStatusProgressReporter(
+                reporter,
+                output_dir,
+                experiment=args.experiment,
+                algorithm=algorithm,
+            )
             if algorithm == "lightgbm":
                 from risk_model_workbench.modeling.train_lgb import train_lightgbm_from_feather
 
@@ -1967,7 +2289,7 @@ def cmd_train(args: argparse.Namespace) -> int:
                     score_output=score_output,
                     input_snapshot_dir=input_snapshot_dir,
                     config=effective_config,
-                    progress=reporter,
+                    progress=train_progress,
                 )
             else:
                 from risk_model_workbench.modeling.train_xgb import train_tabular_from_feather
@@ -1980,11 +2302,24 @@ def cmd_train(args: argparse.Namespace) -> int:
                     input_snapshot_dir=input_snapshot_dir,
                     config=effective_config,
                     algorithm=algorithm,
-                    progress=reporter,
+                    progress=train_progress,
                 )
             _write_json(output_dir / "train_metrics.json", {"status": "done", "metrics": metrics, "experiment": args.experiment, "algorithm": algorithm})
+            status_payload = _write_training_status(
+                output_dir,
+                status="done",
+                experiment=args.experiment,
+                algorithm=algorithm,
+                message="training completed",
+                percent=100,
+                metrics=metrics,
+                completed=True,
+            )
+            _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan, metrics=metrics)
             for artifact in [
                 "train_metrics.json",
+                "training_status.json",
+                "training_summary.md",
                 "metrics_train_valid.json",
                 "feature_importance.csv",
                 "feature_drop_detail.csv",
@@ -2028,14 +2363,49 @@ def cmd_train(args: argparse.Namespace) -> int:
                     "context_path": exc.context_path,
                 }
                 _write_json(output_dir / "train_metrics.json", payload)
+                status_payload = _write_training_status(
+                    output_dir,
+                    status="advisor_required",
+                    experiment=args.experiment,
+                    algorithm=algorithm,
+                    message=str(exc),
+                    failure_code="advisor_required",
+                    error_type=type(exc).__name__,
+                    error_message=str(exc),
+                    completed=True,
+                )
+                _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan)
                 register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_status.json")
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_summary.md")
                 for artifact in sorted(output_dir.glob("tuning_context*.json")):
                     register_artifact(path, "train_baseline", artifact)
                 append_decision(path, stage="train_baseline", decision="advisor_required", reason=str(exc))
                 stage_action_failed(path, "train_baseline", str(exc), failure_code="advisor_required")
                 print(f"train advisor required: {exc}", file=sys.stderr)
                 return 2
-            payload = {"status": "scaffold", "reason": f"training failed or dependency missing: {exc}", "experiment": args.experiment, "algorithm": algorithm}
+            reason = f"training failed: {exc}"
+            payload = {"status": "failed", "reason": reason, "experiment": args.experiment, "algorithm": algorithm}
+            _write_json(output_dir / "train_metrics.json", payload)
+            failure_code = classify_exception(exc)
+            status_payload = _write_training_status(
+                output_dir,
+                status="failed",
+                experiment=args.experiment,
+                algorithm=algorithm,
+                message=reason,
+                failure_code=failure_code,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                completed=True,
+            )
+            _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan)
+            for artifact in ["train_metrics.json", "training_status.json", "training_summary.md"]:
+                register_artifact(path, "train_baseline", f"modeling/{args.experiment}/{artifact}")
+            append_decision(path, stage="train_baseline", decision="failed", reason=reason)
+            stage_action_failed(path, "train_baseline", reason, failure_code=failure_code)
+            print(f"train failed: {reason}", file=sys.stderr)
+            return 1
     else:
         payload = {
             "status": "scaffold",
@@ -2049,10 +2419,23 @@ def cmd_train(args: argparse.Namespace) -> int:
             "train_config_keys": sorted(train_config.keys()),
         }
     reporter.emit(step="train_scaffold", status="scaffold", message=f"模型训练未执行真实训练：{payload['reason']}", percent=100)
+    status_payload = _write_training_status(
+        output_dir,
+        status="scaffold",
+        experiment=args.experiment,
+        algorithm=algorithm,
+        message=payload["reason"],
+        percent=100,
+        failure_code="scaffold_only",
+        completed=True,
+    )
     _write_json(output_dir / "train_metrics.json", payload)
+    _write_training_summary(output_dir, status_payload=status_payload, plan=train_plan)
     if feature_list.exists():
         _copy_if_exists(feature_list, output_dir / "feature_list.txt")
-    register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json")
+    register_artifact(path, "train_baseline", f"modeling/{args.experiment}/train_metrics.json", source="scaffold")
+    register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_status.json", source="scaffold")
+    register_artifact(path, "train_baseline", f"modeling/{args.experiment}/training_summary.md", source="scaffold")
     append_decision(path, stage="train_baseline", decision="scaffold", reason=payload["reason"])
     stage_action_done(path, "train_baseline", scaffold=True, message=payload["reason"])
     print(f"train scaffold: {output_dir / 'train_metrics.json'}")
@@ -2895,6 +3278,7 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--score-output", default=None)
     train.add_argument("--input-dir", default=None)
     train.add_argument("--config", default=None)
+    train.add_argument("--plan-only", action="store_true", help="只生成训练计划预览，不启动模型训练")
     train.add_argument("--skip-split-check", action="store_true", help="跳过 valid_values 时间外污染校验——仅紧急/探索场景")
     train.set_defaults(func=cmd_train)
 

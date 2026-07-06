@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 from risk_model_workbench.harness.errors import (
+    ADVISOR_REQUIRED,
     ARTIFACT_CONTRACT_FAILED,
     DATA_MISSING,
     DEPENDENCY_MISSING,
@@ -146,18 +147,26 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
         inputs=("training data feather", "feature_selection/final_features.txt", "project.yml"),
         outputs=(
             "modeling/*/metrics_train_valid.json",
+            "modeling/*/training_status.json",
+            "modeling/*/training_summary.md",
+            "modeling/*/train_plan.json",
+            "modeling/*/train_plan.md",
             "modeling/*/actual_feature_list.txt",
             "modeling/*/feature_importance.csv",
             "modeling/*/tuning_summary.json",
             "modeling/*/tuning_trials.csv",
             "modeling/*/best_params.json",
         ),
-        failure_codes=COMMON_STAGE_FAILURES,
+        failure_codes=(*COMMON_STAGE_FAILURES, ADVISOR_REQUIRED),
         artifact_rules=(
             "modeling/*/metrics_train_valid.json",
             "modeling/*/actual_feature_list.txt",
             "modeling/*/feature_importance.csv",
             "modeling/*/train_metrics.json",
+            "modeling/*/training_status.json",
+            "modeling/*/training_summary.md",
+            "modeling/*/train_plan.json",
+            "modeling/*/train_plan.md",
             "modeling/*/tuning_summary.json",
             "modeling/*/tuning_trials.csv",
             "modeling/*/best_params.json",

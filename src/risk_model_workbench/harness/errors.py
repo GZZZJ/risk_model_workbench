@@ -11,6 +11,7 @@ ARTIFACT_CONTRACT_FAILED = "artifact_contract_failed"
 SCAFFOLD_ONLY = "scaffold_only"
 DEPENDENCY_MISSING = "dependency_missing"
 TRANSIENT_IO = "transient_io"
+ADVISOR_REQUIRED = "advisor_required"
 UNKNOWN = "unknown"
 
 
@@ -53,6 +54,10 @@ FAILURE_CLASSES: tuple[FailureClass, ...] = (
         TRANSIENT_IO,
         "A safe local IO operation failed transiently and may be retried.",
         retryable=True,
+    ),
+    FailureClass(
+        ADVISOR_REQUIRED,
+        "Host-agent tuning needs an explicit advisor plan before training can continue.",
     ),
     FailureClass(
         UNKNOWN,

@@ -72,3 +72,11 @@ rules:
     source:
       type: design
       path: docs/superpowers/specs/2026-06-25-resource-aware-feature-selection-design.md
+  - id: no-external-skill-runtime-dependency
+    title: Workbench runtime must not depend on external encrypted skills
+    target: guardrail
+    status: enforced
+    enforcement: rmw training hardening is implemented inside src/risk_model_workbench and tests scan runtime code paths for xgb-lgb-trainer-enc, .claude/skills, and bootstrap.py references.
+    source:
+      type: policy
+      path: AGENTS.md
