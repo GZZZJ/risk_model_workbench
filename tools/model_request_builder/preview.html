@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>建模需求生成器预览版</title>
+    <link rel="stylesheet" href="./preview.css" />
+  </head>
+  <body>
+    <main class="preview-shell">
+      <aside class="rail" aria-label="填写进度">
+        <div class="brand-block">
+          <div class="brand-mark">RMW</div>
+          <div>
+            <h1>建模需求生成器</h1>
+            <p>预览版</p>
+          </div>
+        </div>
+        <nav class="step-nav" aria-label="步骤">
+          <button type="button" class="is-active" data-step-target="task">1. 任务</button>
+          <button type="button" data-step-target="contract">2. 口径</button>
+          <button type="button" data-step-target="changes">3. 变化</button>
+          <button type="button" data-step-target="review">4. 确认</button>
+        </nav>
+        <div class="rail-note">
+          <strong>输出边界</strong>
+          <p>人只在本页填写，最终下载 Markdown。后续 Agent 以 Markdown 为需求合同调用工作台。</p>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">HTML to Markdown</span>
+            <h2>轻量填写，完整导出</h2>
+          </div>
+          <div class="topbar-actions">
+            <button type="button" id="restoreDraft">恢复草稿</button>
+            <button type="button" id="resetDraft">重置</button>
+            <button type="button" id="copyMarkdown">复制 MD</button>
+            <button type="button" id="downloadMarkdown" class="primary">下载 MD</button>
+          </div>
+        </header>
+
+        <form id="previewForm" class="content-grid">
+          <section class="main-flow" aria-label="需求填写">
+            <div class="flow-step is-active" id="step-task" data-step="task">
+              <div class="section-head">
+                <span>Step 1</span>
+                <h3>任务选择</h3>
+              </div>
+              <div class="field-grid two">
+                <label>
+                  <span>需求标题</span>
+                  <input name="title" required />
+                </label>
+                <label>
+                  <span>负责人</span>
+                  <input name="owner" />
+                </label>
+                <label>
+                  <span>任务模式</span>
+                  <select name="workflow">
+                    <option value="full_modeling">完整建模</option>
+                    <option value="feature_selection">特征筛选</option>
+                    <option value="train_baseline">训练基线</option>
+                    <option value="challenger_evaluation">挑战者评估</option>
+                  </select>
+                </label>
+                <label>
+                  <span>业务域</span>
+                  <select name="business_domain">
+                    <option value="acquisition">获客</option>
+                    <option value="preloan">贷前</option>
+                    <option value="inloan_risk">贷中风险</option>
+                    <option value="inloan_operation">贷中经营</option>
+                  </select>
+                </label>
+                <label class="wide">
+                  <span>建模场景模板</span>
+                  <select name="scenario_profile">
+                    <option value="fujie_gcard_main_lgbm">复借 G 卡主模型</option>
+                    <option value="inloan_operation">贷中经营通用</option>
+                    <option value="inloan_behavior_card">贷中行为卡</option>
+                    <option value="preloan_credit_card">贷前信用卡</option>
+                    <option value="acquisition_quality">获客质量</option>
+                    <option value="acquisition_conversion">获客转化</option>
+                    <option value="feature_gain_eval">特征增益评估</option>
+                    <option value="credit_product_eval">资信产品评估</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span>建模目标</span>
+                <textarea name="objective" rows="5"></textarea>
+              </label>
+            </div>
+
+            <div class="flow-step" id="step-contract" data-step="contract" hidden>
+              <div class="section-head">
+                <span>Step 2</span>
+                <h3>数据口径</h3>
+              </div>
+              <fieldset class="segmented" aria-label="口径模式">
+                <label>
+                  <input type="radio" name="contract_mode" value="inherit" checked />
+                  <span>沿用项目口径</span>
+                </label>
+                <label>
+                  <input type="radio" name="contract_mode" value="override" />
+                  <span>本次覆盖口径</span>
+                </label>
+              </fieldset>
+              <div class="field-grid two">
+                <label>
+                  <span>数据源模式</span>
+                  <select name="data_source_mode">
+                    <option value="remote_table">DP 表或 SQL 来源</option>
+                    <option value="local_feather">本地 feather 文件</option>
+                  </select>
+                </label>
+                <label>
+                  <span>样本位置</span>
+                  <input name="sample_location" />
+                </label>
+              </div>
+              <div class="inherited-contract" id="inheritedContract" aria-live="polite"></div>
+              <div class="override-contract" id="overrideContract">
+                <div class="field-grid three">
+                  <label>
+                    <span>标签字段</span>
+                    <input name="target_column" />
+                  </label>
+                  <label>
+                    <span>主键字段</span>
+                    <input name="id_columns" />
+                  </label>
+                  <label>
+                    <span>时间字段</span>
+                    <input name="time_column" />
+                  </label>
+                  <label>
+                    <span>分区字段</span>
+                    <input name="period_column" />
+                  </label>
+                  <label>
+                    <span>切分字段</span>
+                    <input name="split_column" />
+                  </label>
+                  <label>
+                    <span>DEV 取值</span>
+                    <input name="dev_values" />
+                  </label>
+                  <label>
+                    <span>OOS 取值</span>
+                    <input name="oos_values" />
+                  </label>
+                  <label>
+                    <span>OOT 取值</span>
+                    <input name="oot_values" />
+                  </label>
+                  <label>
+                    <span>特征来源</span>
+                    <input name="feature_location" />
+                  </label>
+                </div>
+              </div>
+              <label>
+                <span>样本口径 / 标签定义</span>
+                <textarea name="sample_definition" rows="4"></textarea>
+              </label>
+            </div>
+
+            <div class="flow-step" id="step-changes" data-step="changes" hidden>
+              <div class="section-head">
+                <span>Step 3</span>
+                <h3>本次变化</h3>
+              </div>
+              <div class="field-grid two">
+                <label>
+                  <span>实验 ID</span>
+                  <input name="experiment_name" />
+                </label>
+                <label>
+                  <span>建模方法</span>
+                  <select name="experiment_method">
+                    <option value="lightgbm">lightgbm</option>
+                    <option value="xgboost">xgboost</option>
+                    <option value="logistic_regression">logistic_regression</option>
+                    <option value="custom">custom</option>
+                  </select>
+                </label>
+                <label>
+                  <span>候选 Y 字段</span>
+                  <input name="candidate_targets" />
+                </label>
+                <label>
+                  <span>样本变体</span>
+                  <input name="sample_variants" />
+                </label>
+                <label>
+                  <span>历史分 / Champion</span>
+                  <input name="champions" />
+                </label>
+                <label>
+                  <span>风险画像维度</span>
+                  <input name="risk_profile_dimensions" />
+                </label>
+              </div>
+              <label>
+                <span>实验一句话描述</span>
+                <textarea name="experiment_description" rows="3"></textarea>
+              </label>
+              <div class="split-panel">
+                <fieldset>
+                  <legend>重点比较维度</legend>
+                  <label><input type="checkbox" name="comparison_dimensions" value="split" checked /> 样本切分</label>
+                  <label><input type="checkbox" name="comparison_dimensions" value="month" checked /> 月份稳定性</label>
+                  <label><input type="checkbox" name="comparison_dimensions" value="segment" checked /> 业务客群</label>
+                  <label><input type="checkbox" name="comparison_dimensions" value="decile" checked /> 分数十分箱</label>
+                </fieldset>
+                <fieldset>
+                  <legend>评估指标</legend>
+                  <label><input type="checkbox" name="metrics" value="auc" checked /> AUC</label>
+                  <label><input type="checkbox" name="metrics" value="ks" checked /> KS</label>
+                  <label><input type="checkbox" name="metrics" value="decile_lift" checked /> 十分箱 Lift</label>
+                  <label><input type="checkbox" name="metrics" value="ranking_inversion" checked /> 排序倒挂</label>
+                  <label><input type="checkbox" name="metrics" value="psi" checked /> PSI</label>
+                </fieldset>
+              </div>
+              <label>
+                <span>特殊口径 / 禁止事项</span>
+                <textarea name="extra_notes" rows="5"></textarea>
+              </label>
+              <details class="advanced">
+                <summary>
+                  <span>高级覆盖</span>
+                  <small>默认使用场景模板参数</small>
+                </summary>
+                <div class="field-grid three">
+                  <label>
+                    <span>最大缺失率</span>
+                    <input name="missing_rate_threshold" type="number" min="0" max="1" step="0.01" />
+                  </label>
+                  <label>
+                    <span>IV 下限</span>
+                    <input name="iv_min" type="number" min="0" step="0.001" />
+                  </label>
+                  <label>
+                    <span>相关性阈值</span>
+                    <input name="correlation_max_abs" type="number" min="0" max="1" step="0.01" />
+                  </label>
+                  <label>
+                    <span>分数 PSI 告警线</span>
+                    <input name="score_psi_warn" type="number" min="0" step="0.01" />
+                  </label>
+                  <label class="switch-row">
+                    <input type="checkbox" name="sql_block_high_risk" checked />
+                    <span>SQL 高风险时阻断</span>
+                  </label>
+                </div>
+              </details>
+            </div>
+
+            <div class="flow-step" id="step-review" data-step="review" hidden>
+              <div class="section-head">
+                <span>Step 4</span>
+                <h3>生成前确认</h3>
+              </div>
+              <div class="review-grid">
+                <section>
+                  <h4>用户填写</h4>
+                  <ul id="userSummary" class="summary-list"></ul>
+                </section>
+                <section>
+                  <h4>系统继承</h4>
+                  <ul id="inheritSummary" class="summary-list"></ul>
+                </section>
+                <section>
+                  <h4>自动生成</h4>
+                  <ul id="generatedSummary" class="summary-list"></ul>
+                </section>
+              </div>
+              <div class="preview-panel">
+                <div class="panel-title">
+                  <span>Markdown 预览</span>
+                  <span id="filenameHint">model_request.md</span>
+                </div>
+                <pre id="markdownPreview"></pre>
+              </div>
+            </div>
+
+            <div class="form-nav">
+              <button type="button" id="prevStep">上一步</button>
+              <span id="stepProgress">1 / 4</span>
+              <button type="button" id="nextStep" class="primary">下一步</button>
+            </div>
+          </section>
+
+          <aside class="side-summary" aria-label="实时摘要">
+            <div class="summary-block">
+              <span>当前合同</span>
+              <strong id="liveTitle">复借 G 卡主模型从0重跑</strong>
+              <p id="liveSummary"></p>
+            </div>
+            <div class="summary-block">
+              <span>执行步骤</span>
+              <strong id="stepCount">0</strong>
+              <ul id="stageSummary" class="stage-list"></ul>
+            </div>
+            <div class="summary-block warning">
+              <span>检查项</span>
+              <ul id="guardrailSummary" class="summary-list"></ul>
+            </div>
+          </aside>
+        </form>
+      </section>
+    </main>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="./preview.js"></script>
+  </body>
+</html>
