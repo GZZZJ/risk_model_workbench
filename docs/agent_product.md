@@ -52,8 +52,13 @@ Agent states:
 - `running`: a safe task is executing or pending execution.
 - `waiting_for_approval`: a high-risk SQL/DP action needs explicit approval.
 - `waiting_for_advisor`: Host-Agent input is required, such as a tuning plan.
+- `waiting_for_user`: an accepted Advisor decision needs explicit human
+  confirmation.
+- `reconciliation_required`: an external operation outcome cannot be proved
+  locally and must not be retried automatically.
 - `blocked`: no task can safely run.
 - `failed`: a task failed with a non-recoverable failure.
+- `stopped`: an explicit Host-Agent or human decision stopped execution.
 - `done`: all tasks completed and strict evidence can close.
 - `done_with_gaps`: execution finished with scaffold/imported/incomplete
   evidence or strict audit did not reach `complete`.
@@ -62,11 +67,17 @@ Task states:
 
 - `pending`
 - `running`
+- `review_ready`
 - `paused`
 - `done`
 - `scaffold`
 - `failed`
 - `skipped`
+- `stopped`
+- `reconciliation_required`
+
+`review_ready`, `scaffold`, and every waiting or reconciliation state are not
+strict success. Only real `done` dependencies may unlock real downstream work.
 
 ## Gates
 
@@ -135,3 +146,7 @@ An Agent-managed version includes:
 
 Completion still depends on `version_state.yml`, `audit/artifact_manifest.json`,
 workflow contracts, and `rmw version audit --strict`.
+
+The normative Host-Agent/Harness boundary, state-transition table, version
+compatibility policy, and completion invariants are defined in
+[ADR 0003](adr/0003-host-agent-harness-contract.md).

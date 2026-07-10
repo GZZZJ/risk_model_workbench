@@ -23,10 +23,17 @@ from risk_model_workbench.agent.advisor import (
     list_advisor_requests,
     load_advisor_request,
 )
-from risk_model_workbench.agent.approvals import approve_request
+from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
+from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
-from risk_model_workbench.agent.plan import agent_tool_schema, bind_agent_plan, save_agent_plan
-from risk_model_workbench.agent.state import init_agent_state, load_agent_state
+from risk_model_workbench.agent.plan import (
+    agent_tool_schema,
+    bind_agent_plan,
+    load_agent_plan,
+    rebind_agent_plan,
+    save_agent_plan,
+)
+from risk_model_workbench.agent.state import init_agent_state, load_agent_state, save_agent_state
 from risk_model_workbench.agent.trace import append_trace, load_recent_trace
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
@@ -1320,6 +1327,7 @@ def _init_workflow_workspace(args: argparse.Namespace, *, as_version: bool) -> i
                 "version_id": workspace_id,
                 "display_name": getattr(args, "display_name", None) or workspace_id,
                 "source_type": getattr(args, "source_type", "workbench"),
+                "managed_by": state.get("managed_by", "workbench"),
                 "status": "running",
                 "workflow": workflow.get("name", args.workflow),
                 "path": str(path.relative_to(project_dir)),
@@ -1453,6 +1461,15 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
         return 1
 
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    version_state = load_run_state(workspace)
+    version_state["managed_by"] = "agent"
+    save_version_state(workspace, version_state)
+    index = load_version_index(project_dir)
+    entry = next((item for item in index.get("versions", []) or [] if item.get("version_id") == args.version_id), None)
+    if entry:
+        entry = dict(entry)
+        entry["managed_by"] = "agent"
+        upsert_version_index(project_dir, entry, active=index.get("active_version_id") == args.version_id)
     agent_plan = bind_agent_plan(execution_plan, project_dir=project_dir, version_id=args.version_id)
     save_agent_plan(workspace, agent_plan)
     init_agent_state(workspace, project=str(project_dir), version_id=args.version_id, agent_plan=agent_plan)
@@ -1479,7 +1496,11 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
 
 def cmd_agent_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
-    state = run_agent(project_dir, args.version_id, runner=main)
+    try:
+        state = run_agent(project_dir, args.version_id, runner=main)
+    except ValueError as exc:
+        print(f"agent run failed: {exc}")
+        return 1
     print(f"agent_status: {state.get('status')}")
     blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
     if blocker:
@@ -1508,12 +1529,31 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
             return 1
     if state.get("status") == "waiting_for_advisor":
         request_id = str(blocker.get("advisor_request_id") or "")
-        if request_id and not advisor_request_is_answered(workspace, request_id):
+        try:
+            advisor_request = load_advisor_request(workspace, request_id) if request_id else {}
+        except KeyError:
+            advisor_request = {}
+        if request_id and advisor_request.get("status") not in {"answered", "rejected"}:
             print(f"agent resume blocked: advisor response pending: {request_id}")
             return 1
-    resumed = run_agent(project_dir, args.version_id, runner=main)
+    if state.get("status") == "waiting_for_user":
+        request_id = str(blocker.get("advisor_request_id") or "")
+        print(f"agent resume blocked: waiting for user confirmation: {request_id}")
+        return 1
+    try:
+        resumed = run_agent(project_dir, args.version_id, runner=main)
+    except ValueError as exc:
+        print(f"agent resume failed: {exc}")
+        return 1
     print(f"agent_status: {resumed.get('status')}")
-    return 0 if resumed.get("status") not in {"failed", "blocked"} else 1
+    return 0 if resumed.get("status") not in {
+        "failed",
+        "blocked",
+        "waiting_for_approval",
+        "waiting_for_advisor",
+        "waiting_for_user",
+        "reconciliation_required",
+    } else 1
 
 
 def cmd_agent_status(args: argparse.Namespace) -> int:
@@ -1560,7 +1600,7 @@ def cmd_agent_approve(args: argparse.Namespace) -> int:
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
     try:
         approval = approve_request(workspace, args.approval_id, approved_by=args.approved_by, note=args.note or "")
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         print(str(exc))
         return 1
     append_trace(
@@ -1577,6 +1617,93 @@ def cmd_agent_approve(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_agent_reject(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    if getattr(args, "request_id", ""):
+        try:
+            state = load_agent_state(workspace)
+        except FileNotFoundError as exc:
+            print(f"advisor rejection failed: {exc}")
+            return 1
+        result = reject_advisor_response(
+            workspace,
+            args.request_id,
+            state,
+            reason=args.reason or args.note or "rejected_by_user",
+        )
+        if not result.consumed:
+            print("advisor_rejection: rejected")
+            for error in result.errors:
+                print(f"- {error}")
+            return 1
+        append_trace(
+            workspace,
+            "decision",
+            {
+                "summary": "Advisor user confirmation rejected.",
+                "request_id": args.request_id,
+                "reason": args.reason or args.note or "",
+            },
+        )
+        print("advisor_rejection: accepted")
+        print(f"agent_status: {result.status}")
+        print(f"receipt_path: {result.receipt_path}")
+        return 0
+    if not getattr(args, "approval_id", ""):
+        print("approval rejection failed: --approval-id is required")
+        return 1
+    if not getattr(args, "rejected_by", ""):
+        print("approval rejection failed: --rejected-by is required")
+        return 1
+    try:
+        approval = reject_request(workspace, args.approval_id, rejected_by=args.rejected_by, note=args.note or "")
+    except (KeyError, ValueError) as exc:
+        print(str(exc))
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Approval rejected.",
+            "approval_id": args.approval_id,
+            "rejected_by": args.rejected_by,
+        },
+    )
+    print(f"approval_status: {approval.get('status')}")
+    print(f"approval_id: {approval.get('approval_id')}")
+    return 0
+
+
+def cmd_agent_confirm(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        state = load_agent_state(workspace)
+    except FileNotFoundError as exc:
+        print(f"advisor confirmation failed: {exc}")
+        return 1
+    result = confirm_advisor_response(workspace, args.request_id, state, confirmed_by=args.confirmed_by)
+    if not result.consumed:
+        print("advisor_confirmation: rejected")
+        for error in result.errors:
+            print(f"- {error}")
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Advisor user confirmation recorded.",
+            "request_id": args.request_id,
+            "confirmed_by": args.confirmed_by,
+        },
+    )
+    print("advisor_confirmation: accepted")
+    print(f"agent_status: {result.status}")
+    print(f"receipt_path: {result.receipt_path}")
+    return 0
+
+
 def cmd_agent_tools(args: argparse.Namespace) -> int:
     tools = agent_tool_schema()
     if args.json:
@@ -1584,6 +1711,73 @@ def cmd_agent_tools(args: argparse.Namespace) -> int:
     else:
         for tool in tools:
             print(f"{tool['name']}: permission={tool['permission']} approval={tool['requires_approval']}")
+    return 0
+
+
+def cmd_agent_plan_rebind(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        plan = load_agent_plan(workspace)
+        state = load_agent_state(workspace)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"agent plan rebind failed: {exc}")
+        return 1
+    blocked_statuses = {
+        "running",
+        "waiting_for_approval",
+        "waiting_for_advisor",
+        "waiting_for_user",
+        "reconciliation_required",
+        "failed",
+        "stopped",
+        "done",
+        "done_with_gaps",
+    }
+    if state.get("status") in blocked_statuses or any(
+        task.get("status") == "running" for task in state.get("tasks", []) or []
+    ):
+        print(f"agent plan rebind failed: state is not rebind-safe: {state.get('status')}")
+        return 1
+    if state.get("plan_hash") != plan.get("plan_hash"):
+        print("agent plan rebind failed: state plan_hash does not match the on-disk plan")
+        return 1
+    if (
+        Path(str(state.get("project") or "")).resolve() != Path(str(plan.get("project") or "")).resolve()
+        or state.get("version_id") != plan.get("version_id")
+        or state.get("plan_id") != plan.get("plan_id")
+    ):
+        print("agent plan rebind failed: state scope does not match the on-disk plan")
+        return 1
+    unresolved_approvals = [
+        item
+        for item in load_approvals(workspace).get("approvals", []) or []
+        if item.get("status") in {"pending", "approved"}
+    ]
+    unresolved_advisor = [
+        item for item in list_advisor_requests(workspace) if item.get("status") not in {"consumed", "rejected"}
+    ]
+    if unresolved_approvals or unresolved_advisor:
+        print("agent plan rebind failed: approval or Advisor evidence is still unresolved")
+        return 1
+    try:
+        rebound, preview = rebind_agent_plan(plan)
+    except ValueError as exc:
+        print(f"agent plan rebind failed: {exc}")
+        return 1
+    preview["mode"] = "apply" if args.apply else "dry_run"
+    if args.apply:
+        save_agent_plan(workspace, rebound)
+        state["plan_hash"] = rebound["plan_hash"]
+        state["registry_digest"] = rebound["registry_digest"]
+        save_agent_state(workspace, state)
+    if args.json:
+        print(json.dumps(preview, ensure_ascii=False, indent=2))
+    else:
+        print(f"rebind_mode: {preview['mode']}")
+        print(f"changed: {str(preview['changed']).lower()}")
+        print(f"registry_digest_after: {preview['registry_digest_after']}")
+        print(f"plan_hash_after: {preview['plan_hash_after']}")
     return 0
 
 
@@ -1627,6 +1821,11 @@ def cmd_agent_advisor_accept(args: argparse.Namespace) -> int:
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
     result = accept_advisor_response(workspace, args.response)
     if not result.get("accepted"):
+        if result.get("stored"):
+            print("advisor_response: rejected")
+            print(f"request_id: {result.get('request_id')}")
+            print(f"response_path: {result.get('response_path')}")
+            return 0
         print("advisor_response: rejected")
         for error in result.get("errors", []) or []:
             print(f"- {error}")
@@ -1957,7 +2156,12 @@ def cmd_feature_prescreen(args: argparse.Namespace) -> int:
         argv.append("--sql-approved")
     if args.force:
         argv.append("--force")
-    code = batch_select_main(argv)
+    try:
+        code = batch_select_main(argv)
+    except Exception as exc:
+        stage_action_failed(path, stage, str(exc), failure_code=classify_exception(exc))
+        print(f"feature prescreen failed: {exc}", file=sys.stderr)
+        return 1
     if code == 0:
         try:
             feature_cfg = _load_runtime_config(project_dir, path, "feature_select").get("feature_select", {})
@@ -2186,11 +2390,12 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
             execution_result = execute_dp_sql(
                 project_dir=project_dir,
                 sql=sql_text,
-                operation_id="build_wide_sql",
+                operation_id="build_wide_sql_execute",
                 description=f"Create wide feature table {summary_payload.get('output_table', args.output_table or '')}".strip(),
                 metadata_path=execution_path,
                 sql_approved=args.sql_approved,
                 progress=reporter,
+                audit_workspace=run_path,
             )
             execution_payload = {
                 **execution_result,
@@ -2248,7 +2453,13 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
             },
         )
     if run_path:
-        stage_action_done(run_path, "build_wide_sql")
+        stage_action_done(
+            run_path,
+            "build_wide_sql",
+            scaffold=not args.execute,
+            message="SQL generation complete; waiting for approval" if not args.execute else "",
+            failure_code=SQL_APPROVAL_REQUIRED if not args.execute else "",
+        )
     print(f"sql: {sql_path}")
     print(f"feature_map: {feature_map_path}")
     print(f"summary: {summary_path}")
@@ -2284,6 +2495,25 @@ def cmd_feature_refine(args: argparse.Namespace) -> int:
     if code == 0:
         try:
             refine_cfg = _load_runtime_config(project_dir, path, "refine_features").get("feature_refine", {})
+            if args.dry_run_sql and not _runtime_is_local_feather(path, project_dir):
+                from risk_model_workbench.data.sql_evidence import write_sql_evidence
+                from risk_model_workbench.feature_refine import build_sampling_sql
+
+                prepared_sql = build_sampling_sql(
+                    refine_cfg,
+                    _refine_feature_columns(project_dir, {"feature_refine": refine_cfg}),
+                )
+                entry = write_sql_evidence(
+                    path,
+                    prepared_sql,
+                    source="feature_refine.build_sampling_sql",
+                    purpose="feature_refine_sample",
+                    stage="feature_refine",
+                    sql_kind="generated",
+                    name="feature_refine_sample.sql",
+                )
+                _register_if_exists(path, "feature_refine", "queries/sql_evidence_manifest.json", description="SQL evidence manifest")
+                register_artifact(path, "feature_refine", entry["path"], description="Generated feature refine SQL evidence")
             try:
                 runtime_project = _load_runtime_project_config(project_dir, path)
             except FileNotFoundError:
@@ -3484,9 +3714,38 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     approve.add_argument("--note", default="")
     approve.set_defaults(func=cmd_agent_approve)
 
+    confirm = agent_sub.add_parser("confirm", help="confirm an Advisor response that requires explicit user confirmation")
+    confirm.add_argument("--project", required=True)
+    confirm.add_argument("--version-id", required=True)
+    confirm.add_argument("--request-id", required=True)
+    confirm.add_argument("--confirmed-by", required=True)
+    confirm.set_defaults(func=cmd_agent_confirm)
+
+    reject = agent_sub.add_parser("reject", help="reject a blocked approval or Advisor confirmation")
+    reject.add_argument("--project", required=True)
+    reject.add_argument("--version-id", required=True)
+    reject_target = reject.add_mutually_exclusive_group(required=True)
+    reject_target.add_argument("--approval-id")
+    reject_target.add_argument("--request-id")
+    reject.add_argument("--rejected-by", default="")
+    reject.add_argument("--reason", default="")
+    reject.add_argument("--note", default="")
+    reject.set_defaults(func=cmd_agent_reject)
+
     tools = agent_sub.add_parser("tools", help="export Agent tool schema")
     tools.add_argument("--json", action="store_true")
     tools.set_defaults(func=cmd_agent_tools)
+
+    agent_plan = agent_sub.add_parser("plan", help="inspect or safely rebind an Agent plan")
+    agent_plan_sub = agent_plan.add_subparsers(dest="agent_plan_command", required=True)
+    rebind = agent_plan_sub.add_parser("rebind", help="preview or apply current registry metadata")
+    rebind.add_argument("--project", required=True)
+    rebind.add_argument("--version-id", required=True)
+    mode = rebind.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="preview only (default)")
+    mode.add_argument("--apply", action="store_true", help="write the rebound plan")
+    rebind.add_argument("--json", action="store_true")
+    rebind.set_defaults(func=cmd_agent_plan_rebind)
 
     advisor = agent_sub.add_parser("advisor", help="Advisor request/response protocol commands")
     advisor_sub = advisor.add_subparsers(dest="advisor_command", required=True)

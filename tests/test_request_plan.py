@@ -37,13 +37,15 @@ def test_create_execution_plan_from_request():
     plan = create_execution_plan(request_doc, "projects/2026-05-fujie-gcard-v1")
     task_ids = [task["task_id"] for task in plan["tasks"]]
     assert "sample_check_profile" in task_ids
-    assert "feature_prescreen" in task_ids
-    assert "build_wide_sql" in task_ids
+    assert "feature_prescreen_prepare" in task_ids
+    assert "feature_prescreen_execute" in task_ids
+    assert "build_wide_sql_prepare" in task_ids
+    assert "build_wide_sql_execute" in task_ids
     assert "train_baseline_all" in task_ids
     assert task_ids[-1] == "report_final"
-    assert task_ids.index("feature_prescreen") < task_ids.index("build_wide_sql") < task_ids.index("feature_refine")
-    feature_refine = next(task for task in plan["tasks"] if task["task_id"] == "feature_refine")
-    assert feature_refine["depends_on"] == ["build_wide_sql"]
+    assert task_ids.index("feature_prescreen_execute") < task_ids.index("build_wide_sql_prepare") < task_ids.index("feature_refine_execute")
+    feature_refine = next(task for task in plan["tasks"] if task["task_id"] == "feature_refine_execute")
+    assert feature_refine["depends_on"] == ["feature_refine_prepare"]
     assert plan["scenario_profile"] == "fujie_gcard_main_lgbm"
     assert "sql_review_gate" in plan["stage_steps"]["build_wide_sql"]
     assert "feature_availability_filter" in plan["stage_steps"]["feature_refine"]
@@ -67,9 +69,9 @@ def test_refine_only_feature_rounds_do_not_force_build_wide_sql():
 
     plan = create_execution_plan(request_doc, "projects/2026-05-fujie-gcard-v1")
     task_ids = [task["task_id"] for task in plan["tasks"]]
-    feature_refine = next(task for task in plan["tasks"] if task["task_id"] == "feature_refine")
+    feature_refine = next(task for task in plan["tasks"] if task["task_id"] == "feature_refine_prepare")
 
-    assert "build_wide_sql" not in task_ids
+    assert "build_wide_sql_prepare" not in task_ids
     assert feature_refine["depends_on"] == ["sample_check_001"]
 
 
@@ -226,9 +228,12 @@ def test_request_builder_workflows_are_known_and_limit_planned_tasks():
 
     assert [task["task_id"] for task in feature_plan["tasks"]] == [
         "feature_metadata",
-        "feature_prescreen",
-        "build_wide_sql",
-        "feature_refine",
+        "feature_prescreen_prepare",
+        "feature_prescreen_execute",
+        "build_wide_sql_prepare",
+        "build_wide_sql_execute",
+        "feature_refine_prepare",
+        "feature_refine_execute",
     ]
     assert set(feature_plan["stage_steps"]) == {"feature_metadata", "feature_prescreen", "build_wide_sql", "feature_refine"}
     assert {task["type"] for task in train_plan["tasks"]} == {"train"}

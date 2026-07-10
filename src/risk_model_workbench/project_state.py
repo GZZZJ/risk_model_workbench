@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from fnmatch import fnmatch
 from pathlib import Path
@@ -12,10 +13,13 @@ import yaml
 from risk_model_workbench.harness.errors import (
     ARTIFACT_CONTRACT_FAILED,
     DATA_MISSING,
+    InvalidActionResultError,
+    MissingActionResultError,
     SCAFFOLD_ONLY,
     SQL_APPROVAL_REQUIRED,
     UNKNOWN,
 )
+from risk_model_workbench.harness.runtime import load_action_result
 from risk_model_workbench.paths import REPO_ROOT, project_config_path
 from risk_model_workbench.request.training import llm_guided_tuning_enabled
 from risk_model_workbench.rules import summarize_rules
@@ -385,6 +389,9 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
                 contract_source,
             )
         )
+    agent_result = _audit_agent_runtime(evidence)
+    if agent_result is not None:
+        stage_results.append(agent_result)
 
     verdict = _rollup_audit_verdict(stage_results)
     source_of_truth = [
@@ -393,6 +400,14 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
     ]
     if contract_source:
         source_of_truth.append(contract_source)
+    if agent_result is not None:
+        source_of_truth.extend(
+            [
+                str(workspace_rel / "agent_plan.yml"),
+                str(workspace_rel / "audit" / "agent_state.yml"),
+                str(workspace_rel / "audit" / "agent_trace.jsonl"),
+            ]
+        )
     return {
         "project": str(project_path.resolve()),
         "version_id": run_state.get("version_id", ""),
@@ -626,6 +641,120 @@ def _audit_stage(
         "artifact_count": len(artifacts),
         "registered_count": len(manifest_items),
         "contract_source": contract_source,
+        "failure_code": failure_codes[0] if failure_codes else "",
+        "failure_codes": failure_codes,
+        "issues": issues,
+    }
+
+
+def _audit_agent_runtime(evidence: RunEvidence) -> dict[str, Any] | None:
+    if str(evidence.run_state.get("managed_by") or "workbench") != "agent":
+        return None
+    run_path = Path(evidence.run_path)
+    issues: list[str] = []
+    required_files = {
+        "agent_plan.yml": run_path / "agent_plan.yml",
+        "audit/agent_state.yml": run_path / "audit" / "agent_state.yml",
+        "audit/agent_trace.jsonl": run_path / "audit" / "agent_trace.jsonl",
+    }
+    for label, path in required_files.items():
+        if not path.exists():
+            issues.append(f"{label} missing for Agent-managed version")
+
+    agent_state: dict[str, Any] = {}
+    state_path = required_files["audit/agent_state.yml"]
+    if state_path.exists():
+        try:
+            loaded = yaml.safe_load(state_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                agent_state = loaded
+            else:
+                issues.append("audit/agent_state.yml is not an object")
+        except (OSError, yaml.YAMLError) as exc:
+            issues.append(f"audit/agent_state.yml unreadable: {exc}")
+    status = str(agent_state.get("status") or "")
+    tasks = [task for task in agent_state.get("tasks", []) or [] if isinstance(task, dict)]
+    if state_path.exists() and not agent_state:
+        issues.append("audit/agent_state.yml is empty or malformed")
+    if agent_state and not status:
+        issues.append("agent status is missing")
+    if agent_state and not tasks:
+        issues.append("agent tasks are missing")
+    all_tasks_closed = bool(tasks) and all(str(task.get("status") or "") in {"done", "skipped"} for task in tasks)
+    if agent_state and status != "done" and not (status == "running" and all_tasks_closed):
+        issues.append(f"agent status is not terminal complete: {status}")
+
+    for task in tasks:
+        task_id = str(task.get("task_id") or "")
+        task_status = str(task.get("status") or "")
+        if task_status == "scaffold":
+            issues.append(f"task is scaffold evidence, not real closure: {task_id}")
+        if task_status not in {"done", "skipped"}:
+            issues.append(f"task is not closed: {task_id} status={task_status}")
+        attempt_id = str(task.get("attempt_id") or "")
+        if task_status == "done":
+            if not attempt_id:
+                issues.append(f"action result receipt missing for task: {task_id}")
+                continue
+            try:
+                load_action_result(
+                    run_path,
+                    attempt_id,
+                    task_id=task_id,
+                    action_id=str(task.get("action_id") or ""),
+                    invocation_hash=str(task.get("invocation_hash") or ""),
+                    project=str(agent_state.get("project") or ""),
+                    version_id=str(agent_state.get("version_id") or ""),
+                )
+            except (MissingActionResultError, InvalidActionResultError) as exc:
+                issues.append(f"action result receipt invalid for task: {task_id}: {exc}")
+
+    approvals_path = run_path / "audit" / "approvals.yml"
+    if approvals_path.exists():
+        try:
+            approvals = yaml.safe_load(approvals_path.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError) as exc:
+            approvals = {}
+            issues.append(f"audit/approvals.yml unreadable: {exc}")
+        for approval in approvals.get("approvals", []) or []:
+            if not isinstance(approval, dict):
+                continue
+            approval_id = str(approval.get("approval_id") or "")
+            approval_status = str(approval.get("status") or "")
+            if approval_status in {"pending", "approved"}:
+                issues.append(f"approval is not consumed: {approval_id} status={approval_status}")
+            if approval_status == "consumed" and not (run_path / "audit" / "approval_consumptions" / f"{approval_id}.json").exists():
+                issues.append(f"approval consumption receipt missing: {approval_id}")
+
+    advisor_dir = run_path / "audit" / "advisor_requests"
+    if advisor_dir.exists():
+        for request_path in sorted(advisor_dir.glob("*.json")):
+            try:
+                request = json.loads(request_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                issues.append(f"Advisor request unreadable: {request_path.name}: {exc}")
+                continue
+            request_id = str(request.get("request_id") or request_path.stem)
+            request_status = str(request.get("status") or "")
+            if request_status in {"answered", "waiting_for_user"}:
+                issues.append(f"Advisor response is accepted but not consumed: {request_id}")
+            elif request_status in {"pending", "rejected"}:
+                issues.append(f"Advisor request is unresolved: {request_id} status={request_status}")
+            elif request_status == "consumed":
+                receipt_ref = str(request.get("consumption_receipt") or "")
+                receipt_path = run_path / receipt_ref if receipt_ref else run_path / "audit" / "advisor_consumptions" / f"{request_id}.json"
+                if not receipt_path.exists():
+                    issues.append(f"Advisor consumption receipt missing: {request_id}")
+
+    verdict = "incomplete" if issues else "complete"
+    failure_codes = _classify_stage_failure(status="done" if not issues else "missing", verdict=verdict, issues=issues)
+    return {
+        "stage": "agent_runtime",
+        "status": status or "missing",
+        "verdict": verdict,
+        "artifact_count": 0,
+        "registered_count": 0,
+        "contract_source": "agent_runtime",
         "failure_code": failure_codes[0] if failure_codes else "",
         "failure_codes": failure_codes,
         "issues": issues,

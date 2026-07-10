@@ -134,6 +134,104 @@ def test_audit_requires_tuning_evidence_when_llm_tuning_enabled(tmp_path):
     assert any("llm tuning artifact missing" in issue for issue in audit["stages"][0]["issues"])
 
 
+def test_agent_managed_strict_audit_requires_runtime_evidence(tmp_path):
+    project = _make_project(tmp_path)
+    version_id = "demo_model_v1_20260710"
+    assert main(["version", "init", "--project", str(project), "--workflow", "sample_audit", "--version-id", version_id]) == 0
+    workspace = project / "versions" / version_id
+    state_path = workspace / "version_state.yml"
+    state = yaml.safe_load(state_path.read_text(encoding="utf-8"))
+    state["managed_by"] = "agent"
+    state_path.write_text(yaml.safe_dump(state, allow_unicode=True, sort_keys=False), encoding="utf-8")
+
+    audit = audit_run(project, version_id, stage="validate_config")
+
+    agent_stage = next(item for item in audit["stages"] if item["stage"] == "agent_runtime")
+    assert audit["verdict"] == "incomplete"
+    assert agent_stage["verdict"] == "incomplete"
+    assert any("agent_plan.yml missing" in issue for issue in agent_stage["issues"])
+
+
+def test_agent_managed_strict_audit_fails_unconsumed_runtime_state(tmp_path):
+    project = _make_project(tmp_path)
+    version_id = "demo_model_v2_20260710"
+    assert main(["version", "init", "--project", str(project), "--workflow", "sample_audit", "--version-id", version_id]) == 0
+    workspace = project / "versions" / version_id
+    version_state = yaml.safe_load((workspace / "version_state.yml").read_text(encoding="utf-8"))
+    version_state["managed_by"] = "agent"
+    (workspace / "version_state.yml").write_text(yaml.safe_dump(version_state, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    (workspace / "agent_plan.yml").write_text("version: 2\nplan_id: demo\n", encoding="utf-8")
+    (workspace / "audit" / "agent_trace.jsonl").write_text('{"event":"observation"}\n', encoding="utf-8")
+    (workspace / "audit" / "agent_state.yml").write_text(
+        yaml.safe_dump(
+            {
+                "version": 2,
+                "status": "waiting_for_user",
+                "tasks": [
+                    {"task_id": "prepare", "status": "review_ready"},
+                    {"task_id": "execute", "status": "reconciliation_required"},
+                ],
+            },
+            allow_unicode=True,
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (workspace / "audit" / "approvals.yml").write_text(
+        yaml.safe_dump({"version": 1, "approvals": [{"approval_id": "approval_1", "status": "approved"}]}),
+        encoding="utf-8",
+    )
+    requests_dir = workspace / "audit" / "advisor_requests"
+    requests_dir.mkdir(parents=True, exist_ok=True)
+    (requests_dir / "advisor_1.json").write_text('{"request_id":"advisor_1","status":"answered"}\n', encoding="utf-8")
+
+    audit = audit_run(project, version_id, stage="validate_config")
+    agent_stage = next(item for item in audit["stages"] if item["stage"] == "agent_runtime")
+
+    assert audit["verdict"] == "incomplete"
+    assert any("agent status is not terminal" in issue for issue in agent_stage["issues"])
+    assert any("task is not closed" in issue for issue in agent_stage["issues"])
+    assert any("approval is not consumed" in issue for issue in agent_stage["issues"])
+    assert any("Advisor response is accepted but not consumed" in issue for issue in agent_stage["issues"])
+
+
+def test_agent_managed_strict_audit_rejects_malformed_state_and_missing_action_result(tmp_path):
+    project = _make_project(tmp_path)
+    version_id = "demo_model_v3_20260710"
+    assert main(["version", "init", "--project", str(project), "--workflow", "sample_audit", "--version-id", version_id]) == 0
+    workspace = project / "versions" / version_id
+    version_state = yaml.safe_load((workspace / "version_state.yml").read_text(encoding="utf-8"))
+    version_state["managed_by"] = "agent"
+    (workspace / "version_state.yml").write_text(yaml.safe_dump(version_state, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    (workspace / "agent_plan.yml").write_text("version: 2\nplan_id: demo\n", encoding="utf-8")
+    (workspace / "audit" / "agent_trace.jsonl").write_text('{"event":"observation"}\n', encoding="utf-8")
+    (workspace / "audit" / "agent_state.yml").write_text("[]\n", encoding="utf-8")
+
+    audit = audit_run(project, version_id, stage="validate_config")
+    agent_stage = next(item for item in audit["stages"] if item["stage"] == "agent_runtime")
+    assert any("agent_state.yml is not an object" in issue for issue in agent_stage["issues"])
+    assert any("agent_state.yml is empty or malformed" in issue for issue in agent_stage["issues"])
+
+    (workspace / "audit" / "agent_state.yml").write_text(
+        yaml.safe_dump(
+            {
+                "version": 2,
+                "status": "done",
+                "project": str(project),
+                "version_id": version_id,
+                "tasks": [{"task_id": "sample", "status": "done", "action_id": "sample_check"}],
+            },
+            allow_unicode=True,
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    audit = audit_run(project, version_id, stage="validate_config")
+    agent_stage = next(item for item in audit["stages"] if item["stage"] == "agent_runtime")
+    assert any("action result receipt missing for task: sample" in issue for issue in agent_stage["issues"])
+
+
 def test_lesson_promote_and_rules_list_are_idempotent(tmp_path, monkeypatch, capsys):
     project = _make_project(tmp_path)
     rules_path = tmp_path / "workbench_rules.yml"

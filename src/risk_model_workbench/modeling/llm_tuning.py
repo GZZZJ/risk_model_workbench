@@ -117,7 +117,15 @@ def suggest_lgb_candidates(
     if mode in {"host_agent", "agent_in_loop", "codex", "claudecode", "claude_code", "claude-code"}:
         if plan_path and Path(plan_path).exists():
             plan = json.loads(Path(plan_path).read_text(encoding="utf-8"))
-            return _normalize_plan(plan, tuning_cfg, advisor_type="host_agent_plan_file")
+            expected_round = int(context.get("round", 0) or 0) or None
+            expected_experiment = str(context.get("experiment") or "") or None
+            return validate_tuning_plan(
+                plan,
+                tuning_cfg,
+                advisor_type="host_agent_plan_file",
+                expected_experiment=expected_experiment,
+                expected_round=expected_round,
+            )
         if advisor.get("fallback_to_heuristic", True) is False:
             raise HostAgentTuningPlanRequired(plan_path=plan_path, context_path=context_path)
         plan = _suggest_with_heuristic(context, tuning_cfg)
@@ -231,7 +239,15 @@ def _suggest_with_command(command: str, context: dict[str, Any], tuning_cfg: dic
     if proc.returncode != 0:
         raise RuntimeError(f"advisor command failed with code {proc.returncode}: {proc.stderr.strip()}")
     plan = json.loads(proc.stdout)
-    return _normalize_plan(plan, tuning_cfg, advisor_type="external_llm_command")
+    expected_round = int(context.get("round", 0) or 0) or None
+    expected_experiment = str(context.get("experiment") or "") or None
+    return validate_tuning_plan(
+        plan,
+        tuning_cfg,
+        advisor_type="external_llm_command",
+        expected_experiment=expected_experiment,
+        expected_round=expected_round,
+    )
 
 
 def _suggest_with_heuristic(context: dict[str, Any], tuning_cfg: dict[str, Any]) -> dict[str, Any]:
@@ -276,19 +292,39 @@ def _suggest_with_heuristic(context: dict[str, Any], tuning_cfg: dict[str, Any])
     }
 
 
-def _normalize_plan(plan: dict[str, Any], tuning_cfg: dict[str, Any], *, advisor_type: str) -> dict[str, Any]:
+def validate_tuning_plan(
+    plan: dict[str, Any],
+    tuning_cfg: dict[str, Any],
+    *,
+    advisor_type: str,
+    expected_experiment: str | None = None,
+    expected_round: int | None = None,
+) -> dict[str, Any]:
     if not isinstance(plan, dict):
         raise ValueError("advisor output must be a JSON object")
+    if expected_experiment:
+        actual_experiment = str(plan.get("experiment") or "")
+        if actual_experiment and actual_experiment != expected_experiment:
+            raise ValueError(f"experiment mismatch: expected {expected_experiment}, got {actual_experiment}")
+    round_index = int(plan.get("round", 0) or 0)
+    if expected_round is not None and round_index != int(expected_round):
+        raise ValueError(f"round mismatch: expected {expected_round}, got {round_index}")
     candidates = plan.get("candidates")
     if not isinstance(candidates, list):
         raise ValueError("advisor output requires candidates list")
+    max_candidates = int(tuning_cfg.get("candidates_per_round", 1) or 1)
+    if not plan.get("stop"):
+        if len(candidates) < 1 or len(candidates) > max_candidates:
+            raise ValueError(f"candidate count must be between 1 and {max_candidates}")
     normalized = []
-    for index, item in enumerate(candidates[: tuning_cfg["candidates_per_round"]], start=1):
+    for index, item in enumerate(candidates, start=1):
         if not isinstance(item, dict):
-            continue
-        params = sanitize_candidate_params(item.get("params") if isinstance(item.get("params"), dict) else {}, tuning_cfg)
+            raise ValueError(f"candidate {index} must be an object")
+        raw_params = item.get("params") if isinstance(item.get("params"), dict) else {}
+        _validate_candidate_params(raw_params, tuning_cfg, index=index)
+        params = sanitize_candidate_params(raw_params, tuning_cfg)
         if not params:
-            continue
+            raise ValueError(f"candidate {index} has no executable params")
         normalized.append(
             {
                 "name": str(item.get("name") or f"candidate_{index}"),
@@ -299,12 +335,30 @@ def _normalize_plan(plan: dict[str, Any], tuning_cfg: dict[str, Any], *, advisor
     if not normalized and not plan.get("stop"):
         raise ValueError("advisor did not return executable candidates")
     return {
-        "round": int(plan.get("round", 0) or 0),
+        "round": round_index,
+        "experiment": str(plan.get("experiment") or expected_experiment or ""),
         "advisor_type": advisor_type,
         "diagnosis": str(plan.get("diagnosis") or ""),
         "candidates": normalized,
         "stop": bool(plan.get("stop", False)),
     }
+
+
+def _validate_candidate_params(params: dict[str, Any], tuning_cfg: dict[str, Any], *, index: int) -> None:
+    bounds = tuning_cfg.get("param_bounds") or _merge_param_bounds({})
+    for key, value in (params or {}).items():
+        if key in LGB_INTEGER_BOUNDS:
+            lower, upper = bounds["integer"].get(key, LGB_INTEGER_BOUNDS[key])
+            numeric = float(value)
+            if numeric < lower or numeric > upper:
+                raise ValueError(f"candidate {index} param {key} outside allowed bounds")
+        elif key in LGB_NUMERIC_BOUNDS:
+            lower, upper = bounds["numeric"].get(key, LGB_NUMERIC_BOUNDS[key])
+            numeric = float(value)
+            if numeric < lower or numeric > upper:
+                raise ValueError(f"candidate {index} param {key} outside allowed bounds")
+        else:
+            raise ValueError(f"candidate {index} param {key} is unsupported")
 
 
 def _merge_param_bounds(override: dict[str, Any]) -> dict[str, dict[str, tuple[float, float] | tuple[int, int]]]:

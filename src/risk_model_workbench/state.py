@@ -78,6 +78,7 @@ def create_version_state(
     stages: list[str] | None = None,
     status: str = "running",
     source_type: str = "workbench",
+    managed_by: str = "workbench",
     lineage: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     selected_stages = stages or DEFAULT_STAGES
@@ -86,6 +87,7 @@ def create_version_state(
         "project": str(Path(project_dir)),
         "workflow": workflow,
         "source_type": source_type,
+        "managed_by": managed_by,
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "status": status,
         "current_stage": selected_stages[0] if selected_stages else None,

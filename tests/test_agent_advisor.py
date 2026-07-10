@@ -40,17 +40,7 @@ def test_create_and_accept_standard_advisor_response(tmp_path):
     response_path = workspace / "advisor_001.response.json"
     response_path.write_text(
         json.dumps(
-            {
-                "version": 1,
-                "request_id": request["request_id"],
-                "type": "tuning_plan",
-                "status": "answered",
-                "decision": "continue",
-                "summary": "Use bounded LightGBM candidates.",
-                "output_files": [],
-                "risk_notes": ["Do not optimize directly on OOT."],
-                "requires_user_confirmation": False,
-            },
+            _response_payload(request, summary="Use bounded LightGBM candidates."),
             ensure_ascii=False,
             indent=2,
         ),
@@ -87,6 +77,7 @@ def test_advisor_response_validation_rejects_mismatch(tmp_path):
             "status": "answered",
             "decision": "continue",
             "summary": "wrong type",
+            "request_identity": _request_identity(request),
         },
     )
 
@@ -107,17 +98,7 @@ def test_agent_advisor_cli_list_show_accept(tmp_path, capsys):
     response_path = workspace / "response.json"
     response_path.write_text(
         json.dumps(
-            {
-                "version": 1,
-                "request_id": request["request_id"],
-                "type": "tuning_plan",
-                "status": "answered",
-                "decision": "continue",
-                "summary": "Accepted.",
-                "output_files": [],
-                "risk_notes": [],
-                "requires_user_confirmation": False,
-            },
+            _response_payload(request, summary="Accepted."),
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -197,17 +178,7 @@ def test_resume_requires_accepted_advisor_response(tmp_path, capsys):
     response_path = workspace / "response.json"
     response_path.write_text(
         json.dumps(
-            {
-                "version": 1,
-                "request_id": request_id,
-                "type": "tuning_plan",
-                "status": "answered",
-                "decision": "continue",
-                "summary": "Ready.",
-                "output_files": [],
-                "risk_notes": [],
-                "requires_user_confirmation": False,
-            },
+            _response_payload(load_advisor_request(workspace, request_id), summary="Ready."),
             ensure_ascii=False,
         ),
         encoding="utf-8",
@@ -237,6 +208,31 @@ def _task(task_id: str) -> dict:
         "tool_name": "train_baseline",
         "permission": "writes_run",
         "requires_approval": False,
+    }
+
+
+def _response_payload(request: dict, *, summary: str = "Accepted.") -> dict:
+    return {
+        "version": 1,
+        "request_id": request["request_id"],
+        "type": request["expected_response"]["type"],
+        "status": "answered",
+        "decision": "continue",
+        "summary": summary,
+        "request_identity": _request_identity(request),
+        "output_files": [],
+        "risk_notes": [],
+        "requires_user_confirmation": False,
+    }
+
+
+def _request_identity(request: dict) -> dict:
+    return {
+        "task_id": request["task_id"],
+        "attempt_id": request["attempt_id"],
+        "invocation_hash": request["invocation_hash"],
+        "context_hash": request["context_hash"],
+        "round": request["round"],
     }
 
 

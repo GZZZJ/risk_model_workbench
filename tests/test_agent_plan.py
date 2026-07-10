@@ -18,7 +18,7 @@ def test_execution_plan_binds_to_version_agent_plan(tmp_path):
         version_id="demo_model_v1_20260706",
     )
 
-    assert agent_plan["version"] == 1
+    assert agent_plan["version"] == 2
     assert agent_plan["version_id"] == "demo_model_v1_20260706"
     assert agent_plan["source_plan_id"] == "agent-request_plan"
     assert agent_plan["run_id_placeholder"] == ""
@@ -32,9 +32,19 @@ def test_execution_plan_binds_to_version_agent_plan(tmp_path):
         assert args[args.index("--version-id") + 1] == "demo_model_v1_20260706"
         assert task["action_id"]
         assert task["tool_name"]
-        assert task["permission"] in {"read_only", "writes_run", "dp_sql_pull", "external_data"}
-        assert isinstance(task["requires_approval"], bool)
+        assert task["invocation"]["project"] == str(project)
+        assert task["invocation"]["version_id"] == "demo_model_v1_20260706"
+        assert len(task["invocation_hash"]) == 64
+        assert task["derived_metadata"]["permission"] in {
+            "read_only",
+            "writes_run",
+            "dp_sql_pull",
+            "external_data",
+        }
+        assert isinstance(task["derived_metadata"]["requires_approval"], bool)
         assert task["expected_outputs"]
+    assert len(agent_plan["registry_digest"]) == 64
+    assert len(agent_plan["plan_hash"]) == 64
 
 
 def test_agent_start_cli_writes_bound_plan_state_and_trace(tmp_path, capsys):
@@ -64,8 +74,12 @@ def test_agent_start_cli_writes_bound_plan_state_and_trace(tmp_path, capsys):
     agent_state = yaml.safe_load((version_dir / "audit" / "agent_state.yml").read_text(encoding="utf-8"))
 
     assert agent_plan["version_id"] == "demo_model_v1_20260706"
+    assert agent_plan["version"] == 2
     assert agent_plan["tasks"][0]["command"]["args"][-2:] == ["--version-id", "demo_model_v1_20260706"]
     assert agent_state["status"] == "draft"
+    assert agent_state["version"] == 2
+    assert agent_state["plan_hash"] == agent_plan["plan_hash"]
+    assert agent_state["registry_digest"] == agent_plan["registry_digest"]
     assert agent_state["version_id"] == "demo_model_v1_20260706"
     assert agent_state["tasks"][0]["status"] == "pending"
     assert (version_dir / "audit" / "agent_trace.jsonl").exists()
@@ -74,6 +88,43 @@ def test_agent_start_cli_writes_bound_plan_state_and_trace(tmp_path, capsys):
     assert main(["agent", "tools", "--json"]) == 0
     tools = yaml.safe_load(capsys.readouterr().out)
     assert any(tool["name"] == "sample_check" for tool in tools)
+
+
+def test_agent_plan_rebind_cli_previews_then_applies_only_in_safe_state(tmp_path, capsys):
+    project = _make_project(tmp_path)
+    request_path = _write_request(project)
+    version_id = "demo_model_v1_20260706"
+    assert main(["agent", "start", "--project", str(project), "--request", str(request_path), "--version-id", version_id, "--workflow", "sample_audit"]) == 0
+    workspace = project / "versions" / version_id
+    plan_path = workspace / "agent_plan.yml"
+    plan = yaml.safe_load(plan_path.read_text(encoding="utf-8"))
+
+    capsys.readouterr()
+    assert main(["agent", "plan", "rebind", "--project", str(project), "--version-id", version_id, "--dry-run", "--json"]) == 0
+    preview = yaml.safe_load(capsys.readouterr().out)
+    assert preview["mode"] == "dry_run"
+    assert preview["changed"] is False
+    assert yaml.safe_load(plan_path.read_text(encoding="utf-8"))["plan_hash"] == plan["plan_hash"]
+
+    assert main(["agent", "plan", "rebind", "--project", str(project), "--version-id", version_id, "--apply", "--json"]) == 0
+    applied = yaml.safe_load(capsys.readouterr().out)
+    assert applied["mode"] == "apply"
+    assert yaml.safe_load(plan_path.read_text(encoding="utf-8"))["registry_digest"] == plan["registry_digest"]
+
+    tampered = yaml.safe_load(plan_path.read_text(encoding="utf-8"))
+    tampered["tasks"][0]["invocation"]["project"] = "projects/other"
+    plan_path.write_text(yaml.safe_dump(tampered, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    before = plan_path.read_text(encoding="utf-8")
+    assert main(["agent", "plan", "rebind", "--project", str(project), "--version-id", version_id, "--apply"]) == 1
+    assert plan_path.read_text(encoding="utf-8") == before
+
+    plan_path.write_text(yaml.safe_dump(plan, allow_unicode=True, sort_keys=False), encoding="utf-8")
+
+    state_path = workspace / "audit" / "agent_state.yml"
+    state = yaml.safe_load(state_path.read_text(encoding="utf-8"))
+    state["status"] = "running"
+    state_path.write_text(yaml.safe_dump(state, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    assert main(["agent", "plan", "rebind", "--project", str(project), "--version-id", version_id, "--dry-run"]) == 1
 
 
 def _request_doc(project: Path) -> dict:

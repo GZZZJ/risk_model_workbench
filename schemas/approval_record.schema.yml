@@ -1,0 +1,28 @@
+name: approval_record
+version: 2
+statuses: [pending, approved, rejected, revoked, consumed]
+subject_required_fields:
+  - project
+  - version_id
+  - task_id
+  - invocation_hash
+  - config_snapshot_hash
+  - sql_evidence_manifest_hash
+  - sql_files
+  - operation_id
+consumption_required_fields:
+  - receipt_id
+  - approval_id
+  - blocker_id
+  - subject_hash
+  - consumed
+  - consumed_by
+  - consumed_at
+rules:
+  - approval is bound to the canonical subject hash
+  - any subject drift revokes pending or approved records
+  - consumption is create-once and changes approved to consumed
+  - rejected revoked or consumed approvals cannot execute
+  - external execution reloads the exact consumption receipt and approval record
+  - submitted SQL bytes come from a subject-bound evidence file
+  - batch sub-operations retain parent operation and attempt identity

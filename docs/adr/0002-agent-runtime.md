@@ -58,3 +58,12 @@ diagnosis, tuning advice, and human-facing judgment. The repository owns the
 deterministic execution loop, policy gates, state transitions, and audit
 evidence. Advisor responses must match an existing request before
 `rmw agent resume` may continue from `waiting_for_advisor`.
+
+## Contract Hardening
+
+[ADR 0003](0003-host-agent-harness-contract.md) supersedes this ADR only for
+new Agent Plan v2 and Agent State v2 execution semantics. It freezes the
+external Host-Agent boundary, fail-closed policy derivation, attempt-scoped
+semantic evidence, complete state vocabulary, and strict completion
+invariants. Existing v1 workspaces remain readable through an explicitly
+bounded compatibility path.

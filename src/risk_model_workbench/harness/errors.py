@@ -13,6 +13,29 @@ DEPENDENCY_MISSING = "dependency_missing"
 TRANSIENT_IO = "transient_io"
 ADVISOR_REQUIRED = "advisor_required"
 UNKNOWN = "unknown"
+MISSING_ACTION_RESULT = "missing_action_result"
+INVALID_ACTION_RESULT = "invalid_action_result"
+EXTERNAL_OUTCOME_UNKNOWN = "external_outcome_unknown"
+
+
+class ActionResultError(RuntimeError):
+    """Base error for immutable attempt result receipts."""
+
+
+class DuplicateActionResultError(ActionResultError):
+    """Raised when a second semantic result targets the same attempt."""
+
+
+class InvalidActionResultError(ActionResultError):
+    """Raised when a result is malformed or bound to another attempt."""
+
+
+class MissingActionResultError(ActionResultError):
+    """Raised when a completed process emitted no semantic receipt."""
+
+
+class WorkspaceLockedError(RuntimeError):
+    """Raised when another local runner already owns the workspace."""
 
 
 @dataclass(frozen=True)
@@ -58,6 +81,18 @@ FAILURE_CLASSES: tuple[FailureClass, ...] = (
     FailureClass(
         ADVISOR_REQUIRED,
         "Host-agent tuning needs an explicit advisor plan before training can continue.",
+    ),
+    FailureClass(
+        MISSING_ACTION_RESULT,
+        "The process returned without an ActionResult for the active attempt.",
+    ),
+    FailureClass(
+        INVALID_ACTION_RESULT,
+        "The ActionResult does not match the active task, invocation, or workspace.",
+    ),
+    FailureClass(
+        EXTERNAL_OUTCOME_UNKNOWN,
+        "An external operation may have been submitted, but its final outcome is not proven locally.",
     ),
     FailureClass(
         UNKNOWN,
