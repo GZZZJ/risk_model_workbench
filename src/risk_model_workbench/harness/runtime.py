@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+import json
+import re
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import asdict, dataclass, field, replace
+from datetime import datetime
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Iterator, TypeVar
 
 from risk_model_workbench.harness.actions import ActionSpec, get_action_spec
 from risk_model_workbench.harness.errors import (
@@ -16,9 +21,13 @@ from risk_model_workbench.harness.errors import (
     SQL_APPROVAL_REQUIRED,
     TRANSIENT_IO,
     UNKNOWN,
+    DuplicateActionResultError,
+    InvalidActionResultError,
+    MissingActionResultError,
     get_failure_class,
 )
-from risk_model_workbench.registry import load_artifact_manifest
+from risk_model_workbench.registry import load_artifact_manifest, register_artifact as registry_register_artifact
+from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.state import (
     load_run_state,
     mark_stage_done,
@@ -34,15 +43,163 @@ T = TypeVar("T")
 
 @dataclass(frozen=True)
 class ActionResult:
-    status: str
+    schema_version: int = 1
+    attempt_id: str = ""
+    task_id: str = ""
+    action_id: str = ""
+    invocation_hash: str = ""
+    project: str = ""
+    version_id: str = ""
+    status: str = ""
     failure_code: str = ""
+    next_required_action: str = "none"
+    retryable: bool = False
+    scaffold: bool = False
     message: str = ""
+    created_at: str = ""
     retry_count: int = 0
     artifacts: list[dict[str, Any]] = field(default_factory=list)
     decision: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class ActionAttempt:
+    workspace: Path
+    attempt_id: str
+    task_id: str
+    action_id: str
+    invocation_hash: str
+    project: str
+    version_id: str
+
+
+_CURRENT_ATTEMPT: ContextVar[ActionAttempt | None] = ContextVar("rmw_action_attempt", default=None)
+
+
+@contextmanager
+def action_attempt(attempt: ActionAttempt) -> Iterator[None]:
+    token = _CURRENT_ATTEMPT.set(attempt)
+    try:
+        yield
+    finally:
+        _CURRENT_ATTEMPT.reset(token)
+
+
+def action_result_path(workspace: str | Path, attempt_id: str) -> Path:
+    _validate_attempt_id(attempt_id)
+    return WorkspaceStore(workspace).path(Path("audit") / "action_results" / f"{attempt_id}.json")
+
+
+def write_action_result(workspace: str | Path, result: ActionResult) -> Path:
+    payload = result.to_dict()
+    _validate_action_result_payload(payload)
+    relative = Path("audit") / "action_results" / f"{result.attempt_id}.json"
+    store = WorkspaceStore(workspace)
+    if not store.create_once(relative, payload):
+        raise DuplicateActionResultError(f"ActionResult already exists for attempt {result.attempt_id}")
+    path = Path(workspace) / relative
+    registry_register_artifact(
+        workspace,
+        path,
+        stage="agent_runtime",
+        kind="audit",
+        source="generated",
+        description=f"Attempt-scoped ActionResult for {result.task_id}",
+    )
+    return path
+
+
+def load_action_result(
+    workspace: str | Path,
+    attempt_id: str,
+    *,
+    task_id: str = "",
+    action_id: str = "",
+    invocation_hash: str = "",
+    project: str = "",
+    version_id: str = "",
+) -> ActionResult:
+    path = action_result_path(workspace, attempt_id)
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise MissingActionResultError(f"missing ActionResult for attempt {attempt_id}") from exc
+    except (OSError, UnicodeError) as exc:
+        raise InvalidActionResultError(f"unreadable ActionResult for attempt {attempt_id}: {exc}") from exc
+    try:
+        payload = json.loads(raw)
+    except (json.JSONDecodeError, UnicodeError) as exc:
+        raise InvalidActionResultError(f"malformed ActionResult for attempt {attempt_id}: {exc}") from exc
+    _validate_action_result_payload(payload)
+    expected = {
+        "attempt_id": attempt_id,
+        "task_id": task_id,
+        "action_id": action_id,
+        "invocation_hash": invocation_hash,
+        "project": project,
+        "version_id": version_id,
+    }
+    mismatches = [name for name, value in expected.items() if value and payload.get(name) != value]
+    if mismatches:
+        raise InvalidActionResultError("ActionResult subject mismatch: " + ",".join(mismatches))
+    return ActionResult(**payload)
+
+
+def _validate_action_result_payload(payload: object) -> None:
+    if not isinstance(payload, dict):
+        raise InvalidActionResultError("ActionResult must be an object")
+    required = {
+        "schema_version": int,
+        "attempt_id": str,
+        "task_id": str,
+        "action_id": str,
+        "invocation_hash": str,
+        "project": str,
+        "version_id": str,
+        "status": str,
+    }
+    allowed = set(ActionResult.__dataclass_fields__)
+    unknown = sorted(set(payload) - allowed)
+    if unknown:
+        raise InvalidActionResultError("unknown ActionResult fields: " + ",".join(unknown))
+    for name, expected_type in required.items():
+        value = payload.get(name)
+        valid_type = type(value) is int if expected_type is int else isinstance(value, expected_type)
+        if not valid_type or (expected_type is str and not value.strip()):
+            raise InvalidActionResultError(f"invalid ActionResult field: {name}")
+    if payload["schema_version"] != 1:
+        raise InvalidActionResultError("unsupported ActionResult schema_version")
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", payload["attempt_id"]):
+        raise InvalidActionResultError("invalid ActionResult attempt_id")
+    if payload["status"] not in {"done", "scaffold", "failed", "review_ready"}:
+        raise InvalidActionResultError(f"invalid ActionResult status: {payload['status']}")
+    if payload.get("next_required_action", "none") not in {"none", "approval", "advisor", "user", "reconciliation"}:
+        raise InvalidActionResultError("invalid ActionResult next_required_action")
+    optional_types = {
+        "failure_code": str,
+        "retryable": bool,
+        "scaffold": bool,
+        "message": str,
+        "created_at": str,
+        "retry_count": int,
+        "artifacts": list,
+    }
+    for name, expected_type in optional_types.items():
+        value = payload.get(name)
+        valid_type = type(value) is expected_type if expected_type in {bool, int} else isinstance(value, expected_type)
+        if not valid_type:
+            raise InvalidActionResultError(f"invalid ActionResult field: {name}")
+    if not payload["created_at"].strip():
+        raise InvalidActionResultError("invalid ActionResult field: created_at")
+    if any(not isinstance(item, dict) for item in payload["artifacts"]):
+        raise InvalidActionResultError("invalid ActionResult artifacts")
+    if payload.get("decision") is not None and not isinstance(payload.get("decision"), dict):
+        raise InvalidActionResultError("invalid ActionResult decision")
+    if bool(payload["scaffold"]) != (payload["status"] == "scaffold"):
+        raise InvalidActionResultError("ActionResult scaffold flag conflicts with status")
 
 
 def register_action_artifact(
@@ -92,12 +249,14 @@ def stage_action_done(
     state = mark_stage_done(run_path, str(spec.stage), scaffold=scaffold)
     result = ActionResult(
         status="scaffold" if scaffold else "done",
+        scaffold=scaffold,
         failure_code=_normalize_failure_code(failure_code or (SCAFFOLD_ONLY if scaffold else "")),
         message=message,
         retry_count=retry_count,
         artifacts=_stage_artifact_results(run_path, state, str(spec.stage), spec),
         decision=_latest_stage_decision(state, str(spec.stage)),
     )
+    result = _bind_current_attempt(result, spec)
     state = _write_stage_action_metadata(run_path, state, spec, result=result)
     _emit_action_progress(run_path, spec, result)
     return state
@@ -122,6 +281,7 @@ def stage_action_failed(
         artifacts=_stage_artifact_results(run_path, state, str(spec.stage), spec),
         decision=_latest_stage_decision(state, str(spec.stage)),
     )
+    result = _bind_current_attempt(result, spec)
     state = _write_stage_action_metadata(run_path, state, spec, result=result)
     _emit_action_progress(run_path, spec, result)
     return state
@@ -301,3 +461,37 @@ def _normalize_failure_code(code: str) -> str:
     if not code:
         return ""
     return code if code in FAILURE_CODES else UNKNOWN
+
+
+def _validate_attempt_id(attempt_id: str) -> None:
+    if not isinstance(attempt_id, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", attempt_id):
+        raise InvalidActionResultError("invalid ActionResult attempt_id")
+
+
+def _bind_current_attempt(result: ActionResult, spec: ActionSpec) -> ActionResult:
+    attempt = _CURRENT_ATTEMPT.get()
+    if attempt is None:
+        return result
+    if attempt.action_id != spec.id:
+        raise InvalidActionResultError(
+            f"active attempt action mismatch: expected {attempt.action_id}, got {spec.id}"
+        )
+    next_required_action = result.next_required_action
+    if result.failure_code == SQL_APPROVAL_REQUIRED:
+        next_required_action = "approval"
+    elif result.failure_code == "advisor_required":
+        next_required_action = "advisor"
+    bound = replace(
+        result,
+        schema_version=1,
+        attempt_id=attempt.attempt_id,
+        task_id=attempt.task_id,
+        action_id=attempt.action_id,
+        invocation_hash=attempt.invocation_hash,
+        project=attempt.project,
+        version_id=attempt.version_id,
+        next_required_action=next_required_action,
+        created_at=result.created_at or datetime.now().isoformat(timespec="seconds"),
+    )
+    write_action_result(attempt.workspace, bound)
+    return bound

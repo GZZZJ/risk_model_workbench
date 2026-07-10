@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
+from uuid import uuid4
 
 from risk_model_workbench.agent.advisor import advisor_request_is_answered, create_advisor_request
 from risk_model_workbench.agent.plan import (
@@ -22,12 +23,16 @@ from risk_model_workbench.agent.state import (
     mark_task_running,
     pause_agent,
     reset_paused_task,
+    save_agent_state,
     task_status_map,
 )
 from risk_model_workbench.agent.trace import append_trace
-from risk_model_workbench.agent.transitions import BLOCKER_STATES, apply_transition
+from risk_model_workbench.agent.transitions import BLOCKER_STATES, apply_task_transition, apply_transition
 from risk_model_workbench.harness.actions import get_action_spec
+from risk_model_workbench.harness.errors import InvalidActionResultError, MissingActionResultError
+from risk_model_workbench.harness.runtime import ActionAttempt, ActionResult, action_attempt, load_action_result
 from risk_model_workbench.harness.tools import TOOL_REGISTRY, registry_digest
+from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.project_state import audit_run
 from risk_model_workbench.state import load_run_state
 from risk_model_workbench.versioning import resolve_workspace_dir
@@ -39,6 +44,17 @@ Runner = Callable[[list[str]], int]
 def run_agent(project_dir: str | Path, version_id: str, *, runner: Runner | None = None) -> dict[str, Any]:
     project_path = Path(project_dir)
     workspace = resolve_workspace_dir(project_path, version_id=version_id)
+    with WorkspaceStore(workspace).runner_lock():
+        return _run_agent_locked(project_path, workspace, version_id, runner=runner)
+
+
+def _run_agent_locked(
+    project_path: Path,
+    workspace: Path,
+    version_id: str,
+    *,
+    runner: Runner | None,
+) -> dict[str, Any]:
     plan = load_agent_plan(workspace)
     if int(plan.get("version") or 1) >= 2:
         errors = validate_agent_plan(
@@ -132,8 +148,98 @@ def run_agent(project_dir: str | Path, version_id: str, *, runner: Runner | None
             return state
 
         task_id = str(runnable.get("task_id") or "")
+        spec = TOOL_REGISTRY[invocation.tool_name]
+        attempt_id = f"attempt_{uuid4().hex}"
         mark_task_running(workspace, task_id)
-        append_trace(workspace, "action", {"summary": f"Executing task {task_id}.", "task_id": task_id, "command": args})
+        _record_attempt(workspace, task_id, attempt_id, invocation.digest())
+        append_trace(
+            workspace,
+            "action",
+            {
+                "summary": f"Executing task {task_id}.",
+                "task_id": task_id,
+                "attempt_id": attempt_id,
+                "invocation_hash": invocation.digest(),
+                "command": args,
+            },
+        )
+        if int(plan.get("version") or 1) >= 2:
+            attempt = ActionAttempt(
+                workspace=workspace,
+                attempt_id=attempt_id,
+                task_id=task_id,
+                action_id=spec.action_id,
+                invocation_hash=invocation.digest(),
+                project=str(project_path),
+                version_id=version_id,
+            )
+            runner_error = ""
+            try:
+                with action_attempt(attempt):
+                    code = runner(args)
+            except Exception as exc:
+                code = 1
+                runner_error = f"{type(exc).__name__}: {exc}"
+            try:
+                semantic = load_action_result(
+                    workspace,
+                    attempt_id,
+                    task_id=task_id,
+                    action_id=spec.action_id,
+                    invocation_hash=invocation.digest(),
+                    project=str(project_path),
+                    version_id=version_id,
+                )
+            except MissingActionResultError as exc:
+                append_trace(
+                    workspace,
+                    "result",
+                    {
+                        "summary": str(exc),
+                        "task_id": task_id,
+                        "attempt_id": attempt_id,
+                        "exit_code": code,
+                        "runner_error": runner_error,
+                    },
+                )
+                return mark_task_failed(workspace, task_id, reason="missing_action_result")
+            except InvalidActionResultError as exc:
+                append_trace(
+                    workspace,
+                    "result",
+                    {
+                        "summary": str(exc),
+                        "task_id": task_id,
+                        "attempt_id": attempt_id,
+                        "exit_code": code,
+                        "runner_error": runner_error,
+                    },
+                )
+                return mark_task_failed(workspace, task_id, reason="invalid_action_result")
+            append_trace(
+                workspace,
+                "result",
+                {
+                    "summary": f"Task {task_id} emitted semantic status {semantic.status}.",
+                    "task_id": task_id,
+                    "attempt_id": attempt_id,
+                    "exit_code": code,
+                    "runner_error": runner_error,
+                    "action_result": semantic.to_dict(),
+                },
+            )
+            reduced = _reduce_semantic_result(
+                project_path,
+                workspace,
+                version_id,
+                runnable,
+                semantic,
+                invocation_hash=invocation.digest(),
+            )
+            if reduced is not None:
+                return reduced
+            continue
+
         code = runner(args)
         result = _stage_result(workspace, runnable, plan)
         append_trace(
@@ -201,6 +307,100 @@ def run_agent(project_dir: str | Path, version_id: str, *, runner: Runner | None
             mark_task_done(workspace, task_id, scaffold=True, message=str(result.get("message") or "scaffold output"))
             continue
         return mark_task_failed(workspace, task_id, reason=failure_code or f"exit_code_{code}")
+
+
+def _record_attempt(workspace: Path, task_id: str, attempt_id: str, invocation_hash: str) -> None:
+    state = load_agent_state(workspace)
+    for task in state.get("tasks", []) or []:
+        if task.get("task_id") == task_id:
+            task["attempt_id"] = attempt_id
+            task["invocation_hash"] = invocation_hash
+            task["attempt_started_at"] = datetime.now().isoformat(timespec="seconds")
+            break
+    save_agent_state(workspace, state)
+
+
+def _reduce_semantic_result(
+    project_path: Path,
+    workspace: Path,
+    version_id: str,
+    task: dict[str, Any],
+    result: ActionResult,
+    *,
+    invocation_hash: str,
+) -> dict[str, Any] | None:
+    task_id = str(task.get("task_id") or "")
+    if result.next_required_action == "approval":
+        return pause_agent(
+            workspace,
+            status="waiting_for_approval",
+            reason=result.failure_code or "approval_required",
+            task_id=task_id,
+            command_hash=invocation_hash,
+        )
+    if result.next_required_action == "advisor":
+        request = create_advisor_request(
+            workspace,
+            project_dir=project_path,
+            version_id=version_id,
+            task=task,
+            reason=result.failure_code or "advisor_required",
+            message=result.message,
+        )
+        return pause_agent(
+            workspace,
+            status="waiting_for_advisor",
+            reason=result.failure_code or "advisor_required",
+            task_id=task_id,
+            advisor_request=str(request.get("path") or ""),
+            advisor_request_id=str(request.get("request_id") or ""),
+        )
+    if result.next_required_action == "reconciliation":
+        return _pause_for_reconciliation(workspace, task_id, result)
+    if result.next_required_action == "user":
+        return mark_task_failed(workspace, task_id, reason="user_transition_requires_advisor_consumption")
+    if result.status == "done":
+        mark_task_done(workspace, task_id, message=result.message)
+        return None
+    if result.status == "scaffold":
+        mark_task_done(workspace, task_id, scaffold=True, message=result.message or "scaffold output")
+        return None
+    if result.status == "review_ready":
+        return pause_agent(
+            workspace,
+            status="blocked",
+            reason="review_ready_without_next_action",
+            task_id=task_id,
+            command_hash=invocation_hash,
+        )
+    return mark_task_failed(workspace, task_id, reason=result.failure_code or "semantic_action_failed")
+
+
+def _pause_for_reconciliation(workspace: Path, task_id: str, result: ActionResult) -> dict[str, Any]:
+    state = load_agent_state(workspace)
+    for task in state.get("tasks", []) or []:
+        if task.get("task_id") == task_id:
+            task.update(apply_task_transition(task, "unknown_external_outcome", "reconciliation_required"))
+            break
+    blocker_id = f"reconciliation:{result.attempt_id}"
+    blocker = {
+        "blocker_type": "reconciliation",
+        "blocker_id": blocker_id,
+        "attempt_id": result.attempt_id,
+        "reason": result.failure_code or "external_outcome_unknown",
+        "next_safe_action": {
+            "action": "reconcile_external_operation",
+            "required_evidence": "operator-supplied external operation receipt",
+        },
+    }
+    state = apply_transition(
+        state,
+        "unknown_external_outcome",
+        {"target_state": "reconciliation_required", "blocker": blocker},
+    )
+    state["current_task"] = task_id
+    save_agent_state(workspace, state)
+    return state
 
 
 def _next_runnable_task(plan: dict[str, Any], status_by_task: dict[str, str]) -> dict[str, Any] | None:

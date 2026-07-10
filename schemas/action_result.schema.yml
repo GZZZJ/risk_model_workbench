@@ -1,0 +1,56 @@
+name: action_result
+version: 1
+required_fields:
+  - schema_version
+  - attempt_id
+  - task_id
+  - action_id
+  - invocation_hash
+  - project
+  - version_id
+  - status
+  - failure_code
+  - next_required_action
+  - retryable
+  - scaffold
+  - message
+  - created_at
+  - retry_count
+  - artifacts
+  - decision
+field_types:
+  schema_version: integer
+  attempt_id: string
+  task_id: string
+  action_id: string
+  invocation_hash: string
+  project: string
+  version_id: string
+  status: string
+  failure_code: string
+  next_required_action: string
+  retryable: boolean
+  scaffold: boolean
+  message: string
+  created_at: string
+  retry_count: integer
+  artifacts: array
+  decision: object_or_null
+status_values:
+  - done
+  - scaffold
+  - failed
+  - review_ready
+next_required_action_values:
+  - none
+  - approval
+  - advisor
+  - user
+  - reconciliation
+field_notes:
+  attempt_id: Binds the semantic result to exactly one execution attempt.
+  invocation_hash: Must match the invocation snapshot executed by the runner.
+  next_required_action: Takes precedence over process exit code when reducing state.
+  scaffold: Must be true if and only if status is scaffold.
+  retry_count: Diagnostic retry count; it never overrides semantic status.
+  decision: Optional structured stage decision copied into the immutable receipt.
