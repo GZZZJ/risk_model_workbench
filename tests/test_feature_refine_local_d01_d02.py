@@ -94,3 +94,96 @@ def test_d01_disabled_returns_all():
     cfg = {"local_d01": {"enabled": False, "iv": 0.02, "corr": 0.8}}
     kept, detail = d01_local_prescreen(parts, ["f_info", "f_noise", "f_corr"], cfg)
     assert set(kept) == {"f_info", "f_noise", "f_corr"}
+
+
+def test_d01_reports_iv_and_correlation_substeps(monkeypatch, tmp_path):
+    from risk_model_workbench import feature_refine
+    from risk_model_workbench.progress import ProgressReporter, load_progress_events
+
+    def fake_iv_filter(dev, features, target, threshold, n_bins):
+        assert target == "_target_"
+        return ["f_noise"], {"f_info": 0.8, "f_noise": 0.0, "f_corr": 0.7}
+
+    def fake_corr_filter(dev, features, iv_dict, threshold):
+        assert features == ["f_info", "f_corr"]
+        return ["f_corr"]
+
+    monkeypatch.setattr(
+        feature_refine,
+        "_load_vendor_feature_select",
+        lambda: (fake_iv_filter, fake_corr_filter, object()),
+    )
+    reporter = ProgressReporter(tmp_path / "version", "feature_refine", emit_terminal=False)
+
+    kept, _ = feature_refine.d01_local_prescreen(
+        _make_parts(n=20),
+        ["f_info", "f_noise", "f_corr"],
+        {"local_d01": {"enabled": True, "iv": 0.02, "corr": 0.8, "n_bins": 10}},
+        progress=reporter,
+    )
+
+    assert kept == ["f_info"]
+    events = load_progress_events(tmp_path / "version")
+    steps = [event["step"] for event in events]
+    assert steps == [
+        "d01_prepare_start",
+        "d01_prepare_done",
+        "d01_iv_start",
+        "d01_iv_done",
+        "d01_corr_start",
+        "d01_corr_done",
+    ]
+    assert events[3]["metrics"]["kept"] == 2
+    assert events[-1]["metrics"]["kept"] == 1
+
+
+def test_d02_reports_psi_substep(monkeypatch, tmp_path):
+    from risk_model_workbench import feature_refine
+    from risk_model_workbench.progress import ProgressReporter, load_progress_events
+
+    def fake_batch_psi(data_iter, features, method, num_nbins):
+        list(data_iter)
+        return None, None, {"f_info": {"oot": 0.1}, "f_noise": {"oot": 0.5}}
+
+    monkeypatch.setattr(
+        feature_refine,
+        "_load_vendor_feature_select",
+        lambda: (object(), object(), fake_batch_psi),
+    )
+    reporter = ProgressReporter(tmp_path / "version", "feature_refine", emit_terminal=False)
+
+    kept, _ = feature_refine.d02_local_psi(
+        _make_parts(n=20),
+        ["f_info", "f_noise"],
+        {"local_d02": {"enabled": True, "psi": 0.2}},
+        progress=reporter,
+    )
+
+    assert kept == ["f_info"]
+    events = load_progress_events(tmp_path / "version")
+    assert [event["step"] for event in events] == ["d02_psi_start", "d02_psi_done"]
+    assert events[-1]["metrics"] == {"input_features": 2, "kept": 1, "dropped": 1}
+
+
+def test_global_correlation_reports_score_matrix_and_scan_progress(tmp_path):
+    from risk_model_workbench.feature_refine import global_corr_select
+    from risk_model_workbench.progress import ProgressReporter, load_progress_events
+
+    parts = _make_parts(n=20)
+    reporter = ProgressReporter(tmp_path / "version", "feature_refine", emit_terminal=False)
+
+    kept, _ = global_corr_select(
+        parts.train_x,
+        parts.train_y,
+        {"global_corr": {"enabled": True, "threshold": 0.8}},
+        progress=reporter,
+    )
+
+    assert kept
+    events = load_progress_events(tmp_path / "version")
+    steps = [event["step"] for event in events]
+    assert "global_corr_score_progress" in steps
+    assert "global_corr_matrix_start" in steps
+    assert "global_corr_matrix_done" in steps
+    assert "global_corr_scan_progress" in steps
+    assert events[-1]["metrics"]["processed_features"] == 3

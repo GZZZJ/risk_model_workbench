@@ -20,6 +20,7 @@ import math
 import os
 import pickle
 import sys
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -271,18 +272,34 @@ def fill_for_model(train_x: pd.DataFrame, valid_x: pd.DataFrame) -> tuple[pd.Dat
     return train_x.fillna(medians).fillna(0), valid_x.fillna(medians).fillna(0)
 
 
-def univariate_auc_scores(x: pd.DataFrame, y: pd.Series) -> pd.Series:
+def univariate_auc_scores(
+    x: pd.DataFrame,
+    y: pd.Series,
+    *,
+    progress: ProgressReporter | None = None,
+) -> pd.Series:
     from sklearn.metrics import roc_auc_score
 
     scores = {}
     y_values = y.to_numpy()
-    for feature in x.columns:
+    total_features = len(x.columns)
+    progress_interval = max(1, total_features // 20)
+    for feature_index, feature in enumerate(x.columns, start=1):
         values = x[feature].fillna(x[feature].median()).fillna(0).to_numpy()
         try:
             auc = roc_auc_score(y_values, values)
             scores[feature] = abs(float(auc) - 0.5)
         except ValueError:
             scores[feature] = 0.0
+        if progress and (feature_index % progress_interval == 0 or feature_index == total_features):
+            progress.emit(
+                step="global_corr_score_progress",
+                message=f"全局相关性去重：变量区分度评分 {feature_index}/{total_features}",
+                current=feature_index,
+                total=total_features,
+                percent=37 + (feature_index / max(total_features, 1)),
+                metrics={"processed_features": feature_index, "total_features": total_features},
+            )
     return pd.Series(scores).sort_values(ascending=False)
 
 
@@ -319,7 +336,11 @@ def _load_vendor_feature_select():
 
 
 def d01_local_prescreen(
-    parts: DatasetParts, available_features: list[str], cfg: dict[str, Any]
+    parts: DatasetParts,
+    available_features: list[str],
+    cfg: dict[str, Any],
+    *,
+    progress: ProgressReporter | None = None,
 ) -> tuple[list[str], pd.DataFrame]:
     """Local-feather d01: missing-rate (already applied upstream by coerce_feature_frame)
     + IV + correlation, on the DEV split. Reuses vendor ``_iv_filter`` + ``_corr_filter``
@@ -335,15 +356,96 @@ def d01_local_prescreen(
     n_bins = int(step_cfg.get("n_bins", 10))
 
     _iv_filter, _corr_filter, _ = _load_vendor_feature_select()
-    dev = parts.train_x.loc[:, available_features].copy()
-    dev["_target_"] = parts.train_y.values
-    iv_drop, iv_dict = _iv_filter(dev, available_features, "_target_", iv_threshold, n_bins=n_bins)
+    if progress:
+        progress.emit(
+            step="d01_prepare_start",
+            message=f"基础质量筛选：正在准备 DEV 数据，输入 {len(available_features)} 个变量",
+            percent=30,
+            metrics={"input_features": len(available_features)},
+        )
+    prepare_heartbeat = (
+        progress.heartbeat(
+            step="d01_prepare_heartbeat",
+            message=f"基础质量筛选：DEV 数据仍在准备，输入 {len(available_features)} 个变量",
+            percent=30,
+            metrics={"input_features": len(available_features)},
+        )
+        if progress
+        else nullcontext()
+    )
+    with prepare_heartbeat:
+        dev = parts.train_x.loc[:, available_features].copy()
+        dev["_target_"] = parts.train_y.values
+    if progress:
+        progress.emit(
+            step="d01_prepare_done",
+            message=f"基础质量筛选：DEV 数据准备完成，共 {len(available_features)} 个变量",
+            percent=30.5,
+            metrics={"input_features": len(available_features)},
+        )
+
+    if progress:
+        progress.emit(
+            step="d01_iv_start",
+            message=f"基础质量筛选：IV 计算开始，输入 {len(available_features)} 个变量",
+            percent=30.5,
+            metrics={"input_features": len(available_features)},
+        )
+    iv_heartbeat = (
+        progress.heartbeat(
+            step="d01_iv_heartbeat",
+            message=f"基础质量筛选：IV 仍在计算，输入 {len(available_features)} 个变量",
+            percent=30.5,
+            metrics={"input_features": len(available_features)},
+        )
+        if progress
+        else nullcontext()
+    )
+    with iv_heartbeat:
+        iv_drop, iv_dict = _iv_filter(dev, available_features, "_target_", iv_threshold, n_bins=n_bins)
     iv_drop_set = set(iv_drop)
     iv_survivors = [feature for feature in available_features if feature not in iv_drop_set]
-    corr_drop = _corr_filter(dev, iv_survivors, iv_dict, corr_threshold)
+    if progress:
+        progress.emit(
+            step="d01_iv_done",
+            message=f"基础质量筛选：IV 计算完成，保留 {len(iv_survivors)} 个变量",
+            percent=31.5,
+            metrics={
+                "input_features": len(available_features),
+                "kept": len(iv_survivors),
+                "dropped": len(iv_drop_set),
+            },
+        )
+
+    if progress:
+        progress.emit(
+            step="d01_corr_start",
+            message=f"基础质量筛选：相关性计算开始，输入 {len(iv_survivors)} 个变量",
+            percent=31.5,
+            metrics={"input_features": len(iv_survivors)},
+        )
+    corr_heartbeat = (
+        progress.heartbeat(
+            step="d01_corr_heartbeat",
+            message=f"基础质量筛选：相关性仍在计算，输入 {len(iv_survivors)} 个变量",
+            percent=31.5,
+            metrics={"input_features": len(iv_survivors)},
+        )
+        if progress
+        else nullcontext()
+    )
+    with corr_heartbeat:
+        corr_drop = _corr_filter(dev, iv_survivors, iv_dict, corr_threshold)
     corr_drop_set = set(corr_drop)
 
     kept = [feature for feature in iv_survivors if feature not in corr_drop_set]
+    if progress:
+        progress.emit(
+            step="d01_corr_done",
+            message=f"基础质量筛选：相关性计算完成，保留 {len(kept)} 个变量",
+            percent=33,
+            metrics={"input_features": len(iv_survivors), "kept": len(kept), "dropped": len(corr_drop_set)},
+        )
     rows = []
     for feature in available_features:
         if feature in iv_drop_set:
@@ -357,7 +459,11 @@ def d01_local_prescreen(
 
 
 def d02_local_psi(
-    parts: DatasetParts, remain_features: list[str], cfg: dict[str, Any]
+    parts: DatasetParts,
+    remain_features: list[str],
+    cfg: dict[str, Any],
+    *,
+    progress: ProgressReporter | None = None,
 ) -> tuple[list[str], pd.DataFrame]:
     """Local-feather d02 stability filter: per-feature PSI (DEV vs OOT). Reuses vendor
     ``batch_psi`` (same function remote ``run_d02`` uses), so local and remote PSI share
@@ -372,13 +478,31 @@ def d02_local_psi(
     psi_threshold = float(step_cfg.get("psi", 0.2))
 
     _, _, batch_psi = _load_vendor_feature_select()
-    data_iter = iter(
-        [
-            ("base_DEV", parts.train_x.loc[:, remain_features]),
-            ("exp_OOT", parts.valid_x.loc[:, remain_features]),
-        ]
+    if progress:
+        progress.emit(
+            step="d02_psi_start",
+            message=f"稳定性筛选：DEV vs OOT PSI 计算开始，输入 {len(remain_features)} 个变量",
+            percent=34,
+            metrics={"input_features": len(remain_features)},
+        )
+    psi_heartbeat = (
+        progress.heartbeat(
+            step="d02_psi_heartbeat",
+            message=f"稳定性筛选：DEV vs OOT PSI 仍在计算，输入 {len(remain_features)} 个变量",
+            percent=34,
+            metrics={"input_features": len(remain_features)},
+        )
+        if progress
+        else nullcontext()
     )
-    psi_result = batch_psi(data_iter, list(remain_features), method="quantile", num_nbins=10)
+    with psi_heartbeat:
+        data_iter = iter(
+            [
+                ("base_DEV", parts.train_x.loc[:, remain_features]),
+                ("exp_OOT", parts.valid_x.loc[:, remain_features]),
+            ]
+        )
+        psi_result = batch_psi(data_iter, list(remain_features), method="quantile", num_nbins=10)
     fea_psi = psi_result[2] if isinstance(psi_result, tuple) and len(psi_result) > 2 else psi_result
     feature_max_psi = {feature: float(max(psi.values())) for feature, psi in fea_psi.items()}
 
@@ -390,20 +514,76 @@ def d02_local_psi(
         if is_kept:
             kept.append(feature)
         rows.append({"feature": feature, "max_psi": psi, "drop_reason": "kept" if is_kept else "high_psi"})
+    if progress:
+        progress.emit(
+            step="d02_psi_done",
+            message=f"稳定性筛选：DEV vs OOT PSI 计算完成，保留 {len(kept)} 个变量",
+            percent=36,
+            metrics={"input_features": len(remain_features), "kept": len(kept), "dropped": len(remain_features) - len(kept)},
+        )
     return kept, pd.DataFrame(rows)
 
 
-def global_corr_select(train_x: pd.DataFrame, train_y: pd.Series, cfg: dict[str, Any]) -> tuple[list[str], pd.DataFrame]:
+def global_corr_select(
+    train_x: pd.DataFrame,
+    train_y: pd.Series,
+    cfg: dict[str, Any],
+    *,
+    progress: ProgressReporter | None = None,
+) -> tuple[list[str], pd.DataFrame]:
     step_cfg = cfg["global_corr"]
     if not step_cfg.get("enabled", True):
         return list(train_x.columns), pd.DataFrame()
 
     threshold = float(step_cfg["threshold"])
-    scores = univariate_auc_scores(train_x, train_y)
-    corr = train_x.loc[:, scores.index].corr().abs().fillna(0)
+    if progress:
+        progress.emit(
+            step="global_corr_score_start",
+            message=f"全局相关性去重：变量区分度评分开始，共 {len(train_x.columns)} 个变量",
+            percent=37,
+            metrics={"total_features": len(train_x.columns)},
+        )
+    scores = univariate_auc_scores(train_x, train_y, progress=progress)
+    if progress:
+        progress.emit(
+            step="global_corr_score_done",
+            message=f"全局相关性去重：变量区分度评分完成，共 {len(scores)} 个变量",
+            percent=38,
+            metrics={"total_features": len(scores)},
+        )
+
+    if progress:
+        progress.emit(
+            step="global_corr_matrix_start",
+            message=f"全局相关性去重：相关矩阵计算开始，输入 {len(scores)} 个变量",
+            percent=38,
+            metrics={"input_features": len(scores)},
+        )
+    matrix_heartbeat = (
+        progress.heartbeat(
+            step="global_corr_matrix_heartbeat",
+            message=f"全局相关性去重：相关矩阵仍在计算，输入 {len(scores)} 个变量",
+            percent=38,
+            metrics={"input_features": len(scores)},
+        )
+        if progress
+        else nullcontext()
+    )
+    with matrix_heartbeat:
+        corr = train_x.loc[:, scores.index].corr().abs().fillna(0)
+    if progress:
+        progress.emit(
+            step="global_corr_matrix_done",
+            message=f"全局相关性去重：相关矩阵计算完成，共 {len(scores)} 个变量",
+            percent=39,
+            metrics={"input_features": len(scores)},
+        )
+
     kept: list[str] = []
     dropped = []
-    for feature in scores.index:
+    total_features = len(scores)
+    progress_interval = max(1, total_features // 20)
+    for feature_index, feature in enumerate(scores.index, start=1):
         matched = [kept_feature for kept_feature in kept if corr.loc[feature, kept_feature] >= threshold]
         if matched:
             best_match = max(matched, key=lambda item: corr.loc[feature, item])
@@ -419,6 +599,23 @@ def global_corr_select(train_x: pd.DataFrame, train_y: pd.Series, cfg: dict[str,
             )
         else:
             kept.append(feature)
+        if progress and (feature_index % progress_interval == 0 or feature_index == total_features):
+            progress.emit(
+                step="global_corr_scan_progress",
+                message=(
+                    f"全局相关性去重：候选扫描 {feature_index}/{total_features}，"
+                    f"当前保留 {len(kept)} 个"
+                ),
+                current=feature_index,
+                total=total_features,
+                percent=39 + (feature_index / max(total_features, 1)),
+                metrics={
+                    "processed_features": feature_index,
+                    "total_features": total_features,
+                    "kept": len(kept),
+                    "dropped": len(dropped),
+                },
+            )
     return kept, pd.DataFrame(dropped)
 
 
@@ -583,20 +780,57 @@ def d03_noise_survival(
             valid_x[random_feature] = rng.normal(size=len(valid_x))
         round_parts = DatasetParts(train_x, parts.train_y, valid_x, parts.valid_y)
         model_features = features + random_features
-        model, auc = train_lgbm(round_parts, model_features, cfg, seed=int(cfg["random_seed"]) + 100 + round_index)
+        round_percent = 45 + (round_index / max(rounds, 1)) * 15
+        if progress:
+            progress.emit(
+                step="d03_round_start",
+                message=(
+                    f"随机重要性筛选第 {round_index + 1}/{rounds} 轮开始，"
+                    f"真实变量 {len(features)} 个，随机噪声变量 {len(random_features)} 个"
+                ),
+                current=round_index,
+                total=rounds,
+                percent=round_percent,
+                metrics={
+                    "round": round_index + 1,
+                    "rounds": rounds,
+                    "features": len(features),
+                    "random_features": len(random_features),
+                },
+            )
+        heartbeat = (
+            progress.heartbeat(
+                step="d03_round_heartbeat",
+                message=(
+                    f"随机重要性筛选仍在训练：第 {round_index + 1}/{rounds} 轮，"
+                    f"真实变量 {len(features)} 个，随机噪声变量 {len(random_features)} 个"
+                ),
+                percent=round_percent,
+                metrics={
+                    "round": round_index + 1,
+                    "rounds": rounds,
+                    "features": len(features),
+                    "random_features": len(random_features),
+                },
+            )
+            if progress
+            else nullcontext()
+        )
+        with heartbeat:
+            model, auc = train_lgbm(round_parts, model_features, cfg, seed=int(cfg["random_seed"]) + 100 + round_index)
         importance = model_importance(model, model_features)
         random_imp = importance[importance["feature"].isin(random_features)]
         gain_threshold = float(random_imp["gain"].max())
         split_threshold = float(random_imp["split"].max())
         real_imp = importance[~importance["feature"].isin(random_features)]
         round_surv = int(((real_imp["gain"] > gain_threshold) & ((not zero_importance_drop) | (real_imp["split"] > 0))).sum())
-        print(f"[D03] round={round_index} n_feat={len(features)} auc={auc:.4f} "
+        print(f"[random_importance] round={round_index} n_feat={len(features)} auc={auc:.4f} "
               f"gain_th={gain_threshold:.2f} max_real_gain={real_imp['gain'].max():.2f} "
               f"round_surv={round_surv}/{len(features)}")
         if progress:
             progress.emit(
                 step="d03_round",
-                message=f"D03 随机重要性第 {round_index + 1}/{rounds} 轮完成，AUC={auc:.4f}，存活 {round_surv} 个变量",
+                message=f"随机重要性筛选第 {round_index + 1}/{rounds} 轮完成，AUC={auc:.4f}，存活 {round_surv} 个变量",
                 current=round_index + 1,
                 total=rounds,
                 percent=45 + ((round_index + 1) / max(rounds, 1)) * 15,
@@ -635,7 +869,7 @@ def d03_feature_select_v2(
     rng = np.random.default_rng(int(cfg["random_seed"]))
     random_col = str(step_cfg.get("random_column", "random_col"))
     if random_col in features:
-        raise ValueError(f"D03 random_column conflicts with real feature: {random_col}")
+        raise ValueError(f"随机重要性筛选 random_column conflicts with real feature: {random_col}")
 
     bagging_rounds = int(step_cfg.get("bagging_rounds", step_cfg.get("d03_bagging_round", 5)))
     bagging_fraction = float(step_cfg.get("bagging_fraction", step_cfg.get("d03_bagging_fraction", 0.5)))
@@ -655,6 +889,18 @@ def d03_feature_select_v2(
     rows = []
 
     for bagging_index in range(bagging_rounds):
+        if progress:
+            progress.emit(
+                step="d03_v2_bagging_start",
+                message=(
+                    f"随机重要性筛选第 {bagging_index + 1}/{bagging_rounds} 轮开始，"
+                    f"输入 {len(features)} 个变量"
+                ),
+                current=bagging_index,
+                total=bagging_rounds,
+                percent=45 + (bagging_index / max(bagging_rounds, 1)) * 15,
+                metrics={"round": bagging_index + 1, "rounds": bagging_rounds, "features": len(features)},
+            )
         sample_seed = int(rng.integers(10000))
         bag_frame = train_frame.sample(frac=bagging_fraction, random_state=sample_seed).reset_index(drop=True)
         bag_x = bag_frame.drop(columns=[target_col])
@@ -667,13 +913,54 @@ def d03_feature_select_v2(
 
         for iter_index in range(iter_rounds):
             final_iter_index = iter_index
-            model, train_auc = train_feature_select_v2_model(
-                bag_x.loc[:, model_features],
-                bag_y,
-                model_features,
-                cfg,
-                seed=int(cfg["random_seed"]) + 100 + bagging_index * 100 + iter_index,
+            iteration_percent = 45 + (
+                (bagging_index + iter_index / max(iter_rounds, 1)) / max(bagging_rounds, 1)
+            ) * 15
+            if progress:
+                progress.emit(
+                    step="d03_v2_iteration_start",
+                    message=(
+                        f"随机重要性筛选第 {bagging_index + 1}/{bagging_rounds} 轮，"
+                        f"第 {iter_index + 1}/{iter_rounds} 次模型训练开始，候选 {len(model_features) - 1} 个变量"
+                    ),
+                    current=bagging_index,
+                    total=bagging_rounds,
+                    percent=iteration_percent,
+                    metrics={
+                        "round": bagging_index + 1,
+                        "rounds": bagging_rounds,
+                        "iteration": iter_index + 1,
+                        "iterations": iter_rounds,
+                        "candidate_features": len(model_features) - 1,
+                    },
+                )
+            heartbeat = (
+                progress.heartbeat(
+                    step="d03_v2_iteration_heartbeat",
+                    message=(
+                        f"随机重要性筛选仍在训练：第 {bagging_index + 1}/{bagging_rounds} 轮，"
+                        f"第 {iter_index + 1}/{iter_rounds} 次，候选 {len(model_features) - 1} 个变量"
+                    ),
+                    percent=iteration_percent,
+                    metrics={
+                        "round": bagging_index + 1,
+                        "rounds": bagging_rounds,
+                        "iteration": iter_index + 1,
+                        "iterations": iter_rounds,
+                        "candidate_features": len(model_features) - 1,
+                    },
+                )
+                if progress
+                else nullcontext()
             )
+            with heartbeat:
+                model, train_auc = train_feature_select_v2_model(
+                    bag_x.loc[:, model_features],
+                    bag_y,
+                    model_features,
+                    cfg,
+                    seed=int(cfg["random_seed"]) + 100 + bagging_index * 100 + iter_index,
+                )
             importance = model_importance(model, model_features)
             final_drop_sets, final_detail = select_feature_select_v2_drops(
                 importance,
@@ -683,6 +970,27 @@ def d03_feature_select_v2(
                 weight=weight,
             )
             dropped_this_iter = set().union(*final_drop_sets.values())
+            if progress:
+                progress.emit(
+                    step="d03_v2_iteration_done",
+                    message=(
+                        f"随机重要性筛选第 {bagging_index + 1}/{bagging_rounds} 轮，"
+                        f"第 {iter_index + 1}/{iter_rounds} 次模型训练完成，"
+                        f"本次标记剔除 {max(0, len(dropped_this_iter) - (1 if random_col in dropped_this_iter else 0))} 个变量"
+                    ),
+                    current=bagging_index,
+                    total=bagging_rounds,
+                    percent=iteration_percent,
+                    metrics={
+                        "round": bagging_index + 1,
+                        "rounds": bagging_rounds,
+                        "iteration": iter_index + 1,
+                        "iterations": iter_rounds,
+                        "train_auc": train_auc,
+                        "candidate_features": len(model_features) - 1,
+                        "dropped": max(0, len(dropped_this_iter) - (1 if random_col in dropped_this_iter else 0)),
+                    },
+                )
             model_features = sorted(dropped_this_iter) + [random_col]
             if not dropped_this_iter:
                 break
@@ -690,13 +998,13 @@ def d03_feature_select_v2(
         dropped_round = set().union(*final_drop_sets.values())
         real_dropped_round = dropped_round - {random_col}
         dropped_all.update(real_dropped_round)
-        print(f"[D03-v2] bagging_round={bagging_index} n_feat={len(features)} train_auc={train_auc:.4f} "
+        print(f"[random_importance_v2] bagging_round={bagging_index} n_feat={len(features)} train_auc={train_auc:.4f} "
               f"dropped={len(real_dropped_round)} kept={len(features) - len(real_dropped_round)}")
         if progress:
             progress.emit(
                 step="d03_v2_bagging_round",
                 message=(
-                    f"D03 feature-select-v2 第 {bagging_index + 1}/{bagging_rounds} 轮完成，"
+                    f"随机重要性筛选第 {bagging_index + 1}/{bagging_rounds} 轮完成，"
                     f"训练 AUC={train_auc:.4f}，保留 {len(features) - len(real_dropped_round)} 个变量"
                 ),
                 current=bagging_index + 1,
@@ -765,14 +1073,34 @@ def d04_null_importance(
     null_gains = {feature: [] for feature in working_features}
 
     for round_index in range(real_rounds):
-        model, _ = train_lgbm(parts, working_features, cfg, seed=seed + 200 + round_index)
+        if progress:
+            progress.emit(
+                step="d04_real_round_start",
+                message=f"空标签重要性筛选：真实标签模型第 {round_index + 1}/{real_rounds} 轮开始",
+                current=round_index,
+                total=real_rounds,
+                percent=62 + (round_index / max(real_rounds, 1)) * 8,
+                metrics={"round": round_index + 1, "rounds": real_rounds, "features": len(working_features)},
+            )
+        heartbeat = (
+            progress.heartbeat(
+                step="d04_real_round_heartbeat",
+                message=f"空标签重要性筛选仍在训练真实标签模型：第 {round_index + 1}/{real_rounds} 轮",
+                percent=62 + (round_index / max(real_rounds, 1)) * 8,
+                metrics={"round": round_index + 1, "rounds": real_rounds, "features": len(working_features)},
+            )
+            if progress
+            else nullcontext()
+        )
+        with heartbeat:
+            model, _ = train_lgbm(parts, working_features, cfg, seed=seed + 200 + round_index)
         importance = model_importance(model, working_features)
         for row in importance.itertuples(index=False):
             real_gains[row.feature].append(float(row.gain))
         if progress:
             progress.emit(
                 step="d04_real_round",
-                message=f"D04 真实重要性第 {round_index + 1}/{real_rounds} 轮完成",
+                message=f"空标签重要性筛选：真实标签模型第 {round_index + 1}/{real_rounds} 轮完成",
                 current=round_index + 1,
                 total=real_rounds,
                 percent=62 + ((round_index + 1) / max(real_rounds, 1)) * 8,
@@ -787,14 +1115,34 @@ def d04_null_importance(
             parts.valid_x,
             parts.valid_y,
         )
-        model, _ = train_lgbm(shuffled_parts, working_features, cfg, seed=seed + 300 + round_index)
+        if progress:
+            progress.emit(
+                step="d04_null_round_start",
+                message=f"空标签重要性筛选：空标签模型第 {round_index + 1}/{null_rounds} 轮开始",
+                current=round_index,
+                total=null_rounds,
+                percent=70 + (round_index / max(null_rounds, 1)) * 12,
+                metrics={"round": round_index + 1, "rounds": null_rounds, "features": len(working_features)},
+            )
+        heartbeat = (
+            progress.heartbeat(
+                step="d04_null_round_heartbeat",
+                message=f"空标签重要性筛选仍在训练空标签模型：第 {round_index + 1}/{null_rounds} 轮",
+                percent=70 + (round_index / max(null_rounds, 1)) * 12,
+                metrics={"round": round_index + 1, "rounds": null_rounds, "features": len(working_features)},
+            )
+            if progress
+            else nullcontext()
+        )
+        with heartbeat:
+            model, _ = train_lgbm(shuffled_parts, working_features, cfg, seed=seed + 300 + round_index)
         importance = model_importance(model, working_features)
         for row in importance.itertuples(index=False):
             null_gains[row.feature].append(float(row.gain))
         if progress:
             progress.emit(
                 step="d04_null_round",
-                message=f"D04 空重要性第 {round_index + 1}/{null_rounds} 轮完成",
+                message=f"空标签重要性筛选：空标签模型第 {round_index + 1}/{null_rounds} 轮完成",
                 current=round_index + 1,
                 total=null_rounds,
                 percent=70 + ((round_index + 1) / max(null_rounds, 1)) * 12,
@@ -837,15 +1185,26 @@ def d05_top_importance(
         return features[:keep_top_n], pd.DataFrame(), float("nan")
 
     if progress:
-        progress.emit(step="d05_train", message=f"D05 基准模型重要性训练开始，输入 {len(features)} 个变量", percent=84)
-    model, auc = train_lgbm(parts, features, cfg, seed=int(cfg["random_seed"]) + 500)
+        progress.emit(step="d05_train", message=f"基线模型重要性筛选开始，输入 {len(features)} 个变量", percent=84)
+    heartbeat = (
+        progress.heartbeat(
+            step="d05_train_heartbeat",
+            message=f"基线模型重要性筛选仍在训练，输入 {len(features)} 个变量",
+            percent=84,
+            metrics={"input_features": len(features), "keep_top_n": keep_top_n},
+        )
+        if progress
+        else nullcontext()
+    )
+    with heartbeat:
+        model, auc = train_lgbm(parts, features, cfg, seed=int(cfg["random_seed"]) + 500)
     importance = model_importance(model, features).sort_values("gain", ascending=False).reset_index(drop=True)
     importance["rank"] = np.arange(1, len(importance) + 1)
     kept = importance.head(keep_top_n)["feature"].tolist()
     if progress:
         progress.emit(
             step="d05_done",
-            message=f"D05 基准模型重要性完成，AUC={auc:.4f}，最终保留 {len(kept)} 个变量",
+            message=f"基线模型重要性筛选完成，AUC={auc:.4f}，最终保留 {len(kept)} 个变量",
             percent=90,
             metrics={"auc": auc, "input_features": len(features), "final_features": len(kept)},
         )
@@ -1035,24 +1394,69 @@ def main(argv: list[str] | None = None) -> int:
             },
         )
 
-    d01_kept, d01_detail = d01_local_prescreen(parts, available_features, cfg)
-    d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg)
+    if reporter:
+        reporter.emit(
+            step="d01_start",
+            message=f"基础质量筛选开始：缺失率、IV、相关性，输入 {len(available_features)} 个变量",
+            percent=30,
+            metrics={"input_features": len(available_features)},
+        )
+    d01_kept, d01_detail = d01_local_prescreen(parts, available_features, cfg, progress=reporter)
+    if reporter:
+        reporter.emit(
+            step="d01_done",
+            message=f"基础质量筛选完成，保留 {len(d01_kept)} 个，剔除 {len(available_features) - len(d01_kept)} 个",
+            percent=33,
+            metrics={
+                "input_features": len(available_features),
+                "kept": len(d01_kept),
+                "dropped": len(available_features) - len(d01_kept),
+            },
+        )
+
+    if reporter:
+        reporter.emit(
+            step="d02_start",
+            message=f"稳定性筛选开始：DEV vs OOT PSI，输入 {len(d01_kept)} 个变量",
+            percent=34,
+            metrics={"input_features": len(d01_kept)},
+        )
+    d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg, progress=reporter)
+    if reporter:
+        reporter.emit(
+            step="d02_done",
+            message=f"稳定性筛选完成，保留 {len(d02_kept)} 个，剔除 {len(d01_kept) - len(d02_kept)} 个",
+            percent=36,
+            metrics={"input_features": len(d01_kept), "kept": len(d02_kept), "dropped": len(d01_kept) - len(d02_kept)},
+        )
     memory_tracker.record("d01_d02_done", d01_kept=len(d01_kept), d02_kept=len(d02_kept))
     print(
-        f"[STAGE] after_d01: {len(d01_kept)} (dropped {len(available_features) - len(d01_kept)}) "
-        f"| after_d02: {len(d02_kept)} (dropped {len(d01_kept) - len(d02_kept)})"
+        f"[STAGE] quality_filter: {len(d01_kept)} kept (dropped {len(available_features) - len(d01_kept)}) "
+        f"| stability_filter: {len(d02_kept)} kept (dropped {len(d01_kept) - len(d02_kept)})"
     )
-    corr_features, corr_drops = global_corr_select(parts.train_x.loc[:, d02_kept], parts.train_y, cfg)
+    if reporter:
+        reporter.emit(
+            step="global_corr_start",
+            message=f"全局相关性去重开始，输入 {len(d02_kept)} 个变量",
+            percent=37,
+            metrics={"input_features": len(d02_kept)},
+        )
+    corr_features, corr_drops = global_corr_select(
+        parts.train_x.loc[:, d02_kept],
+        parts.train_y,
+        cfg,
+        progress=reporter,
+    )
     memory_tracker.record(
         "global_corr_done",
         kept=len(corr_features),
         dropped=len(corr_drops),
     )
-    print(f"[STAGE] after_global_corr: {len(corr_features)} (dropped {len(corr_drops)})")
+    print(f"[STAGE] global_correlation: {len(corr_features)} kept (dropped {len(corr_drops)})")
     if reporter:
         reporter.emit(
             step="global_corr_done",
-            message=f"全局相关性筛选完成，保留 {len(corr_features)} 个，剔除 {len(corr_drops)} 个",
+            message=f"全局相关性去重完成，保留 {len(corr_features)} 个，剔除 {len(corr_drops)} 个",
             percent=40,
             metrics={"kept": len(corr_features), "dropped": len(corr_drops)},
         )
@@ -1063,18 +1467,18 @@ def main(argv: list[str] | None = None) -> int:
         kept=len(d03_features),
         dropped=len(corr_features) - len(d03_features),
     )
-    print(f"[STAGE] after_d03: {len(d03_features)} (dropped {len(corr_features) - len(d03_features)})")
+    print(f"[STAGE] random_importance: {len(d03_features)} kept (dropped {len(corr_features) - len(d03_features)})")
     if reporter:
         reporter.emit(
             step="d03_done",
-            message=f"D03 随机重要性完成，保留 {len(d03_features)} 个，剔除 {len(corr_features) - len(d03_features)} 个",
+            message=f"随机重要性筛选完成，保留 {len(d03_features)} 个，剔除 {len(corr_features) - len(d03_features)} 个",
             percent=60,
             metrics={"kept": len(d03_features), "dropped": len(corr_features) - len(d03_features)},
         )
     if len(d03_features) == 0:
-        print("[FATAL] D03 eliminated all features, aborting", file=sys.stderr)
+        print("[FATAL] random importance selection eliminated all features, aborting", file=sys.stderr)
         if reporter:
-            reporter.emit(step="d03_failed", status="failed", message="D03 剔除了全部变量，流程中止", level="error")
+            reporter.emit(step="d03_failed", status="failed", message="随机重要性筛选剔除了全部变量，流程中止", level="error")
         return 1
     parts_d03 = DatasetParts(parts_corr.train_x.loc[:, d03_features], parts_corr.train_y, parts_corr.valid_x.loc[:, d03_features], parts_corr.valid_y)
     d04_features, d04_detail = d04_null_importance(parts_d03, d03_features, cfg, progress=reporter)
@@ -1086,7 +1490,7 @@ def main(argv: list[str] | None = None) -> int:
     if reporter:
         reporter.emit(
             step="d04_done",
-            message=f"D04 空重要性完成，保留 {len(d04_features)} 个，剔除 {len(d03_features) - len(d04_features)} 个",
+            message=f"空标签重要性筛选完成，保留 {len(d04_features)} 个，剔除 {len(d03_features) - len(d04_features)} 个",
             percent=82,
             metrics={"kept": len(d04_features), "dropped": len(d03_features) - len(d04_features)},
         )
@@ -1177,7 +1581,20 @@ def main(argv: list[str] | None = None) -> int:
             status="done",
             message=f"特征精筛产物写入完成，最终保留 {len(final_features)} 个变量",
             percent=100,
-            metrics={"final_features": len(final_features), "output_dir": str(output_dir)},
+            metrics={
+                "final_features": len(final_features),
+                "output_dir": str(output_dir),
+                "feature_funnel": {
+                    "initial": len(initial_features),
+                    "available_after_preprocess": len(available_features),
+                    "after_quality_filter": len(d01_kept),
+                    "after_stability_filter": len(d02_kept),
+                    "after_global_correlation": len(corr_features),
+                    "after_random_importance": len(d03_features),
+                    "after_null_importance": len(d04_features),
+                    "final": len(final_features),
+                },
+            },
         )
     return 0
 

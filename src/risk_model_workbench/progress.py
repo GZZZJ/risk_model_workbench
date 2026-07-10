@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
+import threading
 import time
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -137,6 +139,18 @@ def format_progress_report(
                 f"heartbeat_at: {latest.get('timestamp', '')}",
             ]
         )
+        heartbeat_age = _heartbeat_age_seconds(latest.get("timestamp"))
+        latest_status = latest.get("status")
+        if heartbeat_age is not None and latest_status == "waiting_for_approval":
+            lines.append(f"waiting_age: {format_elapsed(heartbeat_age)}")
+            lines.append("status_note: 正在等待人工审批")
+        elif heartbeat_age is not None and latest_status in {"started", "running"}:
+            lines.append(f"heartbeat_age: {format_elapsed(heartbeat_age)}")
+            if heartbeat_age >= 120:
+                lines.append("heartbeat_note: 最近没有新进度事件，可能处于长耗时计算或进程已停止")
+    feature_funnel = _feature_funnel(summary, current_stage=current_stage, events=events)
+    if feature_funnel:
+        lines.extend(_format_feature_funnel(feature_funnel))
     stage_progress = (run_state.get("stages") or {}).get(current_stage, {}).get("progress", {})
     if stage_progress and not summary:
         percent = stage_progress.get("percent")
@@ -153,6 +167,62 @@ def format_progress_report(
         for event in events:
             lines.append(f"  - {format_progress_event(event)}")
     return "\n".join(lines) + "\n"
+
+
+def _heartbeat_age_seconds(timestamp: Any) -> float | None:
+    if not timestamp:
+        return None
+    try:
+        event_time = datetime.fromisoformat(str(timestamp))
+    except ValueError:
+        return None
+    now = datetime.now(tz=event_time.tzinfo) if event_time.tzinfo else datetime.now()
+    return max(0.0, (now - event_time).total_seconds())
+
+
+def _feature_funnel(
+    summary: dict[str, Any],
+    *,
+    current_stage: str,
+    events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    stage_summary = (summary.get("stages") or {}).get(current_stage, {})
+    if isinstance(stage_summary.get("feature_funnel"), dict):
+        return dict(stage_summary["feature_funnel"])
+
+    latest_metrics = (summary.get("latest_event") or {}).get("metrics") or {}
+    if isinstance(latest_metrics.get("feature_funnel"), dict):
+        return dict(latest_metrics["feature_funnel"])
+
+    for event in reversed(events):
+        if event.get("stage") != current_stage:
+            continue
+        if event.get("step") == "stage_started":
+            break
+        metrics = event.get("metrics") or {}
+        if isinstance(metrics.get("feature_funnel"), dict):
+            return dict(metrics["feature_funnel"])
+    return {}
+
+
+def _format_feature_funnel(funnel: dict[str, Any]) -> list[str]:
+    labels = [
+        ("initial", "初始"),
+        ("available_after_preprocess", "预处理可用"),
+        ("after_quality_filter", "基础质量筛选"),
+        ("after_stability_filter", "稳定性筛选"),
+        ("after_global_correlation", "全局相关性去重"),
+        ("after_random_importance", "随机重要性筛选"),
+        ("after_null_importance", "空标签重要性筛选"),
+        ("final", "最终"),
+    ]
+    items = [f"{label} {funnel[key]}" for key, label in labels if funnel.get(key) is not None]
+    if not items:
+        return []
+    lines = ["feature_funnel:", f"  {' -> '.join(items[:4])}"]
+    if len(items) > 4:
+        lines.append(f"  -> {' -> '.join(items[4:])}")
+    return lines
 
 
 class ProgressReporter:
@@ -180,6 +250,7 @@ class ProgressReporter:
         metrics: dict[str, Any] | None = None,
         level: str = "info",
         emit_terminal: bool | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> dict[str, Any]:
         event = build_event(
             run_dir=self.run_dir,
@@ -195,14 +266,105 @@ class ProgressReporter:
             level=level,
         )
         should_print = self.emit_terminal if emit_terminal is None else emit_terminal
-        if should_print:
+        if cancel_event is not None and cancel_event.is_set():
+            return event
+        if should_print and cancel_event is None:
             print(format_progress_event(event), flush=True)
         if self.run_dir:
-            append_progress_event(self.run_dir, event)
+            written = append_progress_event(self.run_dir, event, cancel_event=cancel_event)
+            if not written:
+                return event
+        if should_print and cancel_event is not None and not cancel_event.is_set():
+            print(format_progress_event(event), flush=True)
         return event
 
     def _elapsed_seconds(self) -> float:
         return round(time.time() - self._created_at, 3)
+
+    def heartbeat(
+        self,
+        *,
+        step: str,
+        message: str,
+        percent: float | None = None,
+        metrics: dict[str, Any] | Callable[[], dict[str, Any]] | None = None,
+        interval_seconds: float = 60.0,
+        shutdown_timeout_seconds: float = 1.0,
+        level: str = "info",
+    ) -> "ProgressHeartbeat":
+        return ProgressHeartbeat(
+            self,
+            step=step,
+            message=message,
+            percent=percent,
+            metrics=metrics,
+            interval_seconds=interval_seconds,
+            shutdown_timeout_seconds=shutdown_timeout_seconds,
+            level=level,
+        )
+
+
+class ProgressHeartbeat:
+    """Emit repeated progress events while a blocking operation is running."""
+
+    def __init__(
+        self,
+        reporter: ProgressReporter,
+        *,
+        step: str,
+        message: str,
+        percent: float | None,
+        metrics: dict[str, Any] | Callable[[], dict[str, Any]] | None,
+        interval_seconds: float,
+        shutdown_timeout_seconds: float,
+        level: str,
+    ) -> None:
+        self.reporter = reporter
+        self.step = step
+        self.message = message
+        self.percent = percent
+        self.metrics = metrics
+        self.interval_seconds = max(0.001, float(interval_seconds))
+        self.shutdown_timeout_seconds = max(0.0, float(shutdown_timeout_seconds))
+        self.level = level
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def __enter__(self) -> "ProgressHeartbeat":
+        if not self.reporter.run_dir and not self.reporter.emit_terminal:
+            return self
+        self._thread = threading.Thread(target=self._run, name=f"rmw-progress-{self.step}", daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=self.shutdown_timeout_seconds)
+
+    def _run(self) -> None:
+        while not self._stop.wait(self.interval_seconds):
+            if self._stop.is_set():
+                return
+            try:
+                metrics = self._metrics()
+                if self._stop.is_set():
+                    return
+                self.reporter.emit(
+                    step=self.step,
+                    message=self.message,
+                    percent=self.percent,
+                    metrics=metrics,
+                    level=self.level,
+                    cancel_event=self._stop,
+                )
+            except Exception:
+                return
+
+    def _metrics(self) -> dict[str, Any]:
+        if callable(self.metrics):
+            return dict(self.metrics())
+        return dict(self.metrics or {})
 
 
 def build_event(
@@ -243,16 +405,24 @@ def build_event(
     }
 
 
-def append_progress_event(run_dir: str | Path, event: dict[str, Any]) -> None:
+def append_progress_event(
+    run_dir: str | Path,
+    event: dict[str, Any],
+    *,
+    cancel_event: threading.Event | None = None,
+) -> bool:
     run_path = Path(run_dir)
     path = progress_events_path(run_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with _progress_lock(run_path):
+        if cancel_event is not None and cancel_event.is_set():
+            return False
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(event, ensure_ascii=False, default=str) + "\n")
             handle.flush()
         _write_progress_summary(run_path, event)
         _update_run_state_progress(run_path, event)
+    return True
 
 
 @contextmanager
@@ -344,6 +514,11 @@ def _write_progress_summary(run_dir: Path, event: dict[str, Any]) -> None:
             "updated_at": event["timestamp"],
         }
     )
+    if event.get("step") == "stage_started":
+        stage_summary.pop("feature_funnel", None)
+    event_metrics = event.get("metrics") or {}
+    if isinstance(event_metrics.get("feature_funnel"), dict):
+        stage_summary["feature_funnel"] = dict(event_metrics["feature_funnel"])
     by_stage[event["stage"]] = stage_summary
     payload = {
         "version": 1,
@@ -355,8 +530,10 @@ def _write_progress_summary(run_dir: Path, event: dict[str, Any]) -> None:
         "latest_event": event,
         "stages": by_stage,
     }
-    summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8")
+    _atomic_write_text(
+        summary_path,
+        json.dumps(payload, ensure_ascii=False, indent=2, default=str) + "\n",
+    )
 
 
 def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
@@ -380,8 +557,31 @@ def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
         "last_event_status": event["status"],
     }
     state["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    with path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(state, handle, allow_unicode=True, sort_keys=False)
+    _atomic_write_text(path, yaml.safe_dump(state, allow_unicode=True, sort_keys=False))
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = (path.stat().st_mode & 0o777) if path.exists() else 0o644
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temp_path = Path(handle.name)
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temp_path, mode)
+        os.replace(temp_path, path)
+    finally:
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink()
 
 
 def _run_id(run_dir: Path | None) -> str:
