@@ -17,6 +17,17 @@ from typing import Any
 import yaml
 
 from risk_model_workbench.cli_meta import add_metadata_parsers
+from risk_model_workbench.agent.advisor import (
+    accept_advisor_response,
+    advisor_request_is_answered,
+    list_advisor_requests,
+    load_advisor_request,
+)
+from risk_model_workbench.agent.approvals import approve_request
+from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.plan import agent_tool_schema, bind_agent_plan, save_agent_plan
+from risk_model_workbench.agent.state import init_agent_state, load_agent_state
+from risk_model_workbench.agent.trace import append_trace, load_recent_trace
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
 from risk_model_workbench.harness.errors import SQL_APPROVAL_REQUIRED
@@ -53,6 +64,7 @@ from risk_model_workbench.request import parse_model_request, validate_model_req
 from risk_model_workbench.request.materialize import RUNTIME_CONFIG_DIR, materialize_request_runtime_configs
 from risk_model_workbench.request.training import merge_training_config, project_training_defaults
 from risk_model_workbench.rules import format_rules, load_workbench_rules, promote_lesson_to_rule
+from risk_model_workbench.registry import load_artifact_manifest
 from risk_model_workbench.state import (
     append_decision,
     create_run_state,
@@ -1397,6 +1409,240 @@ def cmd_plan_create(args: argparse.Namespace) -> int:
     print(f"task_count: {len(plan['tasks'])}")
     for warning in validation["warnings"]:
         print(f"warning: {warning}")
+    return 0
+
+
+def cmd_agent_start(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    if cmd_project_validate(argparse.Namespace(project=str(project_dir))) != 0:
+        return 1
+
+    request_path = Path(args.request)
+    request_path = request_path if request_path.is_absolute() else (REPO_ROOT / request_path)
+    try:
+        request_doc = parse_model_request(request_path)
+    except Exception as exc:
+        print(f"agent start failed: request parse failed: {exc}")
+        return 1
+    if args.workflow:
+        request_doc["metadata"]["workflow"] = args.workflow
+    validation = validate_model_request(request_doc, project_dir)
+    blocking = _split_blocking_errors(validation, args)
+    if blocking:
+        print("agent start failed: request validation failed:")
+        for error in blocking:
+            print(f"- {error}")
+        return 1
+
+    execution_plan = create_execution_plan(request_doc, project_dir)
+    plan_output = project_dir / "requests" / f"{request_doc['metadata']['request_id']}.execution_plan.yml"
+    execution_plan_path = save_execution_plan(execution_plan, plan_output)
+
+    init_args = argparse.Namespace(
+        project=str(project_dir),
+        workflow=args.workflow,
+        version_id=args.version_id,
+        display_name=args.display_name,
+        source_type="workbench",
+        request=str(request_path),
+        plan=str(execution_plan_path),
+        force=False,
+        skip_split_check=False,
+    )
+    if cmd_version_init(init_args) != 0:
+        return 1
+
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    agent_plan = bind_agent_plan(execution_plan, project_dir=project_dir, version_id=args.version_id)
+    save_agent_plan(workspace, agent_plan)
+    init_agent_state(workspace, project=str(project_dir), version_id=args.version_id, agent_plan=agent_plan)
+    append_trace(
+        workspace,
+        "observation",
+        {
+            "summary": "RMW Agent initialized.",
+            "version_id": args.version_id,
+            "request": str(request_path),
+            "execution_plan": str(execution_plan_path),
+        },
+    )
+    register_artifact(workspace, "validate_config", "agent_plan.yml", description="Bound Agent execution plan")
+    register_artifact(workspace, "validate_config", "audit/agent_state.yml", description="Agent runtime state")
+    register_artifact(workspace, "validate_config", "audit/agent_trace.jsonl", description="Agent trace log")
+    print(f"agent_plan: {workspace / 'agent_plan.yml'}")
+    print(f"agent_state: {workspace / 'audit' / 'agent_state.yml'}")
+    if args.execute:
+        state = run_agent(project_dir, args.version_id, runner=main)
+        print(f"agent_status: {state.get('status')}")
+    return 0
+
+
+def cmd_agent_run(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    state = run_agent(project_dir, args.version_id, runner=main)
+    print(f"agent_status: {state.get('status')}")
+    blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
+    if blocker:
+        print(f"blocker: {blocker.get('reason', '')}")
+    return 0 if state.get("status") not in {"failed", "blocked"} else 1
+
+
+def cmd_agent_resume(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        state = load_agent_state(workspace)
+    except FileNotFoundError as exc:
+        print(f"agent resume failed: {exc}")
+        return 1
+    blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
+    if state.get("status") == "waiting_for_approval" and blocker.get("approval_id"):
+        approvals = load_yaml(workspace / "audit" / "approvals.yml") if (workspace / "audit" / "approvals.yml").exists() else {}
+        approved = [
+            item
+            for item in approvals.get("approvals", []) or []
+            if item.get("approval_id") == blocker.get("approval_id") and item.get("status") == "approved"
+        ]
+        if not approved:
+            print(f"agent resume blocked: approval pending: {blocker.get('approval_id')}")
+            return 1
+    if state.get("status") == "waiting_for_advisor":
+        request_id = str(blocker.get("advisor_request_id") or "")
+        if request_id and not advisor_request_is_answered(workspace, request_id):
+            print(f"agent resume blocked: advisor response pending: {request_id}")
+            return 1
+    resumed = run_agent(project_dir, args.version_id, runner=main)
+    print(f"agent_status: {resumed.get('status')}")
+    return 0 if resumed.get("status") not in {"failed", "blocked"} else 1
+
+
+def cmd_agent_status(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        agent_state = load_agent_state(workspace)
+    except FileNotFoundError:
+        agent_state = {}
+    version_state = load_run_state(workspace)
+    manifest = load_artifact_manifest(workspace)
+    try:
+        latest_audit = audit_run(project_dir, args.version_id)
+    except Exception as exc:
+        latest_audit = {"verdict": "unavailable", "error": str(exc)}
+    payload = {
+        "version": 1,
+        "project": str(project_dir),
+        "version_id": args.version_id,
+        "agent_state": agent_state,
+        "version_state": version_state,
+        "artifact_manifest": {
+            "version": manifest.get("version", 1),
+            "artifact_count": len(manifest.get("artifacts", []) or []),
+        },
+        "latest_audit": latest_audit,
+        "recent_trace": load_recent_trace(workspace, limit=args.tail),
+    }
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+        return 0
+    status = (agent_state or {}).get("status", "unknown")
+    print(f"agent_status: {status}")
+    print(f"version_status: {version_state.get('status', '')}")
+    print(f"audit_verdict: {latest_audit.get('verdict', '')}")
+    blocker = (agent_state or {}).get("blocker") if isinstance((agent_state or {}).get("blocker"), dict) else {}
+    if blocker:
+        print(f"blocker: {blocker.get('reason', '')}")
+    return 0
+
+
+def cmd_agent_approve(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        approval = approve_request(workspace, args.approval_id, approved_by=args.approved_by, note=args.note or "")
+    except KeyError as exc:
+        print(str(exc))
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Approval recorded.",
+            "approval_id": args.approval_id,
+            "approved_by": args.approved_by,
+        },
+    )
+    print(f"approval_status: {approval.get('status')}")
+    print(f"approval_id: {approval.get('approval_id')}")
+    return 0
+
+
+def cmd_agent_tools(args: argparse.Namespace) -> int:
+    tools = agent_tool_schema()
+    if args.json:
+        print(json.dumps(tools, ensure_ascii=False, indent=2))
+    else:
+        for tool in tools:
+            print(f"{tool['name']}: permission={tool['permission']} approval={tool['requires_approval']}")
+    return 0
+
+
+def cmd_agent_advisor_list(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    rows = list_advisor_requests(workspace)
+    if args.json:
+        print(json.dumps(rows, ensure_ascii=False, indent=2, default=str))
+    else:
+        if not rows:
+            print("advisor_requests: []")
+        for row in rows:
+            print(f"{row.get('request_id')}: type={row.get('type')} status={row.get('status')} task={row.get('task_id')}")
+    return 0
+
+
+def cmd_agent_advisor_show(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        request = load_advisor_request(workspace, args.request_id)
+    except KeyError as exc:
+        print(str(exc))
+        return 1
+    if args.json:
+        print(json.dumps(request, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(f"request_id: {request.get('request_id')}")
+        print(f"type: {request.get('type')}")
+        print(f"status: {request.get('status')}")
+        print(f"question: {request.get('question')}")
+        print("context_files:")
+        for item in request.get("context_files") or []:
+            print(f"- {item}")
+    return 0
+
+
+def cmd_agent_advisor_accept(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    result = accept_advisor_response(workspace, args.response)
+    if not result.get("accepted"):
+        print("advisor_response: rejected")
+        for error in result.get("errors", []) or []:
+            print(f"- {error}")
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Advisor response accepted.",
+            "request_id": result.get("request_id"),
+            "response_path": result.get("response_path"),
+        },
+    )
+    print("advisor_response: accepted")
+    print(f"request_id: {result.get('request_id')}")
+    print(f"response_path: {result.get('response_path')}")
     return 0
 
 
@@ -3200,6 +3446,71 @@ def _add_plan_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPar
     create.set_defaults(func=cmd_plan_create)
 
 
+def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    agent = subparsers.add_parser("agent", help="RMW Agent commands")
+    agent_sub = agent.add_subparsers(dest="agent_command", required=True)
+
+    start = agent_sub.add_parser("start", help="initialize an Agent-managed modeling version")
+    start.add_argument("--project", required=True)
+    start.add_argument("--request", required=True)
+    start.add_argument("--version-id", required=True)
+    start.add_argument("--workflow", default="full_modeling")
+    start.add_argument("--display-name", default=None)
+    start.add_argument("--execute", action="store_true")
+    start.set_defaults(func=cmd_agent_start)
+
+    run = agent_sub.add_parser("run", help="run an initialized Agent plan")
+    run.add_argument("--project", required=True)
+    run.add_argument("--version-id", required=True)
+    run.set_defaults(func=cmd_agent_run)
+
+    resume = agent_sub.add_parser("resume", help="resume an Agent plan after approval or advisor input")
+    resume.add_argument("--project", required=True)
+    resume.add_argument("--version-id", required=True)
+    resume.set_defaults(func=cmd_agent_resume)
+
+    status = agent_sub.add_parser("status", help="show Agent status")
+    status.add_argument("--project", required=True)
+    status.add_argument("--version-id", required=True)
+    status.add_argument("--json", action="store_true")
+    status.add_argument("--tail", type=int, default=20)
+    status.set_defaults(func=cmd_agent_status)
+
+    approve = agent_sub.add_parser("approve", help="record approval for a blocked high-risk Agent action")
+    approve.add_argument("--project", required=True)
+    approve.add_argument("--version-id", required=True)
+    approve.add_argument("--approval-id", required=True)
+    approve.add_argument("--approved-by", required=True)
+    approve.add_argument("--note", default="")
+    approve.set_defaults(func=cmd_agent_approve)
+
+    tools = agent_sub.add_parser("tools", help="export Agent tool schema")
+    tools.add_argument("--json", action="store_true")
+    tools.set_defaults(func=cmd_agent_tools)
+
+    advisor = agent_sub.add_parser("advisor", help="Advisor request/response protocol commands")
+    advisor_sub = advisor.add_subparsers(dest="advisor_command", required=True)
+
+    advisor_list = advisor_sub.add_parser("list", help="list Advisor requests")
+    advisor_list.add_argument("--project", required=True)
+    advisor_list.add_argument("--version-id", required=True)
+    advisor_list.add_argument("--json", action="store_true")
+    advisor_list.set_defaults(func=cmd_agent_advisor_list)
+
+    advisor_show = advisor_sub.add_parser("show", help="show one Advisor request")
+    advisor_show.add_argument("--project", required=True)
+    advisor_show.add_argument("--version-id", required=True)
+    advisor_show.add_argument("--request-id", required=True)
+    advisor_show.add_argument("--json", action="store_true")
+    advisor_show.set_defaults(func=cmd_agent_advisor_show)
+
+    advisor_accept = advisor_sub.add_parser("accept", help="accept and validate an Advisor response")
+    advisor_accept.add_argument("--project", required=True)
+    advisor_accept.add_argument("--version-id", required=True)
+    advisor_accept.add_argument("--response", required=True)
+    advisor_accept.set_defaults(func=cmd_agent_advisor_accept)
+
+
 def _add_feature_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     feature = subparsers.add_parser("feature", help="feature selection commands")
     feature_sub = feature.add_subparsers(dest="feature_command", required=True)
@@ -3253,6 +3564,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_run_parser(subparsers)
     _add_request_parser(subparsers)
     _add_plan_parser(subparsers)
+    _add_agent_parser(subparsers)
     _add_feature_parser(subparsers)
 
     status = subparsers.add_parser("status", help="show run state")

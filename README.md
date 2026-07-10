@@ -8,6 +8,48 @@
 
 详细规划见 [docs/legacy/AI经营建模Agent规划.md](docs/legacy/AI经营建模Agent规划.md)。
 
+## RMW Agent
+
+`RMW Agent` 是当前工作台的本地半自主 CLI Agent runtime。它不内置 LLM
+API、不提供 Web 后台，也不绕过 SQL/DP 审批；Codex 或 Claude Code 作为
+Host-Agent 负责复杂判断，本仓库负责确定性执行、状态、门禁和审计证据。
+
+快速开始：
+
+```bash
+rmw agent start \
+  --project projects/2026-05-fujie-gcard-v1 \
+  --request projects/2026-05-fujie-gcard-v1/requests/model_request_template.md \
+  --version-id fujie_gcard_agent_v1_20260706 \
+  --workflow full_modeling
+
+rmw agent run \
+  --project projects/2026-05-fujie-gcard-v1 \
+  --version-id fujie_gcard_agent_v1_20260706
+
+rmw agent status \
+  --project projects/2026-05-fujie-gcard-v1 \
+  --version-id fujie_gcard_agent_v1_20260706
+```
+
+如果 Agent 因 SQL/DP action 暂停，先审查生成的 SQL 和 approval 记录，再显式批准：
+
+```bash
+rmw agent approve \
+  --project projects/2026-05-fujie-gcard-v1 \
+  --version-id fujie_gcard_agent_v1_20260706 \
+  --approval-id <approval_id> \
+  --approved-by <name> \
+  --note "reviewed SQL evidence"
+```
+
+Agent 产物写入 version workspace，包括 `agent_plan.yml`、
+`audit/agent_state.yml`、`audit/agent_trace.jsonl`、`audit/approvals.yml`
+和 `audit/advisor_requests/`。如果 Agent 等待 Host-Agent 判断，使用
+`rmw agent advisor list/show/accept` 管理标准 Advisor request/response。
+最终闭环仍以 `version_state.yml`、`audit/artifact_manifest.json` 和
+`rmw version audit --strict` 为准。
+
 ## 当前状态
 
 截至 2026-06-09：

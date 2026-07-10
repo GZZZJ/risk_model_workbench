@@ -1,0 +1,28 @@
+name: advisor_response
+version: 1
+required_fields:
+  - version
+  - request_id
+  - type
+  - status
+  - decision
+  - summary
+type_values:
+  - tuning_plan
+  - failure_diagnosis
+  - data_gap_decision
+  - product_decision
+status_values:
+  - answered
+  - rejected
+decision_values:
+  - continue
+  - retry
+  - stop
+  - needs_user_confirmation
+field_notes:
+  request_id: Must match an existing advisor request.
+  type: Must match advisor_request.expected_response.type.
+  output_files: Version-relative files produced for the Agent to consume.
+  risk_notes: Short auditable risk statements.
+  requires_user_confirmation: True when the Advisor answer is not sufficient for autonomous resume.

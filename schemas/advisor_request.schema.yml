@@ -1,0 +1,34 @@
+name: advisor_request
+version: 1
+required_fields:
+  - version
+  - request_id
+  - type
+  - status
+  - project
+  - version_id
+  - task_id
+  - action_id
+  - tool_name
+  - reason
+  - question
+  - command
+  - command_hash
+  - expected_response
+  - created_at
+type_values:
+  - tuning_plan_required
+  - failure_diagnosis_required
+  - data_gap_decision_required
+  - product_decision_required
+status_values:
+  - pending
+  - answered
+  - rejected
+field_notes:
+  request_id: Stable id for this Advisor request inside one version workspace.
+  type: The kind of judgment needed from the Host-Agent or human expert.
+  context_files: Version-relative files the Advisor should inspect.
+  constraints: Guardrails the Advisor response must respect.
+  expected_response.type: Required response type accepted by rmw agent advisor accept.
+  command_hash: Hash of the blocked command to prevent stale or mismatched answers.

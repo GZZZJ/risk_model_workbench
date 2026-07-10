@@ -1,7 +1,8 @@
 # Request-Driven Workflow
 
 Users can provide a Markdown model request with YAML front matter. The request
-acts as the task contract for Codex or Claude Code.
+acts as the task contract for the local RMW Agent runtime and for the external
+Host-Agent layer such as Codex or Claude Code.
 
 For non-technical users, use the static request builder:
 
@@ -14,18 +15,22 @@ evaluation, risk-profile, and report requirements, then download Markdown.
 Current support boundaries are documented in
 `docs/model_request_builder_support_audit.md`.
 
-Standard flow:
+Standard Agent flow:
 
 1. Validate the project config.
 2. Validate the model request.
 3. Generate `execution_plan.yml`.
-4. Initialize a run and copy the request plus plan into the run workspace.
-5. Execute tasks under `runs/<run_id>/tasks/`.
-6. Register artifacts and decisions.
-7. Record missing reusable capabilities in `audit/improvement_candidates.md`.
+4. Initialize a version and copy the request plus plan into the version workspace.
+5. Bind `execution_plan.yml` into version-scoped `agent_plan.yml`.
+6. Execute safe tasks through `rmw agent run`.
+7. Pause for SQL/DP approval, Host-Agent advisor input, missing data, or failed audit evidence.
+8. Register artifacts and decisions.
+9. Record missing reusable capabilities in `audit/improvement_candidates.md`.
 
-The Skill explains how the Agent should decide and recover. The CLI provides
-stable atomic actions. The run workspace remains the source of truth.
+The local Agent runtime owns deterministic execution, policy gates, state, and
+trace artifacts. Codex or Claude Code remains the Host-Agent intelligence layer
+for ambiguous diagnosis, tuning advice, and product judgment. The version
+workspace remains the source of truth.
 
 Recommended commands:
 
@@ -33,14 +38,26 @@ Recommended commands:
 rmw project validate --project <project>
 rmw request validate --project <project> --request <request.md>
 rmw plan create --project <project> --request <request.md>
-rmw run init --project <project> --workflow full_modeling --request <request.md> --plan <execution_plan.yml>
-rmw run status --project <project> --run-id <run_id>
+rmw agent start --project <project> --request <request.md> --version-id <version_id> --workflow full_modeling
+rmw agent run --project <project> --version-id <version_id>
+rmw agent status --project <project> --version-id <version_id>
+rmw version audit --project <project> --version-id <version_id> --strict
+```
+
+When the Agent pauses for Host-Agent advice, inspect and answer the Advisor
+request with the local JSON protocol:
+
+```bash
+rmw agent advisor list --project <project> --version-id <version_id>
+rmw agent advisor show --project <project> --version-id <version_id> --request-id <request_id>
+rmw agent advisor accept --project <project> --version-id <version_id> --response <response.json>
+rmw agent resume --project <project> --version-id <version_id>
 ```
 
 `jm` remains a compatible CLI alias for existing automation, but new workflow
 docs should prefer `rmw`.
 
-After a real project finishes, review its run workspace before changing the
+After a real project finishes, review its version workspace before changing the
 generic workbench:
 
 1. Keep one-off business assumptions in the request or project config.
