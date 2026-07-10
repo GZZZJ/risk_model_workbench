@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any, Callable
 from uuid import uuid4
 
-from risk_model_workbench.agent.advisor import advisor_request_is_answered, create_advisor_request
+from risk_model_workbench.agent.advisor import advisor_request_is_answered, create_advisor_request, load_advisor_request
+from risk_model_workbench.agent.advisor_reducer import consume_advisor_response
 from risk_model_workbench.agent.approvals import (
     approval_by_id,
     build_approval_subject,
@@ -95,6 +96,8 @@ def _run_agent_locked(
             save_agent_state(workspace, state)
         if state.get("status") == "waiting_for_approval":
             state = _consume_ready_sql_approval(workspace, plan, state)
+        if state.get("status") == "waiting_for_advisor":
+            state = _consume_ready_advisor_response(workspace, state)
     runner = runner or _default_runner
     append_trace(workspace, "observation", {"summary": "Agent execution started.", "version_id": version_id})
     if int(plan.get("version") or 1) >= 2 and state.get("status") in BLOCKER_STATES:
@@ -386,6 +389,8 @@ def _reduce_semantic_result(
             task=task,
             reason=result.failure_code or "advisor_required",
             message=result.message,
+            attempt_id=result.attempt_id,
+            invocation_hash=invocation_hash,
         )
         return pause_agent(
             workspace,
@@ -647,6 +652,43 @@ def _consume_ready_sql_approval(workspace: Path, plan: dict[str, Any], state: di
     )
     state["current_task"] = ""
     save_agent_state(workspace, state)
+    return state
+
+
+def _consume_ready_advisor_response(workspace: Path, state: dict[str, Any]) -> dict[str, Any]:
+    blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
+    request_id = str(blocker.get("advisor_request_id") or "")
+    if not request_id:
+        return state
+    try:
+        request = load_advisor_request(workspace, request_id)
+    except KeyError:
+        return state
+    if request.get("status") not in {"answered", "rejected"}:
+        return state
+    result = consume_advisor_response(workspace, request_id, state)
+    if result.consumed:
+        append_trace(
+            workspace,
+            "decision",
+            {
+                "summary": "Advisor response consumed.",
+                "advisor_request_id": request_id,
+                "target_status": result.status,
+                "receipt_path": result.receipt_path,
+                "replacement_request_id": result.replacement_request_id,
+            },
+        )
+        return result.state
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Advisor response was not consumed.",
+            "advisor_request_id": request_id,
+            "errors": result.errors,
+        },
+    )
     return state
 
 

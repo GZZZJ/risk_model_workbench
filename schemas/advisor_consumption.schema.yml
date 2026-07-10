@@ -1,0 +1,36 @@
+name: advisor_consumption
+version: 1
+required_fields:
+  - version
+  - receipt_id
+  - blocker_id
+  - request_id
+  - request_hash
+  - context_hash
+  - task_id
+  - attempt_id
+  - invocation_hash
+  - round
+  - response_hash
+  - decision
+  - target_status
+  - consumed
+  - created_at
+decision_values:
+  - continue
+  - retry
+  - stop
+  - needs_user_confirmation
+  - rejected
+target_status_values:
+  - running
+  - waiting_for_user
+  - waiting_for_advisor
+  - stopped
+field_notes:
+  receipt_id: Stable one-time receipt id for an Advisor response consumption.
+  blocker_id: Agent blocker consumed by this receipt.
+  request_hash: Bound Advisor request identity hash.
+  response_hash: Canonical hash of the accepted Advisor response file.
+  replacement_request_id: Present when a rejected response creates a replacement pending request.
+  consumed: Must be true for transition evidence.

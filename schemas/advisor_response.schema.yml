@@ -7,6 +7,7 @@ required_fields:
   - status
   - decision
   - summary
+  - request_identity
 type_values:
   - tuning_plan
   - failure_diagnosis
@@ -23,6 +24,7 @@ decision_values:
 field_notes:
   request_id: Must match an existing advisor request.
   type: Must match advisor_request.expected_response.type.
+  request_identity: Must match the advisor request task_id, attempt_id, invocation_hash, context_hash, and round.
   output_files: Version-relative files produced for the Agent to consume.
   risk_notes: Short auditable risk statements.
   requires_user_confirmation: True when the Advisor answer is not sufficient for autonomous resume.

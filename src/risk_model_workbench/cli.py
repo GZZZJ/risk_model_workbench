@@ -23,6 +23,7 @@ from risk_model_workbench.agent.advisor import (
     list_advisor_requests,
     load_advisor_request,
 )
+from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
 from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
 from risk_model_workbench.agent.plan import (
@@ -1518,9 +1519,17 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
             return 1
     if state.get("status") == "waiting_for_advisor":
         request_id = str(blocker.get("advisor_request_id") or "")
-        if request_id and not advisor_request_is_answered(workspace, request_id):
+        try:
+            advisor_request = load_advisor_request(workspace, request_id) if request_id else {}
+        except KeyError:
+            advisor_request = {}
+        if request_id and advisor_request.get("status") not in {"answered", "rejected"}:
             print(f"agent resume blocked: advisor response pending: {request_id}")
             return 1
+    if state.get("status") == "waiting_for_user":
+        request_id = str(blocker.get("advisor_request_id") or "")
+        print(f"agent resume blocked: waiting for user confirmation: {request_id}")
+        return 1
     try:
         resumed = run_agent(project_dir, args.version_id, runner=main)
     except ValueError as exc:
@@ -1601,6 +1610,42 @@ def cmd_agent_approve(args: argparse.Namespace) -> int:
 def cmd_agent_reject(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    if getattr(args, "request_id", ""):
+        try:
+            state = load_agent_state(workspace)
+        except FileNotFoundError as exc:
+            print(f"advisor rejection failed: {exc}")
+            return 1
+        result = reject_advisor_response(
+            workspace,
+            args.request_id,
+            state,
+            reason=args.reason or args.note or "rejected_by_user",
+        )
+        if not result.consumed:
+            print("advisor_rejection: rejected")
+            for error in result.errors:
+                print(f"- {error}")
+            return 1
+        append_trace(
+            workspace,
+            "decision",
+            {
+                "summary": "Advisor user confirmation rejected.",
+                "request_id": args.request_id,
+                "reason": args.reason or args.note or "",
+            },
+        )
+        print("advisor_rejection: accepted")
+        print(f"agent_status: {result.status}")
+        print(f"receipt_path: {result.receipt_path}")
+        return 0
+    if not getattr(args, "approval_id", ""):
+        print("approval rejection failed: --approval-id is required")
+        return 1
+    if not getattr(args, "rejected_by", ""):
+        print("approval rejection failed: --rejected-by is required")
+        return 1
     try:
         approval = reject_request(workspace, args.approval_id, rejected_by=args.rejected_by, note=args.note or "")
     except (KeyError, ValueError) as exc:
@@ -1617,6 +1662,35 @@ def cmd_agent_reject(args: argparse.Namespace) -> int:
     )
     print(f"approval_status: {approval.get('status')}")
     print(f"approval_id: {approval.get('approval_id')}")
+    return 0
+
+
+def cmd_agent_confirm(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        state = load_agent_state(workspace)
+    except FileNotFoundError as exc:
+        print(f"advisor confirmation failed: {exc}")
+        return 1
+    result = confirm_advisor_response(workspace, args.request_id, state, confirmed_by=args.confirmed_by)
+    if not result.consumed:
+        print("advisor_confirmation: rejected")
+        for error in result.errors:
+            print(f"- {error}")
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Advisor user confirmation recorded.",
+            "request_id": args.request_id,
+            "confirmed_by": args.confirmed_by,
+        },
+    )
+    print("advisor_confirmation: accepted")
+    print(f"agent_status: {result.status}")
+    print(f"receipt_path: {result.receipt_path}")
     return 0
 
 
@@ -1737,6 +1811,11 @@ def cmd_agent_advisor_accept(args: argparse.Namespace) -> int:
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
     result = accept_advisor_response(workspace, args.response)
     if not result.get("accepted"):
+        if result.get("stored"):
+            print("advisor_response: rejected")
+            print(f"request_id: {result.get('request_id')}")
+            print(f"response_path: {result.get('response_path')}")
+            return 0
         print("advisor_response: rejected")
         for error in result.get("errors", []) or []:
             print(f"- {error}")
@@ -3625,11 +3704,21 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     approve.add_argument("--note", default="")
     approve.set_defaults(func=cmd_agent_approve)
 
-    reject = agent_sub.add_parser("reject", help="reject a blocked high-risk Agent action")
+    confirm = agent_sub.add_parser("confirm", help="confirm an Advisor response that requires explicit user confirmation")
+    confirm.add_argument("--project", required=True)
+    confirm.add_argument("--version-id", required=True)
+    confirm.add_argument("--request-id", required=True)
+    confirm.add_argument("--confirmed-by", required=True)
+    confirm.set_defaults(func=cmd_agent_confirm)
+
+    reject = agent_sub.add_parser("reject", help="reject a blocked approval or Advisor confirmation")
     reject.add_argument("--project", required=True)
     reject.add_argument("--version-id", required=True)
-    reject.add_argument("--approval-id", required=True)
-    reject.add_argument("--rejected-by", required=True)
+    reject_target = reject.add_mutually_exclusive_group(required=True)
+    reject_target.add_argument("--approval-id")
+    reject_target.add_argument("--request-id")
+    reject.add_argument("--rejected-by", default="")
+    reject.add_argument("--reason", default="")
     reject.add_argument("--note", default="")
     reject.set_defaults(func=cmd_agent_reject)
 

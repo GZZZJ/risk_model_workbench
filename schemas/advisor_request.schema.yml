@@ -10,6 +10,12 @@ required_fields:
   - task_id
   - action_id
   - tool_name
+  - attempt_id
+  - invocation_hash
+  - context_hash
+  - context_manifest
+  - round
+  - request_hash
   - reason
   - question
   - command
@@ -25,10 +31,18 @@ status_values:
   - pending
   - answered
   - rejected
+  - consumed
+  - waiting_for_user
 field_notes:
   request_id: Stable id for this Advisor request inside one version workspace.
   type: The kind of judgment needed from the Host-Agent or human expert.
-  context_files: Version-relative files the Advisor should inspect.
+  attempt_id: Agent action attempt bound to this request.
+  invocation_hash: Bound tool invocation hash used to reject stale answers.
+  context_hash: Canonical hash of audit/advisor_contexts/<request_id>.json files payload.
+  context_manifest: Immutable manifest of exact context files and hashes.
+  round: Advisor round, such as LLM tuning round.
+  request_hash: Canonical hash of request identity fields.
+  context_files: Version-relative file patterns the Advisor should inspect.
   constraints: Guardrails the Advisor response must respect.
   expected_response.type: Required response type accepted by rmw agent advisor accept.
   command_hash: Hash of the blocked command to prevent stale or mismatched answers.
