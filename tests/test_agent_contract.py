@@ -71,6 +71,7 @@ ALLOWED_AGENT_TRANSITIONS = {
 
 ALLOWED_TASK_TRANSITIONS = {
     ("pending", "start", "running"),
+    ("pending", "pause", "paused"),
     ("pending", "skip", "skipped"),
     ("pending", "stop", "stopped"),
     ("running", "prepare_complete", "review_ready"),
@@ -246,11 +247,181 @@ def test_blocker_requires_exactly_one_persisted_next_safe_action():
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="P0.1 implements src/risk_model_workbench/agent/transitions.py",
-)
 def test_production_transition_reducer_conforms_to_contract():
     from risk_model_workbench.agent.transitions import validate_transition
 
     assert validate_transition("done", "start", "running") == ["illegal_transition"]
+
+
+def test_v2_blockers_require_bound_consumption_evidence_and_consume_once():
+    from risk_model_workbench.agent.transitions import apply_transition
+
+    approval_state = {
+        "status": "waiting_for_approval",
+        "blocker": {
+            "blocker_type": "approval",
+            "blocker_id": "approval_1",
+            "approval_id": "approval_1",
+        },
+    }
+    with pytest.raises(ValueError, match="consumption_evidence_required"):
+        apply_transition(approval_state, "consume_approval", {"target_state": "running"})
+    consumed = apply_transition(
+        approval_state,
+        "consume_approval",
+        {
+            "target_state": "running",
+            "consumption_evidence": {
+                "receipt_id": "receipt_1",
+                "blocker_id": "approval_1",
+                "consumed": True,
+            },
+        },
+    )
+    assert consumed["status"] == "running"
+    with pytest.raises(ValueError, match="illegal_transition"):
+        apply_transition(
+            consumed,
+            "consume_approval",
+            {
+                "target_state": "running",
+                "consumption_evidence": {
+                    "receipt_id": "receipt_1",
+                    "blocker_id": "approval_1",
+                    "consumed": True,
+                },
+            },
+        )
+
+
+def test_accepted_advisor_response_is_not_consumed_and_can_require_user_confirmation():
+    from risk_model_workbench.agent.transitions import apply_transition
+
+    advisor_state = {
+        "status": "waiting_for_advisor",
+        "blocker": {
+            "blocker_type": "advisor",
+            "blocker_id": "advisor_1",
+            "advisor_request_id": "advisor_1",
+            "response_status": "accepted",
+        },
+    }
+    with pytest.raises(ValueError, match="consumption_evidence_required"):
+        apply_transition(advisor_state, "consume_response", {"target_state": "running"})
+    waiting_for_user = apply_transition(
+        advisor_state,
+        "consume_response",
+        {
+            "target_state": "waiting_for_user",
+            "consumption_evidence": {
+                "receipt_id": "receipt_2",
+                "blocker_id": "advisor_1",
+                "consumed": True,
+            },
+            "blocker": {
+                "blocker_type": "user",
+                "blocker_id": "user:advisor_1",
+                "advisor_request_id": "advisor_1",
+                "next_safe_action": {
+                    "action": "confirm_advisor_decision",
+                    "required_evidence": "user confirmation receipt",
+                },
+            },
+        },
+    )
+    assert waiting_for_user["status"] == "waiting_for_user"
+
+
+@pytest.mark.parametrize(
+    ("state", "event", "target"),
+    [
+        (
+            {
+                "status": "blocked",
+                "blocker": {"blocker_type": "dependency", "blocker_id": "dependency_1"},
+            },
+            "resolve_blocker",
+            "running",
+        ),
+        (
+            {
+                "status": "reconciliation_required",
+                "blocker": {"blocker_type": "reconciliation", "blocker_id": "operation_1"},
+            },
+            "reconcile_success",
+            "running",
+        ),
+    ],
+)
+def test_dependency_and_reconciliation_blockers_require_bound_receipts(state, event, target):
+    from risk_model_workbench.agent.transitions import apply_transition
+
+    with pytest.raises(ValueError, match="consumption_evidence_required"):
+        apply_transition(state, event, {"target_state": target})
+
+
+@pytest.mark.parametrize(
+    ("current", "event", "target"),
+    [
+        ("waiting_for_approval", "consume_approval", "running"),
+        ("waiting_for_approval", "reject_approval", "blocked"),
+        ("waiting_for_advisor", "consume_response", "running"),
+        ("waiting_for_advisor", "consume_response", "waiting_for_user"),
+        ("waiting_for_advisor", "consume_response", "stopped"),
+        ("waiting_for_user", "confirm", "running"),
+        ("waiting_for_user", "reject", "stopped"),
+        ("reconciliation_required", "reconcile_success", "running"),
+        ("reconciliation_required", "reconcile_failure", "failed"),
+        ("reconciliation_required", "reconcile_abandoned", "stopped"),
+        ("blocked", "resolve_blocker", "running"),
+        ("blocked", "stop", "stopped"),
+        ("blocked", "fail", "failed"),
+    ],
+)
+def test_every_allowed_blocker_exit_requires_a_nonempty_bound_receipt(current, event, target):
+    from risk_model_workbench.agent.transitions import apply_transition
+
+    state = {
+        "status": current,
+        "blocker": {
+            "blocker_type": "test",
+            "blocker_id": "blocker_1",
+            "next_safe_action": {"action": "resolve", "required_evidence": "receipt"},
+        },
+    }
+    payload = {"target_state": target}
+    if target in NON_TERMINAL_BLOCKERS:
+        payload["blocker"] = {
+            "blocker_type": "next",
+            "blocker_id": "blocker_2",
+            "next_safe_action": {"action": "continue", "required_evidence": "receipt"},
+        }
+    with pytest.raises(ValueError, match="consumption_evidence_required"):
+        apply_transition(state, event, payload)
+
+
+@pytest.mark.parametrize("receipt_id", ["", None, "   "])
+def test_blocker_exit_rejects_empty_receipt_identity(receipt_id):
+    from risk_model_workbench.agent.transitions import apply_transition
+
+    state = {
+        "status": "blocked",
+        "blocker": {
+            "blocker_type": "dependency",
+            "blocker_id": "blocker_1",
+            "next_safe_action": {"action": "resolve", "required_evidence": "receipt"},
+        },
+    }
+    with pytest.raises(ValueError, match="invalid_consumption_evidence"):
+        apply_transition(
+            state,
+            "resolve_blocker",
+            {
+                "target_state": "running",
+                "consumption_evidence": {
+                    "receipt_id": receipt_id,
+                    "blocker_id": "blocker_1",
+                    "consumed": True,
+                },
+            },
+        )

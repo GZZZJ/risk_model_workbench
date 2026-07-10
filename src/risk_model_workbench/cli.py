@@ -23,10 +23,16 @@ from risk_model_workbench.agent.advisor import (
     list_advisor_requests,
     load_advisor_request,
 )
-from risk_model_workbench.agent.approvals import approve_request
+from risk_model_workbench.agent.approvals import approve_request, load_approvals
 from risk_model_workbench.agent.executor import run_agent
-from risk_model_workbench.agent.plan import agent_tool_schema, bind_agent_plan, save_agent_plan
-from risk_model_workbench.agent.state import init_agent_state, load_agent_state
+from risk_model_workbench.agent.plan import (
+    agent_tool_schema,
+    bind_agent_plan,
+    load_agent_plan,
+    rebind_agent_plan,
+    save_agent_plan,
+)
+from risk_model_workbench.agent.state import init_agent_state, load_agent_state, save_agent_state
 from risk_model_workbench.agent.trace import append_trace, load_recent_trace
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
@@ -1479,7 +1485,11 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
 
 def cmd_agent_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
-    state = run_agent(project_dir, args.version_id, runner=main)
+    try:
+        state = run_agent(project_dir, args.version_id, runner=main)
+    except ValueError as exc:
+        print(f"agent run failed: {exc}")
+        return 1
     print(f"agent_status: {state.get('status')}")
     blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
     if blocker:
@@ -1511,9 +1521,20 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         if request_id and not advisor_request_is_answered(workspace, request_id):
             print(f"agent resume blocked: advisor response pending: {request_id}")
             return 1
-    resumed = run_agent(project_dir, args.version_id, runner=main)
+    try:
+        resumed = run_agent(project_dir, args.version_id, runner=main)
+    except ValueError as exc:
+        print(f"agent resume failed: {exc}")
+        return 1
     print(f"agent_status: {resumed.get('status')}")
-    return 0 if resumed.get("status") not in {"failed", "blocked"} else 1
+    return 0 if resumed.get("status") not in {
+        "failed",
+        "blocked",
+        "waiting_for_approval",
+        "waiting_for_advisor",
+        "waiting_for_user",
+        "reconciliation_required",
+    } else 1
 
 
 def cmd_agent_status(args: argparse.Namespace) -> int:
@@ -1584,6 +1605,73 @@ def cmd_agent_tools(args: argparse.Namespace) -> int:
     else:
         for tool in tools:
             print(f"{tool['name']}: permission={tool['permission']} approval={tool['requires_approval']}")
+    return 0
+
+
+def cmd_agent_plan_rebind(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        plan = load_agent_plan(workspace)
+        state = load_agent_state(workspace)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"agent plan rebind failed: {exc}")
+        return 1
+    blocked_statuses = {
+        "running",
+        "waiting_for_approval",
+        "waiting_for_advisor",
+        "waiting_for_user",
+        "reconciliation_required",
+        "failed",
+        "stopped",
+        "done",
+        "done_with_gaps",
+    }
+    if state.get("status") in blocked_statuses or any(
+        task.get("status") == "running" for task in state.get("tasks", []) or []
+    ):
+        print(f"agent plan rebind failed: state is not rebind-safe: {state.get('status')}")
+        return 1
+    if state.get("plan_hash") != plan.get("plan_hash"):
+        print("agent plan rebind failed: state plan_hash does not match the on-disk plan")
+        return 1
+    if (
+        Path(str(state.get("project") or "")).resolve() != Path(str(plan.get("project") or "")).resolve()
+        or state.get("version_id") != plan.get("version_id")
+        or state.get("plan_id") != plan.get("plan_id")
+    ):
+        print("agent plan rebind failed: state scope does not match the on-disk plan")
+        return 1
+    unresolved_approvals = [
+        item
+        for item in load_approvals(workspace).get("approvals", []) or []
+        if item.get("status") in {"pending", "approved"}
+    ]
+    unresolved_advisor = [
+        item for item in list_advisor_requests(workspace) if item.get("status") not in {"consumed", "rejected"}
+    ]
+    if unresolved_approvals or unresolved_advisor:
+        print("agent plan rebind failed: approval or Advisor evidence is still unresolved")
+        return 1
+    try:
+        rebound, preview = rebind_agent_plan(plan)
+    except ValueError as exc:
+        print(f"agent plan rebind failed: {exc}")
+        return 1
+    preview["mode"] = "apply" if args.apply else "dry_run"
+    if args.apply:
+        save_agent_plan(workspace, rebound)
+        state["plan_hash"] = rebound["plan_hash"]
+        state["registry_digest"] = rebound["registry_digest"]
+        save_agent_state(workspace, state)
+    if args.json:
+        print(json.dumps(preview, ensure_ascii=False, indent=2))
+    else:
+        print(f"rebind_mode: {preview['mode']}")
+        print(f"changed: {str(preview['changed']).lower()}")
+        print(f"registry_digest_after: {preview['registry_digest_after']}")
+        print(f"plan_hash_after: {preview['plan_hash_after']}")
     return 0
 
 
@@ -3487,6 +3575,17 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     tools = agent_sub.add_parser("tools", help="export Agent tool schema")
     tools.add_argument("--json", action="store_true")
     tools.set_defaults(func=cmd_agent_tools)
+
+    agent_plan = agent_sub.add_parser("plan", help="inspect or safely rebind an Agent plan")
+    agent_plan_sub = agent_plan.add_subparsers(dest="agent_plan_command", required=True)
+    rebind = agent_plan_sub.add_parser("rebind", help="preview or apply current registry metadata")
+    rebind.add_argument("--project", required=True)
+    rebind.add_argument("--version-id", required=True)
+    mode = rebind.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="preview only (default)")
+    mode.add_argument("--apply", action="store_true", help="write the rebound plan")
+    rebind.add_argument("--json", action="store_true")
+    rebind.set_defaults(func=cmd_agent_plan_rebind)
 
     advisor = agent_sub.add_parser("advisor", help="Advisor request/response protocol commands")
     advisor_sub = advisor.add_subparsers(dest="advisor_command", required=True)

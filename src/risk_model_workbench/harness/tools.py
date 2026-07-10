@@ -1,10 +1,83 @@
-"""Permission-scoped tool registry for rmw commands."""
+"""Permission-scoped, typed tool registry for rmw commands."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+import hashlib
+import json
+from dataclasses import dataclass, field
+from typing import Callable
 
 from risk_model_workbench.harness.actions import get_action_spec
+from risk_model_workbench.harness.invocation import ActionInvocation
+
+
+BLOCKED_TOOL_FLAGS = ("--force", "--skip-split-check")
+EXECUTION_SEMANTICS = {"read_only", "idempotent_write", "non_idempotent_write", "external_unknown"}
+
+_TYPED_ARGV: dict[str, tuple[str, ...]] = {
+    "project_status": ("project", "status", "--project", "{project}"),
+    "run_status": ("version", "status", "--project", "{project}", "--version-id", "{version_id}"),
+    "run_audit": ("version", "audit", "--project", "{project}", "--version-id", "{version_id}"),
+    "workflow_validate": ("workflow", "validate", "--workflow", "{workflow}"),
+    "rules_list": ("rules", "list"),
+    "sample_check": ("sample", "check", "--project", "{project}", "--version-id", "{version_id}"),
+    "feature_metadata": ("feature", "metadata", "--project", "{project}", "--version-id", "{version_id}"),
+    "feature_prescreen_dry_run": ("feature", "prescreen", "--project", "{project}", "--version-id", "{version_id}", "--dry-run-sql"),
+    "feature_prescreen_pull": ("feature", "prescreen", "--project", "{project}", "--version-id", "{version_id}", "--sql-approved"),
+    "build_wide_sql": ("build-wide-sql", "--project", "{project}", "--version-id", "{version_id}"),
+    "build_wide_sql_execute": ("build-wide-sql", "--project", "{project}", "--version-id", "{version_id}", "--execute", "--sql-approved"),
+    "feature_refine_dry_run": ("feature", "refine", "--project", "{project}", "--version-id", "{version_id}", "--dry-run-sql"),
+    "feature_refine_pull": ("feature", "refine", "--project", "{project}", "--version-id", "{version_id}", "--sql-approved"),
+    "train_baseline": ("train", "--project", "{project}", "--version-id", "{version_id}", "--experiment", "{experiment}"),
+    "evaluate": ("evaluate", "--project", "{project}", "--version-id", "{version_id}"),
+    "compare": ("compare", "--project", "{project}", "--version-id", "{version_id}"),
+    "report": ("report", "--project", "{project}", "--version-id", "{version_id}"),
+}
+
+
+def _default_params_schema(name: str) -> dict[str, object]:
+    properties: dict[str, object] = {}
+    required: list[str] = []
+    if name == "train_baseline":
+        properties["experiment"] = {"type": "string", "minLength": 1}
+        required.append("experiment")
+    elif name == "compare":
+        properties["champions"] = {"type": "array", "items": {"type": "string"}}
+    elif name == "workflow_validate":
+        properties["workflow"] = {"type": "string", "minLength": 1}
+        required.append("workflow")
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": required,
+        "additionalProperties": False,
+    }
+
+
+def _typed_renderer(tool_name: str) -> Callable[[ActionInvocation], list[str]]:
+    try:
+        tokens = _TYPED_ARGV[tool_name]
+    except KeyError as exc:
+        raise ValueError(f"tool {tool_name} requires an explicit typed renderer") from exc
+
+    def render(invocation: ActionInvocation) -> list[str]:
+        if invocation.tool_name != tool_name:
+            raise ValueError(f"invocation tool mismatch: expected {tool_name}, got {invocation.tool_name}")
+        params = invocation.canonical_payload()["params"]
+        assert isinstance(params, dict)
+        values = {
+            "{project}": invocation.project,
+            "{version_id}": invocation.version_id,
+            "{experiment}": str(params.get("experiment") or ""),
+            "{workflow}": str(params.get("workflow") or ""),
+        }
+        rendered = [values.get(token, token) for token in tokens]
+        if tool_name == "compare":
+            for champion in params.get("champions") or []:
+                rendered.extend(["--champion", str(champion)])
+        return rendered
+
+    return render
 
 
 @dataclass(frozen=True)
@@ -16,9 +89,47 @@ class ToolSpec:
     description: str
     requires_approval: bool = False
     allowed_for_auditor: bool = False
+    params_schema: dict[str, object] = field(default_factory=dict)
+    execution_semantics: str = ""
+    approval_type: str = ""
+    blocked_flags: tuple[str, ...] = BLOCKED_TOOL_FLAGS
+    render_argv: Callable[[ActionInvocation], list[str]] | None = field(default=None, compare=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.params_schema:
+            object.__setattr__(self, "params_schema", _default_params_schema(self.name))
+        if not self.execution_semantics:
+            semantics = {
+                "read_only": "read_only",
+                "writes_run": "idempotent_write",
+                "dp_sql_pull": "external_unknown",
+                "external_data": "external_unknown",
+            }.get(self.permission, "external_unknown")
+            object.__setattr__(self, "execution_semantics", semantics)
+        if not self.approval_type:
+            object.__setattr__(self, "approval_type", "sql_review" if self.requires_approval else "none")
+        if self.render_argv is None:
+            object.__setattr__(self, "render_argv", _typed_renderer(self.name))
+
+    @property
+    def command_template(self) -> str:
+        return self.command
 
     def to_dict(self) -> dict[str, object]:
-        return asdict(self)
+        return {
+            "name": self.name,
+            "action_id": self.action_id,
+            "command": self.command,
+            "command_template": self.command_template,
+            "permission": self.permission,
+            "description": self.description,
+            "requires_approval": self.requires_approval,
+            "allowed_for_auditor": self.allowed_for_auditor,
+            "params_schema": self.params_schema,
+            "execution_semantics": self.execution_semantics,
+            "approval_type": self.approval_type,
+            "blocked_flags": list(self.blocked_flags),
+        }
 
 
 TOOL_SPECS: tuple[ToolSpec, ...] = (
@@ -185,7 +296,34 @@ def validate_tool_registry() -> list[str]:
             errors.append(f"tool {spec.name} requires approval but action {spec.action_id} does not")
         if spec.allowed_for_auditor and spec.permission != "read_only":
             errors.append(f"tool {spec.name} is auditor-allowed but permission is {spec.permission}")
+        if spec.execution_semantics not in EXECUTION_SEMANTICS:
+            errors.append(f"tool {spec.name} has invalid execution semantics: {spec.execution_semantics}")
+        if not callable(spec.render_argv):
+            errors.append(f"tool {spec.name} has no argv renderer")
     return errors
+
+
+def registry_digest(registry: dict[str, ToolSpec] | None = None) -> str:
+    source = TOOL_REGISTRY if registry is None else registry
+    rows = []
+    for name in sorted(source):
+        spec = source[name]
+        rows.append(
+            {
+                "name": spec.name,
+                "action_id": spec.action_id,
+                "params_schema": spec.params_schema,
+                "execution_semantics": spec.execution_semantics,
+                "approval_type": spec.approval_type,
+                "blocked_flags": list(spec.blocked_flags),
+                "command_template": spec.command_template,
+                "permission": spec.permission,
+                "requires_approval": spec.requires_approval,
+                "allowed_for_auditor": spec.allowed_for_auditor,
+            }
+        )
+    payload = json.dumps(rows, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def tool_to_dict(spec: ToolSpec) -> dict[str, object]:
@@ -203,7 +341,6 @@ def format_tool_list(specs: tuple[ToolSpec, ...]) -> str:
         )
     return "\n".join(lines) + "\n"
 
-
 def format_tool_detail(spec: ToolSpec) -> str:
     lines = [
         f"tool: {spec.name}",
@@ -212,6 +349,8 @@ def format_tool_detail(spec: ToolSpec) -> str:
         f"requires_approval: {spec.requires_approval}",
         f"allowed_for_auditor: {spec.allowed_for_auditor}",
         f"command: {spec.command}",
+        f"execution_semantics: {spec.execution_semantics}",
+        f"approval_type: {spec.approval_type}",
         f"description: {spec.description}",
     ]
     return "\n".join(lines) + "\n"

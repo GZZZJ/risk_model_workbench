@@ -117,7 +117,7 @@ exactly once.
 
 | Current state | Event | Permitted target |
 | --- | --- | --- |
-| `pending` | start, skip, or stop | `running`, `skipped`, or `stopped` |
+| `pending` | start, wait for a bound decision, skip, or stop | `running`, `paused`, `skipped`, or `stopped` |
 | `running` | prepare complete | `review_ready` |
 | `running` | wait for a bound decision | `paused` |
 | `running` | complete, scaffold, fail, skip, or stop | `done`, `scaffold`, `failed`, `skipped`, or `stopped` |
