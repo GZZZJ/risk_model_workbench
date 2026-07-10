@@ -1327,6 +1327,7 @@ def _init_workflow_workspace(args: argparse.Namespace, *, as_version: bool) -> i
                 "version_id": workspace_id,
                 "display_name": getattr(args, "display_name", None) or workspace_id,
                 "source_type": getattr(args, "source_type", "workbench"),
+                "managed_by": state.get("managed_by", "workbench"),
                 "status": "running",
                 "workflow": workflow.get("name", args.workflow),
                 "path": str(path.relative_to(project_dir)),
@@ -1460,6 +1461,15 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
         return 1
 
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    version_state = load_run_state(workspace)
+    version_state["managed_by"] = "agent"
+    save_version_state(workspace, version_state)
+    index = load_version_index(project_dir)
+    entry = next((item for item in index.get("versions", []) or [] if item.get("version_id") == args.version_id), None)
+    if entry:
+        entry = dict(entry)
+        entry["managed_by"] = "agent"
+        upsert_version_index(project_dir, entry, active=index.get("active_version_id") == args.version_id)
     agent_plan = bind_agent_plan(execution_plan, project_dir=project_dir, version_id=args.version_id)
     save_agent_plan(workspace, agent_plan)
     init_agent_state(workspace, project=str(project_dir), version_id=args.version_id, agent_plan=agent_plan)

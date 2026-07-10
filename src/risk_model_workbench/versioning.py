@@ -200,6 +200,7 @@ def _run_state_to_version_state(
     state["version_id"] = version_id
     state["project"] = str(project_dir.resolve())
     state["source_type"] = source_type
+    state.setdefault("managed_by", "workbench")
     state["lineage"] = {
         "legacy_run_id": run_id,
         "migrated_from": f"runs/{run_id}",
@@ -215,6 +216,7 @@ def _index_entry(project_dir: Path, version_path: Path, state: dict[str, Any], *
         "version_id": version_id,
         "display_name": display_name or version_id,
         "source_type": state.get("source_type", "workbench"),
+        "managed_by": state.get("managed_by", "workbench"),
         "status": state.get("status", ""),
         "workflow": state.get("workflow", ""),
         "path": str(version_path.relative_to(project_dir)),
