@@ -54,6 +54,7 @@ ALLOWED_TASK_TRANSITIONS = {
     ("running", "stop", "stopped"),
     ("running", "unknown_external_outcome", "reconciliation_required"),
     ("review_ready", "request_approval", "paused"),
+    ("review_ready", "approval_confirmed", "done"),
     ("review_ready", "revise", "pending"),
     ("review_ready", "stop", "stopped"),
     ("paused", "resume", "pending"),

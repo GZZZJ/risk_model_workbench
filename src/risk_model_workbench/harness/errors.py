@@ -15,6 +15,7 @@ ADVISOR_REQUIRED = "advisor_required"
 UNKNOWN = "unknown"
 MISSING_ACTION_RESULT = "missing_action_result"
 INVALID_ACTION_RESULT = "invalid_action_result"
+EXTERNAL_OUTCOME_UNKNOWN = "external_outcome_unknown"
 
 
 class ActionResultError(RuntimeError):
@@ -88,6 +89,10 @@ FAILURE_CLASSES: tuple[FailureClass, ...] = (
     FailureClass(
         INVALID_ACTION_RESULT,
         "The ActionResult does not match the active task, invocation, or workspace.",
+    ),
+    FailureClass(
+        EXTERNAL_OUTCOME_UNKNOWN,
+        "An external operation may have been submitted, but its final outcome is not proven locally.",
     ),
     FailureClass(
         UNKNOWN,

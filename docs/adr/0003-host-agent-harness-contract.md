@@ -122,7 +122,7 @@ exactly once.
 | `running` | wait for a bound decision | `paused` |
 | `running` | complete, scaffold, fail, skip, or stop | `done`, `scaffold`, `failed`, `skipped`, or `stopped` |
 | `running` | unknown external outcome | `reconciliation_required` |
-| `review_ready` | request approval, revise, or stop | `paused`, `pending`, or `stopped` |
+| `review_ready` | approval confirmed, request approval, revise, or stop | `done`, `paused`, `pending`, or `stopped` |
 | `paused` | resume, fail, or stop | `pending`, `failed`, or `stopped` |
 | `reconciliation_required` | confirm success, confirm failure, or abandon | `done`, `failed`, or `stopped` |
 | `done` | none | none; terminal |
@@ -168,6 +168,12 @@ has been consumed. `command_hint` is never executable authority.
    strict version audit.
 7. Unknown external outcomes are never retried automatically; they enter
    `reconciliation_required`.
+8. A consumed SQL approval is revalidated at the external client boundary;
+   the client receives the immutable SQL evidence text, never an unchecked
+   regenerated string.
+9. Batch workers receive the exact approval ID, subject hash, consumption
+   receipt, parent operation ID, and attempt ID. One unknown sub-operation
+   makes the whole action `reconciliation_required`.
 
 ## Consequences
 

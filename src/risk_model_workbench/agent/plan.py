@@ -292,11 +292,17 @@ def _infer_tool(task: dict[str, Any]) -> ToolSpec:
     if command[:2] == ["feature", "metadata"] or task_id == "feature_metadata":
         return get_tool_spec("feature_metadata")
     if command[:2] == ["feature", "prescreen"] or task_id == "feature_prescreen":
-        return get_tool_spec("feature_prescreen_pull" if "--sql-approved" in args else "feature_prescreen_dry_run")
+        if "--sql-approved" in args:
+            return get_tool_spec("feature_prescreen_execute")
+        return get_tool_spec("feature_prescreen_prepare" if "--dry-run-sql" in args else "feature_prescreen_local")
     if args and args[0] == "build-wide-sql" or task_id == "build_wide_sql":
-        return get_tool_spec("build_wide_sql_execute" if "--execute" in args or "--sql-approved" in args else "build_wide_sql")
+        if "--execute" in args or "--sql-approved" in args:
+            return get_tool_spec("build_wide_sql_execute")
+        return get_tool_spec("build_wide_sql_local" if task_id == "build_wide_sql" else "build_wide_sql_prepare")
     if command[:2] == ["feature", "refine"] or task_id == "feature_refine":
-        return get_tool_spec("feature_refine_pull" if "--sql-approved" in args else "feature_refine_dry_run")
+        if "--sql-approved" in args:
+            return get_tool_spec("feature_refine_execute")
+        return get_tool_spec("feature_refine_prepare" if "--dry-run-sql" in args else "feature_refine_local")
     if args and args[0] == "train" or task_type == "train":
         return get_tool_spec("train_baseline")
     if args and args[0] == "evaluate" or task_type == "evaluate":

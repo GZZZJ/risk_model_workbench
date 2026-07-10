@@ -23,7 +23,7 @@ from risk_model_workbench.agent.advisor import (
     list_advisor_requests,
     load_advisor_request,
 )
-from risk_model_workbench.agent.approvals import approve_request, load_approvals
+from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
 from risk_model_workbench.agent.plan import (
     agent_tool_schema,
@@ -1581,7 +1581,7 @@ def cmd_agent_approve(args: argparse.Namespace) -> int:
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
     try:
         approval = approve_request(workspace, args.approval_id, approved_by=args.approved_by, note=args.note or "")
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         print(str(exc))
         return 1
     append_trace(
@@ -1591,6 +1591,28 @@ def cmd_agent_approve(args: argparse.Namespace) -> int:
             "summary": "Approval recorded.",
             "approval_id": args.approval_id,
             "approved_by": args.approved_by,
+        },
+    )
+    print(f"approval_status: {approval.get('status')}")
+    print(f"approval_id: {approval.get('approval_id')}")
+    return 0
+
+
+def cmd_agent_reject(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        approval = reject_request(workspace, args.approval_id, rejected_by=args.rejected_by, note=args.note or "")
+    except (KeyError, ValueError) as exc:
+        print(str(exc))
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "Approval rejected.",
+            "approval_id": args.approval_id,
+            "rejected_by": args.rejected_by,
         },
     )
     print(f"approval_status: {approval.get('status')}")
@@ -2045,7 +2067,12 @@ def cmd_feature_prescreen(args: argparse.Namespace) -> int:
         argv.append("--sql-approved")
     if args.force:
         argv.append("--force")
-    code = batch_select_main(argv)
+    try:
+        code = batch_select_main(argv)
+    except Exception as exc:
+        stage_action_failed(path, stage, str(exc), failure_code=classify_exception(exc))
+        print(f"feature prescreen failed: {exc}", file=sys.stderr)
+        return 1
     if code == 0:
         try:
             feature_cfg = _load_runtime_config(project_dir, path, "feature_select").get("feature_select", {})
@@ -2274,11 +2301,12 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
             execution_result = execute_dp_sql(
                 project_dir=project_dir,
                 sql=sql_text,
-                operation_id="build_wide_sql",
+                operation_id="build_wide_sql_execute",
                 description=f"Create wide feature table {summary_payload.get('output_table', args.output_table or '')}".strip(),
                 metadata_path=execution_path,
                 sql_approved=args.sql_approved,
                 progress=reporter,
+                audit_workspace=run_path,
             )
             execution_payload = {
                 **execution_result,
@@ -2336,7 +2364,13 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
             },
         )
     if run_path:
-        stage_action_done(run_path, "build_wide_sql")
+        stage_action_done(
+            run_path,
+            "build_wide_sql",
+            scaffold=not args.execute,
+            message="SQL generation complete; waiting for approval" if not args.execute else "",
+            failure_code=SQL_APPROVAL_REQUIRED if not args.execute else "",
+        )
     print(f"sql: {sql_path}")
     print(f"feature_map: {feature_map_path}")
     print(f"summary: {summary_path}")
@@ -2372,6 +2406,25 @@ def cmd_feature_refine(args: argparse.Namespace) -> int:
     if code == 0:
         try:
             refine_cfg = _load_runtime_config(project_dir, path, "refine_features").get("feature_refine", {})
+            if args.dry_run_sql and not _runtime_is_local_feather(path, project_dir):
+                from risk_model_workbench.data.sql_evidence import write_sql_evidence
+                from risk_model_workbench.feature_refine import build_sampling_sql
+
+                prepared_sql = build_sampling_sql(
+                    refine_cfg,
+                    _refine_feature_columns(project_dir, {"feature_refine": refine_cfg}),
+                )
+                entry = write_sql_evidence(
+                    path,
+                    prepared_sql,
+                    source="feature_refine.build_sampling_sql",
+                    purpose="feature_refine_sample",
+                    stage="feature_refine",
+                    sql_kind="generated",
+                    name="feature_refine_sample.sql",
+                )
+                _register_if_exists(path, "feature_refine", "queries/sql_evidence_manifest.json", description="SQL evidence manifest")
+                register_artifact(path, "feature_refine", entry["path"], description="Generated feature refine SQL evidence")
             try:
                 runtime_project = _load_runtime_project_config(project_dir, path)
             except FileNotFoundError:
@@ -3571,6 +3624,14 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     approve.add_argument("--approved-by", required=True)
     approve.add_argument("--note", default="")
     approve.set_defaults(func=cmd_agent_approve)
+
+    reject = agent_sub.add_parser("reject", help="reject a blocked high-risk Agent action")
+    reject.add_argument("--project", required=True)
+    reject.add_argument("--version-id", required=True)
+    reject.add_argument("--approval-id", required=True)
+    reject.add_argument("--rejected-by", required=True)
+    reject.add_argument("--note", default="")
+    reject.set_defaults(func=cmd_agent_reject)
 
     tools = agent_sub.add_parser("tools", help="export Agent tool schema")
     tools.add_argument("--json", action="store_true")

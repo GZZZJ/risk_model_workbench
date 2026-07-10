@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 from uuid import uuid4
 
 from risk_model_workbench.agent.advisor import advisor_request_is_answered, create_advisor_request
+from risk_model_workbench.agent.approvals import (
+    approval_by_id,
+    build_approval_subject,
+    consume_approval,
+    ensure_subject_approval,
+    revoke_approval,
+)
 from risk_model_workbench.agent.plan import (
     invocation_for_task,
     load_agent_plan,
@@ -85,6 +93,8 @@ def _run_agent_locked(
             from risk_model_workbench.agent.state import save_agent_state
 
             save_agent_state(workspace, state)
+        if state.get("status") == "waiting_for_approval":
+            state = _consume_ready_sql_approval(workspace, plan, state)
     runner = runner or _default_runner
     append_trace(workspace, "observation", {"summary": "Agent execution started.", "version_id": version_id})
     if int(plan.get("version") or 1) >= 2 and state.get("status") in BLOCKER_STATES:
@@ -125,7 +135,12 @@ def _run_agent_locked(
 
         invocation = invocation_for_task(runnable, plan)
         args = rendered_argv_for_task(runnable, plan, TOOL_REGISTRY)
-        decision = evaluate_task_policy(invocation, workspace, task_id=str(runnable.get("task_id") or ""))
+        decision = evaluate_task_policy(
+            invocation,
+            workspace,
+            task_id=str(runnable.get("task_id") or ""),
+            subject_bound=int(plan.get("version") or 1) >= 2,
+        )
         if not decision.allowed:
             state = pause_agent(
                 workspace,
@@ -135,6 +150,15 @@ def _run_agent_locked(
                 approval_id=decision.approval_id,
                 command_hash=decision.command_hash,
             )
+            if decision.status == "waiting_for_approval":
+                review_ready_dependencies = [
+                    dep
+                    for dep in runnable.get("depends_on") or []
+                    if task_status_map(state).get(str(dep)) == "review_ready"
+                ]
+                if review_ready_dependencies:
+                    state["blocker"]["prepare_task_id"] = str(review_ready_dependencies[0])
+                    save_agent_state(workspace, state)
             append_trace(
                 workspace,
                 "decision",
@@ -150,6 +174,7 @@ def _run_agent_locked(
         task_id = str(runnable.get("task_id") or "")
         spec = TOOL_REGISTRY[invocation.tool_name]
         attempt_id = f"attempt_{uuid4().hex}"
+        approval_binding = _task_approval_binding(state, task_id)
         mark_task_running(workspace, task_id)
         _record_attempt(workspace, task_id, attempt_id, invocation.digest())
         append_trace(
@@ -172,6 +197,10 @@ def _run_agent_locked(
                 invocation_hash=invocation.digest(),
                 project=str(project_path),
                 version_id=version_id,
+                approval_id=str(approval_binding.get("approval_id") or ""),
+                approval_subject_hash=str(approval_binding.get("subject_hash") or ""),
+                approval_consumption_receipt=str(approval_binding.get("consumption_receipt") or ""),
+                parent_operation_id=str(approval_binding.get("parent_operation_id") or ""),
             )
             runner_error = ""
             try:
@@ -320,6 +349,13 @@ def _record_attempt(workspace: Path, task_id: str, attempt_id: str, invocation_h
     save_agent_state(workspace, state)
 
 
+def _task_approval_binding(state: dict[str, Any], task_id: str) -> dict[str, Any]:
+    for task in state.get("tasks", []) or []:
+        if task.get("task_id") == task_id and isinstance(task.get("approval_binding"), dict):
+            return dict(task["approval_binding"])
+    return {}
+
+
 def _reduce_semantic_result(
     project_path: Path,
     workspace: Path,
@@ -331,6 +367,10 @@ def _reduce_semantic_result(
 ) -> dict[str, Any] | None:
     task_id = str(task.get("task_id") or "")
     if result.next_required_action == "approval":
+        tool_name = str(((task.get("invocation") or {}).get("tool_name") or task.get("tool_name") or ""))
+        if tool_name.endswith("_prepare"):
+            _mark_task_review_ready(workspace, task_id, result.message or "SQL evidence ready for review")
+            return None
         return pause_agent(
             workspace,
             status="waiting_for_approval",
@@ -378,16 +418,62 @@ def _reduce_semantic_result(
 
 def _pause_for_reconciliation(workspace: Path, task_id: str, result: ActionResult) -> dict[str, Any]:
     state = load_agent_state(workspace)
+    approval_binding: dict[str, Any] = {}
     for task in state.get("tasks", []) or []:
         if task.get("task_id") == task_id:
             task.update(apply_task_transition(task, "unknown_external_outcome", "reconciliation_required"))
+            if isinstance(task.get("approval_binding"), dict):
+                approval_binding = dict(task["approval_binding"])
             break
     blocker_id = f"reconciliation:{result.attempt_id}"
+    consumption_receipt = str(approval_binding.get("consumption_receipt") or "")
+    consumption_receipt_status = "missing"
+    if consumption_receipt:
+        receipt_path = (workspace / consumption_receipt).resolve()
+        if workspace.resolve() in receipt_path.parents and receipt_path.is_file():
+            try:
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                consumption_receipt_status = "consumed" if receipt.get("consumed") is True else "invalid"
+            except (OSError, json.JSONDecodeError):
+                consumption_receipt_status = "invalid"
+    external_operations = []
+    for intent_path in sorted((workspace / "audit" / "external_operations").glob("*.intent.json")):
+        try:
+            intent = json.loads(intent_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if intent.get("attempt_id") == result.attempt_id:
+            receipt_path = intent_path.with_name(intent_path.name.replace(".intent.json", ".receipt.json"))
+            receipt: dict[str, Any] = {}
+            if receipt_path.is_file():
+                try:
+                    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    receipt = {}
+            external_operations.append(
+                {
+                    "operation_id": intent.get("operation_id", ""),
+                    "parent_operation_id": intent.get("parent_operation_id", ""),
+                    "approval_id": intent.get("approval_id", ""),
+                    "subject_hash": intent.get("subject_hash", ""),
+                    "attempt_id": intent.get("attempt_id", ""),
+                    "intent_path": str(intent_path.relative_to(workspace)),
+                    "receipt_path": str(receipt_path.relative_to(workspace)) if receipt_path.is_file() else "",
+                    "receipt_status": receipt.get("status", "unknown"),
+                }
+            )
     blocker = {
         "blocker_type": "reconciliation",
         "blocker_id": blocker_id,
         "attempt_id": result.attempt_id,
+        "task_id": task_id,
         "reason": result.failure_code or "external_outcome_unknown",
+        "approval_id": str(approval_binding.get("approval_id") or ""),
+        "subject_hash": str(approval_binding.get("subject_hash") or ""),
+        "consumption_receipt": consumption_receipt,
+        "consumption_receipt_status": consumption_receipt_status,
+        "parent_operation_id": str(approval_binding.get("parent_operation_id") or ""),
+        "external_operations": external_operations,
         "next_safe_action": {
             "action": "reconcile_external_operation",
             "required_evidence": "operator-supplied external operation receipt",
@@ -411,7 +497,13 @@ def _next_runnable_task(plan: dict[str, Any], status_by_task: dict[str, str]) ->
         if status not in {"pending", "paused"}:
             continue
         deps = [str(dep) for dep in task.get("depends_on") or []]
-        if all(status_by_task.get(dep) in done_statuses for dep in deps):
+        tool_name = str(((task.get("invocation") or {}).get("tool_name") or task.get("tool_name") or ""))
+        dependency_statuses = [status_by_task.get(dep) for dep in deps]
+        execute_after_review = tool_name.endswith("_execute")
+        if all(
+            status in done_statuses or (execute_after_review and status == "review_ready")
+            for status in dependency_statuses
+        ):
             return task
     return None
 
@@ -478,6 +570,83 @@ def _finalize_if_complete(project_dir: Path, workspace: Path, version_id: str) -
         from risk_model_workbench.agent.state import save_agent_state
 
         save_agent_state(workspace, state)
+    return state
+
+
+def _mark_task_review_ready(workspace: Path, task_id: str, message: str) -> None:
+    state = load_agent_state(workspace)
+    for task in state.get("tasks", []) or []:
+        if task.get("task_id") == task_id:
+            task.update(apply_task_transition(task, "prepare_complete", "review_ready"))
+            task["message"] = message
+            task["finished_at"] = datetime.now().isoformat(timespec="seconds")
+            break
+    state["status"] = "running"
+    save_agent_state(workspace, state)
+
+
+def _consume_ready_sql_approval(workspace: Path, plan: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
+    approval_id = str(blocker.get("approval_id") or "")
+    approval = approval_by_id(workspace, approval_id) if approval_id else None
+    if not approval or approval.get("status") in {"pending", "rejected", "consumed"}:
+        return state
+    execute_task_id = str(blocker.get("task_id") or "")
+    execute_task = next(
+        (task for task in plan.get("tasks", []) or [] if str(task.get("task_id") or "") == execute_task_id),
+        None,
+    )
+    if execute_task is None:
+        return state
+    invocation = invocation_for_task(execute_task, plan)
+    try:
+        subject = build_approval_subject(
+            workspace,
+            project=invocation.project,
+            version_id=invocation.version_id,
+            task_id=execute_task_id,
+            invocation_hash=invocation.digest(),
+            operation_id=invocation.tool_name,
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        if approval.get("status") == "approved":
+            revoke_approval(workspace, approval_id, reason="approval_subject_invalid")
+        state["blocker"]["reason"] = f"sql_evidence_invalid:{exc}"
+        save_agent_state(workspace, state)
+        return state
+    if approval.get("status") == "revoked":
+        replacement = ensure_subject_approval(workspace, subject, reason="approval_subject_revalidation")
+        state["blocker"]["approval_id"] = str(replacement.get("approval_id") or "")
+        state["blocker"]["reason"] = "approval_required"
+        save_agent_state(workspace, state)
+        return state
+    try:
+        receipt = consume_approval(workspace, approval_id, subject, consumed_by="agent_runtime")
+    except ValueError as exc:
+        replacement = ensure_subject_approval(workspace, subject, reason="approval_subject_drift")
+        state["blocker"]["reason"] = str(exc)
+        state["blocker"]["approval_id"] = str(replacement.get("approval_id") or "")
+        save_agent_state(workspace, state)
+        return state
+    for task in state.get("tasks", []) or []:
+        if task.get("task_id") == execute_task_id:
+            if task.get("status") == "paused":
+                task.update(apply_task_transition(task, "resume", "pending"))
+            task["approval_binding"] = {
+                "approval_id": approval_id,
+                "subject_hash": receipt["subject_hash"],
+                "consumption_receipt": str(Path("audit") / "approval_consumptions" / f"{approval_id}.json"),
+                "parent_operation_id": invocation.tool_name,
+            }
+        if task.get("task_id") == blocker.get("prepare_task_id") and task.get("status") == "review_ready":
+            task.update(apply_task_transition(task, "approval_confirmed", "done"))
+    state = apply_transition(
+        state,
+        "consume_approval",
+        {"target_state": "running", "consumption_evidence": receipt},
+    )
+    state["current_task"] = ""
+    save_agent_state(workspace, state)
     return state
 
 

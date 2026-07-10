@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.agent.approvals import (
     approval_id_for,
+    build_approval_subject,
     command_hash,
     ensure_approval_request,
+    ensure_subject_approval,
+    is_subject_approval_consumed,
     is_command_approved,
 )
 from risk_model_workbench.harness.invocation import ActionInvocation
@@ -45,6 +49,7 @@ def evaluate_task_policy(
     *,
     task_id: str = "",
     registry: dict[str, ToolSpec] | None = None,
+    subject_bound: bool = False,
 ) -> PolicyDecision:
     source = TOOL_REGISTRY if registry is None else registry
     raw_args = (
@@ -87,6 +92,28 @@ def evaluate_task_policy(
         return PolicyDecision(True, "allowed", "safe_permission", command_hash=digest)
 
     if permission == "dp_sql_pull" or requires_approval:
+        if subject_bound:
+            try:
+                subject = build_approval_subject(
+                    workspace,
+                    project=invocation.project,
+                    version_id=invocation.version_id,
+                    task_id=task_id,
+                    invocation_hash=invocation.digest(),
+                    operation_id=spec.name,
+                )
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                return PolicyDecision(False, "blocked", f"sql_evidence_invalid:{exc}", command_hash=digest)
+            if is_subject_approval_consumed(workspace, subject):
+                return PolicyDecision(True, "allowed", "subject_approval_consumed", command_hash=digest)
+            request = ensure_subject_approval(workspace, subject, reason="approval_required")
+            return PolicyDecision(
+                False,
+                "waiting_for_approval",
+                "approval_required",
+                approval_id=str(request.get("approval_id") or ""),
+                command_hash=digest,
+            )
         approval_id = approval_id_for(args)
         if is_command_approved(workspace, args):
             return PolicyDecision(True, "allowed", "approved", approval_id=approval_id, command_hash=digest)
@@ -144,11 +171,15 @@ def _infer_tool_name(args: list[str]) -> str:
     if args[:2] == ["feature", "metadata"]:
         return "feature_metadata"
     if args[:2] == ["feature", "prescreen"]:
-        return "feature_prescreen_pull" if "--sql-approved" in args else "feature_prescreen_dry_run"
+        if "--sql-approved" in args:
+            return "feature_prescreen_execute"
+        return "feature_prescreen_prepare" if "--dry-run-sql" in args else "feature_prescreen_local"
     if args[:1] == ["build-wide-sql"]:
-        return "build_wide_sql_execute" if "--execute" in args or "--sql-approved" in args else "build_wide_sql"
+        return "build_wide_sql_execute" if "--execute" in args or "--sql-approved" in args else "build_wide_sql_local"
     if args[:2] == ["feature", "refine"]:
-        return "feature_refine_pull" if "--sql-approved" in args else "feature_refine_dry_run"
+        if "--sql-approved" in args:
+            return "feature_refine_execute"
+        return "feature_refine_prepare" if "--dry-run-sql" in args else "feature_refine_local"
     if args[:1] == ["train"]:
         return "train_baseline"
     if args[:1] == ["evaluate"]:

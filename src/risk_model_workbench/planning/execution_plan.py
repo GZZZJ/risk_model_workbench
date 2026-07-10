@@ -184,6 +184,7 @@ def create_execution_plan(request_doc: dict[str, Any], project_path: str | Path)
             seen_prescreen_round = True
     feature_task_ids: list[str] = []
     feature_dependency = sample_task_ids[-1:] if sample_task_ids else []
+    remote_execute_enabled = resolve_data_source_mode(metadata) != LOCAL_FEATHER
     for item in feature_rounds:
         name = item.get("name") if isinstance(item, dict) else str(item)
         normalized = name.replace("-", "_")
@@ -192,46 +193,57 @@ def create_execution_plan(request_doc: dict[str, Any], project_path: str | Path)
             args = ["feature", "metadata", "--project", project, "--run-id", run_arg]
             outputs = ["feature_selection/feature_table_summary.csv", "feature_selection/feature_columns.csv"]
             stage = "feature_metadata"
+            definitions = [(task_id, args, outputs)]
         elif normalized in prescreen_round_names:
-            task_id = "feature_prescreen"
-            args = ["feature", "prescreen", "--project", project, "--run-id", run_arg, "--dry-run-sql"]
-            outputs = ["feature_selection/prescreen_run_summary.json", "feature_selection/prescreen_final_remain_features.json"]
             stage = "feature_prescreen"
+            if remote_execute_enabled:
+                definitions = [
+                    ("feature_prescreen_prepare", ["feature", "prescreen", "--project", project, "--run-id", run_arg, "--dry-run-sql"], ["queries/sql_evidence_manifest.json"]),
+                    ("feature_prescreen_execute", ["feature", "prescreen", "--project", project, "--run-id", run_arg, "--sql-approved"], ["feature_selection/prescreen_run_summary.json", "feature_selection/prescreen_final_remain_features.json"]),
+                ]
+            else:
+                definitions = [("feature_prescreen", ["feature", "prescreen", "--project", project, "--run-id", run_arg], ["feature_selection/data_source_contract.json", "feature_selection/resource_plan.json"])]
         elif normalized in {"build_wide_sql", "wide_sql", "build_wide"}:
-            task_id = "build_wide_sql"
-            args = ["build-wide-sql", "--project", project, "--run-id", run_arg]
-            outputs = [
-                "queries/06_build_prescreen_wide_table.sql",
-                "feature_selection/wide_sql_summary.json",
-                "feature_selection/prescreen_wide_feature_map.csv",
-            ]
             stage = "build_wide_sql"
+            if remote_execute_enabled:
+                definitions = [
+                    ("build_wide_sql_prepare", ["build-wide-sql", "--project", project, "--run-id", run_arg], ["queries/06_build_prescreen_wide_table.sql", "feature_selection/wide_sql_summary.json"]),
+                    ("build_wide_sql_execute", ["build-wide-sql", "--project", project, "--run-id", run_arg, "--execute", "--sql-approved"], ["feature_selection/wide_table_execution.json"]),
+                ]
+            else:
+                definitions = [("build_wide_sql", ["build-wide-sql", "--project", project, "--run-id", run_arg], ["feature_selection/wide_table_skipped.json"])]
         elif normalized == "refine":
-            task_id = "feature_refine"
-            args = ["feature", "refine", "--project", project, "--run-id", run_arg, "--dry-run-sql"]
-            outputs = ["feature_selection/stage_summary.json", "feature_selection/final_features.txt"]
             stage = "feature_refine"
+            if remote_execute_enabled:
+                definitions = [
+                    ("feature_refine_prepare", ["feature", "refine", "--project", project, "--run-id", run_arg, "--dry-run-sql"], ["queries/sql_evidence_manifest.json"]),
+                    ("feature_refine_execute", ["feature", "refine", "--project", project, "--run-id", run_arg, "--sql-approved"], ["feature_selection/stage_summary.json", "feature_selection/final_features.txt"]),
+                ]
+            else:
+                definitions = [("feature_refine", ["feature", "refine", "--project", project, "--run-id", run_arg], ["feature_selection/stage_summary.json", "feature_selection/final_features.txt"])]
         else:
             task_id = f"feature_{normalized}"
             args = ["feature", normalized, "--project", project, "--run-id", run_arg]
             outputs = []
             stage = "feature_refine"
+            definitions = [(task_id, args, outputs)]
         if stage in workflow_stages:
             step_ids = implemented_step_ids_for_stage(step_config, stage)
-            tasks.append(
-                _task(
-                    task_id=task_id,
-                    task_type="feature_selection",
-                    depends_on=feature_dependency,
-                    args=args,
-                    outputs=outputs,
-                    scenario_profile=scenario_profile,
-                    step_ids=step_ids,
-                    step_params=step_params_for(step_config, step_ids),
+            for task_id, args, outputs in definitions:
+                tasks.append(
+                    _task(
+                        task_id=task_id,
+                        task_type="feature_selection",
+                        depends_on=feature_dependency,
+                        args=args,
+                        outputs=outputs,
+                        scenario_profile=scenario_profile,
+                        step_ids=step_ids,
+                        step_params=step_params_for(step_config, step_ids),
+                    )
                 )
-            )
-            feature_dependency = [task_id]
-            feature_task_ids.append(task_id)
+                feature_dependency = [task_id]
+                feature_task_ids.append(task_id)
 
     train_dep = feature_task_ids[-1:] or sample_task_ids[-1:]
     train_task_ids: list[str] = []

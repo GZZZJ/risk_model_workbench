@@ -442,6 +442,7 @@ def process_single_table(
     feature_select_code_dir: str,
     run_dir: str | None,
     stage: str = DEFAULT_STAGE,
+    external_operation_context: dict[str, str] | None = None,
 ) -> dict | None:
     """Process one feature table end-to-end: fetch -> quality screen -> PSI screen -> checkpoint.
 
@@ -505,6 +506,7 @@ def process_single_table(
         refresh=refresh_dp_cache,
         sql_approved=sql_approved,
         progress=reporter,
+        external_operation_context=external_operation_context,
     )
 
     available_features = coerce_features(sample, feature_list)
@@ -745,6 +747,12 @@ def main(argv: list[str] | None = None) -> int:
 
     summary_rows: list[dict] = []
     final_remain_by_table: dict[str, list[str]] = {}
+    from risk_model_workbench.agent.approvals import ApprovalBindingError
+    from risk_model_workbench.dp_feather import ExternalOutcomeUnknown, external_operation_context_for_current_attempt
+
+    external_operation_context = external_operation_context_for_current_attempt()
+    unknown_external_errors: list[str] = []
+    binding_errors: list[str] = []
 
     with ProcessPoolExecutor(max_workers=settings.workers) as executor:
         futures = {}
@@ -778,6 +786,7 @@ def main(argv: list[str] | None = None) -> int:
                 feature_select_code_dir=str(feature_select_code_dir),
                 run_dir=args.run_dir,
                 stage=stage,
+                external_operation_context=external_operation_context,
             )
             futures[future] = table_name
 
@@ -803,6 +812,10 @@ def main(argv: list[str] | None = None) -> int:
                         )
             except Exception as exc:
                 print(f"[ERROR] {table_name}: {exc}", file=sys.stderr, flush=True)
+                if isinstance(exc, ExternalOutcomeUnknown) or "external operation outcome is unknown" in str(exc).lower():
+                    unknown_external_errors.append(f"{table_name}: {exc}")
+                elif external_operation_context is not None and args.sql_approved:
+                    binding_errors.append(f"{table_name}: {exc}")
                 if reporter:
                     reporter.emit(
                         step="table_failed",
@@ -813,6 +826,11 @@ def main(argv: list[str] | None = None) -> int:
                         metrics={"table": table_name, "completed_tables": len(summary_rows)},
                         level="error",
                     )
+
+    if unknown_external_errors:
+        raise ExternalOutcomeUnknown("; ".join(unknown_external_errors))
+    if binding_errors:
+        raise ApprovalBindingError("; ".join(binding_errors))
 
     table_order = {name: idx for idx, (name, _) in enumerate(table_items)}
     summary_rows.sort(key=lambda r: table_order.get(r["table"], 999))

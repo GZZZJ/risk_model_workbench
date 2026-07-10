@@ -16,6 +16,7 @@ from risk_model_workbench.harness.actions import ActionSpec, get_action_spec
 from risk_model_workbench.harness.errors import (
     DATA_MISSING,
     DEPENDENCY_MISSING,
+    EXTERNAL_OUTCOME_UNKNOWN,
     FAILURE_CODES,
     SCAFFOLD_ONLY,
     SQL_APPROVAL_REQUIRED,
@@ -74,6 +75,10 @@ class ActionAttempt:
     invocation_hash: str
     project: str
     version_id: str
+    approval_id: str = ""
+    approval_subject_hash: str = ""
+    approval_consumption_receipt: str = ""
+    parent_operation_id: str = ""
 
 
 _CURRENT_ATTEMPT: ContextVar[ActionAttempt | None] = ContextVar("rmw_action_attempt", default=None)
@@ -86,6 +91,11 @@ def action_attempt(attempt: ActionAttempt) -> Iterator[None]:
         yield
     finally:
         _CURRENT_ATTEMPT.reset(token)
+
+
+def current_action_attempt() -> ActionAttempt | None:
+    """Return the active Agent attempt without granting callers mutation authority."""
+    return _CURRENT_ATTEMPT.get()
 
 
 def action_result_path(workspace: str | Path, attempt_id: str) -> Path:
@@ -276,6 +286,7 @@ def stage_action_failed(
     result = ActionResult(
         status="failed",
         failure_code=normalized,
+        next_required_action="reconciliation" if normalized == EXTERNAL_OUTCOME_UNKNOWN else "none",
         message=reason,
         retry_count=retry_count,
         artifacts=_stage_artifact_results(run_path, state, str(spec.stage), spec),
@@ -288,6 +299,8 @@ def stage_action_failed(
 
 
 def classify_exception(exc: BaseException) -> str:
+    if type(exc).__name__ == "ExternalOutcomeUnknown":
+        return EXTERNAL_OUTCOME_UNKNOWN
     if isinstance(exc, (FileNotFoundError, KeyError, ValueError)):
         return DATA_MISSING
     if isinstance(exc, (ImportError, ModuleNotFoundError)):
@@ -299,6 +312,8 @@ def classify_exception(exc: BaseException) -> str:
 
 def classify_exception_message(message: str) -> str:
     lowered = message.lower()
+    if "external operation outcome is unknown" in lowered or "external_outcome_unknown" in lowered:
+        return EXTERNAL_OUTCOME_UNKNOWN
     if "approval" in lowered or "approve" in lowered or "sql_review_required" in lowered:
         return SQL_APPROVAL_REQUIRED
     if "dependency" in lowered or "no module named" in lowered or "import" in lowered:
