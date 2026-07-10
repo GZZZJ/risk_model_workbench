@@ -246,6 +246,25 @@ def reset_paused_task(workspace: str | Path, task_id: str) -> dict[str, Any]:
     return state
 
 
+def requeue_interrupted_task(workspace: str | Path, task_id: str, *, attempt_id: str) -> dict[str, Any]:
+    """Requeue a provably safe interrupted attempt without erasing its identity."""
+    state = load_agent_state(workspace)
+    task = _task(state, task_id)
+    if task.get("status") != "running":
+        raise ValueError(f"interrupted task is not running: {task_id}")
+    if str(task.get("attempt_id") or "") != attempt_id:
+        raise ValueError(f"interrupted attempt does not match task: {attempt_id}")
+    task["status"] = "pending"
+    task["recovered_attempt_id"] = attempt_id
+    task["attempt_finished_at"] = _now()
+    task["message"] = "interrupted attempt safely requeued"
+    state["status"] = "running"
+    state["current_task"] = ""
+    state["blocker"] = {}
+    save_agent_state(workspace, state)
+    return state
+
+
 def _refresh_overall_status(state: dict[str, Any]) -> None:
     if int(state.get("version") or 1) >= 2:
         state["status"] = "running"

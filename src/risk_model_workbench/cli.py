@@ -26,6 +26,7 @@ from risk_model_workbench.agent.advisor import (
 from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
 from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.recovery import diagnose_recovery, reconcile_operation
 from risk_model_workbench.agent.plan import (
     agent_tool_schema,
     bind_agent_plan,
@@ -35,9 +36,10 @@ from risk_model_workbench.agent.plan import (
 )
 from risk_model_workbench.agent.state import init_agent_state, load_agent_state, save_agent_state
 from risk_model_workbench.agent.trace import append_trace, load_recent_trace
+from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
-from risk_model_workbench.harness.errors import SQL_APPROVAL_REQUIRED
+from risk_model_workbench.harness.errors import SQL_APPROVAL_REQUIRED, WorkspaceLockedError
 from risk_model_workbench.harness.runtime import (
     classify_exception,
     register_action_artifact as register_artifact,
@@ -1498,7 +1500,7 @@ def cmd_agent_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     try:
         state = run_agent(project_dir, args.version_id, runner=main)
-    except ValueError as exc:
+    except (ValueError, WorkspaceLockedError) as exc:
         print(f"agent run failed: {exc}")
         return 1
     print(f"agent_status: {state.get('status')}")
@@ -1542,7 +1544,7 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         return 1
     try:
         resumed = run_agent(project_dir, args.version_id, runner=main)
-    except ValueError as exc:
+    except (ValueError, WorkspaceLockedError) as exc:
         print(f"agent resume failed: {exc}")
         return 1
     print(f"agent_status: {resumed.get('status')}")
@@ -1554,6 +1556,65 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         "waiting_for_user",
         "reconciliation_required",
     } else 1
+
+
+def cmd_agent_diagnose(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        payload = diagnose_recovery(workspace)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"agent diagnose failed: {exc}")
+        return 1
+    payload["project"] = str(project_dir)
+    payload["version_id"] = args.version_id
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(f"unresolved_attempts: {payload['unresolved_count']}")
+        divergence = payload["transaction_divergence"]
+        print(f"transaction_divergence: {str(divergence['detected']).lower()}")
+        for item in payload["attempts"]:
+            if item["recovery_action"] != "none":
+                print(f"- {item['attempt_id']}: {item['recovery_action']}")
+    return 0
+
+
+def cmd_agent_reconcile(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+    try:
+        with WorkspaceStore(workspace).runner_lock():
+            receipt = reconcile_operation(
+                workspace,
+                operation_id=args.operation_id,
+                outcome=args.outcome,
+                evidence_path=args.evidence_path,
+                evidence_sha256=args.evidence_sha256,
+                operator_identity=args.operator_identity,
+                note=args.note,
+            )
+    except (OSError, ValueError, WorkspaceLockedError) as exc:
+        print(f"agent reconcile failed: {exc}")
+        return 1
+    append_trace(
+        workspace,
+        "decision",
+        {
+            "summary": "External operation explicitly reconciled.",
+            "operation_id": args.operation_id,
+            "outcome": args.outcome,
+            "operator_identity": args.operator_identity,
+            "evidence_sha256": args.evidence_sha256,
+            "receipt_path": receipt["receipt_path"],
+        },
+    )
+    if args.json:
+        print(json.dumps(receipt, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(f"reconciliation_outcome: {receipt['outcome']}")
+        print(f"receipt_path: {receipt['receipt_path']}")
+    return 0
 
 
 def cmd_agent_status(args: argparse.Namespace) -> int:
@@ -3698,6 +3759,24 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     resume.add_argument("--project", required=True)
     resume.add_argument("--version-id", required=True)
     resume.set_defaults(func=cmd_agent_resume)
+
+    diagnose = agent_sub.add_parser("diagnose", help="diagnose interrupted Agent attempts and transaction divergence")
+    diagnose.add_argument("--project", required=True)
+    diagnose.add_argument("--version-id", required=True)
+    diagnose.add_argument("--json", action="store_true")
+    diagnose.set_defaults(func=cmd_agent_diagnose)
+
+    reconcile = agent_sub.add_parser("reconcile", help="consume explicit evidence for an unknown external operation")
+    reconcile.add_argument("--project", required=True)
+    reconcile.add_argument("--version-id", required=True)
+    reconcile.add_argument("--operation-id", required=True)
+    reconcile.add_argument("--outcome", required=True, choices=["confirmed_succeeded", "confirmed_failed", "abandoned"])
+    reconcile.add_argument("--evidence-path", "--evidence", dest="evidence_path", required=True)
+    reconcile.add_argument("--evidence-sha256", required=True)
+    reconcile.add_argument("--operator-identity", required=True)
+    reconcile.add_argument("--note", required=True)
+    reconcile.add_argument("--json", action="store_true")
+    reconcile.set_defaults(func=cmd_agent_reconcile)
 
     status = agent_sub.add_parser("status", help="show Agent status")
     status.add_argument("--project", required=True)

@@ -32,18 +32,37 @@ from risk_model_workbench.agent.state import (
     mark_task_running,
     pause_agent,
     reset_paused_task,
+    requeue_interrupted_task,
     save_agent_state,
     task_status_map,
+)
+from risk_model_workbench.agent.recovery import (
+    begin_attempt,
+    diagnose_recovery,
+    load_attempt_journal,
+    mark_attempt_command_finished,
+    mark_attempt_dispatched,
+    mark_attempt_reconciliation,
+    mark_attempt_requeued,
+    mark_attempt_result_committed,
+    mark_attempt_transitioned,
+    recovery_policy,
 )
 from risk_model_workbench.agent.trace import append_trace
 from risk_model_workbench.agent.transitions import BLOCKER_STATES, apply_task_transition, apply_transition
 from risk_model_workbench.harness.actions import get_action_spec
 from risk_model_workbench.harness.errors import InvalidActionResultError, MissingActionResultError
-from risk_model_workbench.harness.runtime import ActionAttempt, ActionResult, action_attempt, load_action_result
+from risk_model_workbench.harness.runtime import (
+    ActionAttempt,
+    ActionResult,
+    action_attempt,
+    action_result_path,
+    load_action_result,
+)
 from risk_model_workbench.harness.tools import TOOL_REGISTRY, registry_digest
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.project_state import audit_run
-from risk_model_workbench.state import load_run_state
+from risk_model_workbench.state import load_run_state, pair_audit_artifact_transaction
 from risk_model_workbench.versioning import resolve_workspace_dir
 
 
@@ -98,6 +117,7 @@ def _run_agent_locked(
             state = _consume_ready_sql_approval(workspace, plan, state)
         if state.get("status") == "waiting_for_advisor":
             state = _consume_ready_advisor_response(workspace, state)
+        state = _recover_interrupted_attempts(project_path, workspace, version_id, plan, state)
     runner = runner or _default_runner
     append_trace(workspace, "observation", {"summary": "Agent execution started.", "version_id": version_id})
     if int(plan.get("version") or 1) >= 2 and state.get("status") in BLOCKER_STATES:
@@ -177,6 +197,7 @@ def _run_agent_locked(
         task_id = str(runnable.get("task_id") or "")
         spec = TOOL_REGISTRY[invocation.tool_name]
         attempt_id = f"attempt_{uuid4().hex}"
+        transition_id = f"transition_{uuid4().hex}"
         approval_binding = _task_approval_binding(state, task_id)
         mark_task_running(workspace, task_id)
         _record_attempt(workspace, task_id, attempt_id, invocation.digest())
@@ -192,6 +213,15 @@ def _run_agent_locked(
             },
         )
         if int(plan.get("version") or 1) >= 2:
+            begin_attempt(
+                workspace,
+                attempt_id=attempt_id,
+                transition_id=transition_id,
+                task_id=task_id,
+                action_id=spec.action_id,
+                invocation_hash=invocation.digest(),
+                execution_semantics=spec.execution_semantics,
+            )
             attempt = ActionAttempt(
                 workspace=workspace,
                 attempt_id=attempt_id,
@@ -207,11 +237,13 @@ def _run_agent_locked(
             )
             runner_error = ""
             try:
+                mark_attempt_dispatched(workspace, attempt_id)
                 with action_attempt(attempt):
                     code = runner(args)
             except Exception as exc:
                 code = 1
                 runner_error = f"{type(exc).__name__}: {exc}"
+            mark_attempt_command_finished(workspace, attempt_id)
             try:
                 semantic = load_action_result(
                     workspace,
@@ -248,6 +280,9 @@ def _run_agent_locked(
                     },
                 )
                 return mark_task_failed(workspace, task_id, reason="invalid_action_result")
+            _pair_action_result_transaction(workspace, semantic)
+            transaction_id = str(load_run_state(workspace).get("transaction_id") or "")
+            mark_attempt_result_committed(workspace, attempt_id, transaction_id=transaction_id)
             append_trace(
                 workspace,
                 "result",
@@ -269,7 +304,9 @@ def _run_agent_locked(
                 invocation_hash=invocation.digest(),
             )
             if reduced is not None:
+                mark_attempt_transitioned(workspace, attempt_id)
                 return reduced
+            mark_attempt_transitioned(workspace, attempt_id)
             continue
 
         code = runner(args)
@@ -339,6 +376,158 @@ def _run_agent_locked(
             mark_task_done(workspace, task_id, scaffold=True, message=str(result.get("message") or "scaffold output"))
             continue
         return mark_task_failed(workspace, task_id, reason=failure_code or f"exit_code_{code}")
+
+
+def _recover_interrupted_attempts(
+    project_path: Path,
+    workspace: Path,
+    version_id: str,
+    plan: dict[str, Any],
+    state: dict[str, Any],
+) -> dict[str, Any]:
+    """Fold durable receipts before any new command is allowed to run."""
+    if state.get("status") in BLOCKER_STATES:
+        return state
+    transaction_diverged = bool(diagnose_recovery(workspace)["transaction_divergence"]["detected"])
+    divergence_has_recovery_path = False
+    tasks_by_id = {str(item.get("task_id") or ""): item for item in plan.get("tasks", []) or []}
+    for attempt_id, snapshot in load_attempt_journal(workspace).items():
+        task_id = str(snapshot.get("task_id") or "")
+        state_task = next(
+            (item for item in state.get("tasks", []) or [] if str(item.get("task_id") or "") == task_id),
+            None,
+        )
+        if not isinstance(state_task, dict):
+            continue
+        if str(state_task.get("attempt_id") or "") != attempt_id:
+            continue
+        task = tasks_by_id.get(task_id)
+        if task is None:
+            raise ValueError(f"journaled task is absent from bound plan: {task_id}")
+        invocation = invocation_for_task(task, plan)
+        spec = TOOL_REGISTRY[invocation.tool_name]
+        receipt_path = action_result_path(workspace, attempt_id)
+        if state_task.get("status") != "running":
+            journal_result_status = str(snapshot.get("result_status") or "")
+            if receipt_path.is_file() and journal_result_status in {"committed", "applied"}:
+                # The state transition won the crash race; close only the
+                # journal record and never execute the domain action again.
+                semantic = load_action_result(
+                    workspace,
+                    attempt_id,
+                    task_id=task_id,
+                    action_id=spec.action_id,
+                    invocation_hash=invocation.digest(),
+                    project=str(project_path),
+                    version_id=version_id,
+                )
+                _pair_action_result_transaction(workspace, semantic)
+                if journal_result_status == "committed":
+                    mark_attempt_transitioned(workspace, attempt_id)
+            continue
+        if receipt_path.is_file():
+            semantic = load_action_result(
+                workspace,
+                attempt_id,
+                task_id=task_id,
+                action_id=spec.action_id,
+                invocation_hash=invocation.digest(),
+                project=str(project_path),
+                version_id=version_id,
+            )
+            _pair_action_result_transaction(workspace, semantic)
+            if str(snapshot.get("result_status") or "") != "committed":
+                transaction_id = str(load_run_state(workspace).get("transaction_id") or "")
+                mark_attempt_result_committed(workspace, attempt_id, transaction_id=transaction_id)
+            reduced = _reduce_semantic_result(
+                project_path,
+                workspace,
+                version_id,
+                task,
+                semantic,
+                invocation_hash=invocation.digest(),
+            )
+            mark_attempt_transitioned(workspace, attempt_id)
+            state = reduced if reduced is not None else load_agent_state(workspace)
+            if state.get("status") in BLOCKER_STATES:
+                return state
+            continue
+
+        decision = recovery_policy(
+            str(snapshot.get("execution_semantics") or spec.execution_semantics),
+            intent_status=str(snapshot.get("intent_status") or ""),
+            result_status=str(snapshot.get("result_status") or ""),
+        )
+        if decision in {"requeue", "retry"}:
+            divergence_has_recovery_path = True
+            state = requeue_interrupted_task(workspace, task_id, attempt_id=attempt_id)
+            mark_attempt_requeued(workspace, attempt_id)
+            append_trace(
+                workspace,
+                "decision",
+                {
+                    "summary": "Interrupted safe attempt requeued.",
+                    "attempt_id": attempt_id,
+                    "task_id": task_id,
+                    "execution_semantics": spec.execution_semantics,
+                },
+            )
+            continue
+        if decision == "reconciliation_required":
+            result = ActionResult(
+                attempt_id=attempt_id,
+                task_id=task_id,
+                action_id=spec.action_id,
+                invocation_hash=invocation.digest(),
+                project=str(project_path),
+                version_id=version_id,
+                status="failed",
+                failure_code="external_outcome_unknown",
+                next_required_action="reconciliation",
+                message="command dispatch was recorded without a durable result receipt",
+            )
+            state = _pause_for_reconciliation(workspace, task_id, result)
+            mark_attempt_reconciliation(workspace, attempt_id)
+            append_trace(
+                workspace,
+                "decision",
+                {
+                    "summary": "Interrupted unsafe attempt requires explicit reconciliation.",
+                    "attempt_id": attempt_id,
+                    "task_id": task_id,
+                    "execution_semantics": spec.execution_semantics,
+                },
+            )
+            return state
+        if decision == "apply_receipt":
+            return pause_agent(
+                workspace,
+                status="blocked",
+                reason="journal_claims_committed_result_but_receipt_is_missing",
+                task_id=task_id,
+                command_hash=invocation.digest(),
+            )
+    divergence_remains = bool(diagnose_recovery(workspace)["transaction_divergence"]["detected"])
+    if transaction_diverged and divergence_remains and not divergence_has_recovery_path:
+        if state.get("status") != "running":
+            raise ValueError("manifest_state_transaction_divergence")
+        return pause_agent(
+            workspace,
+            status="blocked",
+            reason="manifest_state_transaction_divergence",
+            task_id=str(state.get("current_task") or ""),
+        )
+    return state
+
+
+def _pair_action_result_transaction(workspace: Path, result: ActionResult) -> None:
+    """Make the immutable receipt a paired manifest/version-state mutation."""
+    pair_audit_artifact_transaction(
+        workspace,
+        action_result_path(workspace, result.attempt_id),
+        stage="agent_runtime",
+        description=f"Attempt-scoped ActionResult for {result.task_id}",
+    )
 
 
 def _record_attempt(workspace: Path, task_id: str, attempt_id: str, invocation_hash: str) -> None:

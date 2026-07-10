@@ -208,20 +208,22 @@ class WorkspaceStore:
     def runner_lock(self) -> Iterator[Path]:
         lock = self._target("audit/agent_runner.lock")
         lock.parent.mkdir(parents=True, exist_ok=True)
+        fd = os.open(lock, os.O_RDWR | os.O_CREAT, 0o600)
         try:
-            fd = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        except FileExistsError as exc:
-            raise WorkspaceLockedError(f"agent workspace already has an active runner: {lock}") from exc
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                handle.write(f"pid={os.getpid()}\n")
-                handle.flush()
-                os.fsync(handle.fileno())
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                raise WorkspaceLockedError(f"agent workspace already has an active runner: {lock}") from exc
+            os.ftruncate(fd, 0)
+            os.write(fd, f"pid={os.getpid()}\n".encode("utf-8"))
+            os.fsync(fd)
             _fsync_directory(lock.parent)
             yield lock
         finally:
-            lock.unlink(missing_ok=True)
-            _fsync_directory(lock.parent)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            finally:
+                os.close(fd)
 
     def lock(self) -> Iterator[Path]:
         """Public P1 name for the workspace single-runner lock."""

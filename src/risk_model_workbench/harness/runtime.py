@@ -12,7 +12,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any, Callable, Iterator, TypeVar
 
-from risk_model_workbench.harness.actions import ActionSpec, get_action_spec
+from risk_model_workbench.harness.actions import ActionSpec, automatic_recovery_allowed, get_action_spec
 from risk_model_workbench.harness.errors import (
     DATA_MISSING,
     DEPENDENCY_MISSING,
@@ -327,10 +327,19 @@ def classify_exception_message(message: str) -> str:
     return UNKNOWN
 
 
-def should_retry_failure(action_id: str, failure_code: str, *, attempt: int, max_attempts: int = 3) -> bool:
+def should_retry_failure(
+    action_id: str,
+    failure_code: str,
+    *,
+    attempt: int,
+    max_attempts: int = 3,
+    execution_semantics: str = "read_only",
+) -> bool:
     spec = get_action_spec(action_id)
     code = _normalize_failure_code(failure_code)
     if attempt >= max_attempts:
+        return False
+    if not automatic_recovery_allowed(execution_semantics):
         return False
     if spec.retry_policy == "never":
         return False

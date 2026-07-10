@@ -47,6 +47,14 @@ COMMON_STAGE_FAILURES = (
     UNKNOWN,
 )
 
+# ToolSpec owns the execution_semantics value.  The harness keeps the retry
+# predicate here so normal retries and crash recovery cannot drift apart.
+SAFE_RECOVERY_SEMANTICS = frozenset({"read_only", "idempotent_write"})
+
+
+def automatic_recovery_allowed(execution_semantics: str) -> bool:
+    return execution_semantics in SAFE_RECOVERY_SEMANTICS
+
 
 ACTION_SPECS: tuple[ActionSpec, ...] = (
     ActionSpec(

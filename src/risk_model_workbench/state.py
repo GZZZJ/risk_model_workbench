@@ -221,6 +221,35 @@ def register_artifact(
     return entry
 
 
+def pair_audit_artifact_transaction(
+    run_path: str | Path,
+    artifact: str | Path,
+    *,
+    stage: str = "agent_runtime",
+    description: str = "",
+) -> dict[str, Any]:
+    """Pair an audit-only manifest entry without adding a workflow stage.
+
+    Agent runtime receipts are closure evidence, not domain workflow stages.
+    The shared transaction id makes a crash between the two writes detectable
+    and replayable while preserving the workflow's declared stage set.
+    """
+    state = load_run_state(run_path)
+    transaction_id = f"txn_{uuid4().hex}"
+    entry = registry_register_artifact(
+        run_path,
+        artifact,
+        stage=stage,
+        kind="audit",
+        source="generated",
+        description=description,
+        transaction_id=transaction_id,
+    )
+    state["transaction_id"] = transaction_id
+    save_run_state(run_path, state)
+    return entry
+
+
 def append_decision(run_path: str | Path, *, stage: str, decision: str, reason: str) -> Path:
     state = load_run_state(run_path)
     item = {
