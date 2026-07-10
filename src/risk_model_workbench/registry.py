@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
+from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.manifest import describe_file
 
 
@@ -18,19 +19,21 @@ def load_artifact_manifest(run_dir: str | Path) -> dict[str, Any]:
     path = manifest_path(run_dir)
     if not path.exists():
         return {"version": 1, "artifacts": []}
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+    return WorkspaceStore(run_dir).read_json("audit/artifact_manifest.json").payload
 
 
-def save_artifact_manifest(run_dir: str | Path, manifest: dict[str, Any]) -> Path:
+def save_artifact_manifest(
+    run_dir: str | Path,
+    manifest: dict[str, Any],
+    *,
+    transaction_id: str = "",
+) -> Path:
     path = manifest_path(run_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
     manifest.setdefault("version", 1)
     manifest.setdefault("artifacts", [])
     manifest["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(manifest, handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
+    manifest["transaction_id"] = transaction_id or _new_unpaired_transaction_id()
+    WorkspaceStore(run_dir).update_json("audit/artifact_manifest.json", lambda _current: dict(manifest))
     return path
 
 
@@ -42,6 +45,7 @@ def register_artifact(
     kind: str = "file",
     source: str = "generated",
     description: str = "",
+    transaction_id: str = "",
 ) -> dict[str, Any]:
     """Register an artifact relative to the run directory when possible."""
     run_path = Path(run_dir).resolve()
@@ -69,11 +73,25 @@ def register_artifact(
         }
     )
 
-    manifest = load_artifact_manifest(run_path)
-    artifacts = [
-        item for item in manifest.get("artifacts", []) if not (item.get("path") == entry["path"] and item.get("stage") == stage)
-    ]
-    artifacts.append(entry)
-    manifest["artifacts"] = artifacts
-    save_artifact_manifest(run_path, manifest)
+    resolved_transaction_id = transaction_id or _new_unpaired_transaction_id()
+
+    def update_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
+        manifest.setdefault("version", 1)
+        artifacts = [
+            item
+            for item in manifest.get("artifacts", [])
+            if not (item.get("path") == entry["path"] and item.get("stage") == stage)
+        ]
+        artifacts.append(entry)
+        manifest["artifacts"] = artifacts
+        manifest["updated_at"] = datetime.now().isoformat(timespec="seconds")
+        manifest["transaction_id"] = resolved_transaction_id
+        return manifest
+
+    WorkspaceStore(run_path).update_json("audit/artifact_manifest.json", update_manifest)
     return entry
+
+
+def _new_unpaired_transaction_id() -> str:
+    """Identify a manifest mutation that has no matching version-state write."""
+    return f"txn_unpaired_{uuid4().hex}"

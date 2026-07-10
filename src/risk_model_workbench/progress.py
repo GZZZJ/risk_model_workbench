@@ -537,13 +537,16 @@ def _write_progress_summary(run_dir: Path, event: dict[str, Any]) -> None:
 
 
 def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
+    from risk_model_workbench.agent.workspace_store import WorkspaceStore
+
     path = run_dir / "version_state.yml"
     if not path.exists():
         path = run_dir / "run_state.yml"
     if not path.exists():
         return
-    with path.open("r", encoding="utf-8") as handle:
-        state = yaml.safe_load(handle) or {}
+    store = WorkspaceStore(run_dir)
+    document = store.read_yaml(path.name)
+    state = document.payload
     stage_state = state.setdefault("stages", {}).setdefault(event["stage"], {"status": "pending", "artifacts": []})
     stage_state["progress"] = {
         "step": event["step"],
@@ -557,7 +560,7 @@ def _update_run_state_progress(run_dir: Path, event: dict[str, Any]) -> None:
         "last_event_status": event["status"],
     }
     state["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    _atomic_write_text(path, yaml.safe_dump(state, allow_unicode=True, sort_keys=False))
+    store.write_yaml(path.name, state, document.revision)
 
 
 def _atomic_write_text(path: Path, content: str) -> None:

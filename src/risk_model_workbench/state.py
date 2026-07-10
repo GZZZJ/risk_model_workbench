@@ -9,9 +9,9 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
-import yaml
-
+from risk_model_workbench.agent.workspace_store import WorkspaceStore, tracked_payload
 from risk_model_workbench.registry import register_artifact as registry_register_artifact
 
 
@@ -101,25 +101,28 @@ def create_version_state(
 
 def load_run_state(run_path: str | Path) -> dict[str, Any]:
     path = state_path(run_path)
-    with path.open("r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle) or {}
+    return tracked_payload(WorkspaceStore(run_path).read_yaml(path.name))
 
 
 def save_run_state(run_path: str | Path, state: dict[str, Any]) -> Path:
     path = state_path(run_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
     state["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    with path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(state, handle, allow_unicode=True, sort_keys=False)
+    store = WorkspaceStore(run_path)
+    expected_revision = getattr(state, "store_revision", store.read_yaml(path.name).revision)
+    revision = store.write_yaml(path.name, dict(state), expected_revision)
+    if hasattr(state, "store_revision"):
+        state.store_revision = revision
     return path
 
 
 def save_version_state(version_path: str | Path, state: dict[str, Any]) -> Path:
     path = version_state_path(version_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
     state["updated_at"] = datetime.now().isoformat(timespec="seconds")
-    with path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(state, handle, allow_unicode=True, sort_keys=False)
+    store = WorkspaceStore(version_path)
+    expected_revision = getattr(state, "store_revision", store.read_yaml("version_state.yml").revision)
+    revision = store.write_yaml("version_state.yml", dict(state), expected_revision)
+    if hasattr(state, "store_revision"):
+        state.store_revision = revision
     return path
 
 
@@ -155,7 +158,7 @@ def mark_stage_started(run_path: str | Path, stage: str) -> dict[str, Any]:
     state["current_stage"] = stage
     save_run_state(run_path, state)
     _emit_progress_safely(run_path, stage, "started")
-    return state
+    return load_run_state(run_path)
 
 
 def mark_stage_done(run_path: str | Path, stage: str, *, scaffold: bool = False) -> dict[str, Any]:
@@ -173,7 +176,7 @@ def mark_stage_done(run_path: str | Path, stage: str, *, scaffold: bool = False)
     state["current_stage"] = stage
     save_run_state(run_path, state)
     _emit_progress_safely(run_path, stage, "done", scaffold=scaffold)
-    return state
+    return load_run_state(run_path)
 
 
 def mark_stage_failed(run_path: str | Path, stage: str, reason: str) -> dict[str, Any]:
@@ -186,7 +189,7 @@ def mark_stage_failed(run_path: str | Path, stage: str, reason: str) -> dict[str
     state["current_stage"] = stage
     save_run_state(run_path, state)
     _emit_progress_safely(run_path, stage, "failed", reason=reason)
-    return state
+    return load_run_state(run_path)
 
 
 def register_artifact(
@@ -199,11 +202,21 @@ def register_artifact(
     description: str = "",
 ) -> dict[str, Any]:
     state = load_run_state(run_path)
-    entry = registry_register_artifact(run_path, artifact, stage=stage, kind=kind, source=source, description=description)
+    transaction_id = f"txn_{uuid4().hex}"
+    entry = registry_register_artifact(
+        run_path,
+        artifact,
+        stage=stage,
+        kind=kind,
+        source=source,
+        description=description,
+        transaction_id=transaction_id,
+    )
     stage_state = _ensure_stage(state, stage)
     artifacts = stage_state.setdefault("artifacts", [])
     if entry["path"] not in artifacts:
         artifacts.append(entry["path"])
+    state["transaction_id"] = transaction_id
     save_run_state(run_path, state)
     return entry
 

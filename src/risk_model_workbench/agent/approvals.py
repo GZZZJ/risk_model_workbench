@@ -8,9 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import yaml
-
-from risk_model_workbench.agent.workspace_store import WorkspaceStore
+from risk_model_workbench.agent.workspace_store import WorkspaceStore, tracked_payload
 
 
 APPROVALS_VERSION = 1
@@ -109,8 +107,10 @@ def subject_hash(subject: dict[str, Any]) -> str:
 def load_approvals(workspace: str | Path) -> dict[str, Any]:
     path = approvals_path(workspace)
     if not path.exists():
-        return {"version": APPROVALS_VERSION, "approvals": []}
-    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        payload = tracked_payload(WorkspaceStore(workspace).read_yaml("audit/approvals.yml"))
+        payload.update({"version": APPROVALS_VERSION, "approvals": []})
+        return payload
+    payload = tracked_payload(WorkspaceStore(workspace).read_yaml("audit/approvals.yml"))
     payload.setdefault("version", APPROVALS_VERSION)
     payload.setdefault("approvals", [])
     return payload
@@ -118,11 +118,14 @@ def load_approvals(workspace: str | Path) -> dict[str, Any]:
 
 def save_approvals(workspace: str | Path, payload: dict[str, Any]) -> Path:
     path = approvals_path(workspace)
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload["version"] = APPROVALS_VERSION
     payload.setdefault("approvals", [])
     payload["updated_at"] = _now()
-    path.write_text(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    store = WorkspaceStore(workspace)
+    expected_revision = getattr(payload, "store_revision", store.read_yaml("audit/approvals.yml").revision)
+    revision = store.write_yaml("audit/approvals.yml", dict(payload), expected_revision)
+    if hasattr(payload, "store_revision"):
+        payload.store_revision = revision
     return path
 
 

@@ -174,6 +174,8 @@ def confirm_advisor_response(workspace: str | Path, request_id: str, current_sta
         request = load_advisor_request(workspace_path, request_id)
     except KeyError as exc:
         return _error(state, str(exc))
+    if not _claim_user_decision(workspace_path, request_id, decision="confirmed", actor=confirmed_by):
+        return _error(state, f"advisor user decision already recorded: {request_id}")
     task = _task(state, str(request.get("task_id") or ""))
     if task is not None and task.get("status") == "paused":
         task.update(apply_task_transition(task, "resume", "pending"))
@@ -209,6 +211,8 @@ def reject_advisor_response(workspace: str | Path, request_id: str, current_stat
         request = load_advisor_request(workspace_path, request_id)
     except KeyError as exc:
         return _error(state, str(exc))
+    if not _claim_user_decision(workspace_path, request_id, decision="rejected", actor=reason):
+        return _error(state, f"advisor user decision already recorded: {request_id}")
     task = _task(state, str(request.get("task_id") or ""))
     if task is not None and task.get("status") == "paused":
         task.update(apply_task_transition(task, "stop", "stopped"))
@@ -352,8 +356,27 @@ def _task(state: dict[str, Any], task_id: str) -> dict[str, Any] | None:
 
 
 def _save_request(workspace: Path, request: dict[str, Any]) -> None:
-    path = workspace / "audit" / "advisor_requests" / f"{request['request_id']}.json"
-    path.write_text(json.dumps(request, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    relative = Path("audit") / "advisor_requests" / f"{request['request_id']}.json"
+    store = WorkspaceStore(workspace)
+    expected_revision = getattr(request, "store_revision", store.read_json(relative).revision)
+    revision = store.write_json(relative, dict(request), expected_revision)
+    if hasattr(request, "store_revision"):
+        request.store_revision = revision
+
+
+def _claim_user_decision(workspace: Path, request_id: str, *, decision: str, actor: str) -> bool:
+    relative = Path("audit") / "advisor_consumptions" / f"{request_id}.user_decision.json"
+    return WorkspaceStore(workspace).create_once(
+        relative,
+        {
+            "receipt_id": f"advisor_user_decision:{request_id}",
+            "request_id": request_id,
+            "decision": decision,
+            "actor": actor,
+            "consumed": True,
+            "created_at": _now(),
+        },
+    )
 
 
 def _error(state: dict[str, Any], message: str) -> AdvisorConsumptionResult:

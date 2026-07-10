@@ -7,6 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from risk_model_workbench.agent.workspace_store import WorkspaceStore
+
 
 BLOCKED_KEYS = {"hidden_reasoning", "reasoning", "thought", "chain_of_thought", "cot"}
 
@@ -19,11 +21,7 @@ def append_trace(workspace: str | Path, event: str, payload: dict[str, Any] | No
     item = _sanitize(payload or {})
     item["timestamp"] = _now()
     item["event"] = event
-    path = trace_path(workspace)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(item, ensure_ascii=False, default=str))
-        handle.write("\n")
+    WorkspaceStore(workspace).append_jsonl("audit/agent_trace.jsonl", item)
     return item
 
 

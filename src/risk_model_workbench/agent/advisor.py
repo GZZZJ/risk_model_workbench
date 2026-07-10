@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from risk_model_workbench.agent.workspace_store import RevisionConflictError, WorkspaceStore, tracked_payload
 
 
 ADVISOR_PROTOCOL_VERSION = 1
@@ -116,26 +117,20 @@ def create_advisor_request(
     errors = validate_advisor_request(request)
     if errors:
         raise ValueError("; ".join(errors))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(request, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    context_path.parent.mkdir(parents=True, exist_ok=True)
-    context_path.write_text(
-        json.dumps(
-            {
-                "version": ADVISOR_PROTOCOL_VERSION,
-                "request_id": request_id,
-                "context_hash": context_hash,
-                "patterns": context_files,
-                "files": context_entries,
-                "created_at": _now(),
-            },
-            ensure_ascii=False,
-            indent=2,
-            default=str,
-        ),
-        encoding="utf-8",
+    store = WorkspaceStore(workspace_path)
+    context_payload = {
+        "version": ADVISOR_PROTOCOL_VERSION,
+        "request_id": request_id,
+        "context_hash": context_hash,
+        "patterns": context_files,
+        "files": context_entries,
+        "created_at": _now(),
+    }
+    store.create_once(
+        context_path.relative_to(workspace_path),
+        context_payload,
     )
-    return request
+    return _create_advisor_request_once(workspace_path, request)
 
 
 def create_replacement_advisor_request(workspace: str | Path, request: dict[str, Any], *, reason: str) -> dict[str, Any]:
@@ -171,26 +166,19 @@ def create_replacement_advisor_request(workspace: str | Path, request: dict[str,
             "created_at": _now(),
         }
     )
-    _save_advisor_request(workspace_path, replacement)
     context_path = workspace_path / replacement["context_manifest"]
-    context_path.parent.mkdir(parents=True, exist_ok=True)
-    context_path.write_text(
-        json.dumps(
-            {
-                "version": ADVISOR_PROTOCOL_VERSION,
-                "request_id": replacement["request_id"],
-                "context_hash": replacement["context_hash"],
-                "patterns": replacement.get("context_files") or [],
-                "files": context_entries,
-                "created_at": _now(),
-            },
-            ensure_ascii=False,
-            indent=2,
-            default=str,
-        ),
-        encoding="utf-8",
+    WorkspaceStore(workspace_path).create_once(
+        context_path.relative_to(workspace_path),
+        {
+            "version": ADVISOR_PROTOCOL_VERSION,
+            "request_id": replacement["request_id"],
+            "context_hash": replacement["context_hash"],
+            "patterns": replacement.get("context_files") or [],
+            "files": context_entries,
+            "created_at": _now(),
+        },
     )
-    return replacement
+    return _create_advisor_request_once(workspace_path, replacement)
 
 
 def infer_request_type(task: dict[str, Any], reason: str) -> str:
@@ -211,8 +199,8 @@ def list_advisor_requests(workspace: str | Path) -> list[dict[str, Any]]:
         return []
     for path in sorted(directory.glob("*.json")):
         try:
-            rows.append(json.loads(path.read_text(encoding="utf-8")))
-        except (OSError, json.JSONDecodeError):
+            rows.append(WorkspaceStore(workspace).read_json(path.relative_to(Path(workspace))).payload)
+        except (OSError, json.JSONDecodeError, ValueError):
             continue
     return rows
 
@@ -221,7 +209,7 @@ def load_advisor_request(workspace: str | Path, request_id: str) -> dict[str, An
     path = advisor_requests_dir(workspace) / f"{request_id}.json"
     if not path.exists():
         raise KeyError(f"unknown advisor request: {request_id}")
-    return json.loads(path.read_text(encoding="utf-8"))
+    return tracked_payload(WorkspaceStore(workspace).read_json(path.relative_to(Path(workspace))))
 
 
 def advisor_request_is_answered(workspace: str | Path, request_id: str) -> bool:
@@ -320,22 +308,32 @@ def accept_advisor_response(workspace: str | Path, response_path: str | Path) ->
     if errors:
         return {"accepted": False, "stored": False, "errors": errors}
     request_id = str(response["request_id"])
-    request = load_advisor_request(workspace_path, request_id)
-    if request.get("status") != "pending":
+    request_relative = Path("audit") / "advisor_requests" / f"{request_id}.json"
+    target = advisor_responses_dir(workspace_path) / f"{request_id}.response.json"
+
+    class RequestNotPending(RuntimeError):
+        def __init__(self, status: str):
+            self.status = status
+
+    def accept_pending(current: dict[str, Any]) -> dict[str, Any]:
+        if current.get("status") != "pending":
+            raise RequestNotPending(str(current.get("status") or ""))
+        WorkspaceStore(workspace_path).atomic_write(target.relative_to(workspace_path), response)
+        current["status"] = "answered" if response.get("status") == "answered" else "rejected"
+        current["answered_at"] = _now()
+        current["accepted_response"] = str(target.relative_to(workspace_path))
+        return current
+
+    try:
+        updated = WorkspaceStore(workspace_path).update_json(request_relative, accept_pending)
+    except RequestNotPending as exc:
         return {
             "accepted": False,
             "stored": False,
             "request_id": request_id,
-            "errors": [f"advisor request is not pending: {request.get('status')}"],
+            "errors": [f"advisor request is not pending: {exc.status}"],
         }
-    target = advisor_responses_dir(workspace_path) / f"{request_id}.response.json"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    if source.resolve() != target.resolve():
-        shutil.copy2(source, target)
-    request["status"] = "answered" if response.get("status") == "answered" else "rejected"
-    request["answered_at"] = _now()
-    request["accepted_response"] = str(target.relative_to(workspace_path))
-    _save_advisor_request(workspace_path, request)
+    request = updated.payload
     return {
         "accepted": request["status"] == "answered",
         "stored": True,
@@ -368,9 +366,26 @@ def request_identity(request: dict[str, Any]) -> dict[str, Any]:
 
 def _save_advisor_request(workspace: Path, request: dict[str, Any]) -> Path:
     path = advisor_requests_dir(workspace) / f"{request['request_id']}.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(request, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    store = WorkspaceStore(workspace)
+    relative = path.relative_to(workspace)
+    expected_revision = getattr(request, "store_revision", store.read_json(relative).revision)
+    revision = store.write_json(relative, dict(request), expected_revision)
+    if hasattr(request, "store_revision"):
+        request.store_revision = revision
     return path
+
+
+def _create_advisor_request_once(workspace: Path, request: dict[str, Any]) -> dict[str, Any]:
+    relative = Path("audit") / "advisor_requests" / f"{request['request_id']}.json"
+    store = WorkspaceStore(workspace)
+    try:
+        store.write_json(relative, request, expected_revision=0)
+        return request
+    except RevisionConflictError:
+        existing = load_advisor_request(workspace, str(request["request_id"]))
+        if existing.get("request_hash") == request.get("request_hash"):
+            return existing
+        raise ValueError(f"advisor request identity collision: {request['request_id']}")
 
 
 def build_context_manifest(workspace: Path, patterns: list[str]) -> list[dict[str, Any]]:

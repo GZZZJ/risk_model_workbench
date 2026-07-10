@@ -1,5 +1,6 @@
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,11 @@ from risk_model_workbench.agent.advisor import (
     load_advisor_request,
     validate_advisor_response,
 )
-from risk_model_workbench.agent.advisor_reducer import consume_advisor_response
+from risk_model_workbench.agent.advisor_reducer import (
+    confirm_advisor_response,
+    consume_advisor_response,
+    reject_advisor_response,
+)
 from risk_model_workbench.agent.plan import save_agent_plan
 from risk_model_workbench.agent.state import init_agent_state, load_agent_state, pause_agent, save_agent_state
 from risk_model_workbench.cli import main
@@ -147,6 +152,56 @@ def test_duplicate_consumption_is_rejected(tmp_path):
     overwritten = accept_advisor_response(workspace, response_path)
     assert overwritten["accepted"] is False
     assert any("not pending" in error for error in overwritten["errors"])
+
+
+def test_concurrent_advisor_consumers_have_one_winner(tmp_path):
+    _project, workspace, request, state = _paused_request(tmp_path)
+    response_path = _write_response(workspace, request, decision="continue")
+    assert accept_advisor_response(workspace, response_path)["accepted"] is True
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(
+            pool.map(
+                lambda _index: consume_advisor_response(workspace, request["request_id"], state),
+                range(2),
+            )
+        )
+
+    assert sum(result.consumed is True for result in results) == 1
+    assert load_advisor_request(workspace, request["request_id"])["status"] == "consumed"
+
+
+def test_concurrent_user_confirmation_and_rejection_have_one_winner(tmp_path):
+    _project, workspace, request, state = _paused_request(tmp_path)
+    response_path = _write_response(
+        workspace,
+        request,
+        decision="needs_user_confirmation",
+        output_files=[],
+    )
+    assert accept_advisor_response(workspace, response_path)["accepted"] is True
+    waiting = consume_advisor_response(workspace, request["request_id"], state)
+    assert waiting.status == "waiting_for_user"
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        confirm_future = pool.submit(
+            confirm_advisor_response,
+            workspace,
+            request["request_id"],
+            waiting.state,
+            confirmed_by="reviewer",
+        )
+        reject_future = pool.submit(
+            reject_advisor_response,
+            workspace,
+            request["request_id"],
+            waiting.state,
+            reason="unsafe",
+        )
+        results = [confirm_future.result(), reject_future.result()]
+
+    assert sum(result.consumed is True for result in results) == 1
+    assert load_advisor_request(workspace, request["request_id"])["status"] == "consumed"
 
 
 @pytest.mark.parametrize(

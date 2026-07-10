@@ -6,9 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from risk_model_workbench.agent.transitions import apply_task_transition, apply_transition
+from risk_model_workbench.agent.workspace_store import WorkspaceStore, tracked_payload
 
 
 AGENT_STATE_VERSION = 2
@@ -24,7 +23,7 @@ def load_agent_state(workspace: str | Path) -> dict[str, Any]:
     path = agent_state_path(workspace)
     if not path.exists():
         raise FileNotFoundError(f"agent_state.yml not found: {path}")
-    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    payload = tracked_payload(WorkspaceStore(workspace).read_yaml("audit/agent_state.yml"))
     payload.setdefault("version", LEGACY_AGENT_STATE_VERSION)
     payload.setdefault("tasks", [])
     payload.setdefault("blocker", {})
@@ -33,10 +32,13 @@ def load_agent_state(workspace: str | Path) -> dict[str, Any]:
 
 def save_agent_state(workspace: str | Path, state: dict[str, Any]) -> Path:
     path = agent_state_path(workspace)
-    path.parent.mkdir(parents=True, exist_ok=True)
     state.setdefault("version", LEGACY_AGENT_STATE_VERSION)
     state["updated_at"] = _now()
-    path.write_text(yaml.safe_dump(state, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    store = WorkspaceStore(workspace)
+    expected_revision = getattr(state, "store_revision", store.read_yaml("audit/agent_state.yml").revision)
+    revision = store.write_yaml("audit/agent_state.yml", dict(state), expected_revision)
+    if hasattr(state, "store_revision"):
+        state.store_revision = revision
     return path
 
 

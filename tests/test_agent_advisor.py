@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import yaml
@@ -54,6 +55,38 @@ def test_create_and_accept_standard_advisor_response(tmp_path):
     assert loaded["status"] == "answered"
     assert loaded["accepted_response"].endswith(f"{request['request_id']}.response.json")
     assert (workspace / loaded["accepted_response"]).exists()
+
+
+def test_concurrent_advisor_acceptors_have_one_winner_without_response_overwrite(tmp_path):
+    project = _make_project(tmp_path)
+    workspace = _init_version(project)
+    request = create_advisor_request(
+        workspace,
+        project_dir=project,
+        version_id="demo_model_v1_20260709",
+        task=_task("train_main"),
+        reason="advisor_required",
+    )
+    response_paths = []
+    for index in range(2):
+        path = workspace / f"response-{index}.json"
+        path.write_text(
+            json.dumps(_response_payload(request, summary=f"candidate-{index}"), ensure_ascii=False),
+            encoding="utf-8",
+        )
+        response_paths.append(path)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda path: accept_advisor_response(workspace, path), response_paths))
+
+    assert sum(result["accepted"] is True for result in results) == 1
+    assert sum(result["stored"] is True for result in results) == 1
+    loaded = load_advisor_request(workspace, request["request_id"])
+    stored_response = json.loads((workspace / loaded["accepted_response"]).read_text(encoding="utf-8"))
+    winning_summary = next(
+        f"candidate-{index}" for index, result in enumerate(results) if result["accepted"] is True
+    )
+    assert stored_response["summary"] == winning_summary
 
 
 def test_advisor_response_validation_rejects_mismatch(tmp_path):
