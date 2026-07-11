@@ -1,0 +1,79 @@
+{
+  "action_id": "sample_check",
+  "artifacts": [
+    {
+      "artifact_rule": "sample_check/sample_summary.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/sample_summary.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/sample_check_report.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/sample_check_report.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/label_distribution.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/label_distribution.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/sample_split_summary.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/sample_split_summary.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/monthly_label_distribution.csv",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/segment_distribution.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/segment_distribution.csv",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_27e6093f946845d3bb6e7cf15a90085f",
+  "created_at": "2026-07-11T19:33:59",
+  "decision": {
+    "created_at": "2026-07-11T19:33:59",
+    "decision": "done",
+    "reason": "Sample profiling completed from local data",
+    "stage": "sample_check"
+  },
+  "failure_code": "",
+  "invocation_hash": "d4500a2db6f0d38412185392e180c8dee728ef07081835e328e779f30f633a0b",
+  "message": "",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "sample_check_stability",
+  "version_id": "fujie_gcard_agent_v1_20260710"
+}

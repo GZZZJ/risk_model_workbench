@@ -154,7 +154,14 @@ def audit_artifact_availability(run_dir: str | Path, manifest: dict[str, Any]) -
     warnings: list[str] = []
     issues: list[str] = []
     entries: list[dict[str, Any]] = []
-    for raw in manifest.get("artifacts", []) or []:
+    raw_artifacts = manifest.get("artifacts", []) or []
+    latest_registration_by_path: dict[str, str] = {}
+    for raw in raw_artifacts:
+        artifact_path = str(raw.get("path") or "")
+        registered_at = str(raw.get("registered_at") or "")
+        if registered_at >= latest_registration_by_path.get(artifact_path, ""):
+            latest_registration_by_path[artifact_path] = registered_at
+    for raw in raw_artifacts:
         entry = dict(raw)
         storage = str(entry.get("storage_class") or "legacy_workspace")
         role = str(entry.get("contract_role") or "required")
@@ -168,7 +175,10 @@ def audit_artifact_availability(run_dir: str | Path, manifest: dict[str, Any]) -
             issues.append(f"unknown contract_role for {entry.get('path')}: {role}")
         metadata_errors = _retention_metadata_errors(entry, storage)
         issues.extend(metadata_errors)
-        if present and path is not None:
+        is_latest_registration = str(entry.get("registered_at") or "") == latest_registration_by_path.get(
+            str(entry.get("path") or ""), ""
+        )
+        if present and path is not None and is_latest_registration:
             issues.extend(_integrity_errors(path, entry))
         if storage == "legacy_workspace":
             summary["legacy_workspace"] += 1
@@ -183,7 +193,10 @@ def audit_artifact_availability(run_dir: str | Path, manifest: dict[str, Any]) -
             elif role == "required":
                 summary["required_missing"] += 1
         elif storage == "workspace_only":
-            if present:
+            tracked = path is not None and _git_path_is_tracked(run_path, path)
+            if present and tracked:
+                summary["repository_present"] += 1
+            elif present:
                 summary["workspace_only_present"] += 1
             elif role == "required":
                 summary["required_missing"] += 1

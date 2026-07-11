@@ -1,0 +1,26 @@
+{
+  "data_source": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "generated_at": "2026-07-11 20:49:45",
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "train_values": [
+    "DEV"
+  ],
+  "valid_values": [
+    "DEV-OOS"
+  ],
+  "oos_values": [
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "feature_list_source": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v1_20260710/feature_selection/final_features.txt",
+  "feature_count_in_list": 500,
+  "feature_count_in_data": 500,
+  "historical_score_columns": [
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ]
+}

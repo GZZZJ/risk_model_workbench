@@ -1,0 +1,52 @@
+{
+  "action_id": "feature_metadata",
+  "artifacts": [
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "Local Feather schema metadata",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_tables_meta.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "Local Feather schema metadata",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_table_summary.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "Local Feather schema metadata",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_columns.csv",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_7bca6e8eb00e4f28a670363ac20b34cc",
+  "created_at": "2026-07-11T20:00:28",
+  "decision": {
+    "created_at": "2026-07-11T20:00:27",
+    "decision": "done",
+    "reason": "feature metadata derived from declared local Feather schema; no remote metadata access",
+    "stage": "feature_metadata"
+  },
+  "failure_code": "",
+  "invocation_hash": "eb5fd5c3f0d258ac513ebc831b3250452f91fd5096d7bb30e16fe45d36b946ee",
+  "message": "local feather schema metadata generated",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_metadata",
+  "version_id": "fujie_gcard_agent_v1_20260710"
+}

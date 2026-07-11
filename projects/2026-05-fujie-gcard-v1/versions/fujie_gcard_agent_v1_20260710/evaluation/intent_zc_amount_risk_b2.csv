@@ -1,0 +1,4 @@
+﻿intent_level,n_samples,total_principal,total_overdue,amount_overdue_rate,head_risk_count,head_risk_rate
+低意愿,109068,373351.41,0.0,0.0,0,0.0
+中意愿,109068,628880.2599999999,53423.03,0.0849494464971758,9,8.3e-05
+高意愿,109069,10238930.98,328240.5,0.03205808307929428,64,0.000587

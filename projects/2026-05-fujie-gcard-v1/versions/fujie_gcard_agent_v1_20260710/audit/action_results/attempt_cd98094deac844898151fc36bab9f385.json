@@ -1,0 +1,43 @@
+{
+  "action_id": "compare",
+  "artifacts": [
+    {
+      "artifact_rule": "evaluation/benchmark_uplift.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "evaluation/benchmark_uplift.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "evaluation/champion_challenger.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "evaluation/champion_challenger.json",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_cd98094deac844898151fc36bab9f385",
+  "created_at": "2026-07-11T20:51:27",
+  "decision": {
+    "created_at": "2026-07-11T20:51:26",
+    "decision": "done",
+    "reason": "Champion/challenger comparison materialized",
+    "stage": "compare"
+  },
+  "failure_code": "",
+  "invocation_hash": "62a1c0ebc8b4c7b2e864bb690f1194d45fabf4a33a33f41f012d3e9eae42c0d6",
+  "message": "",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "compare_final",
+  "version_id": "fujie_gcard_agent_v1_20260710"
+}

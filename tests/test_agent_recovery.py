@@ -14,7 +14,7 @@ from risk_model_workbench.agent.recovery import (
     reconcile_operation,
     recovery_policy,
 )
-from risk_model_workbench.agent.state import init_agent_state, load_agent_state, save_agent_state
+from risk_model_workbench.agent.state import init_agent_state, load_agent_state, requeue_interrupted_task, save_agent_state
 from risk_model_workbench.harness.errors import WorkspaceLockedError
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
 
@@ -84,6 +84,27 @@ def test_runner_lock_rejects_concurrent_resume(tmp_path):
         with pytest.raises(WorkspaceLockedError):
             with WorkspaceStore(tmp_path).runner_lock():
                 pass
+
+
+def test_safe_missing_result_can_requeue_after_executor_marked_task_failed(tmp_path):
+    plan = {
+        "version": 2,
+        "plan_id": "p",
+        "plan_hash": "h",
+        "registry_digest": "r",
+        "tasks": [{"task_id": "task_1", "derived_metadata": {}, "invocation": {}}],
+    }
+    init_agent_state(tmp_path, project="/project", version_id="v1", agent_plan=plan)
+    state = load_agent_state(tmp_path)
+    state["status"] = "failed"
+    state["tasks"][0].update({"status": "failed", "attempt_id": "attempt_1"})
+    save_agent_state(tmp_path, state)
+
+    recovered = requeue_interrupted_task(tmp_path, "task_1", attempt_id="attempt_1")
+
+    assert recovered["status"] == "running"
+    assert recovered["tasks"][0]["status"] == "pending"
+    assert recovered["tasks"][0]["recovered_attempt_id"] == "attempt_1"
 
 
 def test_stale_runner_lock_metadata_does_not_block_after_process_exit(tmp_path):

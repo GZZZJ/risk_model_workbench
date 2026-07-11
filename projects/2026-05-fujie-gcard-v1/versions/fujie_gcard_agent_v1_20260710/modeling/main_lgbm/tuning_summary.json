@@ -1,0 +1,39 @@
+{
+  "mode": "llm_guided_tune",
+  "advisor_types": [
+    "baseline",
+    "host_agent_plan_file"
+  ],
+  "trial_count": 4,
+  "best_trial_id": 1,
+  "selection": {
+    "best_trial_id": 1,
+    "selection_score": 0.7654244188728526,
+    "primary_metric": "valid_ks",
+    "primary_value": 0.7187879361126688,
+    "secondary_metric": "valid_auc",
+    "secondary_value": 0.9327296552036772,
+    "auc_gap": 0.014961217193911969,
+    "guardrail_passed": true,
+    "guardrail_status": "passed",
+    "candidate_count": 4
+  },
+  "best_params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.03,
+    "num_leaves": 31,
+    "max_depth": 5,
+    "min_child_samples": 160,
+    "subsample": 0.75,
+    "colsample_bytree": 0.7,
+    "reg_alpha": 0.2,
+    "reg_lambda": 2.0,
+    "bagging_freq": 3,
+    "num_boost_round": 1400,
+    "early_stopping_rounds": 80
+  },
+  "decisions": [
+    "round 1: Baseline validation is already strong (KS 0.7170, AUC 0.9325) with a controlled train-validation AUC gap of 0.0132. Explore modest regularization and capacity changes while keeping OOT outside the primary tuning objective."
+  ]
+}

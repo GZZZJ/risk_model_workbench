@@ -52,6 +52,27 @@ def test_ignored_artifact_requires_explicit_storage_class(tmp_path):
     assert entry["size_bytes"] == len(b"local scores")
 
 
+def test_duplicate_stage_registrations_use_latest_content_snapshot(tmp_path):
+    _repo_path, workspace = _repo(tmp_path)
+    shared = workspace / "feature_selection" / "resource_plan.json"
+    shared.parent.mkdir(parents=True)
+    shared.write_text('{"stage":"prescreen"}', encoding="utf-8")
+    first = register_artifact(workspace, shared, stage="feature_prescreen")
+    shared.write_text('{"stage":"refine"}', encoding="utf-8")
+    second = register_artifact(workspace, shared, stage="feature_refine")
+    manifest = load_artifact_manifest(workspace)
+    for entry in manifest["artifacts"]:
+        if entry["stage"] == "feature_prescreen":
+            entry["registered_at"] = "2026-07-11T10:00:00"
+        elif entry["stage"] == "feature_refine":
+            entry["registered_at"] = "2026-07-11T10:01:00"
+
+    result = audit_artifact_availability(workspace, manifest)
+
+    assert first["sha256"] != second["sha256"]
+    assert not any("resource_plan.json" in issue for issue in result["issues"])
+
+
 def test_untracked_artifact_cannot_claim_repository_retention(tmp_path):
     _repo_path, workspace = _repo(tmp_path)
     report = workspace / "reports" / "model.md"
@@ -67,6 +88,21 @@ def test_untracked_artifact_cannot_claim_repository_retention(tmp_path):
     )
 
     assert entry["storage_class"] == "workspace_only"
+
+
+def test_repository_aware_audit_promotes_tracked_workspace_artifact(tmp_path):
+    repo, workspace = _repo(tmp_path)
+    report = workspace / "reports" / "model.md"
+    report.parent.mkdir(parents=True)
+    report.write_text("report", encoding="utf-8")
+    register_artifact(workspace, report, stage="report")
+    _git(repo, "add", str(report.relative_to(repo)))
+
+    result = audit_artifact_availability(workspace, load_artifact_manifest(workspace))
+
+    assert result["availability_summary"]["repository_present"] == 1
+    assert result["availability_summary"]["workspace_only_present"] == 0
+    assert result["reproducibility_verdict"] == "complete"
 
 
 def test_clean_archive_keeps_required_closure_and_warns_for_optional_local_only(tmp_path):

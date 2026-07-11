@@ -1,0 +1,209 @@
+{
+  "action_id": "feature_prescreen",
+  "artifacts": [
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/data_source_contract.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/execution_environment.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/resource_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/sampling_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batch_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/profiles/local_feather_profile.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_001_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_002_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_003_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_004_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_005_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_006_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_007_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_008_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_009_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_010_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_011_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_012_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_013_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_014_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "Feature batch plan",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batches/batch_015_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_ca861989289e473796d0a87206a3e293",
+  "created_at": "2026-07-11T20:00:43",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "67ebde811c72a0d2ac8d4670a7ccfb7ef08a97efd840900b06488afbf103fbae",
+  "message": "local feather mode: prescreen by design, intake evidence emitted",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_prescreen",
+  "version_id": "fujie_gcard_agent_v1_20260710"
+}

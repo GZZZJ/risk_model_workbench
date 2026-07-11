@@ -407,7 +407,13 @@ def _recover_interrupted_attempts(
         invocation = invocation_for_task(task, plan)
         spec = TOOL_REGISTRY[invocation.tool_name]
         receipt_path = action_result_path(workspace, attempt_id)
-        if state_task.get("status") != "running":
+        recoverable_failed = bool(
+            state_task.get("status") == "failed"
+            and state.get("status") == "failed"
+            and isinstance(state.get("blocker"), dict)
+            and state["blocker"].get("reason") == "missing_action_result"
+        )
+        if state_task.get("status") != "running" and not recoverable_failed:
             journal_result_status = str(snapshot.get("result_status") or "")
             if receipt_path.is_file() and journal_result_status in {"committed", "applied"}:
                 # The state transition won the crash race; close only the
@@ -728,9 +734,19 @@ def _finalize_if_complete(project_dir: Path, workspace: Path, version_id: str) -
         target = "done_with_gaps" if any(status != "done" for status in statuses) else "done"
         try:
             audit = audit_run(project_dir, version_id)
-            if audit.get("verdict") != "complete":
+            domain_stages = [
+                stage
+                for stage in audit.get("stages", []) or []
+                if stage.get("stage") != "agent_runtime"
+            ]
+            domain_execution_complete = bool(domain_stages) and all(
+                stage.get("verdict") == "complete" for stage in domain_stages
+            )
+            if not domain_execution_complete:
                 target = "done_with_gaps"
-            state["latest_audit_verdict"] = audit.get("verdict", "")
+            state["latest_audit_verdict"] = (
+                "complete" if domain_execution_complete else audit.get("execution_verdict", audit.get("verdict", ""))
+            )
         except Exception as exc:
             target = "done_with_gaps"
             state["latest_audit_error"] = str(exc)

@@ -550,6 +550,44 @@ def test_explicit_bounded_plan_and_config_record_structures_are_allowed(tmp_path
     assert pack["files"][0]["status"] == "included"
 
 
+def test_real_aggregate_tuning_history_is_allowed(tmp_path):
+    relative = "modeling/main_lgbm/tuning_context_round_1.json"
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "round": 1,
+                "trial_history": [
+                    {
+                        "trial_id": 0,
+                        "candidate_name": "baseline",
+                        "advisor_type": "baseline",
+                        "reason": "configured baseline parameters",
+                        "params": {"learning_rate": 0.05, "num_leaves": 31},
+                        "train_auc": 0.9457,
+                        "valid_auc": 0.9325,
+                        "train_ks": 0.7486,
+                        "valid_ks": 0.7170,
+                        "train_samples": 183739,
+                        "valid_samples": 183480,
+                        "train_bad_rate": 0.1532,
+                        "valid_bad_rate": 0.1735,
+                        "best_iteration": 306,
+                        "train_time_seconds": 20.5,
+                        "auc_gap": 0.0132,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    pack = _build(tmp_path, [relative])
+
+    assert pack["files"][0]["status"] == "included"
+
+
 @pytest.mark.parametrize(
     ("name", "content"),
     [

@@ -250,8 +250,8 @@ def requeue_interrupted_task(workspace: str | Path, task_id: str, *, attempt_id:
     """Requeue a provably safe interrupted attempt without erasing its identity."""
     state = load_agent_state(workspace)
     task = _task(state, task_id)
-    if task.get("status") != "running":
-        raise ValueError(f"interrupted task is not running: {task_id}")
+    if task.get("status") not in {"running", "failed"}:
+        raise ValueError(f"interrupted task is not recoverable: {task_id}")
     if str(task.get("attempt_id") or "") != attempt_id:
         raise ValueError(f"interrupted attempt does not match task: {attempt_id}")
     task["status"] = "pending"

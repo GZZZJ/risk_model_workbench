@@ -1,5 +1,5 @@
-project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
-active_run_id: '20260625_211825_006138'
+project: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1
+active_run_id: fujie_gcard_agent_v1_20260710
 current_objective: 复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告
 status: active
 next_actions:
@@ -14,11 +14,11 @@ risks:
 - scaffold artifacts exist and must not be treated as real modeling evidence
 - 训练数据为10%抽样，非全量宽表数据
 version: 1
-updated_at: '2026-07-01T14:31:41'
-last_handoff: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/handoffs/20260609_201140-2026-06-imported-gcard-main-lgbm.md
+updated_at: '2026-07-11T21:07:00'
+last_handoff: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/handoffs/20260711_210700-fujie_gcard_agent_v1_20260710.md
 last_retrospective: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/retrospectives/20260609_201910-session-2026-06-imported-gcard-main-lgbm.md
 blockers: []
 last_verified_at: '2026-06-25T22:14:11'
 last_verified_commands:
 - rmw project status --project projects/2026-05-fujie-gcard-v1
-active_version_id: fujie_gcard_v7_20260630
+active_version_id: fujie_gcard_agent_v1_20260710

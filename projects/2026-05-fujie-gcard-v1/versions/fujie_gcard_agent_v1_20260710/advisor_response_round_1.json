@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_9a516e70f6e9",
+  "type": "tuning_plan",
+  "status": "answered",
+  "decision": "continue",
+  "summary": "Continue with three bounded LightGBM candidates based on DEV/DEV-OOS validation evidence.",
+  "request_identity": {
+    "task_id": "train_main_lgbm",
+    "attempt_id": "attempt_92aa9070846346c7bdc476b40f8d8a1e",
+    "invocation_hash": "e1f6e37b4f103654e1dc722c0ad02bf04295c6bb44d0aa9822db3362a9baf558",
+    "context_hash": "0fde0c8948dc132f685acf9b51bd97357b3d79e293cbf882a5a63a196a78ecb9",
+    "round": 1
+  },
+  "output_files": [
+    "modeling/main_lgbm/llm_tuning_plan_round_1.json"
+  ],
+  "risk_notes": [
+    "The context-pack classifier rejected the aggregate tuning JSON as row-level content; the Host-Agent inspected the emitted workspace tuning context directly as required by the project protocol."
+  ],
+  "requires_user_confirmation": false
+}

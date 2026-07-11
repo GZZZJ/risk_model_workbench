@@ -1,0 +1,58 @@
+{
+  "_workspace_revision": 3,
+  "accepted_response": "audit/advisor_responses/advisor_train_main_lgbm_tuning_plan_required_9a516e70f6e9.response.json",
+  "action_id": "train_baseline",
+  "answered_at": "2026-07-11T20:40:05",
+  "attempt_id": "attempt_92aa9070846346c7bdc476b40f8d8a1e",
+  "command": [
+    "train",
+    "--project",
+    "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+    "--version-id",
+    "fujie_gcard_agent_v1_20260710",
+    "--experiment",
+    "main_lgbm"
+  ],
+  "command_hash": "364b6b82966d56356468b402b5c016b8151157fea3010927ed97267a47105e9b",
+  "constraints": [
+    "Do not bypass SQL/DP approval gates.",
+    "Do not treat scaffold or imported evidence as locally complete.",
+    "Return only workspace-relative output files.",
+    "Do not optimize directly against OOT as the primary tuning target.",
+    "Use 3-5 bounded candidates.",
+    "Explain each candidate briefly."
+  ],
+  "consumed_at": "2026-07-11T20:40:10",
+  "consumption_receipt": "audit/advisor_consumptions/advisor_train_main_lgbm_tuning_plan_required_9a516e70f6e9.json",
+  "context_files": [
+    "modeling/*/tuning_context_round_*.json",
+    "configs_runtime/train.yaml",
+    "feature_selection/final_features.txt"
+  ],
+  "context_hash": "0fde0c8948dc132f685acf9b51bd97357b3d79e293cbf882a5a63a196a78ecb9",
+  "context_manifest": "audit/context_packs/0fde0c8948dc132f685acf9b51bd97357b3d79e293cbf882a5a63a196a78ecb9.json",
+  "context_pack": "audit/context_packs/0fde0c8948dc132f685acf9b51bd97357b3d79e293cbf882a5a63a196a78ecb9.json",
+  "created_at": "2026-07-11T20:32:32",
+  "expected_response": {
+    "type": "tuning_plan"
+  },
+  "invocation_hash": "e1f6e37b4f103654e1dc722c0ad02bf04295c6bb44d0aa9822db3362a9baf558",
+  "message": "host agent tuning plan required: write /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v1_20260710/modeling/main_lgbm/llm_tuning_plan_round_1.json from /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v1_20260710/modeling/main_lgbm/tuning_context_round_1.json",
+  "path": "audit/advisor_requests/advisor_train_main_lgbm_tuning_plan_required_9a516e70f6e9.json",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "question": "Create a bounded tuning plan for the current training task from the emitted tuning context.",
+  "reason": "advisor_required",
+  "request_hash": "9a516e70f6e9a5fe186d6e7415b29e2a9cf974304ec8df34f8eb0bf15489836d",
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_9a516e70f6e9",
+  "request_retry_index": 0,
+  "retry_budget": {
+    "max_retries": 2
+  },
+  "round": 1,
+  "status": "consumed",
+  "task_id": "train_main_lgbm",
+  "tool_name": "train_baseline",
+  "type": "tuning_plan_required",
+  "version": 2,
+  "version_id": "fujie_gcard_agent_v1_20260710"
+}

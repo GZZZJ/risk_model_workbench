@@ -631,7 +631,7 @@ def _is_allowed_record_container(key: str, records: list[dict[Any, Any]]) -> boo
         return all(_is_task_record(record) for record in records)
     if key in {"candidates", "items"}:
         return all(_is_candidate_record(record) for record in records)
-    if key == "trials":
+    if key in {"trials", "trial_history"}:
         return all(_is_trial_record(record) for record in records)
     return False
 
@@ -694,12 +694,24 @@ def _is_trial_record(record: dict[Any, Any]) -> bool:
     allowed = {
         "trial_id",
         "trial_name",
+        "candidate_name",
+        "advisor_type",
         "status",
         "params",
         "metrics",
         "train_auc",
         "valid_auc",
         "oot_auc",
+        "train_ks",
+        "valid_ks",
+        "oot_ks",
+        "train_samples",
+        "valid_samples",
+        "train_bad_rate",
+        "valid_bad_rate",
+        "best_iteration",
+        "train_time_seconds",
+        "auc_gap",
         "round",
         "trial_index",
         "reason",
@@ -707,7 +719,7 @@ def _is_trial_record(record: dict[Any, Any]) -> bool:
     params = normalised.get("params")
     metrics = normalised.get("metrics")
     return (
-        bool(keys.intersection({"trial_id", "trial_name"}))
+        bool(keys.intersection({"trial_id", "trial_name", "candidate_name"}))
         and keys <= allowed
         and not _record_has_sample_identifier(record)
         and (params is None or _is_tuning_params_mapping(params))

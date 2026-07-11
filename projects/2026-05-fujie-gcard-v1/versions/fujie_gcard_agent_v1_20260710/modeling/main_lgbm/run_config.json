@@ -1,0 +1,99 @@
+{
+  "experiment": "main_lgbm",
+  "data_source": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "train_values": [
+    "DEV"
+  ],
+  "valid_values": [
+    "DEV-OOS"
+  ],
+  "oos_values": [
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "feature_list_path": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v1_20260710/feature_selection/final_features.txt",
+  "candidate_feature_count": 500,
+  "actual_feature_count": 500,
+  "algorithm": "lightgbm",
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.03,
+    "num_leaves": 31,
+    "max_depth": 5,
+    "min_child_samples": 160,
+    "subsample": 0.75,
+    "colsample_bytree": 0.7,
+    "reg_alpha": 0.2,
+    "reg_lambda": 2.0,
+    "verbose": -1,
+    "bagging_freq": 3
+  },
+  "training_mode": "llm_guided_tune",
+  "training_control": {
+    "num_boost_round": 1400,
+    "early_stopping_rounds": 80
+  },
+  "tuning_summary": {
+    "mode": "llm_guided_tune",
+    "advisor_types": [
+      "baseline",
+      "host_agent_plan_file"
+    ],
+    "trial_count": 4,
+    "best_trial_id": 1,
+    "selection": {
+      "best_trial_id": 1,
+      "selection_score": 0.7654244188728526,
+      "primary_metric": "valid_ks",
+      "primary_value": 0.7187879361126688,
+      "secondary_metric": "valid_auc",
+      "secondary_value": 0.9327296552036772,
+      "auc_gap": 0.014961217193911969,
+      "guardrail_passed": true,
+      "guardrail_status": "passed",
+      "candidate_count": 4
+    },
+    "best_params": {
+      "objective": "binary",
+      "metric": "auc",
+      "learning_rate": 0.03,
+      "num_leaves": 31,
+      "max_depth": 5,
+      "min_child_samples": 160,
+      "subsample": 0.75,
+      "colsample_bytree": 0.7,
+      "reg_alpha": 0.2,
+      "reg_lambda": 2.0,
+      "bagging_freq": 3,
+      "num_boost_round": 1400,
+      "early_stopping_rounds": 80
+    },
+    "decisions": [
+      "round 1: Baseline validation is already strong (KS 0.7170, AUC 0.9325) with a controlled train-validation AUC gap of 0.0132. Explore modest regularization and capacity changes while keeping OOT outside the primary tuning objective."
+    ]
+  },
+  "random_seed": 0,
+  "workbench_git_commit": {
+    "commit": "f26046ac18e8748b67ced9a4c7f557457012554a",
+    "dirty": true
+  },
+  "input_feather": {
+    "path": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+    "sha256": "02b3bc9891c2b285625cebc204ea96942ffe595e4590b340f8f7e86dd7365348"
+  },
+  "train_auc": 0.9476908723975892,
+  "valid_auc": 0.9327296552036772,
+  "train_ks": 0.7535090711673518,
+  "valid_ks": 0.7187879361126688,
+  "train_samples": 183739,
+  "valid_samples": 183480,
+  "train_bad_rate": 0.153195565448816,
+  "valid_bad_rate": 0.17346304774362328,
+  "best_iteration": 685,
+  "train_time_seconds": 26.2,
+  "auc_gap": 0.014961217193911969
+}

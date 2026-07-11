@@ -38,6 +38,7 @@ ALLOWED_AGENT_TRANSITIONS = {
     ("running", "stop", "stopped"),
     ("running", "strict_close", "done"),
     ("running", "incomplete_close", "done_with_gaps"),
+    ("done_with_gaps", "resume", "running"),
 }
 
 ALLOWED_TASK_TRANSITIONS = {

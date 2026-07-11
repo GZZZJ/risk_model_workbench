@@ -36,8 +36,14 @@ from risk_model_workbench.agent.plan import (
     rebind_agent_plan,
     save_agent_plan,
 )
-from risk_model_workbench.agent.state import init_agent_state, load_agent_state, save_agent_state
+from risk_model_workbench.agent.state import (
+    init_agent_state,
+    load_agent_state,
+    requeue_interrupted_task,
+    save_agent_state,
+)
 from risk_model_workbench.agent.trace import append_trace, load_recent_trace
+from risk_model_workbench.agent.transitions import apply_transition
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
@@ -50,6 +56,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_failed,
     stage_action_started,
 )
+from risk_model_workbench.harness.tools import TOOL_REGISTRY
 from risk_model_workbench.manifest import make_run_id
 from risk_model_workbench.paths import REPO_ROOT, project_config_path, resolve_project_path, workflow_path
 from risk_model_workbench.planning import create_execution_plan, save_execution_plan
@@ -1559,6 +1566,36 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         request_id = str(blocker.get("advisor_request_id") or "")
         print(f"agent resume blocked: waiting for user confirmation: {request_id}")
         return 1
+    if state.get("status") == "done_with_gaps":
+        state = apply_transition(state, "resume", {"target_state": "running"})
+        save_agent_state(workspace, state)
+    if state.get("status") == "failed":
+        current_task_id = str(state.get("current_task") or blocker.get("task_id") or "")
+        failed_task = next(
+            (
+                item
+                for item in state.get("tasks", []) or []
+                if item.get("task_id") == current_task_id and item.get("status") == "failed"
+            ),
+            None,
+        )
+        tool_name = str((failed_task or {}).get("tool_name") or "")
+        spec = TOOL_REGISTRY.get(tool_name)
+        attempt_id = str((failed_task or {}).get("attempt_id") or "")
+        if failed_task is None or spec is None or spec.execution_semantics not in {"read_only", "idempotent_write"} or not attempt_id:
+            print("agent resume blocked: failed task is not explicitly safe to retry")
+            return 1
+        requeue_interrupted_task(workspace, current_task_id, attempt_id=attempt_id)
+        append_trace(
+            workspace,
+            "decision",
+            {
+                "summary": "Operator explicitly retried a failed idempotent task after correcting its local cause.",
+                "task_id": current_task_id,
+                "attempt_id": attempt_id,
+                "execution_semantics": spec.execution_semantics,
+            },
+        )
     try:
         resumed = run_agent(project_dir, args.version_id, runner=main)
     except (ValueError, WorkspaceLockedError) as exc:
@@ -2132,6 +2169,8 @@ def cmd_feature_metadata(args: argparse.Namespace) -> int:
     path = _run_path(args)
     project_dir = resolve_project_path(args.project)
     stage_action_started(path, "feature_metadata")
+    if _runtime_is_local_feather(path, project_dir):
+        return _finish_feature_metadata_local_feather(path, project_dir)
     from risk_model_workbench.feature_metadata import main as metadata_main
 
     argv = ["--project-dir", str(project_dir), "--run-dir", str(path)]
@@ -2154,6 +2193,76 @@ def cmd_feature_metadata(args: argparse.Namespace) -> int:
     else:
         stage_action_failed(path, "feature_metadata", f"metadata command exited with code {code}")
     return code
+
+
+def _finish_feature_metadata_local_feather(path: Path, project_dir: Path) -> int:
+    """Derive version-local metadata from the declared Feather schema only."""
+    try:
+        import csv
+        import pyarrow as pa
+        import pyarrow.ipc as ipc
+
+        feature_cfg = _load_runtime_config(project_dir, path, "feature_select").get("feature_select", {})
+        runtime_request = feature_cfg.get("runtime_request") or {}
+        feather_value = runtime_request.get("sample_location")
+        if not feather_value:
+            refine_cfg = _load_runtime_config(project_dir, path, "refine_features").get("feature_refine", {})
+            feather_value = (refine_cfg.get("input") or {}).get("local_feather_path")
+        if not feather_value:
+            raise FileNotFoundError("local_feather sample_location is missing")
+        feather_path = _resolve_project_relative(project_dir, feather_value).resolve()
+        if not feather_path.is_file():
+            raise FileNotFoundError(f"local feather not found: {feather_path}")
+        schema = ipc.open_file(pa.memory_map(str(feather_path), "r")).schema
+        output_dir = path / "feature_metadata"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        rows = [
+            {
+                "table_index": 1,
+                "full_table_name": "local_feather",
+                "feature_name": field.name,
+                "feature_type": str(field.type),
+                "feature_comment": "",
+                "ordinal": index,
+            }
+            for index, field in enumerate(schema, start=1)
+        ]
+        columns_path = output_dir / "feature_columns.csv"
+        with columns_path.open("w", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+        summary_path = output_dir / "feature_table_summary.csv"
+        with summary_path.open("w", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=["table_index", "full_table_name", "feature_count", "source_path"])
+            writer.writeheader()
+            writer.writerow({"table_index": 1, "full_table_name": "local_feather", "feature_count": len(rows), "source_path": str(feather_path)})
+        meta_path = output_dir / "feature_tables_meta.json"
+        _write_json(
+            meta_path,
+            {
+                "version": 1,
+                "source": "local_feather_schema",
+                "source_path": str(feather_path),
+                "feature_count": len(rows),
+                "fields": [{"name": row["feature_name"], "type": row["feature_type"]} for row in rows],
+            },
+        )
+        for artifact in (meta_path, summary_path, columns_path):
+            register_artifact(path, "feature_metadata", artifact.relative_to(path), description="Local Feather schema metadata")
+        append_decision(
+            path,
+            stage="feature_metadata",
+            decision="done",
+            reason="feature metadata derived from declared local Feather schema; no remote metadata access",
+        )
+        stage_action_done(path, "feature_metadata", message="local feather schema metadata generated")
+        print(f"feature_metadata: {output_dir}")
+        return 0
+    except Exception as exc:
+        stage_action_failed(path, "feature_metadata", str(exc), failure_code=classify_exception(exc))
+        print(f"feature metadata local-feather failed: {exc}", file=sys.stderr)
+        return 1
 
 
 def _finish_feature_prescreen_local_feather(path: Path, project_dir: Path, stage: str) -> int:
@@ -2930,10 +3039,15 @@ def cmd_train(args: argparse.Namespace) -> int:
             for artifact in sorted(output_dir.glob("llm_tuning_plan_round_*.json")) + sorted(output_dir.glob("tuning_context_round_*.json")):
                 register_artifact(path, "train_baseline", artifact)
             if score_output.exists():
-                try:
-                    register_artifact(path, "train_baseline", score_output)
-                except Exception:
-                    register_artifact(path, "train_baseline", f"modeling/{args.experiment}/scores_all_splits.feather")
+                register_artifact(
+                    path,
+                    "train_baseline",
+                    score_output,
+                    storage_class="local_only",
+                    contract_role="optional",
+                    retention_reason="Row-level scored dataset is intentionally retained only in the local version workspace.",
+                    regeneration="Rerun the train action for this version and experiment from the approved local feature source.",
+                )
             _register_woe_artifacts(path, "train_baseline", output_dir / "woe_top_features")
             append_decision(path, stage="train_baseline", decision="done", reason=f"{algorithm} training completed from local feather data")
             stage_action_done(path, "train_baseline")

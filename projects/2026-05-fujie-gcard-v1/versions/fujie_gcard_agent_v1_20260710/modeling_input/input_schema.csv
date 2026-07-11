@@ -1,0 +1,17 @@
+﻿column,dtype,non_null,null
+uid,object,489743,0
+mdl_dte,object,489743,0
+ds,object,489743,0
+final_flag,object,489743,0
+blue_customer_flag,object,489743,0
+zc_level,int32,489743,0
+ftr_30d_ord_flag,int32,489743,0
+ftr_30d_ord_amt,float64,489743,0
+prc_amt_xz_30d_3m,float64,489743,0
+ovd_amt_xz_30d_3m,float64,489743,0
+rand_flag0,float64,489743,0
+gcard_v2,float64,489578,165
+gcard_v4,float64,489734,9
+gcard_v5,float32,489743,0
+gcard_v6,float64,489743,0
+model_score,float64,489743,0
