@@ -1,0 +1,103 @@
+feature_refine:
+  input:
+    wide_table: pdm_risk.pdm_risk_fujie_gcard_feature_prescreen_wide_feature_v6_1
+    feature_map: runs/feature_prescreen/results/prescreen_wide_feature_map.csv
+    label_column: ftr_30d_ord_flag
+    split_column: final_flag
+    train_value: DEV
+    valid_value: OOT
+    id_columns:
+      - uid
+      - mdl_dte
+      - ds
+    base_columns:
+      - uid
+      - mdl_dte
+      - ds
+      - blue_customer_flag
+      - ftr_30d_ord_flag
+      - ftr_30d_ord_amt
+      - prc_amt_xz_30d_3m
+      - ovd_amt_xz_30d_3m
+      - final_flag
+      - zc_level
+      - gcard_v2
+      - gcard_v4
+      - gcard_v5
+      - gcard_v6
+      - rand_flag0
+      - rand_flag1
+      - rand_flag2
+      - rand_flag3
+      - rand_flag4
+      - rand_flag5
+
+  sampling:
+    # Keep this small when pulling from DP through TMLSQL. Increase only after memory checks.
+    where: "ds is not null and final_flag in ('DEV','OOT') and ftr_30d_ord_flag in (0,1) and rand_flag0 < 0.01"
+    max_rows: 50000
+
+  dp_feather:
+    dataset_id: feature_refine_wide_sample
+    description: 特征初筛后宽表抽样，用于D03随机重要性、D04 Null Importance 和D05基线重要性筛选。
+    data_dir: data/local/dp_feather
+    metadata_dir: data/profile/dp_feather_datasets
+
+  output_dir: runs/feature_refine_wide
+  random_seed: 0
+  target_feature_count: 500
+
+  preprocessing:
+    missing_sentinels:
+      - -999
+      - -998
+    min_non_null_rate: 0.01
+    drop_constant: true
+
+  global_corr:
+    enabled: true
+    threshold: 0.80
+    score_metric: univariate_auc
+
+  d03_random_importance:
+    enabled: true
+    mode: feature_select_v2
+    random_column: random_col
+    random_low: 1
+    random_high: 10
+    bagging_rounds: 5
+    bagging_fraction: 0.50
+    num_boost_round: 1000
+    thresholds: 0.95
+    importance_types:
+      - split
+      - gain
+    weight: 1.0
+    iter_rounds: 1
+
+  d04_null_importance:
+    enabled: true
+    max_features_for_null_importance: 1200
+    real_rounds: 3
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.00
+
+  d05_baseline_importance:
+    enabled: true
+    importance_type: gain
+    keep_top_n: 500
+
+  lightgbm:
+    objective: binary
+    metric: auc
+    learning_rate: 0.05
+    num_leaves: 31
+    max_depth: 5
+    min_child_samples: 100
+    subsample: 0.7
+    colsample_bytree: 0.7
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    num_boost_round: 400
+    early_stopping_rounds: 50

@@ -1,0 +1,159 @@
+version: 2
+agent_run_id: agent_20260712T014800
+mode: semi_autonomous
+status: done
+project: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1
+version_id: fujie_gcard_action_runner_v1_20260710
+plan_id: 20260710-agent-harness-dogfood_agent_plan
+plan_hash: 0c62111ffd6b2d5a983fe8a4713d773e1e5fbaae37838b412ba102fdec2772c3
+registry_digest: 0e0ec4e5308c2ef658e3ed3b44b70e7e27616a6604fb92d4b0fe0598137c9b40
+current_task: report_final
+policy:
+  safe_permissions:
+  - read_only
+  - writes_run
+  approval_required_permissions:
+  - dp_sql_pull
+  blocked_permissions:
+  - external_data
+  blocked_flags:
+  - --force
+  - --skip-split-check
+blocker: {}
+tasks:
+- task_id: sample_check_profile
+  status: done
+  action_id: sample_check
+  tool_name: sample_check
+  permission: writes_run
+  depends_on: []
+  started_at: '2026-07-12T01:48:08'
+  finished_at: '2026-07-12T01:48:22'
+  message: ''
+  attempt_id: attempt_78c63b8ec7d34feeae079d935c86330e
+  invocation_hash: da67364a668dd8c15d0d5c8bdcd411814584c22c7f78a891a7f4fa4f8ccc2f5b
+  attempt_started_at: '2026-07-12T01:48:08'
+- task_id: sample_check_stability
+  status: done
+  action_id: sample_check
+  tool_name: sample_check
+  permission: writes_run
+  depends_on: []
+  started_at: '2026-07-12T01:48:22'
+  finished_at: '2026-07-12T01:48:35'
+  message: ''
+  attempt_id: attempt_7db75900a7e74f68ad24a29a32253366
+  invocation_hash: da67364a668dd8c15d0d5c8bdcd411814584c22c7f78a891a7f4fa4f8ccc2f5b
+  attempt_started_at: '2026-07-12T01:48:22'
+- task_id: feature_metadata
+  status: done
+  action_id: feature_metadata
+  tool_name: feature_metadata
+  permission: writes_run
+  depends_on:
+  - sample_check_stability
+  started_at: '2026-07-12T01:48:35'
+  finished_at: '2026-07-12T01:48:36'
+  message: local feather schema metadata generated
+  attempt_id: attempt_b023c11c9c784b8695dfa09a181a50c4
+  invocation_hash: f0482b74d10c42d8e0fb1adc32cfc7f34cf0aacf1ce0ed636d8cc38d918fe70a
+  attempt_started_at: '2026-07-12T01:48:35'
+- task_id: feature_prescreen
+  status: done
+  action_id: feature_prescreen
+  tool_name: feature_prescreen_local
+  permission: writes_run
+  depends_on:
+  - feature_metadata
+  started_at: '2026-07-12T01:48:36'
+  finished_at: '2026-07-12T01:48:44'
+  message: 'local feather mode: prescreen by design, intake evidence emitted'
+  attempt_id: attempt_def44e13715d47b3970c5421327c649a
+  invocation_hash: a17284a6f0b44ca893f4ad0ac9bdff4867ef7bc93320da54e4c04025c4f509ea
+  attempt_started_at: '2026-07-12T01:48:36'
+- task_id: build_wide_sql
+  status: done
+  action_id: build_wide_sql
+  tool_name: build_wide_sql_local
+  permission: writes_run
+  depends_on:
+  - feature_prescreen
+  started_at: '2026-07-12T01:53:35'
+  finished_at: '2026-07-12T01:53:36'
+  message: 'local feather mode: wide table skipped by design'
+  attempt_id: attempt_e0eb890188c54cb69340be03fdb072fe
+  invocation_hash: 05eaae11262f3556fac3fdb6aa10979153c21f523a1bf4b06fae58f102555fa0
+  attempt_started_at: '2026-07-12T01:53:35'
+  recovered_attempt_id: attempt_7775326384bb41a4bc86d54f8cfef4d5
+  attempt_finished_at: '2026-07-12T01:53:34'
+- task_id: feature_refine
+  status: done
+  action_id: feature_refine
+  tool_name: feature_refine_local
+  permission: writes_run
+  depends_on:
+  - build_wide_sql
+  started_at: '2026-07-12T01:53:36'
+  finished_at: '2026-07-12T02:21:34'
+  message: ''
+  attempt_id: attempt_ec22bdf0d8a048a18dc60b501f6326b5
+  invocation_hash: da4cfff7dcfb53a957d62bf0884c591371fe0faa8a7e709661ac41895fa151fd
+  attempt_started_at: '2026-07-12T01:53:36'
+- task_id: train_main_lgbm
+  status: done
+  action_id: train_baseline
+  tool_name: train_baseline
+  permission: writes_run
+  depends_on:
+  - feature_refine
+  started_at: '2026-07-12T02:33:23'
+  finished_at: '2026-07-12T02:35:57'
+  message: ''
+  attempt_id: attempt_817e176fb769469188ef37b67e6f6b47
+  invocation_hash: ea35f26736aae262a9d9f8a1ffa1f930a26231226f96cce4feb35240dd0dd0cd
+  attempt_started_at: '2026-07-12T02:33:23'
+  recovered_attempt_id: attempt_845d6abe660741958c30ef4b4159f05d
+  attempt_finished_at: '2026-07-12T02:25:40'
+- task_id: evaluate_final
+  status: done
+  action_id: evaluate
+  tool_name: evaluate
+  permission: writes_run
+  depends_on:
+  - train_main_lgbm
+  started_at: '2026-07-12T02:35:57'
+  finished_at: '2026-07-12T02:36:58'
+  message: 'evaluation complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_action_runner_v1_20260710/evaluation/evaluation_summary.json'
+  attempt_id: attempt_1d54af76b97a4679b41628e9a0906c95
+  invocation_hash: 6aeb6a9a92d2c07e8088cef96173e1c20a23b3baa06393750e0f192cbf7ad525
+  attempt_started_at: '2026-07-12T02:35:57'
+- task_id: compare_final
+  status: done
+  action_id: compare
+  tool_name: compare
+  permission: writes_run
+  depends_on:
+  - evaluate_final
+  started_at: '2026-07-12T02:36:58'
+  finished_at: '2026-07-12T02:37:02'
+  message: 'compare complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_action_runner_v1_20260710/evaluation/champion_challenger.json'
+  attempt_id: attempt_03b08ecb87dd4bb1a10b441dcdc2be05
+  invocation_hash: 5824e8d50ac2dcad26e85fd876b9ce9ef034bf93fe669d7b651a5f32cc7c51f1
+  attempt_started_at: '2026-07-12T02:36:58'
+- task_id: report_final
+  status: done
+  action_id: report
+  tool_name: report
+  permission: writes_run
+  depends_on:
+  - compare_final
+  started_at: '2026-07-12T02:37:02'
+  finished_at: '2026-07-12T02:37:28'
+  message: 'report complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_action_runner_v1_20260710/reports/model_report.xlsx'
+  attempt_id: attempt_93659c309c3e41809b64d229c865c52d
+  invocation_hash: 3159a1a2c779aa7c1c807fc3ffda992b07f81669f25f3ee11a6abe67d3518937
+  attempt_started_at: '2026-07-12T02:37:02'
+created_at: '2026-07-12T01:48:00'
+updated_at: '2026-07-12T02:37:43'
+latest_audit_verdict: complete
+_workspace_revision: 46

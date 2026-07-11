@@ -1,0 +1,70 @@
+{
+  "allowed_tools": [
+    "train_baseline"
+  ],
+  "attempt_id": "attempt_13ef7c50b55e4ed08c8fed3c739bf02c",
+  "constraints": [
+    "Do not bypass SQL/DP approval gates.",
+    "Do not optimize directly against OOT as the primary tuning target.",
+    "Do not treat scaffold or imported evidence as locally complete.",
+    "Explain each candidate briefly.",
+    "Return only workspace-relative output files.",
+    "Use 3-5 bounded candidates."
+  ],
+  "context_hash": "fa150b1e5ef8f4c90538719f740fd0b04b2bfe58fbcbf19340882b1ef4c1f421",
+  "files": [
+    {
+      "missing": false,
+      "path": "configs_runtime/train.yaml",
+      "reason": "row_level_content",
+      "sha256": "",
+      "size": 3577,
+      "status": "rejected",
+      "summary": {}
+    },
+    {
+      "missing": false,
+      "path": "feature_selection/final_features.txt",
+      "sha256": "45339028de22094a95a08c7c6db0f116e705e22b34a3839f8a140ce7ad6b7f47",
+      "size": 17764,
+      "status": "included",
+      "summary": {
+        "content": "d180_apl_ord_days_cnt\nfirst_day_diff_event_result_1_all\nd360_apl_ord_ddf_mdl_ord_crt_dte_min\nhis_360_day_csh_apl_ord_cnt_his_rto\ncnt_avg_ord_span_30d\npayment_day_6m\ndau_90d\npmt_crd_amt_3m\nd30_apl_ord_days_cnt\nstg_pln_max_prc_amt_12m_ftr\nddf_lst_app_str_tim_to_mdl_tim_sec\nd180_apl_ord_days_cnt_all\nclk_cnt_14d\nfirst_day_diff_event_result_0_event_type_loan_all\nord_apl_avg_prc_amt_720_day_per_mth\nrsk_lmt_rate_ch_1m_grt_0p2_rate_6m\nd180_apl_ord_cnt_all\npmt_crd_amt_1m\npmt_crd_amt_pmonth_his\nd180_suc_ord_days_cnt_all\nrsk_avl_lmt_ch_les_10000_cnt_12m\nmin_rsk_lmt_rate_12m_bt_ch\nd90_bsy_typ_bt_cash_suc_ord_cnt_all\nd180_apl_ord_ddf_mdl_ord_crt_dte_max\nm1_stg_pln_d0_rep_apl_cnt\nd30_d60_apl_ord_cnt_rat\nsum_avb_lmt_2m_v2\navg_avl_lmt_lft_rep_prc_3m_cash_1m\nd90_unpaid_principal_tot_amt_t_day_divide_rsk_avl_lmt_cash_his_t_day_max\nd180_ontimrepay_thismon_sum_larger_than_rsk_avl_lmt_cash_count_sum\naf_6m_trend\npst_ord_apl_suc_max_prc_amt_180_day\nd60_apl_ord_prc_amt_sum\nd360_max_faqi_prc_amt_divide_rsk_avl_lmt_cash\nd30_apl_ord_days_cnt_all\nhis_720_day_csh_apl_ord_cnt_his_rto\nord_apl_fal_cnt_his\nd180_due_repay_amt_sum_divide_d180_faqi_trade_amt_sum\nhis_30d_app_str_ctn_v2\nstg_pln_sum_rep_prc_his_d0_mrn_zd_rto_v2\nrsk_avl_lmt_ch_les_500_cnt_12m\nstg_pln_cnt_3m_ftr_his_rep_rto_cash\nord_apl_suc_sum_prc_amt_360_day_bjq_12m\nhis_due_repay_amt_sum_divide_his_faqi_trade_amt_sum\nd90_apl_ord_prc_amt_per_stg_sum\nord_apl_min_prc_amt_his\nd180_unpaid_principal_tot_amt_t_day_divide_rsk_avl_lmt_cash_his_t_day_max\nmax_avl_lmt_lft_rep_prc_1m_cash_3m\nd60_apl_ord_ddf_mdl_ord_crt_dte_max\nrsk_lmt_rate_ch_1m_grt_0p5_rate_6m\n12m_used_lmt_second_der_sum\n3m_used_lmt_first_der_median\nmin_rsk_avl_lmt_12m_bt_ch\nmax_amt_other_info_manual_repay\nd60_apl_ord_stg_num_sum_all\nfirst_amt_event_type_credit_all\nrsk_lmt_rate_ch_1m_grt_0p8_rate_3m\nd60_apl_ord_prc_amt_avg\nftr_pending_repay_gurantee_fee_sum_divide_ftr_principal_sum\nai_call_cnt_21d\nrsk_lmt_rate_ch_1m_grt_0p2_rate_36m\nm1_stg_pln_d0_rep_apl_suc_cnt\nm6_stg_pln_manual_deduct_rep_apl_cnt_sum\nstg_pln_sum_prc_amt_6m_12m_rto_ftr\npge_id_cnt_7d\nddf_ato_fst_ord_crt_dte\nd15_suc_ord_prc_amt_avg_all\nrsk_lmt_rate_ch_1m_grt_0p5_cnt_3m\nrsk_lmt_rate_ch_1m_grt_0p2_cnt_3m\nhis_360_day_csh_suc_ord_cnt_bjq_12m\nd365_aplord_suc_month_cnt\nd7_d360_suc_ord_prc_amt_avg_rat_all\nd90_apl_ord_ddf_mdl_ord_crt_dte_max\nd90_apl_ord_prc_amt_avg\nsum_talk_duration_180d\nstg_pln_sum_prc_amt_12m_ftr_his_rep_rto_cash\nstg_pln_pay_off_cnt_bjq_12m\nper_event_type_limit_all\nd180_apl_ord_prc_amt_sum_all\ncredit_unique_scene_cnt_12m\nord_apl_min_prc_amt_360_day_bjq_12m\nd60_apl_ord_prc_amt_max\nd90_faqiamt_thismon_sum_larger_than_rsk_avl_lmt_cash_count_sum\nm3_manual_rep_apl_suc_amt_avg\n12m_used_lmt_second_der_max\nd30_d360_apl_ord_prc_amt_avg_rat_all\nrsk_lmt_rate_ch_1m_grt_0p95_rate_36m\nd720_faqi_trade_amt_larger_than_due_repay_amt_by_mon_count_sum\nstg_pln_cnt_1m_ftr_his_rep_rto_all\n18m_repay_amt_second_der_mean_diff\nlst_app_str_hr\nd7_d15_apl_ord_prc_amt_avg_rat\nord_apl_suc_sum_stg_num_180_day\n3m_used_lmt_second_der_sum\naf_1y_inter_3m_sum_up\nord_apl_cnt_13_18\nd180_max_faqi_prc_amt_divide_rsk_adt_lmt_cash\nord_apl_fal_cnt_360_day\nd720_faqi_trade_amt_larger_than_unpaid_principal_tot_amt_t_day_count_sum\nd90_aplord_suc_month_cnt\nstg_pln_max_prc_amt_6m_12m_ftr_cash\nd90_apl_ord_dis_bsy_typ_cnt_all\nrsk_lmt_rate_ch_1m_grt_0p9_rate_12m\nd360_unpaid_principal_tot_amt_t_day_divide_rsk_adt_lmt_cash_his_t_day_max\npercent_true_call_mode_is_manual_called_phone_social_relations_is_family_90d\nmax_rsk_lmt_rate_bt_ch_3m\nstg_pln_sum_rep_prc_his_d0_mrn_zd_v2\nhis_7d_app_str_ctn_v2\nfst_fal_ord_prc_amt\nstg_pln_sum_rep_prc_his_fst_ord\n3m_repay_amt_first_der_sum\n3m_used_lmt_first_der_small_0_sum\nstg_pln_sum_rep_prc_12m_his_d0_mrn_pk_rto\nstg_pln_avg_prc_amt_2m_ftr_his_rep_rto_all\ntot_pending_repay_tot_fee_stddev\n6m_used_lmt_first_der_min\nstg_pln_avg_prc_amt_3m_6m_ftr_rto_all\nddf_mdl_max_con_dau_dt_90d\naf_q2_q1_trend\nd1080_max_faqi_prc_amt_divide_rsk_adt_lmt_cash\n6m_repay_amt_first_der_max\nd180_apl_ord_prc_amt_avg\npercent_true_followup_code_wfjt_is_can_contact_person_yes_30d\n12m_used_lmt_second_der_mean_diff\ncredit_loan_usage_rate_24m\nmedian_amt_other_info_auto_deduct_all\n12m_repay_amt_first_der_median\npercent_true_followup_code_other_call_mode_manual_30d\nmin_ddf_mdl_rep_tim_adv_bjq_12m\nd1095_aplord_stg_grt_fst_month_cnt\nrsk_avl_lmt_ch_1m_les_10000_rate_bjq_12m\nmin_ddf_rep_tim_dte_adv\n3m_repay_amt_first_der_max\n18m_used_lmt_second_der_min\nrsk_avl_lmt_ch_les_1000_rate_12m\nd180_d360_apl_ord_cnt_rat\ncnt_other_info_auto_deduct_uid_recent_days_540\nrecent_1m_repay_progress_max\nm1_rep_apl_suc_stg_pln_cnt_max\nm3_rep_apl_stg_pln_cnt_max\n12m_used_lmt_first_der_mean_diff\nd180_max_adv_repay_amt_divide_d180_max_faqi_prc_amt\nmin_avl_lmt_lft_rep_prc_2m_cash_3m\nddf_36m_rep_dte_5_crt_dt_rep_prc_amt_rto\n3m_repay_ftr_amt_second_der_mean_rto\n12m_used_lmt_second_der_small_0_sum\nd90_apl_ord_prc_amt_per_stg_max\n6m_used_lmt_first_der_median\nm1_stg_pln_manual_deduct_rep_apl_cnt_equal_1_cnt_rat\nd360_apl_ord_ddf_mdl_ord_crt_dte_max\nmin_ddf_suc_lag_crt_tim_mnt\nmax_ddf_mdl_rep_dte_ftr\nstg_pln_sum_rep_prc_12m_his_d0_mrn_zd_rto\nd90_aplord_fal_month_cnt\n3m_repay_amt_first_der_mean_rto\nstg_pln_min_rep_prc_his\nd180_apl_ord_prc_amt_per_stg_min\ncnt_event_type_limit_type_heavy_all\nstg_pln_sum_prc_amt_6m_12m_ftr_cash\naf_6m_inter_1m_sum_up\nmax_ddf_suc_lag_crt_dte\nd720_unpaid_principal_tot_amt_t_day_divide_rsk_adt_lmt_cash_his_t_day_max\nd360_faqi_trade_amt_larger_than_unpaid_principal_tot_amt_t_day_count_sum\nord_apl_max_prc_amt_360_day_bjq_12m\nmin_amt_event_type_credit_event_result_1\nused_rate_ch_grt_0p5_rate_3m\nrsk_avl_lmt_ch_1m_les_10000_cnt_bjq_12m\nd1080_due_repay_amt_avg_divide_d1080_faqi_trade_amt_avg\nm1_stg_pln_manual_rep_apl_suc_cnt_avg\nhis_max_faqi_prc_amt_divide_max_ontim_amt_sum_mon\n6stg_pln_repay_amt_second_der_median\nd30_d90_suc_ord_cnt_rat\n3m_used_lmt_second_der_stddev\nmin_amt_event_type_repay_recent_180\navg_avl_lmt_lft_rep_prc_all_cash_12m\nddf_24m_rep_dte_neg_7_crt_dt_ord_cnt\nd15_d360_suc_ord_cnt_rat\n18m_used_lmt_second_der_mean_rto\nd360_light_limit_divide_btch_adt_limit\nd1095_avl_lmt_eql_0_month_cnt\navg_ddf_rep_dte_ord_crt_tim_7\nstg_pln_max_prc_amt_d0_rep_his_fst_ord\n6m_used_lmt_first_der_small_0_sum\n12ord_apply_amt_second_der_sum\nd30_apl_ord_ddf_mdl_ord_crt_dte_max\nm3_rep_apl_suc_amt_avg\nddf_fst_lst_ord_crt_dte\nstg_pln_sum_rep_prc_his_d0_mrn_pk\n18m_used_lmt_second_der_sum\nddf_12m_rep_dte_1_crt_dt_rep_prc_amt_rto\navg_avl_lmt_lft_rep_prc_all_cash_24m\nm1_manual_deduct_rep_apl_stg_pln_cnt_sum\nd720_due_repay_amt_sum_divide_d720_faqi_trade_amt_sum\nm3_stg_pln_bnk_cnt_avg\navg_ddf_rep_dte_ord_crt_tim_3\nstg_pln_sum_prc_amt_3m_6m_rto_ftr\nrsk_avl_lmt_ch_les_1000_cnt_3m\n6ord_apply_amt_second_der_mean_rto\n30stg_pln_repay_amt_second_der_mean_rto\nddf_bjq_12m_rep_dte_1_crt_dt_max_prc_amt\nd1095_aplord_fal_month_cnt\nm1_rep_apl_suc_amt_max\nm1_mrn_rep_apl_cnt\ncredit_ratio_12m\nd60_apl_ord_prc_amt_per_stg_min\nrsk_avl_lmt_ch_1m_les_500_cnt_3m\nstg_pln_sum_rep_prc_his_ovd_0d_pls_3d_zd_v2\nstg_pln_cnt_6m_12m_ftr_rto_all\nm6_mrn_rep_apl_cnt\nsuccloan_day_diff_reud_stage_num_sum_all\n3stg_pln_repay_amt_second_der_mean_rto\nstg_pln_avg_prc_amt_1m_on_light\nddf_24m_rep_dte_neg_7_crt_dt_avg_prc_amt\n3m_used_lmt_first_der_mean_diff\npayment_balancenotenough_day_rate_3m\nai_busy_cnt_15d\nstg_pln_max_prc_amt_12m_ftr_his_rep_rto_cash\nstddev_amt_event_type_repay_all\nstg_pln_min_prc_amt_d0_rep_24m\n18ord_apply_amt_first_der_median\n18ord_apply_amt_first_der_min\nlast_amt_channel_hb_microcredit_lv1_all\nhis_max_faqi_prc_amt_divide_max_due_pay_amt_sum_mon\nlast_day_diff_event_result_0_event_type_loan_all\nhis_trade_fail_amt_sum_mon_divide_his_trade_success_amt_sum_mon\naf_1m_trend\nm6_rep_apl_suc_amt_min\nddf_3m_rep_dte_7_crt_dt_rep_prc_amt_rto\nd360_apl_ord_prc_amt_min\nsuccloan_stage_num_mean_all\n18m_used_lmt_first_der_mean_rto\ncredit_unique_fund_cnt_3m\nm3_manual_rep_apl_suc_stg_pln_cnt_avg\n36stg_pln_repay_amt_second_der_mean_diff\n18m_used_lmt_first_der_sum\nm1_manual_rep_apl_suc_amt_sum\nstg_pln_sum_rep_prc_3m_his_ovd_0d_pls_3d_afn_pk_rto_v2\nm1_rep_apl_stg_pln_cnt_mor_1_cnt\nrsi_abf_1y_inter_1m\nstg_pln_sum_rep_prc_his_ovd_0d_pls_3d_zd_rto_v2\ncredit_unique_scene_cnt_36m\n6m_used_lmt_second_der_min\nf54__perc\n[TRUNCATED]",
+        "kind": "text"
+      }
+    },
+    {
+      "missing": false,
+      "path": "modeling/main_lgbm/tuning_context_round_1.json",
+      "reason": "row_level_content",
+      "sha256": "",
+      "size": 2917,
+      "status": "rejected",
+      "summary": {}
+    }
+  ],
+  "limits": {
+    "max_entries": 128,
+    "max_file_bytes": 65536,
+    "max_pack_bytes": 262144,
+    "max_total_bytes": 262144
+  },
+  "output_contract": {
+    "type": "tuning_plan"
+  },
+  "project": "2026-05-fujie-gcard-v1",
+  "provenance": [
+    "configs_runtime/train.yaml",
+    "feature_selection/final_features.txt",
+    "modeling/*/tuning_context_round_*.json"
+  ],
+  "request_type": "tuning_plan_required",
+  "task_id": "train_main_lgbm",
+  "truncation": {
+    "omitted_entries": 0,
+    "recorded_entries": 3,
+    "requested_entries": 3
+  },
+  "version": 1,
+  "version_id": "fujie_gcard_action_runner_v1_20260710"
+}

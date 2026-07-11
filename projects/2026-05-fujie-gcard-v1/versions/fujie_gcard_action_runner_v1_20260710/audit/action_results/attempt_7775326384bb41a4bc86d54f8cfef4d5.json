@@ -1,0 +1,29 @@
+{
+  "action_id": "build_wide_sql",
+  "artifacts": [
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/wide_table_skipped.json",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_7775326384bb41a4bc86d54f8cfef4d5",
+  "created_at": "2026-07-12T01:48:45",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "1560f8321e03fdd5267c49e7a849623cf4693aaa691f0a79bcf20844415f49f5",
+  "message": "local feather mode: wide table skipped by design",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "build_wide_sql",
+  "version_id": "fujie_gcard_action_runner_v1_20260710"
+}

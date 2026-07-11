@@ -1,0 +1,19 @@
+{
+  "attempt_id": "attempt_13ef7c50b55e4ed08c8fed3c739bf02c",
+  "blocker_id": "advisor_train_main_lgbm_tuning_plan_required_b9774ac5e2c6",
+  "consumed": true,
+  "context_hash": "fa150b1e5ef8f4c90538719f740fd0b04b2bfe58fbcbf19340882b1ef4c1f421",
+  "created_at": "2026-07-12T02:32:28",
+  "decision": "rejected",
+  "invocation_hash": "ea35f26736aae262a9d9f8a1ffa1f930a26231226f96cce4feb35240dd0dd0cd",
+  "output_files": [],
+  "receipt_id": "advisor_consumption:advisor_train_main_lgbm_tuning_plan_required_b9774ac5e2c6",
+  "replacement_request_id": "advisor_train_main_lgbm_tuning_plan_required_5afac73f19ea",
+  "request_hash": "b9774ac5e2c6d4316c86bac6fc5bc8ad857395d18bf9c1889613766a81ced726",
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_b9774ac5e2c6",
+  "response_hash": "e9e0e859bafaf9ac9c4acb6b50022ab171911a9f0ef6b9ad0fe2fc4318b88bd8",
+  "round": 1,
+  "target_status": "waiting_for_advisor",
+  "task_id": "train_main_lgbm",
+  "version": 1
+}

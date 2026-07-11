@@ -1,0 +1,20 @@
+{
+  "decision": "retry",
+  "output_files": [],
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_b9774ac5e2c6",
+  "request_identity": {
+    "attempt_id": "attempt_13ef7c50b55e4ed08c8fed3c739bf02c",
+    "context_hash": "fa150b1e5ef8f4c90538719f740fd0b04b2bfe58fbcbf19340882b1ef4c1f421",
+    "invocation_hash": "ea35f26736aae262a9d9f8a1ffa1f930a26231226f96cce4feb35240dd0dd0cd",
+    "round": 1,
+    "task_id": "train_main_lgbm"
+  },
+  "requires_user_confirmation": false,
+  "risk_notes": [
+    "The prior immutable pack omitted safe training configuration and aggregate tuning context."
+  ],
+  "status": "rejected",
+  "summary": "Replace the immutable context pack after the structured-summary classifier fix.",
+  "type": "tuning_plan",
+  "version": 1
+}

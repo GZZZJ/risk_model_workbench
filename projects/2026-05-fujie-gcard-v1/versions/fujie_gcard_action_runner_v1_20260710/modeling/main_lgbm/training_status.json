@@ -1,0 +1,27 @@
+{
+  "status": "done",
+  "experiment": "main_lgbm",
+  "algorithm": "lightgbm",
+  "pid": 26940,
+  "started_at": "2026-07-12T02:21:35",
+  "heartbeat_at": "2026-07-12T02:35:40",
+  "completed_at": "2026-07-12T02:35:40",
+  "percent": 100,
+  "message": "training completed",
+  "failure_code": "",
+  "error_type": "",
+  "error_message": "",
+  "metrics": {
+    "train_auc": 0.9501824388929561,
+    "valid_auc": 0.9328607425385913,
+    "train_ks": 0.7590522264748425,
+    "valid_ks": 0.7185060306146099,
+    "train_samples": 183739,
+    "valid_samples": 183480,
+    "train_bad_rate": 0.153195565448816,
+    "valid_bad_rate": 0.17346304774362328,
+    "best_iteration": 492,
+    "train_time_seconds": 24.5,
+    "auc_gap": 0.017321696354364757
+  }
+}

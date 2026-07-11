@@ -1,0 +1,27 @@
+{
+  "status": "done",
+  "reason": "",
+  "rows": 489743,
+  "columns": 2857,
+  "project": {
+    "name": "2026-05-fujie-gcard-v1",
+    "display_name": "复借G卡",
+    "scenario": "复借意愿",
+    "owner": "牧羊咕",
+    "created_date": "2026-05-29",
+    "template": "fujie-gcard"
+  },
+  "target_column": "ftr_30d_ord_flag",
+  "target_column_present": true,
+  "id_columns": [
+    "uid",
+    "mdl_dte"
+  ],
+  "id_columns_present": [
+    "uid",
+    "mdl_dte"
+  ],
+  "duplicate_key_rows": 0,
+  "split_column": "final_flag",
+  "split_column_present": true
+}

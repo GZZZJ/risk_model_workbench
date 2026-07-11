@@ -1,0 +1,21 @@
+{
+  "attempt_id": "attempt_13ef7c50b55e4ed08c8fed3c739bf02c",
+  "blocker_id": "advisor:advisor_train_main_lgbm_tuning_plan_required_5afac73f19ea",
+  "consumed": true,
+  "context_hash": "4638c6d1bcfec2d9e6ae02dcae57accf8fcb644ecb1721bcd65e6aa469bbd720",
+  "created_at": "2026-07-12T02:33:22",
+  "decision": "continue",
+  "invocation_hash": "ea35f26736aae262a9d9f8a1ffa1f930a26231226f96cce4feb35240dd0dd0cd",
+  "output_files": [
+    "modeling/main_lgbm/llm_tuning_plan_round_1.json"
+  ],
+  "receipt_id": "advisor_consumption:advisor_train_main_lgbm_tuning_plan_required_5afac73f19ea",
+  "replacement_request_id": "",
+  "request_hash": "5afac73f19ea4507fcbf7fd01657551a1f6e48222904a721298e926198fbd28b",
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_5afac73f19ea",
+  "response_hash": "cbd34c42d3d09162b8ca7e83d1a125ae4d4ec56274165a40c19f7ed74d1c6ef3",
+  "round": 1,
+  "target_status": "running",
+  "task_id": "train_main_lgbm",
+  "version": 1
+}

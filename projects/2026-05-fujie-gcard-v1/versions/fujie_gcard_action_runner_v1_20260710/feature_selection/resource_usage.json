@@ -1,0 +1,127 @@
+{
+  "stage": "feature_refine",
+  "started_at": "2026-07-12T01:53:37",
+  "completed_at": "2026-07-12T02:21:31",
+  "baseline_current_rss_bytes": 111001600,
+  "baseline_peak_rss_bytes": 112525312,
+  "max_current_rss_delta_bytes": 3942137856,
+  "max_peak_rss_delta_bytes": 5287936000,
+  "matrix_memory_bytes": 2050400132,
+  "row_count": 200000,
+  "column_count": 2857,
+  "feature_count": 2563,
+  "configured_peak_multiplier": 4.0,
+  "observed_peak_multiplier": 2.5789775944083875,
+  "multiplier_basis": "max_peak_rss_delta_bytes / pandas_dataframe_memory_usage_deep_bytes",
+  "checkpoints": [
+    {
+      "label": "load_feature_list",
+      "created_at": "2026-07-12T01:53:44",
+      "current_rss_bytes": 2970484736,
+      "peak_rss_bytes": 4269326336,
+      "current_rss_delta_bytes": 2859483136,
+      "peak_rss_delta_bytes": 4156801024,
+      "metrics": {
+        "initial_features": 2837,
+        "config_path": "versions/fujie_gcard_action_runner_v1_20260710/configs_runtime/refine_features.yaml"
+      }
+    },
+    {
+      "label": "load_sample",
+      "created_at": "2026-07-12T01:53:57",
+      "current_rss_bytes": 596246528,
+      "peak_rss_bytes": 5277270016,
+      "current_rss_delta_bytes": 485244928,
+      "peak_rss_delta_bytes": 5164744704,
+      "metrics": {
+        "rows": 200000,
+        "columns": 2857,
+        "dataframe_memory_bytes": 2384756071
+      }
+    },
+    {
+      "label": "preprocess_done",
+      "created_at": "2026-07-12T01:54:08",
+      "current_rss_bytes": 2195177472,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 2084175872,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "available_features": 2563,
+        "feature_matrix_memory_bytes": 2050400132
+      }
+    },
+    {
+      "label": "split_dataset",
+      "created_at": "2026-07-12T01:54:11",
+      "current_rss_bytes": 4053139456,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 3942137856,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "train_samples": 75347,
+        "valid_samples": 24958
+      }
+    },
+    {
+      "label": "d01_d02_done",
+      "created_at": "2026-07-12T02:09:56",
+      "current_rss_bytes": 750977024,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 639975424,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "d01_kept": 1773,
+        "d02_kept": 1773
+      }
+    },
+    {
+      "label": "global_corr_done",
+      "created_at": "2026-07-12T02:17:32",
+      "current_rss_bytes": 411828224,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 300826624,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "kept": 1773,
+        "dropped": 0
+      }
+    },
+    {
+      "label": "d03_done",
+      "created_at": "2026-07-12T02:17:33",
+      "current_rss_bytes": 1482539008,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 1371537408,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "kept": 1773,
+        "dropped": 0
+      }
+    },
+    {
+      "label": "d04_done",
+      "created_at": "2026-07-12T02:21:20",
+      "current_rss_bytes": 1447280640,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 1336279040,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "kept": 1022,
+        "dropped": 751
+      }
+    },
+    {
+      "label": "d05_done",
+      "created_at": "2026-07-12T02:21:31",
+      "current_rss_bytes": 1729429504,
+      "peak_rss_bytes": 5400461312,
+      "current_rss_delta_bytes": 1618427904,
+      "peak_rss_delta_bytes": 5287936000,
+      "metrics": {
+        "final_features": 500,
+        "d05_valid_auc": 0.9332214574370676
+      }
+    }
+  ]
+}
