@@ -13,6 +13,7 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import yaml
 
@@ -45,11 +46,15 @@ from risk_model_workbench.agent.state import (
 from risk_model_workbench.agent.trace import append_trace, load_recent_trace
 from risk_model_workbench.agent.transitions import apply_transition
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
+from risk_model_workbench.application.action_runner import ActionRunner
+from risk_model_workbench.application.context import VersionContext
+from risk_model_workbench.application.handlers import production_handler_registry
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
 from risk_model_workbench.harness.errors import SQL_APPROVAL_REQUIRED, WorkspaceLockedError
 from risk_model_workbench.harness.runtime import (
     classify_exception,
+    current_action_attempt,
     register_action_artifact as register_artifact,
     run_with_retry,
     stage_action_done,
@@ -57,6 +62,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_started,
 )
 from risk_model_workbench.harness.tools import TOOL_REGISTRY
+from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.manifest import make_run_id
 from risk_model_workbench.paths import REPO_ROOT, project_config_path, resolve_project_path, workflow_path
 from risk_model_workbench.planning import create_execution_plan, save_execution_plan
@@ -3145,98 +3151,61 @@ def cmd_train(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_evaluate(args: argparse.Namespace) -> int:
+def _run_application_action(args: argparse.Namespace, tool_name: str, params: dict[str, Any]) -> int:
+    """Thin compatibility adapter from argparse to the shared in-process runner."""
     project_dir = resolve_project_path(args.project)
-    path = _run_path(args)
-    stage_action_started(path, "evaluate")
-    reporter = ProgressReporter(path, "evaluate")
-    evaluate_path = _runtime_config_path(path, project_dir, "evaluate")
-    evaluate_config = load_yaml(evaluate_path) if evaluate_path.exists() else {}
-    metrics = evaluate_config.get("metrics") or evaluate_config.get("evaluation", {}).get("metrics") or []
-    scores_feather = _scores_feather_for_run(path, args.scores_feather)
-    if not scores_feather.is_absolute():
-        scores_feather = project_dir / scores_feather
-    output_dir = Path(args.output_dir or path / "evaluation")
-    if not output_dir.is_absolute():
-        output_dir = project_dir / output_dir
-    if scores_feather.exists() and evaluate_config:
-        try:
-            from risk_model_workbench.evaluation.run import evaluate_scores_from_feather
+    workspace = _run_path(args)
+    workspace_id = _workspace_arg(args)
+    context = VersionContext(
+        project_dir=project_dir,
+        version_id=workspace_id,
+        workspace=workspace,
+        runtime_config_dir=workspace / RUNTIME_CONFIG_DIR,
+        manifest_path=workspace / "audit" / "artifact_manifest.json",
+        version_state_path=(workspace / "version_state.yml" if (workspace / "version_state.yml").exists() else workspace / "run_state.yml"),
+    )
+    invocation = ActionInvocation(
+        tool_name=tool_name,
+        params=params,
+        project=str(project_dir),
+        version_id=workspace_id,
+    )
+    active_attempt = current_action_attempt()
+    attempt_id = active_attempt.attempt_id if active_attempt is not None else f"cli_{tool_name}_{uuid4().hex}"
+    task_id = active_attempt.task_id if active_attempt is not None else tool_name
+    spec = TOOL_REGISTRY[tool_name]
+    runner = ActionRunner(
+        handlers=production_handler_registry(),
+        policy_check=lambda candidate, candidate_context: (
+            candidate.tool_name == tool_name
+            and spec.action_id == tool_name
+            and spec.permission == "writes_run"
+            and candidate_context.workspace == workspace
+        ),
+    )
+    result = runner.run(
+        invocation=invocation,
+        context=context,
+        attempt_id=attempt_id,
+        task_id=task_id,
+    )
+    stream = sys.stderr if result.status == "failed" else sys.stdout
+    if result.message:
+        print(result.message, file=stream)
+    return 1 if result.status == "failed" else 0
 
-            summary = evaluate_scores_from_feather(scores_feather=scores_feather, output_dir=output_dir, config=evaluate_config, progress=reporter)
-            for artifact in sorted([*output_dir.glob("*.csv"), *output_dir.glob("*.json")]):
-                register_artifact(path, "evaluate", artifact)
-            append_decision(path, stage="evaluate", decision="done", reason="Evaluation completed from local score feather")
-            stage_action_done(path, "evaluate")
-            print(f"evaluation complete: {output_dir / 'evaluation_summary.json'}")
-            return 0
-        except Exception as exc:
-            payload = {"status": "scaffold", "reason": f"evaluation failed or dependency missing: {exc}", "configured_metrics": metrics}
-    else:
-        payload = {
-            "status": "scaffold",
-            "reason": "prediction data not available",
-            "configured_metrics": metrics,
-            "scores_feather": str(scores_feather),
-            "scores_feather_exists": scores_feather.exists(),
-        }
-    reporter.emit(step="evaluate_scaffold", status="scaffold", message=f"模型评估未执行真实评估：{payload['reason']}", percent=100)
-    _write_json(path / "evaluation" / "evaluation_summary.json", payload)
-    register_artifact(path, "evaluate", "evaluation/evaluation_summary.json")
-    append_decision(path, stage="evaluate", decision="scaffold", reason=payload["reason"])
-    stage_action_done(path, "evaluate", scaffold=True, message=payload["reason"])
-    print(f"evaluation scaffold: {path / 'evaluation' / 'evaluation_summary.json'}")
-    return 0
+
+def cmd_evaluate(args: argparse.Namespace) -> int:
+    return _run_application_action(
+        args,
+        "evaluate",
+        {key: value for key, value in {"scores_feather": args.scores_feather, "output_dir": args.output_dir}.items() if value is not None},
+    )
 
 
 def cmd_compare(args: argparse.Namespace) -> int:
-    project_dir = resolve_project_path(args.project)
-    path = _run_path(args)
-    stage_action_started(path, "compare")
-    champions = _as_string_list(args.champion)
-    if not champions:
-        evaluate_config = _load_runtime_config(project_dir, path, "evaluate")
-        champions = [
-            score
-            for score in _as_string_list((evaluate_config.get("evaluation") or {}).get("score_columns"))
-            if score != "model_score"
-        ]
-    champions = list(dict.fromkeys(champions))
-    if not champions:
-        payload = {"status": "skipped", "reason": "no champion configured", "champion": "", "champions": []}
-        _write_json(path / "evaluation" / "champion_challenger.json", payload)
-        register_artifact(path, "compare", "evaluation/champion_challenger.json")
-        append_decision(path, stage="compare", decision="skipped", reason=payload["reason"])
-        stage_action_done(path, "compare", message=payload["reason"])
-        print(f"compare skipped: {path / 'evaluation' / 'champion_challenger.json'}")
-        return 0
-    benchmark_path = path / "evaluation" / "benchmark_uplift.csv"
-    if benchmark_path.exists():
-        payload = {
-            "status": "done",
-            "reason": "",
-            "champion": champions[-1],
-            "champions": champions,
-            "benchmark_uplift": str(benchmark_path.relative_to(path)),
-        }
-        register_artifact(path, "compare", "evaluation/benchmark_uplift.csv")
-        decision = "done"
-        scaffold = False
-    else:
-        payload = {
-            "status": "scaffold",
-            "reason": "candidate and champion predictions not available",
-            "champion": champions[-1],
-            "champions": champions,
-        }
-        decision = "scaffold"
-        scaffold = True
-    _write_json(path / "evaluation" / "champion_challenger.json", payload)
-    register_artifact(path, "compare", "evaluation/champion_challenger.json")
-    append_decision(path, stage="compare", decision=decision, reason=payload["reason"] or "Champion/challenger comparison materialized")
-    stage_action_done(path, "compare", scaffold=scaffold, message=payload["reason"])
-    print(f"compare {'scaffold' if scaffold else 'complete'}: {path / 'evaluation' / 'champion_challenger.json'}")
-    return 0
+    params = {"champions": _as_string_list(args.champion)} if args.champion else {}
+    return _run_application_action(args, "compare", params)
 
 
 def _as_config_dict(value: Any) -> dict[str, Any]:
@@ -3453,112 +3422,8 @@ def _generate_excel_report_for_target(
 
 
 def cmd_report(args: argparse.Namespace) -> int:
-    project_dir = resolve_project_path(args.project)
-    path = _run_path(args)
-    stage_action_started(path, "report")
-    report_path = _runtime_config_path(path, project_dir, "report")
-    report_config = load_yaml(report_path) if report_path.exists() else {}
-    evaluate_path = _runtime_config_path(path, project_dir, "evaluate")
-    evaluate_config = load_yaml(evaluate_path) if evaluate_path.exists() else {}
-    selected_target = getattr(args, "report_target", None)
-    sections = report_config.get("sections") or report_config.get("report", {}).get("sections") or []
-    outputs = report_config.get("outputs") or report_config.get("report", {}).get("outputs") or ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]
-    report_steps = _as_string_list((report_config.get("report") or {}).get("stage_steps"))
-    outputs = _as_string_list(outputs)
-    if "model_recovery_report" in report_steps and "model_recovery_report.md" not in outputs:
-        outputs.append("model_recovery_report.md")
-    if "credit_product_report" in report_steps and "credit_product_report.md" not in outputs:
-        outputs.append("credit_product_report.md")
-    state = load_run_state(path)
-    manifest_path = path / "audit" / "artifact_manifest.json"
-    text = (
-        "# Model Report\n\n"
-        "status: scaffold\n\n"
-        "This report is generated only from registered run artifacts. Missing metrics are not fabricated.\n\n"
-        f"- run_id: {args.run_id}\n"
-        f"- workflow: {state.get('workflow')}\n"
-        f"- configured_sections: {', '.join(sections) if sections else 'not configured'}\n"
-        f"- artifact_manifest: {manifest_path.relative_to(path)}\n"
-    )
-    generated_report_paths: list[Path] = []
-
-    def _report_body(name: str) -> str:
-        lowered = name.lower()
-        if "model_card" in lowered:
-            return "# Model Card\n\nstatus: scaffold\n\nThis card is generated from registered run artifacts.\n"
-        if "executive" in lowered:
-            return "# Executive Summary\n\nstatus: scaffold\n\nModel evaluation evidence is summarized from the run manifest when available.\n"
-        if "recovery" in lowered:
-            return "# Model Recovery Report\n\nstatus: scaffold\n\nRecovery monitoring inputs were requested; missing artifacts are listed in the run manifest.\n"
-        if "credit" in lowered:
-            return "# Credit Product Report\n\nstatus: scaffold\n\nCredit product evaluation outputs were requested; missing artifacts are listed in the run manifest.\n"
-        return text
-
-    if not selected_target:
-        for output_name in outputs:
-            target = path / "reports" / Path(output_name).name
-            suffix = target.suffix.lower()
-            if suffix == ".xlsx":
-                continue
-            if suffix == ".html":
-                from risk_model_workbench.reporting.html_report import render_model_report_html
-
-                body = _report_body(target.name)
-                _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
-            elif suffix == ".json":
-                _write_json(target, {"status": "scaffold", "run_id": args.run_id, "sections": sections, "artifact_manifest": str(manifest_path.relative_to(path))})
-            else:
-                _write_text(target, _report_body(target.name))
-            generated_report_paths.append(target)
-
-        for required_name in ["model_report.md", "model_report.html", "model_card.md", "executive_summary.md"]:
-            target = path / "reports" / required_name
-            if not target.exists():
-                body = _report_body(required_name)
-                if target.suffix.lower() == ".html":
-                    from risk_model_workbench.reporting.html_report import render_model_report_html
-
-                    _write_text(target, render_model_report_html(body, title="Model Report", run_id=args.run_id))
-                else:
-                    _write_text(target, body)
-                generated_report_paths.append(target)
-    for artifact_path in generated_report_paths:
-        register_artifact(path, "report", artifact_path)
-    train_dirs = [item for item in (path / "modeling").glob("*") if item.is_dir() and (item / "metrics_train_valid.json").exists()]
-    all_configured_targets = _configured_report_targets(report_config)
-    targets = _configured_report_targets(report_config, selected_target)
-    if selected_target and all_configured_targets and not targets:
-        stage_action_failed(path, "report", f"unknown report target: {selected_target}")
-        print(f"unknown report target: {selected_target}", file=sys.stderr)
-        return 1
-    if not targets:
-        targets = [{"name": selected_target or "default", "output_dir": "reports"}]
-
-    excel_paths: list[Path] = []
-    fallback_train_dir = sorted(train_dirs)[0] if train_dirs else None
-    for target in targets:
-        try:
-            excel_path = _generate_excel_report_for_target(
-                workspace=path,
-                project_dir=project_dir,
-                target=target,
-                report_config=report_config,
-                evaluate_config=evaluate_config,
-                fallback_train_dir=fallback_train_dir,
-            )
-            if excel_path is not None:
-                excel_paths.append(excel_path)
-        except Exception as exc:
-            append_decision(path, stage="report", decision="excel_scaffold", reason=f"{target.get('name')}: Excel report not generated: {exc}")
-    if excel_paths:
-        append_decision(path, stage="report", decision="done", reason=f"Excel report generated for {len(excel_paths)} report target(s)")
-        stage_action_done(path, "report")
-        print("report complete: " + ", ".join(str(item) for item in excel_paths))
-    else:
-        append_decision(path, stage="report", decision="scaffold", reason="report generated with missing real evaluation artifacts")
-        stage_action_done(path, "report", scaffold=True, message="report generated with missing real evaluation artifacts")
-        print(f"report scaffold: {path / 'reports' / 'model_report.md'}")
-    return 0
+    params = {"report_target": args.report_target} if args.report_target else {}
+    return _run_application_action(args, "report", params)
 
 
 def cmd_feature_screening_summary(args: argparse.Namespace) -> int:

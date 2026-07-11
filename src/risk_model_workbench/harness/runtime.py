@@ -98,6 +98,20 @@ def current_action_attempt() -> ActionAttempt | None:
     return _CURRENT_ATTEMPT.get()
 
 
+@contextmanager
+def detached_action_attempt() -> Iterator[None]:
+    """Prevent a nested handler from writing the outer runner's receipt.
+
+    ActionRunner owns the single semantic receipt. Stage helpers may still be
+    reused to update state, but must not bind and persist that receipt first.
+    """
+    token = _CURRENT_ATTEMPT.set(None)
+    try:
+        yield
+    finally:
+        _CURRENT_ATTEMPT.reset(token)
+
+
 def action_result_path(workspace: str | Path, attempt_id: str) -> Path:
     _validate_attempt_id(attempt_id)
     return WorkspaceStore(workspace).path(Path("audit") / "action_results" / f"{attempt_id}.json")

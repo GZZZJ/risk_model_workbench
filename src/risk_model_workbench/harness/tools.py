@@ -54,6 +54,11 @@ def _default_params_schema(name: str) -> dict[str, object]:
         required.append("experiment")
     elif name == "compare":
         properties["champions"] = {"type": "array", "items": {"type": "string"}}
+    elif name == "evaluate":
+        properties["scores_feather"] = {"type": "string", "minLength": 1}
+        properties["output_dir"] = {"type": "string", "minLength": 1}
+    elif name == "report":
+        properties["report_target"] = {"type": "string", "minLength": 1}
     elif name == "workflow_validate":
         properties["workflow"] = {"type": "string", "minLength": 1}
         required.append("workflow")
@@ -86,6 +91,12 @@ def _typed_renderer(tool_name: str) -> Callable[[ActionInvocation], list[str]]:
         if tool_name == "compare":
             for champion in params.get("champions") or []:
                 rendered.extend(["--champion", str(champion)])
+        elif tool_name == "evaluate":
+            for name in ["scores_feather", "output_dir"]:
+                if params.get(name):
+                    rendered.extend(["--" + name.replace("_", "-"), str(params[name])])
+        elif tool_name == "report" and params.get("report_target"):
+            rendered.extend(["--report-target", str(params["report_target"])])
         return rendered
 
     return render
