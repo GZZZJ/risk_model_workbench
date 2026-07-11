@@ -56,6 +56,11 @@ def automatic_recovery_allowed(execution_semantics: str) -> bool:
     return execution_semantics in SAFE_RECOVERY_SEMANTICS
 
 
+def declared_action_ids() -> frozenset[str]:
+    """Return action identities that application handlers may implement."""
+    return frozenset(spec.id for spec in ACTION_SPECS)
+
+
 ACTION_SPECS: tuple[ActionSpec, ...] = (
     ActionSpec(
         id="validate_config",

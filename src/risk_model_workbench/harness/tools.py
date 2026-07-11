@@ -14,6 +14,14 @@ from risk_model_workbench.harness.invocation import ActionInvocation
 BLOCKED_TOOL_FLAGS = ("--force", "--skip-split-check")
 EXECUTION_SEMANTICS = {"read_only", "idempotent_write", "non_idempotent_write", "external_unknown"}
 
+
+def action_id_for_tool(tool_name: str) -> str:
+    """Resolve a typed tool to its declared action without rendering a command."""
+    try:
+        return TOOL_REGISTRY[tool_name].action_id
+    except KeyError as exc:
+        raise ValueError(f"unknown typed tool: {tool_name}") from exc
+
 _TYPED_ARGV: dict[str, tuple[str, ...]] = {
     "project_status": ("project", "status", "--project", "{project}"),
     "run_status": ("version", "status", "--project", "{project}", "--version-id", "{version_id}"),
