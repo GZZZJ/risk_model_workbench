@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+import re
+from copy import deepcopy
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
+from risk_model_workbench.agent.advisor import list_advisor_requests, load_advisor_request
+from risk_model_workbench.agent.context_pack import load_context_pack
 from risk_model_workbench.config import load_yaml
 from risk_model_workbench.facts import list_facts
 from risk_model_workbench.paths import workflow_path
@@ -27,7 +31,7 @@ def build_context_snapshot(project_dir: str | Path, run_id: str) -> dict[str, An
     workspace_rel = selected_run.relative_to(project_path)
     state_filename = "version_state.yml" if (selected_run / "version_state.yml").exists() else "run_state.yml"
 
-    return {
+    snapshot = {
         "version": 1,
         "generated_at": _now(),
         "project": str(project_path.resolve()),
@@ -52,6 +56,15 @@ def build_context_snapshot(project_dir: str | Path, run_id: str) -> dict[str, An
         "progress_summary": load_progress_summary(selected_run),
         "facts": list_facts(project_path),
     }
+    reference = _latest_advisor_context(selected_run)
+    if reference:
+        snapshot = attach_context_pack_reference(
+            snapshot,
+            selected_run,
+            reference["context_pack"],
+            reference["context_hash"],
+        )
+    return snapshot
 
 
 def write_context_snapshot(
@@ -119,6 +132,53 @@ def format_context_snapshot(snapshot: dict[str, Any]) -> str:
             lines.append(f"- [{fact.get('category')}] {fact.get('statement')} (source: {fact.get('source_path')})")
     lines.append("")
     return "\n".join(lines)
+
+
+def attach_context_pack_reference(
+    snapshot: dict[str, Any],
+    workspace: str | Path,
+    context_pack: str,
+    context_hash: str,
+) -> dict[str, Any]:
+    """Attach a safe immutable Host-Agent context reference to a snapshot."""
+    normalised = str(context_pack).replace("\\", "/")
+    path = PurePosixPath(normalised)
+    digest = str(context_hash)
+    expected = PurePosixPath("audit") / "context_packs" / f"{digest}.json"
+    if path.is_absolute() or ".." in path.parts or path != expected:
+        raise ValueError("context pack reference must be workspace-relative")
+    if not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise ValueError("context pack reference requires a lowercase SHA256 hash")
+    pack = load_context_pack(workspace, normalised)
+    if pack.get("context_hash") != digest:
+        raise ValueError("context pack reference hash mismatch")
+    updated = deepcopy(snapshot)
+    updated["host_agent_context"] = {
+        "context_pack": normalised,
+        "context_hash": digest,
+    }
+    sources = updated.get("sources")
+    if isinstance(sources, list) and normalised not in sources:
+        sources.append(normalised)
+    return updated
+
+
+def _latest_advisor_context(workspace: Path) -> dict[str, str] | None:
+    candidates = [
+        request
+        for request in list_advisor_requests(workspace)
+        if int(request.get("version") or 1) >= 2
+        and request.get("status") not in {"consumed", "rejected"}
+        and request.get("context_pack")
+    ]
+    if not candidates:
+        return None
+    selected = max(candidates, key=lambda item: (str(item.get("created_at") or ""), str(item.get("request_id") or "")))
+    request = load_advisor_request(workspace, str(selected["request_id"]))
+    return {
+        "context_pack": str(request["context_pack"]),
+        "context_hash": str(request["context_hash"]),
+    }
 
 
 def _workflow_payload(workflow: str, stage_contracts: dict[str, dict[str, Any]], contract_source: str) -> dict[str, Any]:

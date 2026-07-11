@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
+from risk_model_workbench.agent.context_pack import (
+    build_context_pack,
+    load_context_pack,
+    persist_context_pack,
+)
 from risk_model_workbench.agent.workspace_store import RevisionConflictError, WorkspaceStore, tracked_payload
 
 
-ADVISOR_PROTOCOL_VERSION = 1
+ADVISOR_PROTOCOL_VERSION = 2
 REQUEST_TYPES = {
     "tuning_plan_required",
     "failure_diagnosis_required",
@@ -68,8 +74,17 @@ def create_advisor_request(
     resolved_invocation_hash = str(invocation_hash or task.get("invocation_hash") or command_digest)
     resolved_round = _round_for(workspace_path, resolved_type, task, round_index)
     context_files = _context_files_for(resolved_type, task)
-    context_entries = build_context_manifest(workspace_path, context_files)
-    context_hash = context_manifest_hash(context_entries)
+    context_pack = _build_advisor_context_pack(
+        workspace_path,
+        project_dir=project_dir,
+        version_id=version_id,
+        task=task,
+        attempt_id=resolved_attempt_id,
+        request_type=resolved_type,
+        context_files=context_files,
+    )
+    context_hash = str(context_pack["context_hash"])
+    context_pack_path = persist_context_pack(workspace_path, context_pack)
     identity = {
         "task_id": task_id,
         "attempt_id": resolved_attempt_id,
@@ -82,7 +97,6 @@ def create_advisor_request(
     request_hash = canonical_hash(identity)
     request_id = _request_id(task_id, resolved_type, request_hash)
     path = advisor_requests_dir(workspace_path) / f"{request_id}.json"
-    context_path = advisor_contexts_dir(workspace_path) / f"{request_id}.json"
     request = {
         "version": ADVISOR_PROTOCOL_VERSION,
         "request_id": request_id,
@@ -96,7 +110,10 @@ def create_advisor_request(
         "attempt_id": resolved_attempt_id,
         "invocation_hash": resolved_invocation_hash,
         "context_hash": context_hash,
-        "context_manifest": str(context_path.relative_to(workspace_path)),
+        "context_pack": context_pack_path,
+        # P0 compatibility alias.  This now points to the immutable pack rather
+        # than a mutable glob expansion manifest.
+        "context_manifest": context_pack_path,
         "round": resolved_round,
         "request_hash": request_hash,
         "request_retry_index": int(retry_index),
@@ -117,19 +134,6 @@ def create_advisor_request(
     errors = validate_advisor_request(request)
     if errors:
         raise ValueError("; ".join(errors))
-    store = WorkspaceStore(workspace_path)
-    context_payload = {
-        "version": ADVISOR_PROTOCOL_VERSION,
-        "request_id": request_id,
-        "context_hash": context_hash,
-        "patterns": context_files,
-        "files": context_entries,
-        "created_at": _now(),
-    }
-    store.create_once(
-        context_path.relative_to(workspace_path),
-        context_payload,
-    )
     return _create_advisor_request_once(workspace_path, request)
 
 
@@ -145,13 +149,23 @@ def create_replacement_advisor_request(workspace: str | Path, request: dict[str,
         "round": int(request.get("round", 0) or 0),
         "retry_index": retry_index,
     }
-    context_entries = build_context_manifest(workspace_path, list(request.get("context_files") or []))
-    identity["context_hash"] = context_manifest_hash(context_entries)
+    replacement_pack = _build_advisor_context_pack(
+        workspace_path,
+        project_dir=str(request.get("project") or ""),
+        version_id=str(request.get("version_id") or ""),
+        task=request,
+        attempt_id=str(request.get("attempt_id") or ""),
+        request_type=str(request.get("type") or "failure_diagnosis_required"),
+        context_files=list(request.get("context_files") or []),
+    )
+    identity["context_hash"] = str(replacement_pack["context_hash"])
+    replacement_pack_path = persist_context_pack(workspace_path, replacement_pack)
     request_hash = canonical_hash(identity)
     request_id = _request_id(str(request.get("task_id") or "task"), str(request.get("type") or "advisor"), request_hash)
     replacement = dict(request)
     replacement.update(
         {
+            "version": ADVISOR_PROTOCOL_VERSION,
             "request_id": request_id,
             "status": "pending",
             "reason": reason,
@@ -159,24 +173,13 @@ def create_replacement_advisor_request(workspace: str | Path, request: dict[str,
             "request_hash": request_hash,
             "request_retry_index": retry_index,
             "path": str(Path("audit") / "advisor_requests" / f"{request_id}.json"),
-            "context_manifest": str(Path("audit") / "advisor_contexts" / f"{request_id}.json"),
+            "context_pack": replacement_pack_path,
+            "context_manifest": replacement_pack_path,
             "accepted_response": "",
             "answered_at": "",
             "replacement_of": request.get("request_id", ""),
             "created_at": _now(),
         }
-    )
-    context_path = workspace_path / replacement["context_manifest"]
-    WorkspaceStore(workspace_path).create_once(
-        context_path.relative_to(workspace_path),
-        {
-            "version": ADVISOR_PROTOCOL_VERSION,
-            "request_id": replacement["request_id"],
-            "context_hash": replacement["context_hash"],
-            "patterns": replacement.get("context_files") or [],
-            "files": context_entries,
-            "created_at": _now(),
-        },
     )
     return _create_advisor_request_once(workspace_path, replacement)
 
@@ -206,16 +209,30 @@ def list_advisor_requests(workspace: str | Path) -> list[dict[str, Any]]:
 
 
 def load_advisor_request(workspace: str | Path, request_id: str) -> dict[str, Any]:
+    if not re.fullmatch(r"[A-Za-z0-9_]+", request_id):
+        raise KeyError(f"invalid advisor request id: {request_id}")
     path = advisor_requests_dir(workspace) / f"{request_id}.json"
     if not path.exists():
         raise KeyError(f"unknown advisor request: {request_id}")
-    return tracked_payload(WorkspaceStore(workspace).read_json(path.relative_to(Path(workspace))))
+    request = tracked_payload(WorkspaceStore(workspace).read_json(path.relative_to(Path(workspace))))
+    errors = validate_advisor_request(request)
+    if errors:
+        raise ValueError(f"invalid advisor request {request_id}: {'; '.join(errors)}")
+    workspace_path = Path(workspace).resolve()
+    if workspace_path.parent.name in {"versions", "runs"}:
+        expected_project = workspace_path.parent.parent
+        if Path(str(request.get("project") or "")).resolve() != expected_project:
+            raise ValueError(f"invalid advisor request {request_id}: project scope mismatch")
+        if str(request.get("version_id") or request.get("run_id") or "") != workspace_path.name:
+            raise ValueError(f"invalid advisor request {request_id}: workspace identity mismatch")
+    load_advisor_context_pack(workspace, request)
+    return request
 
 
 def advisor_request_is_answered(workspace: str | Path, request_id: str) -> bool:
     try:
         request = load_advisor_request(workspace, request_id)
-    except KeyError:
+    except (KeyError, ValueError):
         return False
     response_path = str(request.get("accepted_response") or "")
     return bool(request.get("status") == "answered" and response_path and (Path(workspace) / response_path).exists())
@@ -255,6 +272,39 @@ def validate_advisor_request(request: dict[str, Any]) -> list[str]:
         errors.append("expected_response.type is required")
     if not isinstance(request.get("command"), list):
         errors.append("command must be an argv-style list")
+    elif request.get("command_hash") != _command_hash(request["command"]):
+        errors.append("command_hash does not match command")
+    try:
+        protocol_version = int(request.get("version") or 1)
+    except (TypeError, ValueError):
+        protocol_version = 0
+        errors.append("advisor request version must be an integer")
+    if protocol_version not in {1, 2}:
+        errors.append(f"unsupported advisor request version: {protocol_version}")
+    context_pack = str(request.get("context_pack") or "")
+    if protocol_version >= 2:
+        expected_pack = str(Path("audit") / "context_packs" / f"{request.get('context_hash', '')}.json")
+        if context_pack != expected_pack:
+            errors.append("context_pack must be the content-addressed workspace-relative path")
+        if request.get("context_manifest") != context_pack:
+            errors.append("context_manifest must match context_pack")
+    elif context_pack:
+        errors.append("v1 advisor requests may not claim a v2 context_pack")
+    if not isinstance(request.get("context_files"), list):
+        errors.append("context_files provenance must be a list")
+    try:
+        expected_hash = canonical_hash(_identity_payload(request))
+    except (TypeError, ValueError):
+        expected_hash = ""
+        errors.append("advisor request identity fields are invalid")
+    if expected_hash and request.get("request_hash") != expected_hash:
+        errors.append("request_hash does not match request identity")
+    expected_request_id = _request_id(str(request.get("task_id") or "task"), str(request.get("type") or "advisor"), expected_hash)
+    if expected_hash and request.get("request_id") != expected_request_id:
+        errors.append("request_id does not match request identity")
+    expected_path = str(Path("audit") / "advisor_requests" / f"{request.get('request_id', '')}.json")
+    if request.get("path") != expected_path:
+        errors.append("advisor request path does not match request_id")
     return errors
 
 
@@ -270,8 +320,8 @@ def validate_advisor_response(workspace: str | Path, response: dict[str, Any]) -
     request_id = str(response.get("request_id") or "")
     try:
         request = load_advisor_request(workspace, request_id)
-    except KeyError:
-        errors.append(f"unknown advisor request: {request_id}")
+    except (KeyError, ValueError) as exc:
+        errors.append(str(exc))
         request = {}
     expected_type = ((request.get("expected_response") or {}) if isinstance(request.get("expected_response"), dict) else {}).get("type")
     if expected_type and response.get("type") != expected_type:
@@ -351,7 +401,60 @@ def load_accepted_advisor_response(workspace: str | Path, request: dict[str, Any
 
 
 def current_context_hash_for_request(workspace: str | Path, request: dict[str, Any]) -> str:
-    return context_manifest_hash(build_context_manifest(Path(workspace), list(request.get("context_files") or [])))
+    if int(request.get("version") or 1) == 1:
+        return context_manifest_hash(build_context_manifest(Path(workspace), list(request.get("context_files") or [])))
+    return str(load_advisor_context_pack(workspace, request)["context_hash"])
+
+
+def load_advisor_context_pack(workspace: str | Path, request: dict[str, Any]) -> dict[str, Any]:
+    if int(request.get("version") or 1) == 1:
+        relative = str(request.get("context_manifest") or "")
+        expected = str(Path("audit") / "advisor_contexts" / f"{request.get('request_id', '')}.json")
+        if relative != expected:
+            raise ValueError("legacy advisor context manifest path mismatch")
+        payload = WorkspaceStore(workspace).read_json(relative).payload
+        files = payload.get("files")
+        if (
+            payload.get("request_id") != request.get("request_id")
+            or payload.get("patterns") != request.get("context_files")
+            or payload.get("context_hash") != request.get("context_hash")
+            or not isinstance(files, list)
+            or context_manifest_hash(files) != request.get("context_hash")
+        ):
+            raise ValueError("legacy advisor context manifest mismatch")
+        return payload
+    relative = str(request.get("context_pack") or request.get("context_manifest") or "")
+    if not relative:
+        raise ValueError("advisor request has no context pack")
+    pack = load_context_pack(workspace, relative)
+    if pack.get("context_hash") != request.get("context_hash"):
+        raise ValueError("advisor request context hash mismatch")
+    identity_pairs = {
+        "version_id": "version_id",
+        "task_id": "task_id",
+        "attempt_id": "attempt_id",
+        "request_type": "type",
+    }
+    for pack_field, request_field in identity_pairs.items():
+        if str(pack.get(pack_field) or "") != str(request.get(request_field) or ""):
+            raise ValueError(f"advisor request context pack identity mismatch: {pack_field}")
+    if str(pack.get("project") or "") != Path(str(request.get("project") or "")).name:
+        raise ValueError("advisor request context pack identity mismatch: project")
+    if sorted(pack.get("constraints") or []) != sorted(request.get("constraints") or []):
+        raise ValueError("advisor request context pack constraints mismatch")
+    expected_tools = sorted(
+        {str(request.get("tool_name") or request.get("action_id") or "")} - {""}
+    )
+    if pack.get("allowed_tools") != expected_tools:
+        raise ValueError("advisor request context pack allowed_tools mismatch")
+    if pack.get("output_contract") != request.get("expected_response"):
+        raise ValueError("advisor request context pack output_contract mismatch")
+    expected_provenance = sorted(
+        {PurePosixPath(str(item).replace("\\", "/")).as_posix() for item in request.get("context_files") or []}
+    )
+    if pack.get("provenance") != expected_provenance:
+        raise ValueError("advisor request context pack provenance mismatch")
+    return pack
 
 
 def request_identity(request: dict[str, Any]) -> dict[str, Any]:
@@ -417,6 +520,43 @@ def build_context_manifest(workspace: Path, patterns: list[str]) -> list[dict[st
     return sorted(rows, key=lambda item: str(item.get("path") or ""))
 
 
+def _build_advisor_context_pack(
+    workspace: Path,
+    *,
+    project_dir: str | Path,
+    version_id: str,
+    task: dict[str, Any],
+    attempt_id: str,
+    request_type: str,
+    context_files: list[str],
+) -> dict[str, Any]:
+    return build_context_pack(
+        workspace,
+        project=str(project_dir),
+        version_id=version_id,
+        task_id=str(task.get("task_id") or "task"),
+        attempt_id=attempt_id,
+        request_type=request_type,
+        paths=_expand_context_provenance(workspace, context_files),
+        constraints=_constraints_for(request_type),
+        allowed_tools=[str(task.get("tool_name") or task.get("action_id") or "")],
+        output_contract={"type": REQUEST_TO_RESPONSE[request_type]},
+        provenance=context_files,
+    )
+
+
+def _expand_context_provenance(workspace: Path, patterns: list[str]) -> list[str]:
+    """Expand trusted protocol globs; the pack builder enforces every result."""
+    rows: list[str] = []
+    for pattern in patterns:
+        matches = sorted(workspace.glob(pattern)) if _has_glob(pattern) else []
+        if matches:
+            rows.extend(str(path.relative_to(workspace)) for path in matches)
+        else:
+            rows.append(pattern)
+    return rows
+
+
 def context_manifest_hash(entries: list[dict[str, Any]]) -> str:
     return canonical_hash(entries)
 
@@ -424,6 +564,18 @@ def context_manifest_hash(entries: list[dict[str, Any]]) -> str:
 def canonical_hash(payload: object) -> str:
     encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _identity_payload(request: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "task_id": str(request.get("task_id") or ""),
+        "attempt_id": str(request.get("attempt_id") or ""),
+        "request_type": str(request.get("type") or ""),
+        "invocation_hash": str(request.get("invocation_hash") or ""),
+        "context_hash": str(request.get("context_hash") or ""),
+        "round": int(request.get("round", 0) or 0),
+        "retry_index": int(request.get("request_retry_index", 0) or 0),
+    }
 
 
 def _question_for(request_type: str, task: dict[str, Any], message: str) -> str:

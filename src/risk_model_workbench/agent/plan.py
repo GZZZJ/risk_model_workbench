@@ -11,6 +11,7 @@ from typing import Any
 
 import yaml
 
+from risk_model_workbench.agent.context_pack import context_pack_capabilities
 from risk_model_workbench.harness.actions import get_action_spec
 from risk_model_workbench.harness.invocation import ActionInvocation, canonical_json
 from risk_model_workbench.harness.tools import (
@@ -101,6 +102,15 @@ def agent_tool_schema() -> list[dict[str, Any]]:
         item["failure_codes"] = list(action.failure_codes)
         rows.append(item)
     return rows
+
+
+def agent_capabilities() -> dict[str, Any]:
+    """Machine-readable Host-Agent contract, independent of CLI help text."""
+    return {
+        "version": 1,
+        "context_pack": context_pack_capabilities(),
+        "tools": agent_tool_schema(),
+    }
 
 
 def canonical_plan_hash(plan: dict[str, Any]) -> str:

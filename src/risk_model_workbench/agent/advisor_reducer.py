@@ -43,7 +43,7 @@ def consume_advisor_response(
     state = deepcopy(current_state)
     try:
         request = load_advisor_request(workspace_path, request_id)
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         return _error(state, str(exc))
 
     receipt_relative = Path("audit") / "advisor_consumptions" / f"{request_id}.json"
@@ -62,7 +62,10 @@ def consume_advisor_response(
     identity_errors = _current_identity_errors(request, task)
     if identity_errors:
         return _error(state, "; ".join(identity_errors))
-    current_context_hash = current_context_hash_for_request(workspace_path, request)
+    try:
+        current_context_hash = current_context_hash_for_request(workspace_path, request)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        return _error(state, f"context pack invalid: {exc}")
     if current_context_hash != request.get("context_hash"):
         return _error(state, "context hash mismatch")
 
@@ -172,7 +175,7 @@ def confirm_advisor_response(workspace: str | Path, request_id: str, current_sta
         return _error(state, "advisor request does not match current user confirmation blocker")
     try:
         request = load_advisor_request(workspace_path, request_id)
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         return _error(state, str(exc))
     if not _claim_user_decision(workspace_path, request_id, decision="confirmed", actor=confirmed_by):
         return _error(state, f"advisor user decision already recorded: {request_id}")
@@ -209,7 +212,7 @@ def reject_advisor_response(workspace: str | Path, request_id: str, current_stat
         return _error(state, "advisor request does not match current user confirmation blocker")
     try:
         request = load_advisor_request(workspace_path, request_id)
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         return _error(state, str(exc))
     if not _claim_user_decision(workspace_path, request_id, decision="rejected", actor=reason):
         return _error(state, f"advisor user decision already recorded: {request_id}")

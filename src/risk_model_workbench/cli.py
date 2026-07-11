@@ -21,6 +21,7 @@ from risk_model_workbench.agent.advisor import (
     accept_advisor_response,
     advisor_request_is_answered,
     list_advisor_requests,
+    load_advisor_context_pack,
     load_advisor_request,
 )
 from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
@@ -28,6 +29,7 @@ from risk_model_workbench.agent.approvals import approve_request, load_approvals
 from risk_model_workbench.agent.executor import run_agent
 from risk_model_workbench.agent.recovery import diagnose_recovery, reconcile_operation
 from risk_model_workbench.agent.plan import (
+    agent_capabilities,
     agent_tool_schema,
     bind_agent_plan,
     load_agent_plan,
@@ -1533,8 +1535,9 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         request_id = str(blocker.get("advisor_request_id") or "")
         try:
             advisor_request = load_advisor_request(workspace, request_id) if request_id else {}
-        except KeyError:
-            advisor_request = {}
+        except (KeyError, ValueError) as exc:
+            print(f"agent resume blocked: invalid advisor request: {exc}")
+            return 1
         if request_id and advisor_request.get("status") not in {"answered", "rejected"}:
             print(f"agent resume blocked: advisor response pending: {request_id}")
             return 1
@@ -1775,6 +1778,19 @@ def cmd_agent_tools(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_agent_capabilities(args: argparse.Namespace) -> int:
+    payload = agent_capabilities()
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(f"capabilities_version: {payload['version']}")
+        print(f"context_pack_version: {payload['context_pack']['version']}")
+        print("tools:")
+        for tool in payload["tools"]:
+            print(f"- {tool.get('name')}")
+    return 0
+
+
 def cmd_agent_plan_rebind(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
@@ -1861,7 +1877,7 @@ def cmd_agent_advisor_show(args: argparse.Namespace) -> int:
     workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
     try:
         request = load_advisor_request(workspace, args.request_id)
-    except KeyError as exc:
+    except (KeyError, ValueError) as exc:
         print(str(exc))
         return 1
     if args.json:
@@ -1874,6 +1890,28 @@ def cmd_agent_advisor_show(args: argparse.Namespace) -> int:
         print("context_files:")
         for item in request.get("context_files") or []:
             print(f"- {item}")
+    return 0
+
+
+def cmd_agent_advisor_context(args: argparse.Namespace) -> int:
+    try:
+        project_dir = resolve_project_path(args.project)
+        workspace = resolve_workspace_dir(project_dir, version_id=args.version_id)
+        request = load_advisor_request(workspace, args.request_id)
+        context_pack = load_advisor_context_pack(workspace, request)
+    except (KeyError, FileNotFoundError, OSError, ValueError, json.JSONDecodeError) as exc:
+        if args.json:
+            print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False))
+        else:
+            print(f"advisor context failed: {exc}")
+        return 1
+    if args.json:
+        print(json.dumps(context_pack, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(f"context_hash: {context_pack.get('context_hash')}")
+        print(f"context_pack: {request.get('context_pack')}")
+        for item in context_pack.get("files") or []:
+            print(f"- {item.get('path')}: {item.get('status')}")
     return 0
 
 
@@ -3815,6 +3853,10 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     tools.add_argument("--json", action="store_true")
     tools.set_defaults(func=cmd_agent_tools)
 
+    capabilities = agent_sub.add_parser("capabilities", help="export the Host-Agent capability contract")
+    capabilities.add_argument("--json", action="store_true")
+    capabilities.set_defaults(func=cmd_agent_capabilities)
+
     agent_plan = agent_sub.add_parser("plan", help="inspect or safely rebind an Agent plan")
     agent_plan_sub = agent_plan.add_subparsers(dest="agent_plan_command", required=True)
     rebind = agent_plan_sub.add_parser("rebind", help="preview or apply current registry metadata")
@@ -3841,6 +3883,13 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     advisor_show.add_argument("--request-id", required=True)
     advisor_show.add_argument("--json", action="store_true")
     advisor_show.set_defaults(func=cmd_agent_advisor_show)
+
+    advisor_context = advisor_sub.add_parser("context", help="show the immutable context pack for one request")
+    advisor_context.add_argument("--project", required=True)
+    advisor_context.add_argument("--version-id", required=True)
+    advisor_context.add_argument("--request-id", required=True)
+    advisor_context.add_argument("--json", action="store_true")
+    advisor_context.set_defaults(func=cmd_agent_advisor_context)
 
     advisor_accept = advisor_sub.add_parser("accept", help="accept and validate an Advisor response")
     advisor_accept.add_argument("--project", required=True)

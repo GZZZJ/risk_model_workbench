@@ -851,7 +851,7 @@ def _consume_ready_advisor_response(workspace: Path, state: dict[str, Any]) -> d
         return state
     try:
         request = load_advisor_request(workspace, request_id)
-    except KeyError:
+    except (KeyError, ValueError):
         return state
     if request.get("status") not in {"answered", "rejected"}:
         return state

@@ -1,5 +1,5 @@
 name: advisor_request
-version: 1
+version: 2
 required_fields:
   - version
   - request_id
@@ -38,11 +38,12 @@ field_notes:
   type: The kind of judgment needed from the Host-Agent or human expert.
   attempt_id: Agent action attempt bound to this request.
   invocation_hash: Bound tool invocation hash used to reject stale answers.
-  context_hash: Canonical hash of audit/advisor_contexts/<request_id>.json files payload.
-  context_manifest: Immutable manifest of exact context files and hashes.
+  context_hash: Canonical hash of the immutable Host-Agent Context Pack.
+  context_pack: Required for version 2; absent for legacy version 1 requests. Workspace-relative content-addressed Context Pack snapshot.
+  context_manifest: Compatibility alias for context_pack; no longer a live glob expansion.
   round: Advisor round, such as LLM tuning round.
   request_hash: Canonical hash of request identity fields.
-  context_files: Version-relative file patterns the Advisor should inspect.
+  context_files: Informational provenance patterns only; never authoritative after request creation.
   constraints: Guardrails the Advisor response must respect.
   expected_response.type: Required response type accepted by rmw agent advisor accept.
   command_hash: Hash of the blocked command to prevent stale or mismatched answers.

@@ -8,7 +8,11 @@ import yaml
 
 from risk_model_workbench.agent.advisor import (
     accept_advisor_response,
+    build_context_manifest,
+    canonical_hash,
+    context_manifest_hash,
     create_advisor_request,
+    create_replacement_advisor_request,
     load_advisor_request,
     validate_advisor_response,
 )
@@ -223,7 +227,7 @@ def test_stale_response_identity_is_rejected(tmp_path, field, value):
     assert any("response identity mismatch" in error for error in errors)
 
 
-def test_stale_current_context_is_rejected_at_consumption(tmp_path):
+def test_workspace_changes_do_not_mutate_an_issued_context_pack(tmp_path):
     _project, workspace, request, state = _paused_request(tmp_path)
     response_path = _write_response(workspace, request, decision="continue")
     assert accept_advisor_response(workspace, response_path)["accepted"] is True
@@ -234,8 +238,101 @@ def test_stale_current_context_is_rejected_at_consumption(tmp_path):
 
     result = consume_advisor_response(workspace, request["request_id"], state)
 
+    assert result.consumed is True
+
+
+def test_tampered_immutable_context_pack_is_rejected_at_consumption(tmp_path):
+    _project, workspace, request, state = _paused_request(tmp_path)
+    response_path = _write_response(workspace, request, decision="continue")
+    assert accept_advisor_response(workspace, response_path)["accepted"] is True
+    context_path = workspace / request["context_pack"]
+    payload = json.loads(context_path.read_text(encoding="utf-8"))
+    payload["task_id"] = "tampered"
+    context_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    result = consume_advisor_response(workspace, request["request_id"], state)
+
     assert result.consumed is False
-    assert any("context hash mismatch" in error for error in result.errors)
+    assert any("context pack" in error for error in result.errors)
+
+
+def test_pending_v1_advisor_request_keeps_legacy_manifest_identity_and_consumes(tmp_path):
+    _project, workspace, request, state = _paused_request(tmp_path)
+    legacy_entries = build_context_manifest(workspace, request["context_files"])
+    legacy_context_hash = context_manifest_hash(legacy_entries)
+    identity = {
+        "task_id": request["task_id"],
+        "attempt_id": request["attempt_id"],
+        "request_type": request["type"],
+        "invocation_hash": request["invocation_hash"],
+        "context_hash": legacy_context_hash,
+        "round": request["round"],
+        "retry_index": request["request_retry_index"],
+    }
+    request_hash = canonical_hash(identity)
+    legacy_request_id = f"advisor_train_main_tuning_plan_required_{request_hash[:12]}"
+    legacy_context = Path("audit") / "advisor_contexts" / f"{legacy_request_id}.json"
+    (workspace / legacy_context).parent.mkdir(parents=True, exist_ok=True)
+    (workspace / legacy_context).write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "request_id": legacy_request_id,
+                "context_hash": legacy_context_hash,
+                "patterns": request["context_files"],
+                "files": legacy_entries,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (workspace / request["path"]).unlink()
+    legacy_request = dict(request)
+    legacy_request.update(
+        {
+            "version": 1,
+            "request_id": legacy_request_id,
+            "context_hash": legacy_context_hash,
+            "context_manifest": str(legacy_context),
+            "request_hash": request_hash,
+            "path": str(Path("audit") / "advisor_requests" / f"{legacy_request_id}.json"),
+        }
+    )
+    legacy_request.pop("context_pack", None)
+    _save_request(workspace, legacy_request)
+    state["blocker"]["advisor_request_id"] = legacy_request_id
+    state["blocker"]["advisor_request"] = legacy_request["path"]
+    save_agent_state(workspace, state)
+    response_path = _write_response(workspace, legacy_request, decision="continue")
+
+    assert accept_advisor_response(workspace, response_path)["accepted"] is True
+    result = consume_advisor_response(workspace, legacy_request_id, state)
+
+    assert result.consumed is True
+    assert result.status == "running"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("project", "/other/project"),
+        ("constraints", ["different"]),
+        ("tool_name", "report"),
+        ("expected_response", {"type": "failure_diagnosis"}),
+        ("context_files", ["version_state.yml"]),
+        ("command", ["report"]),
+        ("request_hash", "0" * 64),
+        ("request_id", "advisor_tampered"),
+        ("version_id", "other_version"),
+        ("attempt_id", "other_attempt"),
+    ],
+)
+def test_request_cannot_rebind_a_valid_context_pack(field, value, tmp_path):
+    _project, workspace, request, _state = _paused_request(tmp_path)
+    request[field] = value
+    _save_request(workspace, request)
+
+    with pytest.raises(ValueError):
+        load_advisor_request(workspace, request["request_id"])
 
 
 def test_response_output_files_must_exist_and_stay_inside_workspace(tmp_path):
@@ -453,14 +550,7 @@ def _response_payload(
 
 
 def _clone_new_request(workspace: Path, request: dict, *, suffix: str) -> dict:
-    cloned = dict(request)
-    cloned["request_id"] = f"{request['request_id']}_{suffix}"
-    cloned["status"] = "pending"
-    cloned["accepted_response"] = ""
-    cloned["answered_at"] = ""
-    cloned["path"] = str(Path("audit") / "advisor_requests" / f"{cloned['request_id']}.json")
-    _save_request(workspace, cloned)
-    return cloned
+    return create_replacement_advisor_request(workspace, request, reason=suffix)
 
 
 def _save_request(workspace: Path, request: dict) -> None:
