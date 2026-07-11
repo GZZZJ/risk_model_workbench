@@ -22,6 +22,7 @@ from risk_model_workbench.harness.errors import (
 from risk_model_workbench.harness.runtime import load_action_result
 from risk_model_workbench.paths import REPO_ROOT, project_config_path
 from risk_model_workbench.request.training import llm_guided_tuning_enabled
+from risk_model_workbench.registry import audit_artifact_availability
 from risk_model_workbench.rules import summarize_rules
 from risk_model_workbench.run_evidence import load_run_evidence
 from risk_model_workbench.state import load_run_state, run_dir
@@ -394,6 +395,10 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
         stage_results.append(agent_result)
 
     verdict = _rollup_audit_verdict(stage_results)
+    availability = audit_artifact_availability(evidence.run_path, evidence.manifest)
+    execution_verdict = verdict
+    if verdict == "complete" and availability["execution_verdict"] != "complete":
+        execution_verdict = "incomplete"
     source_of_truth = [
         str(workspace_rel / state_filename),
         str(workspace_rel / "audit" / "artifact_manifest.json"),
@@ -416,7 +421,13 @@ def audit_run(project_dir: str | Path, run_id: str, *, stage: str | None = None)
         "run_status": run_state.get("status", ""),
         "version_status": run_state.get("status", ""),
         "stage": stage or "",
-        "verdict": verdict,
+        "verdict": execution_verdict,
+        "verdict_dimension": "execution",
+        "execution_verdict": execution_verdict,
+        "reproducibility_verdict": availability["reproducibility_verdict"],
+        "availability_summary": availability["availability_summary"],
+        "availability_warnings": availability["warnings"],
+        "availability_issues": availability["issues"],
         "source_of_truth": source_of_truth,
         "contract_source": contract_source,
         "stages": stage_results,
@@ -430,6 +441,9 @@ def format_run_audit(audit: dict[str, Any]) -> str:
         f"workflow: {audit.get('workflow')}",
         f"run_status: {audit.get('run_status')}",
         f"verdict: {audit.get('verdict')}",
+        f"verdict_dimension: {audit.get('verdict_dimension') or 'execution'}",
+        f"execution_verdict: {audit.get('execution_verdict') or audit.get('verdict')}",
+        f"reproducibility_verdict: {audit.get('reproducibility_verdict') or 'unknown'}",
         f"contract_source: {audit.get('contract_source') or ''}",
         "",
         "stages:",
@@ -442,6 +456,11 @@ def format_run_audit(audit: dict[str, Any]) -> str:
         )
         for issue in stage.get("issues", []):
             lines.append(f"    issue: {issue}")
+    lines.extend(["", "availability_summary:"])
+    for key, value in (audit.get("availability_summary") or {}).items():
+        lines.append(f"  {key}: {value}")
+    for warning in audit.get("availability_warnings") or []:
+        lines.append(f"availability_warning: {warning}")
     return "\n".join(lines) + "\n"
 
 
@@ -597,6 +616,7 @@ def _audit_stage(
         str(item.get("path"))
         for item in manifest_items
         if not artifact_exists(run_path, item)
+        and not (item.get("storage_class") == "local_only" and item.get("contract_role") == "optional")
     ]
     scaffold_sources = [item for item in manifest_items if item.get("source") == "scaffold"]
     imported_sources = [item for item in manifest_items if item.get("source") == "imported"]

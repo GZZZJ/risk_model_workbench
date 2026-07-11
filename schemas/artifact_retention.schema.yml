@@ -1,0 +1,62 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: rmw.artifact-retention.v1
+title: RMW Artifact Retention Metadata
+type: object
+required:
+  - storage_class
+  - contract_role
+  - retention_reason
+properties:
+  path:
+    type: string
+  kind:
+    type: string
+  storage_class:
+    enum: [repository, workspace_only, local_only, external, legacy_workspace]
+  contract_role:
+    enum: [required, optional]
+  sha256:
+    type: string
+    pattern: '^[0-9a-f]{64}$'
+  size_bytes:
+    type: integer
+    minimum: 0
+  retention_reason:
+    type: string
+    minLength: 1
+  regeneration:
+    type: string
+  external_reference:
+    type: string
+  integrity_mode:
+    enum: [content, mutable]
+allOf:
+  - if:
+      required: [storage_class]
+      properties:
+        storage_class:
+          enum: [repository, workspace_only, local_only]
+    then:
+      required: [sha256, size_bytes]
+  - if:
+      required: [storage_class]
+      properties: {storage_class: {const: local_only}}
+    then:
+      properties: {contract_role: {const: optional}}
+      required: [sha256, size_bytes]
+  - if:
+      required: [storage_class]
+      properties: {storage_class: {const: external}}
+    then:
+      required: [external_reference]
+  - if:
+      required: [integrity_mode]
+      properties: {integrity_mode: {const: mutable}}
+    then:
+      properties:
+        storage_class: {const: workspace_only}
+        kind: {const: audit}
+        path:
+          enum: [audit/agent_state.yml, audit/agent_trace.jsonl]
+      required: [path, kind, storage_class]
+additionalProperties: true

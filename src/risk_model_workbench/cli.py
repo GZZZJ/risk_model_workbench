@@ -1488,8 +1488,22 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
         },
     )
     register_artifact(workspace, "validate_config", "agent_plan.yml", description="Bound Agent execution plan")
-    register_artifact(workspace, "validate_config", "audit/agent_state.yml", description="Agent runtime state")
-    register_artifact(workspace, "validate_config", "audit/agent_trace.jsonl", description="Agent trace log")
+    register_artifact(
+        workspace,
+        "validate_config",
+        "audit/agent_state.yml",
+        kind="audit",
+        description="Mutable Agent runtime state",
+        integrity_mode="mutable",
+    )
+    register_artifact(
+        workspace,
+        "validate_config",
+        "audit/agent_trace.jsonl",
+        kind="audit",
+        description="Append-only mutable Agent trace log",
+        integrity_mode="mutable",
+    )
     print(f"agent_plan: {workspace / 'agent_plan.yml'}")
     print(f"agent_state: {workspace / 'audit' / 'agent_state.yml'}")
     if args.execute:

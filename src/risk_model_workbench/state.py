@@ -200,6 +200,12 @@ def register_artifact(
     kind: str = "file",
     source: str = "generated",
     description: str = "",
+    storage_class: str | None = None,
+    contract_role: str = "required",
+    retention_reason: str = "",
+    regeneration: str = "",
+    external_reference: str = "",
+    integrity_mode: str = "content",
 ) -> dict[str, Any]:
     state = load_run_state(run_path)
     transaction_id = f"txn_{uuid4().hex}"
@@ -211,6 +217,12 @@ def register_artifact(
         source=source,
         description=description,
         transaction_id=transaction_id,
+        storage_class=storage_class,
+        contract_role=contract_role,
+        retention_reason=retention_reason,
+        regeneration=regeneration,
+        external_reference=external_reference,
+        integrity_mode=integrity_mode,
     )
     stage_state = _ensure_stage(state, stage)
     artifacts = stage_state.setdefault("artifacts", [])

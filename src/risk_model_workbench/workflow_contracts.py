@@ -106,13 +106,23 @@ def artifact_exists(run_path: str | Path, artifact: dict[str, Any]) -> bool:
     """Check the artifact's current filesystem existence."""
     if artifact.get("exists") is False:
         return False
+    if artifact.get("storage_class") in {"local_only", "external"}:
+        return False
     raw_path = artifact.get("path")
     if not raw_path:
         return False
+    root = Path(run_path).resolve()
     path = Path(str(raw_path))
     if not path.is_absolute():
-        path = Path(run_path) / path
-    return path.exists()
+        path = root / path
+    path = path.resolve()
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    if artifact.get("kind") == "directory":
+        return path.is_dir()
+    return path.is_file()
 
 
 def _pattern_satisfied(pattern: str, manifest_items: list[dict[str, Any]], run_path: str | Path) -> tuple[bool, str]:

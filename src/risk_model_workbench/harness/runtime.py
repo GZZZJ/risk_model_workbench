@@ -220,6 +220,12 @@ def register_action_artifact(
     kind: str = "file",
     source: str = "generated",
     description: str = "",
+    storage_class: str | None = None,
+    contract_role: str = "required",
+    retention_reason: str = "",
+    regeneration: str = "",
+    external_reference: str = "",
+    integrity_mode: str = "content",
 ) -> dict[str, Any]:
     """Register an artifact through the action harness."""
     spec = _require_stage_action(action_id)
@@ -230,6 +236,12 @@ def register_action_artifact(
         kind=kind,
         source=source,
         description=description,
+        storage_class=storage_class,
+        contract_role=contract_role,
+        retention_reason=retention_reason,
+        regeneration=regeneration,
+        external_reference=external_reference,
+        integrity_mode=integrity_mode,
     )
     state = load_run_state(run_path)
     stage_state = state.setdefault("stages", {}).setdefault(str(spec.stage), {"status": "pending", "artifacts": []})
