@@ -526,11 +526,7 @@ def _bind_current_attempt(result: ActionResult, spec: ActionSpec) -> ActionResul
         raise InvalidActionResultError(
             f"active attempt action mismatch: expected {attempt.action_id}, got {spec.id}"
         )
-    next_required_action = result.next_required_action
-    if result.failure_code == SQL_APPROVAL_REQUIRED:
-        next_required_action = "approval"
-    elif result.failure_code == "advisor_required":
-        next_required_action = "advisor"
+    result = canonicalize_required_action(result)
     bound = replace(
         result,
         schema_version=1,
@@ -540,8 +536,19 @@ def _bind_current_attempt(result: ActionResult, spec: ActionSpec) -> ActionResul
         invocation_hash=attempt.invocation_hash,
         project=attempt.project,
         version_id=attempt.version_id,
-        next_required_action=next_required_action,
         created_at=result.created_at or datetime.now().isoformat(timespec="seconds"),
     )
     write_action_result(attempt.workspace, bound)
     return bound
+
+
+def canonicalize_required_action(result: ActionResult) -> ActionResult:
+    """Derive the mandatory reducer transition from a canonical failure code."""
+    required = {
+        SQL_APPROVAL_REQUIRED: "approval",
+        "advisor_required": "advisor",
+        EXTERNAL_OUTCOME_UNKNOWN: "reconciliation",
+    }.get(result.failure_code, result.next_required_action)
+    return result if required == result.next_required_action else replace(
+        result, next_required_action=required
+    )

@@ -68,6 +68,17 @@ class DatasetParts:
     valid_y: pd.Series
 
 
+@dataclass(frozen=True)
+class RefineAction:
+    project_dir: str | Path
+    config: str = "configs/refine_features.yaml"
+    dry_run_sql: bool = False
+    refresh_dp_cache: bool = False
+    sql_approved: bool = False
+    sample_max_rows: int | None = None
+    run_dir: str | Path | None = None
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Refine wide-table features to <=500 candidates.")
     parser.add_argument("--project-dir", default=str(DEFAULT_PROJECT_DIR), help="Project workspace directory.")
@@ -1236,8 +1247,7 @@ def configured_peak_multiplier(cfg: dict[str, Any]) -> float:
     return default_peak_multiplier_for_stage("feature_refine")
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
+def _run_refine(args: RefineAction) -> int:
     project_dir = Path(args.project_dir).resolve()
     reporter = ProgressReporter(args.run_dir, "feature_refine") if args.run_dir else None
     config_path = resolve_project_path(project_dir, args.config)
@@ -1597,6 +1607,43 @@ def main(argv: list[str] | None = None) -> int:
             },
         )
     return 0
+
+
+def run_refine_service(
+    *,
+    project_dir: str | Path,
+    config: str = "configs/refine_features.yaml",
+    dry_run_sql: bool = False,
+    refresh_dp_cache: bool = False,
+    sql_approved: bool = False,
+    sample_max_rows: int | None = None,
+    run_dir: str | Path | None = None,
+) -> int:
+    """Typed refinement service; the CLI parser is only an adapter."""
+    return _run_refine(
+        RefineAction(
+            project_dir=project_dir,
+            config=config,
+            dry_run_sql=dry_run_sql,
+            refresh_dp_cache=refresh_dp_cache,
+            sql_approved=sql_approved,
+            sample_max_rows=sample_max_rows,
+            run_dir=run_dir,
+        )
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    return run_refine_service(
+        project_dir=args.project_dir,
+        config=args.config,
+        dry_run_sql=args.dry_run_sql,
+        refresh_dp_cache=args.refresh_dp_cache,
+        sql_approved=args.sql_approved,
+        sample_max_rows=args.sample_max_rows,
+        run_dir=args.run_dir,
+    )
 
 
 if __name__ == "__main__":

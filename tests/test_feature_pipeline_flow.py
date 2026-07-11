@@ -163,6 +163,37 @@ def test_build_wide_sql_prefers_runtime_prescreen_paths(tmp_path):
     assert not (project_dir / "queries" / "06_build_prescreen_wide_table.sql").exists()
 
 
+def test_build_wide_sql_rejects_output_escape_before_generator_side_effects(tmp_path, monkeypatch):
+    project_dir = tmp_path / "project"
+    run_dir = _write_minimal_project(project_dir)
+    called = False
+
+    def generator(**_kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("generator must not run for escaped output")
+
+    import risk_model_workbench.cli as cli_module
+
+    monkeypatch.setattr(cli_module, "generate_wide_sql", generator)
+    code = main(
+        [
+            "build-wide-sql",
+            "--project",
+            str(project_dir),
+            "--run-id",
+            "run1",
+            "--sql-output",
+            "../outside.sql",
+        ]
+    )
+
+    assert code == 1
+    assert called is False
+    assert not (project_dir.parent / "outside.sql").exists()
+    assert load_run_state(run_dir)["stages"]["build_wide_sql"]["status"] == "failed"
+
+
 def test_sql_review_gate_blocks_high_risk_even_when_approved(tmp_path, monkeypatch):
     project_dir = tmp_path / "project"
     run_dir = _write_minimal_project(project_dir)
@@ -205,10 +236,10 @@ def test_sql_review_safe_and_high_risk_patterns():
 def test_feature_prescreen_cli_registers_run_artifacts(tmp_path, monkeypatch):
     project_dir = tmp_path / "project"
     run_dir = _write_minimal_project(project_dir)
-    seen_argv: list[str] = []
+    seen: dict = {}
 
-    def fake_prescreen_main(argv):
-        seen_argv.extend(argv)
+    def fake_prescreen_service(**kwargs):
+        seen.update(kwargs)
         results_dir = project_dir / "runs" / "feature_prescreen" / "results"
         results_dir.mkdir(parents=True, exist_ok=True)
         (results_dir / "prescreen_run_summary.json").write_text('{"final_remain": 2}\n', encoding="utf-8")
@@ -218,12 +249,13 @@ def test_feature_prescreen_cli_registers_run_artifacts(tmp_path, monkeypatch):
 
     import risk_model_workbench.batch_feature_select as batch_feature_select_module
 
-    monkeypatch.setattr(batch_feature_select_module, "main", fake_prescreen_main)
+    monkeypatch.setattr(batch_feature_select_module, "run_prescreen_service", fake_prescreen_service)
 
     code = main(["feature", "prescreen", "--project", str(project_dir), "--run-id", "run1"])
 
     assert code == 0
-    assert "--run-dir" in seen_argv
+    assert seen["run_dir"] == run_dir
+    assert seen["stage"] == "feature_prescreen"
     state = load_run_state(run_dir)
     artifacts = set(state["stages"]["feature_prescreen"]["artifacts"])
     assert "feature_selection/prescreen_run_summary.json" in artifacts
@@ -354,15 +386,15 @@ def test_feature_refine_cli_registers_run_feature_outputs(tmp_path, monkeypatch)
     (output_dir / "final_500_features.txt").write_text("feat_a\nfeat_b\n", encoding="utf-8")
     (output_dir / "final_features.txt").write_text("feat_a\nfeat_b\n", encoding="utf-8")
     save_run_state(run_dir, create_run_state(project_dir, run_id="run1", workflow="full_modeling"))
-    seen_argv: list[str] = []
+    seen: dict = {}
 
-    def fake_refine_main(argv):
-        seen_argv.extend(argv)
+    def fake_refine_service(**kwargs):
+        seen.update(kwargs)
         return 0
 
     import risk_model_workbench.feature_refine as feature_refine_module
 
-    monkeypatch.setattr(feature_refine_module, "main", fake_refine_main)
+    monkeypatch.setattr(feature_refine_module, "run_refine_service", fake_refine_service)
 
     code = main(
         [
@@ -380,7 +412,8 @@ def test_feature_refine_cli_registers_run_feature_outputs(tmp_path, monkeypatch)
     )
 
     assert code == 0
-    assert seen_argv[-2:] == ["--sample-max-rows", "321"]
+    assert seen["sample_max_rows"] == 321
+    assert seen["run_dir"] == run_dir
     state = load_run_state(run_dir)
     artifacts = set(state["stages"]["feature_refine"]["artifacts"])
     assert "feature_selection/stage_summary.json" in artifacts

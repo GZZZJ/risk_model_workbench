@@ -564,7 +564,14 @@ def test_real_aggregate_tuning_history_is_allowed(tmp_path):
                         "candidate_name": "baseline",
                         "advisor_type": "baseline",
                         "reason": "configured baseline parameters",
-                        "params": {"learning_rate": 0.05, "num_leaves": 31},
+                        "params": {
+                            "objective": "binary",
+                            "metric": "auc",
+                            "learning_rate": 0.05,
+                            "num_leaves": 31,
+                            "max_bin": 255,
+                            "min_gain_to_split": 0.0,
+                        },
                         "train_auc": 0.9457,
                         "valid_auc": 0.9325,
                         "train_ks": 0.7486,
@@ -586,6 +593,47 @@ def test_real_aggregate_tuning_history_is_allowed(tmp_path):
     pack = _build(tmp_path, [relative])
 
     assert pack["files"][0]["status"] == "included"
+
+
+def test_real_training_experiment_config_is_allowed_but_nested_rows_are_rejected(tmp_path):
+    relative = "configs_runtime/train.yaml"
+    path = tmp_path / relative
+    path.parent.mkdir(parents=True)
+    experiment = {
+        "name": "main_lgbm",
+        "display_name": "Main model",
+        "segment": "all",
+        "segment_filter": None,
+        "algorithm": "lightgbm_binary",
+        "method": "native_categorical",
+        "description": "bounded training experiment",
+        "sample_weight": None,
+    }
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "training": {
+                    "experiments": [experiment],
+                    "feature_list_path": "/private/workspace/final_features.txt",
+                },
+                "input": {"feather_path": "/Users/alice/private/sample.feather"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    included = _build(tmp_path, [relative])
+    assert included["files"][0]["status"] == "included"
+    rendered = json.dumps(included["files"][0]["summary"], ensure_ascii=False)
+    assert "/private/workspace/final_features.txt" not in rendered
+    assert "/Users/alice/private/sample.feather" not in rendered
+    assert rendered.count("[REDACTED]") >= 2
+
+    experiment["rows"] = [{"score": 0.93, "label": 1}]
+    path.write_text(yaml.safe_dump({"training": {"experiments": [experiment]}}), encoding="utf-8")
+    rejected = _build(tmp_path, [relative])
+    assert rejected["files"][0]["status"] == "rejected"
+    assert rejected["files"][0]["reason"] == "row_level_content"
 
 
 @pytest.mark.parametrize(

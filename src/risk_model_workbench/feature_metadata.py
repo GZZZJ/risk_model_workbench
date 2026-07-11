@@ -424,11 +424,18 @@ def write_markdown(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    project_dir = Path(args.project_dir).resolve()
-    reporter = ProgressReporter(args.run_dir, "feature_metadata") if args.run_dir else None
-    options = load_metadata_options(project_dir, args.tables_file, config=args.config, project_config=args.project_config)
+def run_metadata_service(
+    *,
+    project_dir: str | Path,
+    tables_file: str = "configs/feature_tables.txt",
+    config: str | None = None,
+    project_config: str | None = None,
+    run_dir: str | Path | None = None,
+) -> int:
+    """Typed metadata export service; independent of argparse and CLI entrypoints."""
+    project_dir = Path(project_dir).resolve()
+    reporter = ProgressReporter(run_dir, "feature_metadata") if run_dir else None
+    options = load_metadata_options(project_dir, tables_file, config=config, project_config=project_config)
     tables_file = Path(options["tables_file"])
     if not tables_file.is_absolute():
         tables_file = project_dir / tables_file
@@ -597,6 +604,17 @@ def main(argv: list[str] | None = None) -> int:
     if all_meta["failed_tables"]:
         return 2
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    return run_metadata_service(
+        project_dir=args.project_dir,
+        tables_file=args.tables_file,
+        config=args.config,
+        project_config=args.project_config,
+        run_dir=args.run_dir,
+    )
 
 
 if __name__ == "__main__":

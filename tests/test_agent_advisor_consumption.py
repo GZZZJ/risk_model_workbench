@@ -6,6 +6,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from risk_model_workbench.agent.eval import emit_scenario_evidence
+
 from risk_model_workbench.agent.advisor import (
     accept_advisor_response,
     build_context_manifest,
@@ -48,6 +50,10 @@ def test_consume_continue_response_with_valid_output(tmp_path):
     assert loaded_request["status"] == "consumed"
     assert receipt["decision"] == "continue"
     assert receipt["consumed"] is True
+    emit_scenario_evidence(
+        state_pairs=[(state, reloaded)],
+        workspace=workspace,
+    )
 
 
 def test_consume_retry_is_bounded_by_request_budget(tmp_path):
@@ -78,6 +84,11 @@ def test_consume_retry_is_bounded_by_request_budget(tmp_path):
     rejected = consume_advisor_response(workspace, request_2["request_id"], state_2)
     assert rejected.consumed is False
     assert any("retry budget exceeded" in error for error in rejected.errors)
+    emit_scenario_evidence(
+        state_pairs=[(state, reloaded)],
+        workspace=workspace,
+        validation_errors=rejected.errors,
+    )
 
 
 def test_consume_stop_moves_agent_to_terminal_stopped(tmp_path):
@@ -91,6 +102,10 @@ def test_consume_stop_moves_agent_to_terminal_stopped(tmp_path):
     assert result.status == "stopped"
     assert reloaded["status"] == "stopped"
     assert reloaded["tasks"][0]["status"] == "stopped"
+    emit_scenario_evidence(
+        state_pairs=[(state, reloaded)],
+        workspace=workspace,
+    )
 
 
 def test_consume_needs_user_confirmation_blocks_resume_until_confirmed(tmp_path, capsys):
@@ -123,6 +138,10 @@ def test_consume_needs_user_confirmation_blocks_resume_until_confirmed(tmp_path,
         == 0
     )
     assert load_agent_state(workspace)["status"] == "running"
+    emit_scenario_evidence(
+        state_pairs=[(state, result.state), (result.state, load_agent_state(workspace))],
+        workspace=workspace,
+    )
 
 
 def test_rejected_advisor_response_creates_replacement_request(tmp_path):
@@ -225,6 +244,10 @@ def test_stale_response_identity_is_rejected(tmp_path, field, value):
     errors = validate_advisor_response(workspace, response)
 
     assert any("response identity mismatch" in error for error in errors)
+    emit_scenario_evidence(
+        workspace=workspace,
+        validation_errors=errors,
+    )
 
 
 def test_workspace_changes_do_not_mutate_an_issued_context_pack(tmp_path):
@@ -357,6 +380,13 @@ def test_response_output_files_must_exist_and_stay_inside_workspace(tmp_path):
     assert any(
         "path escape" in error
         for error in validate_advisor_response(workspace, _response_payload(request, output_files=["modeling/escape_link.json"]))
+    )
+    emit_scenario_evidence(
+        workspace=workspace,
+        validation_errors=[
+            *validate_advisor_response(workspace, _response_payload(request, output_files=["../outside.txt"])),
+            *validate_advisor_response(workspace, _response_payload(request, output_files=["modeling/escape_link.json"])),
+        ],
     )
 
 

@@ -5,6 +5,8 @@ import yaml
 
 from risk_model_workbench.agent.advisor import accept_advisor_response, load_advisor_request
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.eval import emit_scenario_evidence
+from risk_model_workbench.agent.state import load_agent_state
 from risk_model_workbench.harness.runtime import current_action_attempt, stage_action_done, stage_action_failed
 from risk_model_workbench.project_state import audit_run
 from risk_model_workbench.state import register_artifact
@@ -35,6 +37,7 @@ def test_agent_local_happy_path_closes_strict_audit_after_advisor_pause(tmp_path
         == 0
     )
     workspace = project / "versions" / VERSION_ID
+    initial = load_agent_state(workspace)
 
     runner = _SyntheticRunner(workspace)
     first = run_agent(project, VERSION_ID, runner=runner)
@@ -51,6 +54,16 @@ def test_agent_local_happy_path_closes_strict_audit_after_advisor_pause(tmp_path
     assert final["status"] == "done"
     assert audit["verdict"] == "complete"
     assert any(item["stage"] == "agent_runtime" and item["verdict"] == "complete" for item in audit["stages"])
+    trace = [json.loads(line) for line in (workspace / "audit" / "agent_trace.jsonl").read_text(encoding="utf-8").splitlines()]
+    action_attempts = {item["attempt_id"] for item in trace if item.get("event") == "action" and item.get("attempt_id")}
+    result_attempts = {item["attempt_id"] for item in trace if item.get("event") == "result" and item.get("attempt_id")}
+    assert action_attempts
+    assert action_attempts <= result_attempts
+    emit_scenario_evidence(
+        state_pairs=[(initial, first), (first, final)],
+        workspace=workspace,
+        audit=audit,
+    )
 
 
 class _SyntheticRunner:

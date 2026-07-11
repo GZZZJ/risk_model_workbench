@@ -82,6 +82,31 @@ class BatchSelectSettings:
     dp_metadata_dir: str
 
 
+@dataclass(frozen=True)
+class PrescreenAction:
+    project_dir: str | Path
+    config: str = "configs/feature_select.yaml"
+    feature_select_code_dir: str | None = None
+    feature_columns: str | None = None
+    output_dir: str | None = None
+    table: tuple[str, ...] = ()
+    max_tables: int | None = None
+    round_num: int | None = None
+    random_seed: int | None = None
+    force: bool = False
+    use_native: bool = False
+    dev_partition_ds: str | None = None
+    oot_partition_ds: str | None = None
+    partition_col: str | None = None
+    sample_where: str | None = None
+    workers: int | None = None
+    dry_run_sql: bool = False
+    refresh_dp_cache: bool = False
+    sql_approved: bool = False
+    run_dir: str | Path | None = None
+    stage: str = DEFAULT_STAGE
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run coarse feature prescreening by feature table.")
     parser.add_argument("--project-dir", default=str(DEFAULT_PROJECT_DIR), help="Project workspace directory.")
@@ -157,7 +182,7 @@ def split_csv(value: str | None) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def load_batch_settings(project_dir: Path, args: argparse.Namespace) -> BatchSelectSettings:
+def load_batch_settings(project_dir: Path, args: PrescreenAction | argparse.Namespace) -> BatchSelectSettings:
     config_path = resolve_project_path(project_dir, args.config)
     feature_config = load_yaml(config_path).get("feature_select", {})
     prescreen_cfg = feature_config.get("prescreen", {}) or feature_config.get("d01_d02", {}) or {}
@@ -601,8 +626,7 @@ def process_single_table(
 # Main
 # ---------------------------------------------------------------------------
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
+def _run_prescreen(args: PrescreenAction) -> int:
     project_dir = Path(args.project_dir).resolve()
     stage = args.stage or DEFAULT_STAGE
     reporter = ProgressReporter(args.run_dir, stage) if args.run_dir else None
@@ -869,6 +893,85 @@ def main(argv: list[str] | None = None) -> int:
             },
         )
     return 0
+
+
+def run_prescreen_service(
+    *,
+    project_dir: str | Path,
+    config: str = "configs/feature_select.yaml",
+    feature_select_code_dir: str | None = None,
+    feature_columns: str | None = None,
+    output_dir: str | None = None,
+    tables: list[str] | tuple[str, ...] = (),
+    max_tables: int | None = None,
+    round_num: int | None = None,
+    random_seed: int | None = None,
+    force: bool = False,
+    use_native: bool = False,
+    dev_partition_ds: str | None = None,
+    oot_partition_ds: str | None = None,
+    partition_col: str | None = None,
+    sample_where: str | None = None,
+    workers: int | None = None,
+    dry_run_sql: bool = False,
+    refresh_dp_cache: bool = False,
+    sql_approved: bool = False,
+    run_dir: str | Path | None = None,
+    stage: str = DEFAULT_STAGE,
+) -> int:
+    """Typed prescreen service; the CLI parser is only an adapter."""
+    return _run_prescreen(
+        PrescreenAction(
+            project_dir=project_dir,
+            config=config,
+            feature_select_code_dir=feature_select_code_dir,
+            feature_columns=feature_columns,
+            output_dir=output_dir,
+            table=tuple(tables),
+            max_tables=max_tables,
+            round_num=round_num,
+            random_seed=random_seed,
+            force=force,
+            use_native=use_native,
+            dev_partition_ds=dev_partition_ds,
+            oot_partition_ds=oot_partition_ds,
+            partition_col=partition_col,
+            sample_where=sample_where,
+            workers=workers,
+            dry_run_sql=dry_run_sql,
+            refresh_dp_cache=refresh_dp_cache,
+            sql_approved=sql_approved,
+            run_dir=run_dir,
+            stage=stage,
+        )
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    return run_prescreen_service(
+        project_dir=args.project_dir,
+        config=args.config,
+        feature_select_code_dir=args.feature_select_code_dir,
+        feature_columns=args.feature_columns,
+        output_dir=args.output_dir,
+        tables=args.table or [],
+        max_tables=args.max_tables,
+        round_num=args.round_num,
+        random_seed=args.random_seed,
+        force=args.force,
+        use_native=args.use_native,
+        dev_partition_ds=args.dev_partition_ds,
+        oot_partition_ds=args.oot_partition_ds,
+        partition_col=args.partition_col,
+        sample_where=args.sample_where,
+        workers=args.workers,
+        dry_run_sql=args.dry_run_sql,
+        refresh_dp_cache=args.refresh_dp_cache,
+        sql_approved=args.sql_approved,
+        run_dir=args.run_dir,
+        stage=args.stage,
+    )
 
 
 if __name__ == "__main__":

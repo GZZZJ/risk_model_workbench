@@ -2,6 +2,7 @@ import yaml
 
 from risk_model_workbench.agent import executor
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.eval import emit_scenario_evidence
 from risk_model_workbench.agent.recovery import begin_attempt, diagnose_recovery, mark_attempt_dispatched, mark_attempt_result_committed
 from risk_model_workbench.agent.state import load_agent_state
 from risk_model_workbench.cli import main
@@ -55,37 +56,53 @@ def test_crash_after_intent_before_command_requeues_without_phantom_execution(tm
     except SimulatedProcessCrash:
         pass
     assert calls == []
-    assert next(iter(diagnose_recovery(workspace)["attempts"]))["recovery_action"] == "requeue"
+    crashed_state = load_agent_state(workspace)
+    recovery = diagnose_recovery(workspace)
+    assert next(iter(recovery["attempts"]))["recovery_action"] == "requeue"
 
     monkeypatch.setattr(executor, "mark_attempt_dispatched", original)
     run_agent(project, version_id, runner=lambda argv: calls.append(argv) or stage_action_done(workspace, "sample_check") or 0)
     assert len(calls) == 1
-    assert load_agent_state(workspace)["tasks"][0]["status"] == "done"
+    done_state = load_agent_state(workspace)
+    assert done_state["tasks"][0]["status"] == "done"
+    emit_scenario_evidence(
+        state_pairs=[(crashed_state, done_state)],
+        workspace=workspace,
+        recovery_reports=[recovery],
+        runner_calls=calls,
+    )
 
 
 def test_crash_after_safe_command_before_result_is_retried_once(tmp_path):
     project, workspace, version_id = _agent_project(tmp_path)
-    calls = 0
+    calls = []
 
-    def crashed_runner(_argv):
-        nonlocal calls
-        calls += 1
+    def crashed_runner(argv):
+        calls.append(list(argv))
         raise SimulatedProcessCrash()
 
     try:
         run_agent(project, version_id, runner=crashed_runner)
     except SimulatedProcessCrash:
         pass
-    assert diagnose_recovery(workspace)["attempts"][0]["recovery_action"] == "requeue"
+    crashed_state = load_agent_state(workspace)
+    recovery = diagnose_recovery(workspace)
+    assert recovery["attempts"][0]["recovery_action"] == "requeue"
 
-    def successful_runner(_argv):
-        nonlocal calls
-        calls += 1
+    def successful_runner(argv):
+        calls.append(list(argv))
         stage_action_done(workspace, "sample_check")
         return 0
 
     run_agent(project, version_id, runner=successful_runner)
-    assert calls == 2
+    done_state = load_agent_state(workspace)
+    assert len(calls) == 2
+    emit_scenario_evidence(
+        state_pairs=[(crashed_state, done_state)],
+        workspace=workspace,
+        recovery_reports=[recovery],
+        runner_calls=calls,
+    )
 
 
 def test_crash_after_manifest_before_version_state_is_detected_and_safe_action_requeues(tmp_path):
@@ -103,21 +120,27 @@ def test_crash_after_manifest_before_version_state_is_detected_and_safe_action_r
     except SimulatedProcessCrash:
         pass
     diagnosis = diagnose_recovery(workspace)
+    crashed_state = load_agent_state(workspace)
     assert diagnosis["transaction_divergence"]["detected"] is True
     assert diagnosis["attempts"][0]["recovery_action"] == "requeue"
 
     run_agent(project, version_id, runner=lambda _argv: stage_action_done(workspace, "sample_check") or 0)
-    assert load_agent_state(workspace)["tasks"][0]["status"] == "done"
+    done_state = load_agent_state(workspace)
+    assert done_state["tasks"][0]["status"] == "done"
     assert diagnose_recovery(workspace)["transaction_divergence"]["detected"] is False
+    emit_scenario_evidence(
+        state_pairs=[(crashed_state, done_state)],
+        workspace=workspace,
+        recovery_reports=[diagnosis],
+    )
 
 
 def test_crash_after_result_commit_before_agent_transition_consumes_receipt_without_rerun(tmp_path):
     project, workspace, version_id = _agent_project(tmp_path)
-    calls = 0
+    calls = []
 
-    def crashed_runner(_argv):
-        nonlocal calls
-        calls += 1
+    def crashed_runner(argv):
+        calls.append(list(argv))
         stage_action_done(workspace, "sample_check")
         raise SimulatedProcessCrash()
 
@@ -126,11 +149,20 @@ def test_crash_after_result_commit_before_agent_transition_consumes_receipt_with
     except SimulatedProcessCrash:
         pass
     assert list((workspace / "audit" / "action_results").glob("*.json"))
+    crashed_state = load_agent_state(workspace)
+    recovery = diagnose_recovery(workspace)
 
     run_agent(project, version_id, runner=lambda _argv: (_ for _ in ()).throw(AssertionError("must not rerun")))
-    assert calls == 1
-    assert load_agent_state(workspace)["tasks"][0]["status"] == "done"
+    assert len(calls) == 1
+    done_state = load_agent_state(workspace)
+    assert done_state["tasks"][0]["status"] == "done"
     assert diagnose_recovery(workspace)["transaction_divergence"]["detected"] is False
+    emit_scenario_evidence(
+        state_pairs=[(crashed_state, done_state)],
+        workspace=workspace,
+        recovery_reports=[recovery],
+        runner_calls=calls,
+    )
 
 
 def _agent_project(tmp_path):

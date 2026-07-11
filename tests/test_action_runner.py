@@ -109,3 +109,37 @@ def test_attempt_receipt_is_create_once(tmp_path):
         runner.run(invocation=_invocation(context), context=context, attempt_id="attempt_001")
 
     assert calls == [True]
+
+
+@pytest.mark.parametrize(
+    ("failure_code", "expected_action"),
+    [
+        ("advisor_required", "advisor"),
+        ("sql_approval_required", "approval"),
+        ("external_outcome_unknown", "reconciliation"),
+    ],
+)
+def test_runner_canonicalizes_failure_code_required_action(
+    tmp_path, failure_code, expected_action
+):
+    context = _context(tmp_path)
+    handlers = HandlerRegistry()
+    handlers.register(
+        "sample_check",
+        lambda *_: ActionResult(
+            status="failed", failure_code=failure_code, next_required_action="none"
+        ),
+    )
+    runner = ActionRunner(handlers=handlers, policy_check=lambda *_: True)
+
+    result = runner.run(
+        invocation=_invocation(context), context=context, attempt_id="attempt_required"
+    )
+
+    assert result.next_required_action == expected_action
+    receipt = json.loads(
+        (context.workspace / "audit/action_results/attempt_required.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert receipt["next_required_action"] == expected_action

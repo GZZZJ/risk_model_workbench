@@ -28,6 +28,7 @@ from risk_model_workbench.agent.advisor import (
 from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
 from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.eval import evaluate_harness_suite
 from risk_model_workbench.agent.recovery import diagnose_recovery, reconcile_operation
 from risk_model_workbench.agent.plan import (
     agent_capabilities,
@@ -1520,7 +1521,7 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
     print(f"agent_plan: {workspace / 'agent_plan.yml'}")
     print(f"agent_state: {workspace / 'audit' / 'agent_state.yml'}")
     if args.execute:
-        state = run_agent(project_dir, args.version_id, runner=main)
+        state = run_agent(project_dir, args.version_id)
         print(f"agent_status: {state.get('status')}")
     return 0
 
@@ -1528,7 +1529,7 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
 def cmd_agent_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     try:
-        state = run_agent(project_dir, args.version_id, runner=main)
+        state = run_agent(project_dir, args.version_id)
     except (ValueError, WorkspaceLockedError) as exc:
         print(f"agent run failed: {exc}")
         return 1
@@ -1603,7 +1604,7 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
             },
         )
     try:
-        resumed = run_agent(project_dir, args.version_id, runner=main)
+        resumed = run_agent(project_dir, args.version_id)
     except (ValueError, WorkspaceLockedError) as exc:
         print(f"agent resume failed: {exc}")
         return 1
@@ -1714,6 +1715,19 @@ def cmd_agent_status(args: argparse.Namespace) -> int:
     if blocker:
         print(f"blocker: {blocker.get('reason', '')}")
     return 0
+
+
+def cmd_agent_eval(args: argparse.Namespace) -> int:
+    report = evaluate_harness_suite()
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"suite: {report['suite']}")
+        print(f"passed: {str(report['passed']).lower()}")
+        print(f"scenario_count: {report['scenario_count']}")
+        for name, metric in report["metrics"].items():
+            print(f"{name}: {json.dumps(metric, ensure_ascii=False)}")
+    return 0 if report["passed"] else 1
 
 
 def cmd_agent_approve(args: argparse.Namespace) -> int:
@@ -2045,7 +2059,7 @@ def cmd_run_watch(args: argparse.Namespace) -> int:
         time.sleep(args.interval)
 
 
-def cmd_sample_check(args: argparse.Namespace) -> int:
+def _legacy_cmd_sample_check(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     path = _run_path(args)
     stage_action_started(path, "sample_check")
@@ -2171,7 +2185,7 @@ def cmd_sample_check(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_feature_metadata(args: argparse.Namespace) -> int:
+def _legacy_cmd_feature_metadata(args: argparse.Namespace) -> int:
     path = _run_path(args)
     project_dir = resolve_project_path(args.project)
     stage_action_started(path, "feature_metadata")
@@ -2358,7 +2372,7 @@ def _finish_feature_prescreen_local_feather(path: Path, project_dir: Path, stage
     return 0
 
 
-def cmd_feature_prescreen(args: argparse.Namespace) -> int:
+def _legacy_cmd_feature_prescreen(args: argparse.Namespace) -> int:
     path = _run_path(args)
     project_dir = resolve_project_path(args.project)
     stage = _feature_prescreen_stage(path)
@@ -2485,7 +2499,7 @@ def _finish_build_wide_sql_local_feather(run_path: Path, reporter: Any) -> int:
     return 0
 
 
-def cmd_build_wide_sql(args: argparse.Namespace) -> int:
+def _legacy_cmd_build_wide_sql(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     reporter = None
     run_path = None
@@ -2696,7 +2710,7 @@ def cmd_build_wide_sql(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_feature_refine(args: argparse.Namespace) -> int:
+def _legacy_cmd_feature_refine(args: argparse.Namespace) -> int:
     path = _run_path(args)
     project_dir = resolve_project_path(args.project)
     stage_action_started(path, "feature_refine")
@@ -2836,7 +2850,7 @@ def cmd_feature_refine(args: argparse.Namespace) -> int:
     return code
 
 
-def cmd_train(args: argparse.Namespace) -> int:
+def _legacy_cmd_train(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     path = _run_path(args)
     stage_action_started(path, "train_baseline")
@@ -3178,8 +3192,7 @@ def _run_application_action(args: argparse.Namespace, tool_name: str, params: di
         handlers=production_handler_registry(),
         policy_check=lambda candidate, candidate_context: (
             candidate.tool_name == tool_name
-            and spec.action_id == tool_name
-            and spec.permission == "writes_run"
+            and spec.permission in {"writes_run", "dp_sql_pull"}
             and candidate_context.workspace == workspace
         ),
     )
@@ -3192,7 +3205,103 @@ def _run_application_action(args: argparse.Namespace, tool_name: str, params: di
     stream = sys.stderr if result.status == "failed" else sys.stdout
     if result.message:
         print(result.message, file=stream)
+    if result.failure_code == "advisor_required":
+        return 2
     return 1 if result.status == "failed" else 0
+
+
+def cmd_sample_check(args: argparse.Namespace) -> int:
+    return _run_application_action(args, "sample_check", {})
+
+
+def cmd_feature_metadata(args: argparse.Namespace) -> int:
+    return _run_application_action(
+        args,
+        "feature_metadata",
+        {key: value for key, value in {"config": args.config, "tables_file": args.tables_file}.items() if value is not None},
+    )
+
+
+def _feature_tool_for_args(args: argparse.Namespace, *, domain: str) -> str:
+    path = _run_path(args)
+    project_dir = resolve_project_path(args.project)
+    if domain == "prescreen":
+        if _runtime_is_local_feather(path, project_dir):
+            return "feature_prescreen_local"
+        if bool(getattr(args, "sql_approved", False)):
+            return "feature_prescreen_execute"
+        return "feature_prescreen_prepare"
+    if domain == "refine":
+        if _runtime_is_local_feather(path, project_dir):
+            return "feature_refine_local"
+        if bool(getattr(args, "sql_approved", False)):
+            return "feature_refine_execute"
+        return "feature_refine_prepare"
+    if domain == "wide":
+        if _runtime_is_local_feather(path, project_dir):
+            return "build_wide_sql_local"
+        if bool(getattr(args, "execute", False)):
+            return "build_wide_sql_execute"
+        return "build_wide_sql_prepare"
+    raise ValueError(f"unknown feature domain: {domain}")
+
+
+def cmd_feature_prescreen(args: argparse.Namespace) -> int:
+    params = {
+        key: value
+        for key, value in {
+            "config": args.config,
+            "tables": args.table,
+            "max_tables": args.max_tables,
+        }.items()
+        if value is not None
+    }
+    return _run_application_action(args, _feature_tool_for_args(args, domain="prescreen"), params)
+
+
+def cmd_build_wide_sql(args: argparse.Namespace) -> int:
+    from risk_model_workbench.application.handlers import feature_selection as feature_actions
+
+    feature_actions.WIDE_SQL_GENERATOR = generate_wide_sql
+    params = {
+        key: value
+        for key, value in {
+            "remain_features": args.remain_features,
+            "sql_output": args.sql_output,
+            "feature_map_output": args.feature_map_output,
+            "summary_output": args.summary_output,
+            "execution_output": args.execution_output,
+            "base_table": args.base_table,
+            "output_table": args.output_table,
+            "base_where": args.base_where,
+            "feature_where": args.feature_where,
+            "sql_approved": bool(args.sql_approved),
+        }.items()
+        if value is not None
+    }
+    return _run_application_action(args, _feature_tool_for_args(args, domain="wide"), params)
+
+
+def cmd_feature_refine(args: argparse.Namespace) -> int:
+    params = {
+        key: value
+        for key, value in {"config": args.config, "sample_max_rows": args.sample_max_rows}.items()
+        if value is not None
+    }
+    return _run_application_action(args, _feature_tool_for_args(args, domain="refine"), params)
+
+
+def cmd_train(args: argparse.Namespace) -> int:
+    params = {"experiment": args.experiment}
+    for key in ["input_feather", "feature_list", "score_output", "input_dir", "config"]:
+        value = getattr(args, key, None)
+        if value is not None:
+            params[key] = value
+    if bool(getattr(args, "plan_only", False)):
+        params["plan_only"] = True
+    if bool(getattr(args, "skip_split_check", False)):
+        params["skip_split_check"] = True
+    return _run_application_action(args, "train_baseline", params)
 
 
 def cmd_evaluate(args: argparse.Namespace) -> int:
@@ -3815,6 +3924,11 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     status.add_argument("--json", action="store_true")
     status.add_argument("--tail", type=int, default=20)
     status.set_defaults(func=cmd_agent_status)
+
+    agent_eval = agent_sub.add_parser("eval", help="run the Agent Harness product evaluation suite")
+    agent_eval.add_argument("--suite", required=True, choices=["harness"])
+    agent_eval.add_argument("--json", action="store_true")
+    agent_eval.set_defaults(func=cmd_agent_eval)
 
     approve = agent_sub.add_parser("approve", help="record approval for a blocked high-risk Agent action")
     approve.add_argument("--project", required=True)

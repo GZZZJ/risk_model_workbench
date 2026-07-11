@@ -10,7 +10,12 @@ from risk_model_workbench.agent.trace import append_trace
 from risk_model_workbench.application.context import VersionContext
 from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.harness.errors import DuplicateActionResultError
-from risk_model_workbench.harness.runtime import ActionResult, action_result_path, write_action_result
+from risk_model_workbench.harness.runtime import (
+    ActionResult,
+    action_result_path,
+    canonicalize_required_action,
+    write_action_result,
+)
 from risk_model_workbench.harness.tools import action_id_for_tool
 
 
@@ -32,6 +37,10 @@ class HandlerRegistry:
             return self._handlers[action_id]
         except KeyError as exc:
             raise ValueError(f"no registered action handler: {action_id}") from exc
+
+    def action_ids(self) -> frozenset[str]:
+        """Return an immutable registry snapshot for workflow coverage checks."""
+        return frozenset(self._handlers)
 
 
 class ActionRunner:
@@ -77,7 +86,7 @@ class ActionRunner:
         if not isinstance(result, ActionResult):
             raise TypeError("action handler must return ActionResult")
         correlated = replace(
-            result,
+            canonicalize_required_action(result),
             attempt_id=attempt_id,
             task_id=correlated_task_id,
             action_id=action_id,

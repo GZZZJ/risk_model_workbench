@@ -51,6 +51,9 @@ def _default_params_schema(name: str) -> dict[str, object]:
     required: list[str] = []
     if name == "train_baseline":
         properties["experiment"] = {"type": "string", "minLength": 1}
+        for key in ["input_feather", "feature_list", "score_output", "input_dir", "config"]:
+            properties[key] = {"type": "string", "minLength": 1}
+        properties["plan_only"] = {"type": "boolean"}
         required.append("experiment")
     elif name == "compare":
         properties["champions"] = {"type": "array", "items": {"type": "string"}}
@@ -97,6 +100,12 @@ def _typed_renderer(tool_name: str) -> Callable[[ActionInvocation], list[str]]:
                     rendered.extend(["--" + name.replace("_", "-"), str(params[name])])
         elif tool_name == "report" and params.get("report_target"):
             rendered.extend(["--report-target", str(params["report_target"])])
+        elif tool_name == "train_baseline":
+            for name in ["input_feather", "feature_list", "score_output", "input_dir", "config"]:
+                if params.get(name):
+                    rendered.extend(["--" + name.replace("_", "-"), str(params[name])])
+            if params.get("plan_only") is True:
+                rendered.append("--plan-only")
         return rendered
 
     return render

@@ -14,6 +14,7 @@ from risk_model_workbench.agent.recovery import (
     reconcile_operation,
     recovery_policy,
 )
+from risk_model_workbench.agent.eval import emit_scenario_evidence
 from risk_model_workbench.agent.state import init_agent_state, load_agent_state, requeue_interrupted_task, save_agent_state
 from risk_model_workbench.harness.errors import WorkspaceLockedError
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
@@ -84,6 +85,9 @@ def test_runner_lock_rejects_concurrent_resume(tmp_path):
         with pytest.raises(WorkspaceLockedError):
             with WorkspaceStore(tmp_path).runner_lock():
                 pass
+    emit_scenario_evidence(
+        workspace=tmp_path,
+    )
 
 
 def test_safe_missing_result_can_requeue_after_executor_marked_task_failed(tmp_path):

@@ -1,0 +1,182 @@
+suite: harness
+version: 1
+scenarios:
+  - name: local_happy_path
+    fixture: tests/agent_scenarios/test_local_happy_path.py::test_agent_local_happy_path_closes_strict_audit_after_advisor_pause
+    expected_transitions: [draft_to_waiting_for_advisor, waiting_for_advisor_to_done]
+    expected_blockers: [advisor_required]
+    expected_artifacts: [agent_plan.yml, audit/agent_state.yml, audit/agent_trace.jsonl, reports/model_report.md]
+    expected_audit_verdict: complete
+    forbidden_runner_calls: []
+    expected_trace_events: [action_result_attempt_pair]
+    tags: [terminal_happy_path]
+
+  - name: sql_approve
+    fixture: tests/test_agent_sql_approval_flow.py::test_agent_prepare_approval_consume_execute_is_exactly_bound
+    expected_transitions: [waiting_for_approval_to_done_with_gaps]
+    expected_blockers: [approval_required]
+    expected_artifacts: [audit/approvals.yml]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: [action_result_attempt_pair]
+    tags: [policy_guard]
+
+  - name: sql_reject
+    fixture: tests/test_agent_sql_approval_flow.py::test_rejected_agent_approval_remains_blocked_and_does_not_execute
+    expected_transitions: [waiting_for_approval_to_waiting_for_approval]
+    expected_blockers: [approval_required, approval_rejected]
+    expected_artifacts: [audit/approvals.yml]
+    expected_audit_verdict: null
+    forbidden_runner_calls: [feature_refine_execute]
+    expected_trace_events: [action_result_attempt_pair]
+    tags: [policy_guard]
+
+  - name: sql_drift
+    fixture: tests/test_agent_sql_approval_flow.py::test_agent_approval_drift_creates_replacement_and_does_not_execute
+    expected_transitions: [waiting_for_approval_to_waiting_for_approval]
+    expected_blockers: [approval_required, approval_subject_drift]
+    expected_artifacts: [audit/approvals.yml]
+    expected_audit_verdict: null
+    forbidden_runner_calls: [feature_refine_execute]
+    expected_trace_events: [action_result_attempt_pair]
+    tags: [policy_guard]
+
+  - name: advisor_continue
+    fixture: tests/test_agent_advisor_consumption.py::test_consume_continue_response_with_valid_output
+    expected_transitions: [waiting_for_advisor_to_running]
+    expected_blockers: [advisor_required]
+    expected_artifacts: [audit/advisor_responses]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: []
+
+  - name: advisor_retry
+    fixture: tests/test_agent_advisor_consumption.py::test_consume_retry_is_bounded_by_request_budget
+    expected_transitions: [waiting_for_advisor_to_running]
+    expected_blockers: [advisor_required, retry_budget]
+    expected_artifacts: [audit/advisor_responses]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: advisor_stop
+    fixture: tests/test_agent_advisor_consumption.py::test_consume_stop_moves_agent_to_terminal_stopped
+    expected_transitions: [waiting_for_advisor_to_stopped]
+    expected_blockers: [advisor_required]
+    expected_artifacts: [audit/advisor_responses]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: advisor_user_confirmation
+    fixture: tests/test_agent_advisor_consumption.py::test_consume_needs_user_confirmation_blocks_resume_until_confirmed
+    expected_transitions: [waiting_for_advisor_to_waiting_for_user, waiting_for_user_to_running]
+    expected_blockers: [advisor_required, advisor_requires_user_confirmation, user_confirmation_required]
+    expected_artifacts: [audit/advisor_responses]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: stale_advisor_response
+    fixture: tests/test_agent_advisor_consumption.py::test_stale_response_identity_is_rejected
+    expected_transitions: []
+    expected_blockers: [stale_response_identity]
+    expected_artifacts: [audit/advisor_requests]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: advisor_path_escape
+    fixture: tests/test_agent_advisor_consumption.py::test_response_output_files_must_exist_and_stay_inside_workspace
+    expected_transitions: []
+    expected_blockers: [path_escape]
+    expected_artifacts: [audit/advisor_requests]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: plan_tamper
+    fixture: tests/test_agent_plan_integrity.py::test_plan_validation_rejects_registry_drift_and_blocked_flags
+    expected_transitions: []
+    expected_blockers: [plan_integrity_error]
+    expected_artifacts: []
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: plan_cycle
+    fixture: 'tests/test_agent_plan_integrity.py::test_executor_rejects_every_invalid_plan_before_runner_call[cycle]'
+    expected_transitions: []
+    expected_blockers: [cyclic_dependency]
+    expected_artifacts: [agent_plan.yml]
+    expected_audit_verdict: null
+    forbidden_runner_calls: ['*']
+    expected_trace_events: []
+    tags: [policy_guard]
+
+  - name: scaffold_closure_rejection
+    fixture: tests/test_agent_executor.py::test_agent_executor_runs_safe_task_and_marks_scaffold_gap
+    expected_transitions: [draft_to_done_with_gaps]
+    expected_blockers: []
+    expected_artifacts: [audit/agent_state.yml, audit/agent_trace.jsonl]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: [scaffold_result]
+    tags: [policy_guard]
+
+  - name: crash_before_command
+    fixture: tests/agent_scenarios/test_crash_recovery.py::test_crash_after_intent_before_command_requeues_without_phantom_execution
+    expected_transitions: [running_to_done_with_gaps]
+    expected_blockers: [interrupted_before_dispatch]
+    expected_artifacts: [audit/attempt_journal.jsonl]
+    expected_audit_verdict: null
+    forbidden_runner_calls: [duplicate:sample_check]
+    expected_trace_events: [recovery_requeue]
+    tags: [crash]
+
+  - name: crash_after_command
+    fixture: tests/agent_scenarios/test_crash_recovery.py::test_crash_after_safe_command_before_result_is_retried_once
+    expected_transitions: [running_to_done_with_gaps]
+    expected_blockers: [missing_action_result]
+    expected_artifacts: [audit/attempt_journal.jsonl]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: [recovery_requeue]
+    tags: [crash]
+
+  - name: crash_after_manifest
+    fixture: tests/agent_scenarios/test_crash_recovery.py::test_crash_after_manifest_before_version_state_is_detected_and_safe_action_requeues
+    expected_transitions: [running_to_done]
+    expected_blockers: [missing_action_result, transaction_divergence]
+    expected_artifacts: [audit/artifact_manifest.json, audit/attempt_journal.jsonl]
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: [recovery_requeue]
+    tags: [crash]
+
+  - name: crash_after_result
+    fixture: tests/agent_scenarios/test_crash_recovery.py::test_crash_after_result_commit_before_agent_transition_consumes_receipt_without_rerun
+    expected_transitions: [running_to_done_with_gaps]
+    expected_blockers: [missing_action_result, transaction_divergence]
+    expected_artifacts: [audit/action_results, audit/attempt_journal.jsonl]
+    expected_audit_verdict: null
+    forbidden_runner_calls: [duplicate:sample_check]
+    expected_trace_events: []
+    tags: [crash]
+
+  - name: concurrent_resume
+    fixture: tests/test_agent_recovery.py::test_runner_lock_rejects_concurrent_resume
+    expected_transitions: []
+    expected_blockers: []
+    expected_artifacts: []
+    expected_audit_verdict: null
+    forbidden_runner_calls: []
+    expected_trace_events: []
+    tags: [policy_guard]

@@ -61,6 +61,9 @@ from risk_model_workbench.harness.runtime import (
 )
 from risk_model_workbench.harness.tools import TOOL_REGISTRY, registry_digest
 from risk_model_workbench.agent.workspace_store import WorkspaceStore
+from risk_model_workbench.application.action_runner import ActionRunner
+from risk_model_workbench.application.context import VersionContext
+from risk_model_workbench.application.handlers import production_handler_registry
 from risk_model_workbench.project_state import audit_run
 from risk_model_workbench.state import load_run_state, pair_audit_artifact_transaction
 from risk_model_workbench.versioning import resolve_workspace_dir
@@ -118,7 +121,6 @@ def _run_agent_locked(
         if state.get("status") == "waiting_for_advisor":
             state = _consume_ready_advisor_response(workspace, state)
         state = _recover_interrupted_attempts(project_path, workspace, version_id, plan, state)
-    runner = runner or _default_runner
     append_trace(workspace, "observation", {"summary": "Agent execution started.", "version_id": version_id})
     if int(plan.get("version") or 1) >= 2 and state.get("status") in BLOCKER_STATES:
         append_trace(
@@ -239,7 +241,18 @@ def _run_agent_locked(
             try:
                 mark_attempt_dispatched(workspace, attempt_id)
                 with action_attempt(attempt):
-                    code = runner(args)
+                    code = (
+                        runner(args)
+                        if runner is not None
+                        else _run_production_action(
+                            invocation,
+                            project_path=project_path,
+                            workspace=workspace,
+                            version_id=version_id,
+                            attempt_id=attempt_id,
+                            task_id=task_id,
+                        )
+                    )
             except Exception as exc:
                 code = 1
                 runner_error = f"{type(exc).__name__}: {exc}"
@@ -309,7 +322,18 @@ def _run_agent_locked(
             mark_attempt_transitioned(workspace, attempt_id)
             continue
 
-        code = runner(args)
+        code = (
+            runner(args)
+            if runner is not None
+            else _run_production_action(
+                invocation,
+                project_path=project_path,
+                workspace=workspace,
+                version_id=version_id,
+                attempt_id=attempt_id,
+                task_id=task_id,
+            )
+        )
         result = _stage_result(workspace, runnable, plan)
         append_trace(
             workspace,
@@ -897,7 +921,37 @@ def _consume_ready_advisor_response(workspace: Path, state: dict[str, Any]) -> d
     return state
 
 
-def _default_runner(argv: list[str]) -> int:
-    from risk_model_workbench.cli import main
-
-    return main(argv)
+def _run_production_action(
+    invocation,
+    *,
+    project_path: Path,
+    workspace: Path,
+    version_id: str,
+    attempt_id: str,
+    task_id: str,
+) -> int:
+    """Execute a bound invocation in process without routing through the CLI."""
+    context = VersionContext(
+        project_dir=Path(invocation.project),
+        version_id=version_id,
+        workspace=workspace,
+        runtime_config_dir=workspace / "configs_runtime",
+        manifest_path=workspace / "audit" / "artifact_manifest.json",
+        version_state_path=(
+            workspace / "version_state.yml"
+            if (workspace / "version_state.yml").exists()
+            else workspace / "run_state.yml"
+        ),
+    )
+    result = ActionRunner(
+        handlers=production_handler_registry(),
+        # The bound invocation passed evaluate_task_policy immediately before
+        # dispatch. ActionRunner still enforces an explicit allow decision.
+        policy_check=lambda *_: True,
+    ).run(
+        invocation=invocation,
+        context=context,
+        attempt_id=attempt_id,
+        task_id=task_id,
+    )
+    return 1 if result.status == "failed" else 0

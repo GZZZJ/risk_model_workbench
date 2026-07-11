@@ -14,6 +14,7 @@ from risk_model_workbench.agent.plan import (
     validate_agent_plan,
 )
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.eval import emit_scenario_evidence
 from risk_model_workbench.agent.state import init_agent_state, save_agent_state
 from risk_model_workbench.agent.policy import evaluate_task_policy
 from risk_model_workbench.harness.invocation import ActionInvocation
@@ -98,10 +99,15 @@ def test_plan_validation_fails_closed_for_tampering(mutation, expected_code):
 def test_plan_validation_rejects_registry_drift_and_blocked_flags():
     plan = _plan()
     plan["registry_digest"] = "stale"
-    assert any(error.startswith("registry_digest_drift") for error in validate_agent_plan(plan, TOOL_REGISTRY))
+    drift_errors = validate_agent_plan(plan, TOOL_REGISTRY)
+    assert any(error.startswith("registry_digest_drift") for error in drift_errors)
 
     forced = _plan(params={"extra_args": ["--force"]})
-    assert any(error.startswith("blocked_flag") for error in validate_agent_plan(forced, TOOL_REGISTRY))
+    forced_errors = validate_agent_plan(forced, TOOL_REGISTRY)
+    assert any(error.startswith("blocked_flag") for error in forced_errors)
+    emit_scenario_evidence(
+        validation_errors=[*drift_errors, *forced_errors],
+    )
 
 
 def test_explicit_empty_registry_never_falls_back_to_global_registry(tmp_path):
@@ -188,10 +194,16 @@ def test_executor_rejects_every_invalid_plan_before_runner_call(tmp_path, mutati
     save_agent_plan(workspace, plan)
     calls: list[list[str]] = []
 
-    with pytest.raises(ValueError, match="invalid agent plan"):
+    with pytest.raises(ValueError, match="invalid agent plan") as exc_info:
         run_agent(project, "demo_v1", runner=lambda argv: calls.append(argv) or 0)
 
     assert calls == []
+    if mutation == "cycle":
+        emit_scenario_evidence(
+            workspace=workspace,
+            validation_errors=[str(exc_info.value)],
+            runner_calls=calls,
+        )
 
 
 def test_executor_binds_plan_and_state_to_runtime_scope_before_trace_or_runner(tmp_path):

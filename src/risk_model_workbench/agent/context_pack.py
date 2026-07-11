@@ -146,6 +146,8 @@ _AGGREGATE_METRICS = {
     "value",
 }
 _TUNING_PARAMETER_KEYS = {
+    "objective",
+    "metric",
     "learning_rate",
     "num_leaves",
     "max_depth",
@@ -155,6 +157,8 @@ _TUNING_PARAMETER_KEYS = {
     "reg_alpha",
     "reg_lambda",
     "bagging_freq",
+    "max_bin",
+    "min_gain_to_split",
     "num_boost_round",
     "early_stopping_rounds",
 }
@@ -525,7 +529,9 @@ def _is_sensitive_key(key: str) -> bool:
         "token",
     }
     return bool(
-        _SENSITIVE_KEYS.search(lowered)
+        lowered.endswith(("_path", "_file", "_dir", "_directory", "_uri", "_url"))
+        or lowered in {"file_path", "directory_path"}
+        or _SENSITIVE_KEYS.search(lowered)
         or tokens.intersection(sensitive_tokens)
         or "dsn" in tokens
         or ({"database"}.issubset(tokens) and bool(tokens.intersection({"url", "uri"})))
@@ -633,7 +639,32 @@ def _is_allowed_record_container(key: str, records: list[dict[Any, Any]]) -> boo
         return all(_is_candidate_record(record) for record in records)
     if key in {"trials", "trial_history"}:
         return all(_is_trial_record(record) for record in records)
+    if key == "experiments":
+        return all(_is_training_experiment_record(record) for record in records)
     return False
+
+
+def _is_training_experiment_record(record: dict[Any, Any]) -> bool:
+    normalised = _normalised_mapping(record)
+    if normalised is None:
+        return False
+    allowed = {
+        "name",
+        "display_name",
+        "segment",
+        "segment_filter",
+        "algorithm",
+        "method",
+        "description",
+        "sample_weight",
+    }
+    return (
+        bool(normalised.get("name"))
+        and isinstance(normalised.get("name"), str)
+        and isinstance(normalised.get("algorithm"), str)
+        and set(normalised) <= allowed
+        and all(not isinstance(child, (dict, list, tuple, set, frozenset)) for child in normalised.values())
+    )
 
 
 def _is_task_record(record: dict[Any, Any]) -> bool:

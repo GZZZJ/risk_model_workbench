@@ -10,6 +10,8 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
+from risk_model_workbench.agent.eval import emit_scenario_evidence
+
 from risk_model_workbench.agent.approvals import (
     ApprovalBindingError,
     approval_by_id,
@@ -41,6 +43,9 @@ from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.harness.runtime import ActionAttempt, action_attempt, stage_action_done
 from risk_model_workbench.harness.runtime import stage_action_failed
 from risk_model_workbench.harness.tools import TOOL_REGISTRY, registry_digest
+from risk_model_workbench.application.context import VersionContext
+from risk_model_workbench.application.handlers import feature_selection as feature_actions
+from risk_model_workbench.state import create_version_state, save_version_state
 
 
 def test_remote_feature_plan_uses_fixed_prepare_execute_pairs():
@@ -223,6 +228,11 @@ def test_agent_prepare_approval_consume_execute_is_exactly_bound(tmp_path):
     assert [task["status"] for task in state["tasks"]] == ["done", "done"]
     assert load_approvals(workspace)["approvals"][0]["status"] == "consumed"
     assert finished["status"] in {"done", "done_with_gaps"}
+    emit_scenario_evidence(
+        state_pairs=[(waiting, finished)],
+        workspace=workspace,
+        runner_calls=calls,
+    )
 
 
 @pytest.mark.parametrize("pair", ["feature_prescreen", "build_wide_sql", "feature_refine"])
@@ -301,6 +311,11 @@ def test_rejected_agent_approval_remains_blocked_and_does_not_execute(tmp_path):
     still_waiting = run_agent(project, version_id, runner=runner)
     assert still_waiting["status"] == "waiting_for_approval"
     assert len(calls) == 1
+    emit_scenario_evidence(
+        state_pairs=[(waiting, still_waiting)],
+        workspace=workspace,
+        runner_calls=calls,
+    )
 
 
 def test_agent_approval_drift_creates_replacement_and_does_not_execute(tmp_path):
@@ -333,6 +348,11 @@ def test_agent_approval_drift_creates_replacement_and_does_not_execute(tmp_path)
     statuses = {item["approval_id"]: item["status"] for item in load_approvals(workspace)["approvals"]}
     assert statuses[old_id] == "revoked"
     assert statuses[drifted["blocker"]["approval_id"]] == "pending"
+    emit_scenario_evidence(
+        state_pairs=[(waiting, drifted)],
+        workspace=workspace,
+        runner_calls=calls,
+    )
 
 
 def test_unregistered_sql_tamper_revokes_approval_and_fails_closed(tmp_path):
@@ -441,6 +461,150 @@ def test_external_boundary_submits_immutable_approved_sql(monkeypatch, tmp_path)
 
     assert submitted == ["select 1"]
     assert result["sql_sha256"] == hashlib.sha256(b"select 1").hexdigest()
+
+
+def test_build_wide_handler_dispatches_exact_consumed_sql(monkeypatch, tmp_path):
+    context, invocation, attempt = _wide_handler_context(tmp_path, generated_sql="  select   1  ")
+    submitted: list[str] = []
+
+    class Result:
+        def execute(self):
+            return None
+
+    class Client:
+        def sql(self, sql):
+            submitted.append(sql)
+            return Result()
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = feature_actions.run_build_wide_sql(invocation, context, attempt.attempt_id)
+
+    assert result.status == "done"
+    assert submitted == ["select 1"]
+    assert (context.workspace / "audit/external_operations/build_wide_sql_execute.intent.json").exists()
+    assert (context.workspace / "audit/external_operations/build_wide_sql_execute.receipt.json").exists()
+
+
+def test_build_wide_handler_blocks_generated_sql_drift_before_dispatch(monkeypatch, tmp_path):
+    context, invocation, attempt = _wide_handler_context(tmp_path, generated_sql="select 2")
+    submitted: list[str] = []
+
+    class Client:
+        def sql(self, sql):
+            submitted.append(sql)
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = feature_actions.run_build_wide_sql(invocation, context, attempt.attempt_id)
+
+    assert result.status == "failed"
+    assert submitted == []
+    assert not (context.workspace / "audit/external_operations/build_wide_sql_execute.intent.json").exists()
+
+
+def test_build_wide_handler_marks_unknown_external_outcome_for_reconciliation(monkeypatch, tmp_path):
+    context, invocation, attempt = _wide_handler_context(tmp_path, generated_sql="select 1")
+
+    class Client:
+        def sql(self, _sql):
+            raise RuntimeError("connection dropped after submit")
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = feature_actions.run_build_wide_sql(invocation, context, attempt.attempt_id)
+
+    assert result.status == "failed"
+    assert result.failure_code == "external_outcome_unknown"
+    assert result.next_required_action == "reconciliation"
+    assert (context.workspace / "audit/external_operations/build_wide_sql_execute.intent.json").exists()
+    assert not (context.workspace / "audit/external_operations/build_wide_sql_execute.receipt.json").exists()
+
+
+@pytest.mark.parametrize("domain", ["feature_prescreen", "feature_refine"])
+def test_feature_execute_handler_dispatches_exact_consumed_sql(monkeypatch, tmp_path, domain):
+    context, invocation, attempt = _feature_execute_handler_context(
+        monkeypatch, tmp_path, domain=domain, candidate_sql="  select   1  "
+    )
+    submitted: list[str] = []
+
+    class Result:
+        def execute(self):
+            return None
+
+    class Client:
+        def sql(self, sql):
+            submitted.append(sql)
+            return Result()
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = _run_feature_execute_handler(domain, invocation, context, attempt)
+
+    assert result.status == "done"
+    assert submitted == ["select 1"]
+    operation = f"{domain}_execute"
+    assert (context.workspace / f"audit/external_operations/{operation}.intent.json").exists()
+    assert (context.workspace / f"audit/external_operations/{operation}.receipt.json").exists()
+
+
+@pytest.mark.parametrize("domain", ["feature_prescreen", "feature_refine"])
+def test_feature_execute_handler_blocks_sql_drift_before_dispatch(monkeypatch, tmp_path, domain):
+    context, invocation, attempt = _feature_execute_handler_context(
+        monkeypatch, tmp_path, domain=domain, candidate_sql="select 2"
+    )
+    submitted: list[str] = []
+
+    class Client:
+        def sql(self, sql):
+            submitted.append(sql)
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = _run_feature_execute_handler(domain, invocation, context, attempt)
+
+    assert result.status == "failed"
+    assert submitted == []
+    assert not (context.workspace / f"audit/external_operations/{domain}_execute.intent.json").exists()
+
+
+@pytest.mark.parametrize("domain", ["feature_prescreen", "feature_refine"])
+def test_feature_execute_handler_marks_unknown_outcome_for_reconciliation(monkeypatch, tmp_path, domain):
+    context, invocation, attempt = _feature_execute_handler_context(
+        monkeypatch, tmp_path, domain=domain, candidate_sql="select 1"
+    )
+
+    class Client:
+        def sql(self, _sql):
+            raise RuntimeError("connection dropped after submit")
+
+        def stop(self):
+            return None
+
+    _install_fake_tmlpatch(monkeypatch, Client)
+    with action_attempt(attempt):
+        result = _run_feature_execute_handler(domain, invocation, context, attempt)
+
+    assert result.status == "failed"
+    assert result.failure_code == "external_outcome_unknown"
+    assert result.next_required_action == "reconciliation"
+    assert (context.workspace / f"audit/external_operations/{domain}_execute.intent.json").exists()
+    assert not (context.workspace / f"audit/external_operations/{domain}_execute.receipt.json").exists()
 
 
 def test_external_boundary_blocks_regenerated_sql_drift(monkeypatch, tmp_path):
@@ -569,19 +733,6 @@ def test_prescreen_worker_receives_context_and_fails_closed(monkeypatch, tmp_pat
         "consumption_receipt": "audit/approval_consumptions/approval_1.json",
         "parent_operation_id": "feature_prescreen_execute",
     }
-    args = SimpleNamespace(
-        project_dir=str(tmp_path),
-        stage="feature_prescreen",
-        run_dir=None,
-        table=None,
-        max_tables=None,
-        force=False,
-        dry_run_sql=False,
-        use_native=False,
-        refresh_dp_cache=True,
-        sql_approved=True,
-        feature_select_code_dir=None,
-    )
     settings = SimpleNamespace(
         feature_columns="features.csv",
         output_dir="out",
@@ -621,7 +772,6 @@ def test_prescreen_worker_receives_context_and_fails_closed(monkeypatch, tmp_pat
             submitted.append(kwargs)
             return Future()
 
-    monkeypatch.setattr(batch, "parse_args", lambda _argv: args)
     monkeypatch.setattr(batch, "load_batch_settings", lambda _project, _args: settings)
     monkeypatch.setattr(batch, "find_feature_select_code_dir", lambda *_args: tmp_path)
     monkeypatch.setattr(batch, "load_feature_map", lambda _path: {"mart.table_a": ["f1"]})
@@ -630,7 +780,12 @@ def test_prescreen_worker_receives_context_and_fails_closed(monkeypatch, tmp_pat
     monkeypatch.setattr(dp, "external_operation_context_for_current_attempt", lambda: context)
 
     with pytest.raises(expected_error, match="mart.table_a"):
-        batch.main([])
+        batch.run_prescreen_service(
+            project_dir=tmp_path,
+            stage="feature_prescreen",
+            refresh_dp_cache=True,
+            sql_approved=True,
+        )
 
     assert submitted[0]["external_operation_context"] == context
 
@@ -829,6 +984,134 @@ def _approved_attempt(workspace, approval, receipt, subject):
         approval_consumption_receipt=str(Path("audit") / "approval_consumptions" / f"{approval['approval_id']}.json"),
         parent_operation_id=subject["operation_id"],
     )
+
+
+def _wide_handler_context(tmp_path, *, generated_sql: str):
+    workspace, approval, receipt, subject = _consumed_sql_approval(
+        tmp_path, "build_wide_sql_execute"
+    )
+    project = tmp_path / "project"
+    (project / "configs").mkdir(parents=True)
+    (project / "project.yml").write_text(
+        yaml.safe_dump(
+            {"project": {"name": "demo"}, "data": {"source_table": "mart.base"}},
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    (project / "configs" / "feature_select.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "feature_select": {
+                    "wide_table": {
+                        "base_table": "mart.base",
+                        "output_table": "mart.wide",
+                        "join_keys": ["uid"],
+                        "base_columns": ["uid"],
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    remain = project / "remain.json"
+    remain.write_text('{"mart.features": ["f1"]}\n', encoding="utf-8")
+    state = create_version_state(
+        project,
+        version_id="demo_v1",
+        workflow="feature_selection",
+        stages=["build_wide_sql"],
+    )
+    save_version_state(workspace, state)
+
+    def generator(**kwargs):
+        sql_path = kwargs["sql_output_path"]
+        feature_map = kwargs["feature_map_path"]
+        summary = kwargs["summary_path"]
+        sql_path.parent.mkdir(parents=True, exist_ok=True)
+        feature_map.parent.mkdir(parents=True, exist_ok=True)
+        summary.parent.mkdir(parents=True, exist_ok=True)
+        sql_path.write_text(generated_sql, encoding="utf-8")
+        feature_map.write_text("output_feature\nf1\n", encoding="utf-8")
+        summary.write_text('{"output_table":"mart.wide","features":1}\n', encoding="utf-8")
+        return sql_path, feature_map, summary
+
+    feature_actions.WIDE_SQL_GENERATOR = generator
+    context = VersionContext(
+        project_dir=project,
+        version_id="demo_v1",
+        workspace=workspace,
+        runtime_config_dir=workspace / "configs_runtime",
+        manifest_path=workspace / "audit/artifact_manifest.json",
+        version_state_path=workspace / "version_state.yml",
+    )
+    invocation = ActionInvocation(
+        "build_wide_sql_execute",
+        {"remain_features": str(remain), "sql_approved": True},
+        subject["project"],
+        subject["version_id"],
+    )
+    return context, invocation, _approved_attempt(workspace, approval, receipt, subject)
+
+
+def _feature_execute_handler_context(monkeypatch, tmp_path, *, domain: str, candidate_sql: str):
+    operation = f"{domain}_execute"
+    workspace, approval, receipt, subject = _consumed_sql_approval(tmp_path, operation)
+    project = tmp_path / "project"
+    (project / "configs").mkdir(parents=True)
+    (project / "project.yml").write_text(
+        yaml.safe_dump({"project": {"name": "demo"}, "data": {}}, sort_keys=False),
+        encoding="utf-8",
+    )
+    (project / "configs" / "feature_select.yaml").write_text(
+        "feature_select: {}\n", encoding="utf-8"
+    )
+    (project / "configs" / "refine_features.yaml").write_text(
+        yaml.safe_dump({"feature_refine": {"output_dir": str(workspace / "feature_selection")}}, sort_keys=False),
+        encoding="utf-8",
+    )
+    state = create_version_state(
+        project, version_id="demo_v1", workflow="feature_selection", stages=[domain]
+    )
+    save_version_state(workspace, state)
+
+    def service(**_kwargs):
+        execute_dp_sql(
+            project_dir=project,
+            sql=candidate_sql,
+            operation_id=operation,
+            description="handler boundary test",
+            metadata_path=workspace / "feature_selection/execution.json",
+            sql_approved=True,
+            audit_workspace=workspace,
+        )
+        return 0
+
+    if domain == "feature_prescreen":
+        import risk_model_workbench.batch_feature_select as batch
+
+        monkeypatch.setattr(batch, "run_prescreen_service", service)
+    else:
+        import risk_model_workbench.feature_refine as refine
+
+        monkeypatch.setattr(refine, "run_refine_service", service)
+    context = VersionContext(
+        project_dir=project,
+        version_id="demo_v1",
+        workspace=workspace,
+        runtime_config_dir=workspace / "configs_runtime",
+        manifest_path=workspace / "audit/artifact_manifest.json",
+        version_state_path=workspace / "version_state.yml",
+    )
+    invocation = ActionInvocation(operation, {}, subject["project"], subject["version_id"])
+    return context, invocation, _approved_attempt(workspace, approval, receipt, subject)
+
+
+def _run_feature_execute_handler(domain, invocation, context, attempt):
+    if domain == "feature_prescreen":
+        return feature_actions.run_feature_prescreen(invocation, context, attempt.attempt_id)
+    return feature_actions.run_feature_refine(invocation, context, attempt.attempt_id)
 
 
 def _install_fake_tmlpatch(monkeypatch, client_type):
