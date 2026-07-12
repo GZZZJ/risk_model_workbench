@@ -1,38 +1,12 @@
-"""Config loading helpers."""
+"""Compatibility forwarder for :mod:`risk_model_workbench.config`."""
 
-from __future__ import annotations
+from pathlib import Path as _Path
+import sys as _sys
 
-from pathlib import Path
-from typing import Any
+_SOURCE_ROOT = _Path(__file__).resolve().parents[1] / "src"
+_SOURCE_ROOT_TEXT = str(_SOURCE_ROOT)
+if _SOURCE_ROOT_TEXT in _sys.path:
+    _sys.path.remove(_SOURCE_ROOT_TEXT)
+_sys.path.insert(0, _SOURCE_ROOT_TEXT)
 
-
-def load_yaml(path: str | Path) -> dict[str, Any]:
-    """Load a YAML file with a clear dependency error."""
-    try:
-        import yaml
-    except ImportError as exc:  # pragma: no cover - depends on environment
-        raise RuntimeError(
-            "PyYAML is required to read project configs. Install with: pip install pyyaml"
-        ) from exc
-
-    config_path = Path(path)
-    with config_path.open("r", encoding="utf-8") as handle:
-        data = yaml.safe_load(handle) or {}
-    if not isinstance(data, dict):
-        raise ValueError(f"Expected YAML mapping in {config_path}")
-    return data
-
-
-def dump_yaml(data: dict[str, Any], path: str | Path) -> None:
-    """Write a YAML mapping."""
-    try:
-        import yaml
-    except ImportError as exc:  # pragma: no cover - depends on environment
-        raise RuntimeError(
-            "PyYAML is required to write project configs. Install with: pip install pyyaml"
-        ) from exc
-
-    output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(data, handle, allow_unicode=True, sort_keys=False)
+from risk_model_workbench.config import *  # noqa: F401,F403,E402

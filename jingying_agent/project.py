@@ -1,116 +1,12 @@
-"""Project workspace creation."""
+"""Compatibility forwarder for :mod:`risk_model_workbench.project`."""
 
-from __future__ import annotations
+from pathlib import Path as _Path
+import sys as _sys
 
-from dataclasses import dataclass
-from datetime import date
-from pathlib import Path
+_SOURCE_ROOT = _Path(__file__).resolve().parents[1] / "src"
+_SOURCE_ROOT_TEXT = str(_SOURCE_ROOT)
+if _SOURCE_ROOT_TEXT in _sys.path:
+    _sys.path.remove(_SOURCE_ROOT_TEXT)
+_sys.path.insert(0, _SOURCE_ROOT_TEXT)
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE_ROOT = REPO_ROOT / "templates" / "project"
-
-
-@dataclass(frozen=True)
-class ProjectContext:
-    name: str
-    display_name: str
-    scenario: str
-    template: str
-    created_date: str
-    sample_table: str
-    target_column: str
-    time_column: str
-    period_column: str
-
-    def as_mapping(self) -> dict[str, str]:
-        return {
-            "project_name": self.name,
-            "display_name": self.display_name,
-            "scenario": self.scenario,
-            "template": self.template,
-            "created_date": self.created_date,
-            "sample_table": self.sample_table,
-            "target_column": self.target_column,
-            "time_column": self.time_column,
-            "period_column": self.period_column,
-        }
-
-
-def default_context(name: str, display_name: str, scenario: str, template: str) -> ProjectContext:
-    """Build template defaults for a project."""
-    if template == "fujie-gcard":
-        sample_table = "pdm_risk.pdm_risk_gcard_base_sample_uid_ds_eva_ben_v6_1"
-        target_column = "ftr_30d_ord_flag"
-        time_column = "mdl_dte"
-        period_column = "ds"
-    else:
-        sample_table = ""
-        target_column = "target"
-        time_column = "sample_date"
-        period_column = "sample_month"
-
-    return ProjectContext(
-        name=name,
-        display_name=display_name,
-        scenario=scenario,
-        template=template,
-        created_date=date.today().isoformat(),
-        sample_table=sample_table,
-        target_column=target_column,
-        time_column=time_column,
-        period_column=period_column,
-    )
-
-
-def render_text(text: str, context: ProjectContext) -> str:
-    """Render simple {{key}} placeholders."""
-    rendered = text
-    for key, value in context.as_mapping().items():
-        rendered = rendered.replace("{{" + key + "}}", value)
-    return rendered
-
-
-def create_project(
-    root_dir: str | Path,
-    *,
-    name: str,
-    display_name: str,
-    scenario: str,
-    template: str = "generic",
-    force: bool = False,
-) -> Path:
-    """Create a project workspace from the standard template."""
-    if not TEMPLATE_ROOT.exists():
-        raise FileNotFoundError(f"Template directory not found: {TEMPLATE_ROOT}")
-
-    root_path = Path(root_dir).resolve()
-    project_dir = root_path / "projects" / name
-    if project_dir.exists() and not force:
-        raise FileExistsError(f"Project already exists: {project_dir}")
-
-    context = default_context(name, display_name, scenario, template)
-    for source_path in TEMPLATE_ROOT.rglob("*"):
-        if source_path.is_dir():
-            continue
-        relative_path = source_path.relative_to(TEMPLATE_ROOT)
-        target_path = project_dir / relative_path
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-
-        text = source_path.read_text(encoding="utf-8")
-        target_path.write_text(render_text(text, context), encoding="utf-8")
-
-    for directory in [
-        "data/raw",
-        "data/sampled",
-        "data/processed",
-        "data/profile",
-        "runs",
-        "reports",
-    ]:
-        keep = project_dir / directory / ".gitkeep"
-        keep.parent.mkdir(parents=True, exist_ok=True)
-        if not keep.exists():
-            keep.write_text("", encoding="utf-8")
-
-    return project_dir
+from risk_model_workbench.project import *  # noqa: F401,F403,E402
