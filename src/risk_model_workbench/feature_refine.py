@@ -37,7 +37,7 @@ def find_repo_root(start: Path) -> Path:
     for candidate in [start, *start.parents]:
         if (candidate / "agent.py").exists():
             return candidate
-    raise RuntimeError("Cannot locate repo root from script path")
+    return start.parent.parent
 
 
 REPO_ROOT = find_repo_root(SCRIPT_PATH)

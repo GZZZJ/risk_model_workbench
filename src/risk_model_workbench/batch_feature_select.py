@@ -24,7 +24,10 @@ import numpy as np
 import pandas as pd
 
 SCRIPT_PATH = Path(__file__).resolve()
-REPO_ROOT = next(path for path in [SCRIPT_PATH, *SCRIPT_PATH.parents] if (path / "agent.py").exists())
+REPO_ROOT = next(
+    (path for path in [SCRIPT_PATH, *SCRIPT_PATH.parents] if (path / "agent.py").exists()),
+    SCRIPT_PATH.parent.parent,
+)
 sys.path.insert(0, str(REPO_ROOT))
 
 from risk_model_workbench.dp_feather import (
