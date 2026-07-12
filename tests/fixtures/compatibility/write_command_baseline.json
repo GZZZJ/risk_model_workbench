@@ -1,0 +1,594 @@
+{
+  "artifact_files": [
+    "feature_metadata/feature_columns.csv",
+    "feature_metadata/feature_table_summary.csv",
+    "feature_metadata/feature_tables_meta.json",
+    "feature_selection/batch_plan.json",
+    "feature_selection/data_source_contract.json",
+    "feature_selection/execution_environment.json",
+    "feature_selection/profiles/local_feather_profile.json",
+    "feature_selection/resource_plan.json",
+    "feature_selection/sampling_plan.json",
+    "feature_selection/wide_table_skipped.json",
+    "sample_check/label_distribution.csv",
+    "sample_check/sample_check_report.md",
+    "sample_check/sample_split_summary.csv",
+    "sample_check/sample_summary.json"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "request",
+        "validate",
+        "--request",
+        "<PROJECT>/requests/compat-request.md",
+        "--project",
+        "<PROJECT>"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "request validation ok: <PROJECT>/requests/compat-request.md\nwarning: scenario_profile inferred as preloan_credit_card\n"
+    },
+    {
+      "argv": [
+        "plan",
+        "create",
+        "--project",
+        "<PROJECT>",
+        "--request",
+        "<PROJECT>/requests/compat-request.md",
+        "--output",
+        "<PROJECT>/requests/compat-request.execution_plan.yml"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "execution_plan: <PROJECT>/requests/compat-request.execution_plan.yml\ntask_count: 6\nwarning: scenario_profile inferred as preloan_credit_card\n"
+    },
+    {
+      "argv": [
+        "version",
+        "init",
+        "--project",
+        "<PROJECT>",
+        "--workflow",
+        "full_modeling",
+        "--version-id",
+        "compat_request_v1_20260712",
+        "--request",
+        "<PROJECT>/requests/compat-request.md",
+        "--plan",
+        "<PROJECT>/requests/compat-request.execution_plan.yml"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "[RMW] 配置校验 0% | 配置校验开始执行 | 已用 0秒\nwarning: scenario_profile inferred as preloan_credit_card\n[RMW] 配置校验 100% | 配置校验完成 | 已用 0秒\nversion_id: compat_request_v1_20260712\nversion_dir: <PROJECT>/versions/compat_request_v1_20260712\n"
+    },
+    {
+      "argv": [
+        "sample",
+        "check",
+        "--project",
+        "<PROJECT>",
+        "--run-id",
+        "compat_legacy_run"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "[RMW] 样本检查 0% | 样本检查开始执行 | 已用 0秒\n[RMW] 样本检查 100% | 样本检查完成 | 已用 0秒\n"
+    },
+    {
+      "argv": [
+        "feature",
+        "metadata",
+        "--project",
+        "<PROJECT>",
+        "--run-id",
+        "compat_legacy_run"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "[RMW] 特征元数据 0% | 特征元数据开始执行 | 已用 0秒\n[RMW] 特征元数据 100% | 特征元数据完成 | 已用 0秒\nlocal feather schema metadata generated\n"
+    },
+    {
+      "argv": [
+        "feature",
+        "prescreen",
+        "--project",
+        "<PROJECT>",
+        "--run-id",
+        "compat_legacy_run"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "[RMW] 特征初筛 0% | 特征初筛开始执行 | 已用 0秒\n[RMW] 特征初筛 100% | 特征初筛完成 | 已用 0秒\nlocal feather mode: prescreen by design, intake evidence emitted\n"
+    },
+    {
+      "argv": [
+        "build-wide-sql",
+        "--project",
+        "<PROJECT>",
+        "--run-id",
+        "compat_legacy_run"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "[RMW] 宽表 SQL 生成 0% | 宽表 SQL 生成开始执行 | 已用 0秒\n[RMW] 宽表 SQL 生成 100% | 宽表 SQL 生成完成 | 已用 0秒\nlocal feather mode: wide table skipped by design\n"
+    }
+  ],
+  "decision_log": "- <TIMESTAMP> [sample_check] done: Sample profiling completed from local data\n",
+  "manifest": [
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "sample_check/label_distribution.csv",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "sample_check",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "sample_check/sample_check_report.md",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "sample_check",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "sample_check/sample_split_summary.csv",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "sample_check",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "sample_check/sample_summary.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "sample_check",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "Attempt-scoped ActionResult for sample_check",
+      "integrity_mode": "content",
+      "kind": "audit",
+      "path": "audit/action_results/cli_sample_check_<ID>.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "agent_runtime",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_metadata/feature_tables_meta.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_metadata",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_metadata/feature_table_summary.csv",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_metadata",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_metadata/feature_columns.csv",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_metadata",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "Attempt-scoped ActionResult for feature_metadata",
+      "integrity_mode": "content",
+      "kind": "audit",
+      "path": "audit/action_results/cli_feature_metadata_<ID>.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "agent_runtime",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/data_source_contract.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/execution_environment.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/resource_plan.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/sampling_plan.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/batch_plan.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/profiles/local_feather_profile.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "feature_prescreen",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "Attempt-scoped ActionResult for feature_prescreen_local",
+      "integrity_mode": "content",
+      "kind": "audit",
+      "path": "audit/action_results/cli_feature_prescreen_local_<ID>.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "agent_runtime",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "feature_selection/wide_table_skipped.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "build_wide_sql",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "Attempt-scoped ActionResult for build_wide_sql_local",
+      "integrity_mode": "content",
+      "kind": "audit",
+      "path": "audit/action_results/cli_build_wide_sql_local_<ID>.json",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "agent_runtime",
+      "storage_class": "workspace_only"
+    }
+  ],
+  "request_plan_version_flow": {
+    "artifact_files": [
+      "configs_runtime/evaluate.yaml",
+      "configs_runtime/feature_select.yaml",
+      "configs_runtime/project.yml",
+      "configs_runtime/refine_features.yaml",
+      "configs_runtime/report.yaml",
+      "configs_runtime/request_runtime.yaml",
+      "configs_runtime/sample.yaml",
+      "configs_runtime/train.yaml",
+      "configs_snapshot/evaluate.yaml",
+      "configs_snapshot/feature_select.yaml",
+      "configs_snapshot/project.yml",
+      "configs_snapshot/refine_features.yaml",
+      "configs_snapshot/report.yaml",
+      "configs_snapshot/train.yaml",
+      "execution_plan.yml",
+      "model_request.md"
+    ],
+    "bindings": {
+      "execution_plan": {
+        "project": "<PROJECT>",
+        "request_id": "compat-request",
+        "workflow": "full_modeling"
+      },
+      "model_request_matches": true,
+      "runtime_config_files": [
+        "evaluate.yaml",
+        "feature_select.yaml",
+        "project.yml",
+        "refine_features.yaml",
+        "report.yaml",
+        "request_runtime.yaml",
+        "sample.yaml",
+        "train.yaml"
+      ],
+      "runtime_request": {
+        "business_domain": null,
+        "data_source_mode": "local_feather",
+        "request_id": "compat-request",
+        "sample_location": "data/sample.feather",
+        "scenario_profile": "preloan_credit_card",
+        "title": null,
+        "workflow": "full_modeling"
+      },
+      "task_ids": [
+        "sample_check_001",
+        "feature_refine",
+        "train_baseline_all",
+        "evaluate_final",
+        "compare_final",
+        "report_final"
+      ]
+    },
+    "manifest": [
+      {
+        "contract_role": "required",
+        "description": "Project config snapshot",
+        "integrity_mode": "content",
+        "kind": "directory",
+        "path": "configs_snapshot",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Model request copied into run workspace",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "model_request.md",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Execution plan copied into run workspace",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "execution_plan.yml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime configs",
+        "integrity_mode": "content",
+        "kind": "directory",
+        "path": "configs_runtime",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/project.yml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/sample.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/feature_select.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/refine_features.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/train.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/evaluate.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/report.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      },
+      {
+        "contract_role": "required",
+        "description": "Request-materialized runtime config",
+        "integrity_mode": "content",
+        "kind": "file",
+        "path": "configs_runtime/request_runtime.yaml",
+        "retention_reason": "generated in the current workspace",
+        "source": "generated",
+        "stage": "validate_config",
+        "storage_class": "workspace_only"
+      }
+    ],
+    "project_state": {
+      "active_run_id": null,
+      "active_version_id": "compat_request_v1_20260712",
+      "status": "active"
+    },
+    "validate_config_stage": {
+      "artifacts": [
+        "configs_snapshot",
+        "model_request.md",
+        "execution_plan.yml",
+        "configs_runtime",
+        "configs_runtime/project.yml",
+        "configs_runtime/sample.yaml",
+        "configs_runtime/feature_select.yaml",
+        "configs_runtime/refine_features.yaml",
+        "configs_runtime/train.yaml",
+        "configs_runtime/evaluate.yaml",
+        "configs_runtime/report.yaml",
+        "configs_runtime/request_runtime.yaml"
+      ],
+      "status": "done"
+    },
+    "version_index": {
+      "active_version_id": "compat_request_v1_20260712",
+      "versions": [
+        {
+          "managed_by": "workbench",
+          "path": "versions/compat_request_v1_20260712",
+          "source_type": "workbench",
+          "status": "running",
+          "version_id": "compat_request_v1_20260712",
+          "workflow": "full_modeling"
+        }
+      ]
+    },
+    "version_state": {
+      "current_stage": "validate_config",
+      "managed_by": "workbench",
+      "source_type": "workbench",
+      "status": "running",
+      "version_id": "compat_request_v1_20260712",
+      "workflow": "full_modeling"
+    }
+  },
+  "stage_state": {
+    "build_wide_sql": {
+      "artifacts": [
+        "feature_selection/wide_table_skipped.json"
+      ],
+      "status": "done"
+    },
+    "feature_metadata": {
+      "artifacts": [
+        "feature_metadata/feature_tables_meta.json",
+        "feature_metadata/feature_table_summary.csv",
+        "feature_metadata/feature_columns.csv"
+      ],
+      "status": "done"
+    },
+    "feature_prescreen": {
+      "artifacts": [
+        "feature_selection/data_source_contract.json",
+        "feature_selection/execution_environment.json",
+        "feature_selection/resource_plan.json",
+        "feature_selection/sampling_plan.json",
+        "feature_selection/batch_plan.json",
+        "feature_selection/profiles/local_feather_profile.json"
+      ],
+      "status": "done"
+    },
+    "sample_check": {
+      "artifacts": [
+        "sample_check/label_distribution.csv",
+        "sample_check/sample_check_report.md",
+        "sample_check/sample_split_summary.csv",
+        "sample_check/sample_summary.json"
+      ],
+      "status": "done"
+    }
+  },
+  "state_decisions": [
+    {
+      "decision": "done",
+      "reason": "Sample profiling completed from local data",
+      "stage": "sample_check"
+    }
+  ]
+}
