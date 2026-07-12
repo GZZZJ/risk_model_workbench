@@ -1,0 +1,12 @@
+{
+  "status": "done",
+  "reason": "",
+  "champion": "gcard_v6",
+  "champions": [
+    "gcard_v2",
+    "gcard_v4",
+    "gcard_v5",
+    "gcard_v6"
+  ],
+  "benchmark_uplift": "evaluation/benchmark_uplift.csv"
+}

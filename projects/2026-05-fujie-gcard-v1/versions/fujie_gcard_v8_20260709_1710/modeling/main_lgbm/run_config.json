@@ -1,0 +1,102 @@
+{
+  "experiment": "main_lgbm",
+  "data_source": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+  "train_values": [
+    "DEV"
+  ],
+  "valid_values": [
+    "DEV-OOS"
+  ],
+  "oos_values": [
+    "DEV-OOS",
+    "OOT",
+    "OOT-OOS"
+  ],
+  "label_column": "ftr_30d_ord_flag",
+  "split_column": "final_flag",
+  "feature_list_path": "/Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v8_20260709_1710/feature_selection/final_features.txt",
+  "candidate_feature_count": 474,
+  "actual_feature_count": 474,
+  "algorithm": "lightgbm",
+  "params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": 7,
+    "min_child_samples": 100,
+    "subsample": 0.82,
+    "colsample_bytree": 0.75,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0,
+    "verbose": -1,
+    "bagging_freq": 3
+  },
+  "training_mode": "llm_guided_tune",
+  "training_control": {
+    "num_boost_round": 1200,
+    "early_stopping_rounds": 80
+  },
+  "tuning_summary": {
+    "mode": "llm_guided_tune",
+    "advisor_types": [
+      "baseline",
+      "host_agent_unavailable_local_heuristic_fallback"
+    ],
+    "trial_count": 9,
+    "best_trial_id": 1,
+    "selection": {
+      "best_trial_id": 1,
+      "selection_score": 0.7659112009250191,
+      "primary_metric": "valid_ks",
+      "primary_value": 0.719264041739591,
+      "secondary_metric": "valid_auc",
+      "secondary_value": 0.9329431837085607,
+      "auc_gap": 0.021794347828822502,
+      "guardrail_passed": true,
+      "guardrail_status": "passed",
+      "candidate_count": 9
+    },
+    "best_params": {
+      "objective": "binary",
+      "metric": "auc",
+      "learning_rate": 0.03,
+      "num_leaves": 63,
+      "max_depth": 7,
+      "min_child_samples": 100,
+      "subsample": 0.82,
+      "colsample_bytree": 0.75,
+      "reg_alpha": 0.1,
+      "reg_lambda": 2.0,
+      "bagging_freq": 3,
+      "num_boost_round": 1200,
+      "early_stopping_rounds": 80
+    },
+    "decisions": [
+      "round 1: baseline is within overfit guardrail; explore moderate capacity and learning-rate tradeoffs",
+      "round 2: baseline is within overfit guardrail; explore moderate capacity and learning-rate tradeoffs",
+      "round 2: improvement 0.000000 < 0.001000",
+      "round 2: stopped after 1 no-improvement round(s)"
+    ]
+  },
+  "random_seed": 0,
+  "workbench_git_commit": {
+    "commit": "bce4bb652b5c352ecd4b20ed995834812ec648f3",
+    "dirty": true
+  },
+  "input_feather": {
+    "path": "/Users/guzijun/gcard_1pct_export/sample_50pct.feather",
+    "sha256": "02b3bc9891c2b285625cebc204ea96942ffe595e4590b340f8f7e86dd7365348"
+  },
+  "train_auc": 0.9547375315373832,
+  "valid_auc": 0.9329431837085607,
+  "train_ks": 0.7690440179897363,
+  "valid_ks": 0.719264041739591,
+  "train_samples": 183739,
+  "valid_samples": 183480,
+  "train_bad_rate": 0.153195565448816,
+  "valid_bad_rate": 0.17346304774362328,
+  "best_iteration": 421,
+  "train_time_seconds": 42.9,
+  "auc_gap": 0.021794347828822502
+}

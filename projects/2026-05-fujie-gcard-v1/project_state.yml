@@ -1,27 +1,27 @@
-project: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1
-active_run_id: fujie_gcard_action_runner_v1_20260710
-current_objective: ActionRunner Agent 建模闭环已完成，进入领域 Skill 验收、规则沉淀与更大样本泛化验证
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+active_run_id: ''
+current_objective: 复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告
 status: active
 next_actions:
-- 核对 imported run 中 pending 阶段是否需要标记为 skipped/imported
-- 把高频 lessons 进一步提升为 CLI guardrail、测试或 skill 规则
-- 完成四个领域 Skill 的人工评审并提交 Task10
-- 在更大样本上验证模型泛化性能；监控线上PSI趋势
+- 评审 fujie_gcard_v8_20260709_1710 报告、模型卡和执行摘要，决定是否进入发布/准入评审
+- 如需提高特征筛选稳健性，使用更高 feature_refine 采样上限或全量宽表资源复跑 D01/D02/Null Importance
+- 固化 evaluation 维度字段别名规则，避免 split/month/segment/decile 字面字段缺失被记录为 missing requirement
+- 继续监控 OOT/OOT-OOS 表现、PSI 和线上稳定性
 risks:
-- imported run 不是本地全链路重跑证据
-- imported run is not proof that the full workflow was rerun locally
-- scaffold artifacts exist and must not be treated as real modeling evidence
-- 当前闭环基于本地 sample_50pct.feather，仍不是生产全量宽表验证
+- fujie_gcard_v8_20260709_1710 是本地全链路重跑证据，审计 verdict=complete；不要再用 imported run 作为本轮证据
+- feature_refine 因 200000/100000 行 D01 相关性计算超时，最终使用 sample-max-rows=50000 的资源降级口径
+- 训练和评估基于 /Users/guzijun/gcard_1pct_export/sample_50pct.feather 的 489743 行本地 feather，不代表远端全量宽表
+- MOB1/MOB3 历史风险仍缺未来期还款表现数据，报告中只能保留缺失说明
 version: 1
-updated_at: '2026-07-12T11:30:59'
-last_handoff: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/handoffs/20260712_113059-fujie_gcard_agent_v2_20260712.md
+updated_at: '2026-07-09T18:14:30'
+last_handoff: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/handoffs/20260709_181430-fujie_gcard_v8_20260709_1710.md
 last_retrospective: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/retrospectives/20260609_201910-session-2026-06-imported-gcard-main-lgbm.md
 blockers: []
-last_verified_at: '2026-07-12T02:46:22'
+last_verified_at: '2026-07-09T18:05:50'
 last_verified_commands:
-- rmw agent status --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710
-  --json
-- rmw version audit --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710
+- rmw request validate --project projects/2026-05-fujie-gcard-v1 --request projects/2026-05-fujie-gcard-v1/requests/20260709-1710-model-request.md
+- rmw plan create --project projects/2026-05-fujie-gcard-v1 --request projects/2026-05-fujie-gcard-v1/requests/20260709-1710-model-request.md
+- rmw version audit --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_v8_20260709_1710
   --strict
-- pytest tests -q
-active_version_id: fujie_gcard_agent_v2_20260712
+- rmw project status --project projects/2026-05-fujie-gcard-v1
+active_version_id: fujie_gcard_v8_20260709_1710

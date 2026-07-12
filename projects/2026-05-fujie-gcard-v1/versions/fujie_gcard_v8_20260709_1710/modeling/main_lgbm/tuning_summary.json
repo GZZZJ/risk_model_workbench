@@ -1,0 +1,42 @@
+{
+  "mode": "llm_guided_tune",
+  "advisor_types": [
+    "baseline",
+    "host_agent_unavailable_local_heuristic_fallback"
+  ],
+  "trial_count": 9,
+  "best_trial_id": 1,
+  "selection": {
+    "best_trial_id": 1,
+    "selection_score": 0.7659112009250191,
+    "primary_metric": "valid_ks",
+    "primary_value": 0.719264041739591,
+    "secondary_metric": "valid_auc",
+    "secondary_value": 0.9329431837085607,
+    "auc_gap": 0.021794347828822502,
+    "guardrail_passed": true,
+    "guardrail_status": "passed",
+    "candidate_count": 9
+  },
+  "best_params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": 7,
+    "min_child_samples": 100,
+    "subsample": 0.82,
+    "colsample_bytree": 0.75,
+    "reg_alpha": 0.1,
+    "reg_lambda": 2.0,
+    "bagging_freq": 3,
+    "num_boost_round": 1200,
+    "early_stopping_rounds": 80
+  },
+  "decisions": [
+    "round 1: baseline is within overfit guardrail; explore moderate capacity and learning-rate tradeoffs",
+    "round 2: baseline is within overfit guardrail; explore moderate capacity and learning-rate tradeoffs",
+    "round 2: improvement 0.000000 < 0.001000",
+    "round 2: stopped after 1 no-improvement round(s)"
+  ]
+}

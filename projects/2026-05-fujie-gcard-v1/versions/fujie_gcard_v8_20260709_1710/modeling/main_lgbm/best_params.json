@@ -1,0 +1,15 @@
+{
+  "objective": "binary",
+  "metric": "auc",
+  "learning_rate": 0.03,
+  "num_leaves": 63,
+  "max_depth": 7,
+  "min_child_samples": 100,
+  "subsample": 0.82,
+  "colsample_bytree": 0.75,
+  "reg_alpha": 0.1,
+  "reg_lambda": 2.0,
+  "bagging_freq": 3,
+  "num_boost_round": 1200,
+  "early_stopping_rounds": 80
+}

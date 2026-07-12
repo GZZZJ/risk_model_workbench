@@ -1,0 +1,1978 @@
+version_id: fujie_gcard_v8_20260709_1710
+project: /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1
+workflow: full_modeling
+source_type: workbench
+created_at: '2026-07-09T17:15:00'
+status: done
+current_stage: report
+stages:
+  validate_config:
+    status: done
+    artifacts:
+    - configs_snapshot
+    - model_request.md
+    - execution_plan.yml
+    - configs_runtime
+    - configs_runtime/project.yml
+    - configs_runtime/sample.yaml
+    - configs_runtime/feature_select.yaml
+    - configs_runtime/refine_features.yaml
+    - configs_runtime/train.yaml
+    - configs_runtime/evaluate.yaml
+    - configs_runtime/report.yaml
+    - configs_runtime/request_runtime.yaml
+    started_at: '2026-07-09T17:15:00'
+    action:
+      id: validate_config
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - configs/*.yml
+      - optional model_request.md
+      - optional execution_plan.yml
+      expected_outputs:
+      - run_state.yml
+      - configs_snapshot/
+      - audit/artifact_manifest.json
+      artifact_rules:
+      - configs_snapshot
+      - configs_snapshot/*
+    finished_at: '2026-07-09T17:15:00'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: configs_snapshot
+        kind: directory
+        source: generated
+        exists: true
+        description: Project config snapshot
+        artifact_rule: configs_snapshot
+        rule_matched: true
+      - path: model_request.md
+        kind: file
+        source: generated
+        exists: false
+        description: Model request copied into run workspace
+        artifact_rule: ''
+        rule_matched: false
+      - path: execution_plan.yml
+        kind: file
+        source: generated
+        exists: false
+        description: Execution plan copied into run workspace
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime
+        kind: directory
+        source: generated
+        exists: true
+        description: Request-materialized runtime configs
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/project.yml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/sample.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/feature_select.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/refine_features.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/train.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/evaluate.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/report.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      - path: configs_runtime/request_runtime.yaml
+        kind: file
+        source: generated
+        exists: false
+        description: Request-materialized runtime config
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+    progress:
+      step: action_done
+      status: done
+      message: 配置校验完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:15:00'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  sample_check:
+    status: done
+    artifacts:
+    - sample_check/sample_summary.json
+    - sample_check/sample_check_report.md
+    - sample_check/label_distribution.csv
+    - sample_check/sample_split_summary.csv
+    - sample_check/monthly_label_distribution.csv
+    - sample_check/segment_distribution.csv
+    started_at: '2026-07-09T17:15:36'
+    action:
+      id: sample_check
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - configs_snapshot/*
+      expected_outputs:
+      - sample_check/sample_summary.json
+      - sample_check/sample_check_report.md
+      artifact_rules:
+      - sample_check/sample_summary.json
+      - sample_check/sample_check_report.md
+      - sample_check/sample_split_summary.csv
+      - sample_check/label_distribution.csv
+      - sample_check/segment_distribution.csv
+    finished_at: '2026-07-09T17:15:55'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: sample_check/sample_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_summary.json
+        rule_matched: true
+      - path: sample_check/sample_check_report.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_check_report.md
+        rule_matched: true
+      - path: sample_check/label_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/label_distribution.csv
+        rule_matched: true
+      - path: sample_check/sample_split_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/sample_split_summary.csv
+        rule_matched: true
+      - path: sample_check/monthly_label_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: sample_check/segment_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: sample_check/segment_distribution.csv
+        rule_matched: true
+      decision:
+        stage: sample_check
+        decision: done
+        reason: Sample profiling completed from local data
+        created_at: '2026-07-09T17:15:55'
+    progress:
+      step: action_done
+      status: done
+      message: 样本检查完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:15:55'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  feature_metadata:
+    status: done
+    artifacts:
+    - feature_metadata/feature_tables_meta.json
+    - feature_metadata/feature_table_summary.csv
+    - feature_metadata/feature_columns.csv
+    started_at: '2026-07-09T17:16:50'
+    action:
+      id: feature_metadata
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - optional tables file
+      expected_outputs:
+      - feature_metadata/*
+      artifact_rules:
+      - feature_metadata/*
+    progress:
+      step: action_done
+      status: done
+      message: 特征元数据完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:17:58'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-07-09T17:17:58'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: feature_metadata/feature_tables_meta.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature metadata export
+        artifact_rule: feature_metadata/*
+        rule_matched: true
+      - path: feature_metadata/feature_table_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: Feature metadata export
+        artifact_rule: feature_metadata/*
+        rule_matched: true
+      - path: feature_metadata/feature_columns.csv
+        kind: file
+        source: generated
+        exists: false
+        description: Feature metadata export
+        artifact_rule: feature_metadata/*
+        rule_matched: true
+      decision: null
+  feature_prescreen:
+    status: done
+    artifacts:
+    - feature_selection/data_source_contract.json
+    - feature_selection/execution_environment.json
+    - feature_selection/resource_plan.json
+    - feature_selection/sampling_plan.json
+    - feature_selection/batch_plan.json
+    - feature_selection/profiles/local_feather_profile.json
+    - feature_selection/batches/batch_001_plan.json
+    - feature_selection/batches/batch_002_plan.json
+    - feature_selection/batches/batch_003_plan.json
+    - feature_selection/batches/batch_004_plan.json
+    - feature_selection/batches/batch_005_plan.json
+    - feature_selection/batches/batch_006_plan.json
+    - feature_selection/batches/batch_007_plan.json
+    - feature_selection/batches/batch_008_plan.json
+    - feature_selection/batches/batch_009_plan.json
+    - feature_selection/batches/batch_010_plan.json
+    - feature_selection/batches/batch_011_plan.json
+    - feature_selection/batches/batch_012_plan.json
+    - feature_selection/batches/batch_013_plan.json
+    - feature_selection/batches/batch_014_plan.json
+    - feature_selection/batches/batch_015_plan.json
+    started_at: '2026-07-09T17:18:04'
+    action:
+      id: feature_prescreen
+      kind: stage
+      approval_required: true
+      approval_type: sql_review
+      retry_policy: never
+      expected_inputs:
+      - project.yml
+      - feature metadata
+      - SQL review approval for DP pull
+      expected_outputs:
+      - feature_selection/prescreen_*
+      - feature_selection/*_run_summary.json
+      - feature_selection/*_final_remain_features.json
+      artifact_rules:
+      - feature_selection/prescreen_*
+      - feature_selection/*_run_summary.json
+      - feature_selection/*_final_remain_features.json
+    finished_at: '2026-07-09T17:18:14'
+    last_result:
+      status: done
+      failure_code: ''
+      message: 'local feather mode: prescreen by design, intake evidence emitted'
+      retry_count: 0
+      artifacts:
+      - path: feature_selection/data_source_contract.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/execution_environment.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/resource_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/sampling_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batch_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/profiles/local_feather_profile.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_001_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_002_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_003_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_004_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_005_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_006_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_007_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_008_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_009_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_010_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_011_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_012_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_013_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_014_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_015_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+    progress:
+      step: action_done
+      status: done
+      message: 'local feather mode: prescreen by design, intake evidence emitted'
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:18:15'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  build_wide_sql:
+    status: done
+    artifacts:
+    - feature_selection/wide_table_skipped.json
+    started_at: '2026-07-09T17:18:21'
+    action:
+      id: build_wide_sql
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - feature prescreen remaining features
+      - project.yml
+      expected_outputs:
+      - queries/*.sql
+      - feature_selection/wide_sql_summary.json
+      - feature_selection/wide_table_execution.json
+      artifact_rules:
+      - queries/*.sql
+      - feature_selection/*wide*summary.json
+      - feature_selection/wide_table_execution.json
+      - feature_selection/*feature_map.csv
+    progress:
+      step: action_done
+      status: done
+      message: 'local feather mode: wide table skipped by design'
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:18:21'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-07-09T17:18:21'
+    last_result:
+      status: done
+      failure_code: ''
+      message: 'local feather mode: wide table skipped by design'
+      retry_count: 0
+      artifacts:
+      - path: feature_selection/wide_table_skipped.json
+        kind: file
+        source: generated
+        exists: false
+        description: Local-feather wide-table skip (by design)
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+  feature_refine:
+    status: done
+    artifacts:
+    - feature_selection/data_source_contract.json
+    - feature_selection/execution_environment.json
+    - feature_selection/resource_plan.json
+    - feature_selection/sampling_plan.json
+    - feature_selection/batch_plan.json
+    - feature_selection/profiles/local_feather_profile.json
+    - feature_selection/batches/batch_001_plan.json
+    - feature_selection/batches/batch_002_plan.json
+    - feature_selection/batches/batch_003_plan.json
+    - feature_selection/batches/batch_004_plan.json
+    - feature_selection/batches/batch_005_plan.json
+    - feature_selection/batches/batch_006_plan.json
+    - feature_selection/batches/batch_007_plan.json
+    - feature_selection/batches/batch_008_plan.json
+    - feature_selection/batches/batch_009_plan.json
+    - feature_selection/batches/batch_010_plan.json
+    - feature_selection/batches/batch_011_plan.json
+    - feature_selection/batches/batch_012_plan.json
+    - feature_selection/batches/batch_013_plan.json
+    - feature_selection/batches/batch_014_plan.json
+    - feature_selection/batches/batch_015_plan.json
+    - feature_selection/stage_summary.json
+    - feature_selection/feature_stage_summary.json
+    - feature_selection/final_500_features.txt
+    - feature_selection/final_features.txt
+    - feature_selection/resource_usage.json
+    started_at: '2026-07-09T17:44:32'
+    action:
+      id: feature_refine
+      kind: stage
+      approval_required: true
+      approval_type: sql_review
+      retry_policy: never
+      expected_inputs:
+      - training data feather
+      - wide SQL output
+      - SQL review approval for DP pull
+      expected_outputs:
+      - feature_selection/final_features.txt
+      - feature_selection/final_500_features.txt
+      - feature_selection/stage_summary.json
+      artifact_rules:
+      - feature_selection/final_features.txt
+      - feature_selection/final_500_features.txt
+      - feature_selection/*stage_summary.json
+    progress:
+      step: action_done
+      status: done
+      message: 特征精筛完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T17:53:45'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-07-09T17:53:44'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: feature_selection/data_source_contract.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/execution_environment.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/resource_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/sampling_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batch_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Resource-aware feature intake evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/profiles/local_feather_profile.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature source profile evidence
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_001_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_002_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_003_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_004_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_005_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_006_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_007_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_008_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_009_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_010_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_011_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_012_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_013_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_014_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/batches/batch_015_plan.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature batch plan
+        artifact_rule: ''
+        rule_matched: false
+      - path: feature_selection/stage_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement stage summary
+        artifact_rule: feature_selection/*stage_summary.json
+        rule_matched: true
+      - path: feature_selection/feature_stage_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement stage summary compatibility copy
+        artifact_rule: feature_selection/*stage_summary.json
+        rule_matched: true
+      - path: feature_selection/final_500_features.txt
+        kind: file
+        source: generated
+        exists: false
+        description: Final refined feature list
+        artifact_rule: feature_selection/final_500_features.txt
+        rule_matched: true
+      - path: feature_selection/final_features.txt
+        kind: file
+        source: generated
+        exists: false
+        description: Final refined feature list
+        artifact_rule: feature_selection/final_features.txt
+        rule_matched: true
+      - path: feature_selection/resource_usage.json
+        kind: file
+        source: generated
+        exists: false
+        description: Feature refinement runtime memory usage
+        artifact_rule: ''
+        rule_matched: false
+      decision: null
+  train_baseline:
+    status: done
+    artifacts:
+    - modeling/main_lgbm/train_metrics.json
+    - modeling/main_lgbm/training_status.json
+    - modeling/main_lgbm/training_summary.md
+    - modeling/main_lgbm/metrics_train_valid.json
+    - modeling/main_lgbm/feature_importance.csv
+    - modeling/main_lgbm/feature_drop_detail.csv
+    - modeling/main_lgbm/actual_feature_list.txt
+    - modeling/main_lgbm/preprocessing.json
+    - modeling/main_lgbm/run_config.json
+    - modeling/main_lgbm/model.pkl
+    - modeling/main_lgbm/score_column_summary.csv
+    - modeling/main_lgbm/tuning_context.json
+    - modeling/main_lgbm/tuning_trials.csv
+    - modeling/main_lgbm/tuning_summary.json
+    - modeling/main_lgbm/best_params.json
+    - modeling/main_lgbm/selection_reason.md
+    - modeling/main_lgbm/llm_tuning_decisions.md
+    - modeling/main_lgbm/llm_tuning_plan_round_1.json
+    - modeling/main_lgbm/llm_tuning_plan_round_2.json
+    - modeling/main_lgbm/tuning_context_round_1.json
+    - modeling/main_lgbm/tuning_context_round_2.json
+    - modeling/main_lgbm/scores_all_splits.feather
+    - modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/003_unpaid_principal_future_light_add_heavy_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/004_first_day_diff_event_result_1_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/005_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/007_pge_id_cnt_90d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/008_cnt_avg_ord_span_30d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/010_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/011_ddf_mdl_max_dau_dt_90d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/012_min_rsk_lmt_rate_3m_bt_ch_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/013_clk_cnt_14d_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/014_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/015_rsi_abf_1y_inter_1m_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/016_his_30d_app_str_ctn_v2_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/018_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - modeling/main_lgbm/woe_top_features/images/020_d180_apl_ord_cnt_all_WOE.png
+    - modeling/main_lgbm/woe_top_features/woe_top20_summary.csv
+    started_at: '2026-07-09T17:54:07'
+    action:
+      id: train_baseline
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - training data feather
+      - feature_selection/final_features.txt
+      - project.yml
+      expected_outputs:
+      - modeling/*/metrics_train_valid.json
+      - modeling/*/training_status.json
+      - modeling/*/training_summary.md
+      - modeling/*/train_plan.json
+      - modeling/*/train_plan.md
+      - modeling/*/actual_feature_list.txt
+      - modeling/*/feature_importance.csv
+      - modeling/*/tuning_summary.json
+      - modeling/*/tuning_trials.csv
+      - modeling/*/best_params.json
+      artifact_rules:
+      - modeling/*/metrics_train_valid.json
+      - modeling/*/actual_feature_list.txt
+      - modeling/*/feature_importance.csv
+      - modeling/*/train_metrics.json
+      - modeling/*/training_status.json
+      - modeling/*/training_summary.md
+      - modeling/*/train_plan.json
+      - modeling/*/train_plan.md
+      - modeling/*/tuning_summary.json
+      - modeling/*/tuning_trials.csv
+      - modeling/*/best_params.json
+      - modeling/*/llm_tuning_decisions.md
+    progress:
+      step: action_done
+      status: done
+      message: 模型训练完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T18:02:31'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-07-09T18:02:31'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: modeling/main_lgbm/train_metrics.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/train_metrics.json
+        rule_matched: true
+      - path: modeling/main_lgbm/training_status.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/training_status.json
+        rule_matched: true
+      - path: modeling/main_lgbm/training_summary.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/training_summary.md
+        rule_matched: true
+      - path: modeling/main_lgbm/metrics_train_valid.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/metrics_train_valid.json
+        rule_matched: true
+      - path: modeling/main_lgbm/feature_importance.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/feature_importance.csv
+        rule_matched: true
+      - path: modeling/main_lgbm/feature_drop_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/actual_feature_list.txt
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/actual_feature_list.txt
+        rule_matched: true
+      - path: modeling/main_lgbm/preprocessing.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/run_config.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/model.pkl
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/score_column_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/tuning_context.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/tuning_trials.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/tuning_trials.csv
+        rule_matched: true
+      - path: modeling/main_lgbm/tuning_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/tuning_summary.json
+        rule_matched: true
+      - path: modeling/main_lgbm/best_params.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/best_params.json
+        rule_matched: true
+      - path: modeling/main_lgbm/selection_reason.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/llm_tuning_decisions.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: modeling/*/llm_tuning_decisions.md
+        rule_matched: true
+      - path: modeling/main_lgbm/llm_tuning_plan_round_1.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/llm_tuning_plan_round_2.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/tuning_context_round_1.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/tuning_context_round_2.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/scores_all_splits.feather
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/003_unpaid_principal_future_light_add_heavy_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/004_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/005_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/007_pge_id_cnt_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/008_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/010_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/011_ddf_mdl_max_dau_dt_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/012_min_rsk_lmt_rate_3m_bt_ch_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/013_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/014_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/015_rsi_abf_1y_inter_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/016_his_30d_app_str_ctn_v2_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/018_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/images/020_d180_apl_ord_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: modeling/main_lgbm/woe_top_features/woe_top20_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      decision:
+        stage: train_baseline
+        decision: done
+        reason: lightgbm training completed from local feather data
+        created_at: '2026-07-09T18:02:31'
+  evaluate:
+    status: done
+    artifacts:
+    - evaluation/benchmark_uplift.csv
+    - evaluation/business_risk.csv
+    - evaluation/cross_gain_matrix_gcard_v2.csv
+    - evaluation/cross_gain_matrix_gcard_v4.csv
+    - evaluation/cross_gain_matrix_gcard_v5.csv
+    - evaluation/cross_gain_matrix_gcard_v6.csv
+    - evaluation/decile_lift_all.csv
+    - evaluation/decile_lift_all_gcard_v2.csv
+    - evaluation/decile_lift_all_gcard_v4.csv
+    - evaluation/decile_lift_all_gcard_v5.csv
+    - evaluation/decile_lift_all_gcard_v6.csv
+    - evaluation/decile_lift_all_model_score.csv
+    - evaluation/decile_lift_b2.csv
+    - evaluation/decile_lift_b2_gcard_v2.csv
+    - evaluation/decile_lift_b2_gcard_v4.csv
+    - evaluation/decile_lift_b2_gcard_v5.csv
+    - evaluation/decile_lift_b2_gcard_v6.csv
+    - evaluation/decile_lift_b2_model_score.csv
+    - evaluation/decile_lift_e2e3.csv
+    - evaluation/decile_lift_e2e3_gcard_v2.csv
+    - evaluation/decile_lift_e2e3_gcard_v4.csv
+    - evaluation/decile_lift_e2e3_gcard_v5.csv
+    - evaluation/decile_lift_e2e3_gcard_v6.csv
+    - evaluation/decile_lift_e2e3_model_score.csv
+    - evaluation/dimension_metrics.csv
+    - evaluation/evaluation_summary.json
+    - evaluation/feature_gain_summary.csv
+    - evaluation/intent_zc_amount_risk.csv
+    - evaluation/intent_zc_amount_risk_b2.csv
+    - evaluation/intent_zc_amount_risk_e2e3.csv
+    - evaluation/intent_zc_distribution.csv
+    - evaluation/intent_zc_distribution_b2.csv
+    - evaluation/intent_zc_distribution_e2e3.csv
+    - evaluation/intent_zc_ftr_rate.csv
+    - evaluation/intent_zc_ftr_rate_b2.csv
+    - evaluation/intent_zc_ftr_rate_e2e3.csv
+    - evaluation/intent_zc_headcount_risk.csv
+    - evaluation/intent_zc_headcount_risk_b2.csv
+    - evaluation/intent_zc_headcount_risk_e2e3.csv
+    - evaluation/missing_evaluation_requirements.json
+    - evaluation/monthly_metrics.csv
+    - evaluation/overall_metrics.csv
+    - evaluation/ranking_inversion.csv
+    - evaluation/score_psi_bin_detail.csv
+    - evaluation/score_psi_by_month.csv
+    - evaluation/segment_metrics.csv
+    started_at: '2026-07-09T18:02:44'
+    action:
+      id: evaluate
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - model scores feather
+      - project.yml
+      expected_outputs:
+      - evaluation/evaluation_summary.json
+      artifact_rules:
+      - evaluation/evaluation_summary.json
+    progress:
+      step: action_done
+      status: done
+      message: 模型评估完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T18:03:38'
+      elapsed_seconds: 0.0
+      last_event_status: done
+    finished_at: '2026-07-09T18:03:37'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: evaluation/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/business_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/cross_gain_matrix_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_all_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_b2_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v4.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v5.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_gcard_v6.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/decile_lift_e2e3_model_score.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/dimension_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/evaluation_summary.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/evaluation_summary.json
+        rule_matched: true
+      - path: evaluation/feature_gain_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_amount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_amount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_amount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_distribution.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_distribution_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_distribution_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_ftr_rate.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_ftr_rate_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_ftr_rate_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_headcount_risk.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_headcount_risk_b2.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/intent_zc_headcount_risk_e2e3.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/missing_evaluation_requirements.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/monthly_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/overall_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/ranking_inversion.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/score_psi_bin_detail.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/score_psi_by_month.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: evaluation/segment_metrics.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      decision:
+        stage: evaluate
+        decision: done
+        reason: Evaluation completed from local score feather
+        created_at: '2026-07-09T18:03:37'
+  compare:
+    status: done
+    artifacts:
+    - evaluation/benchmark_uplift.csv
+    - evaluation/champion_challenger.json
+    started_at: '2026-07-09T18:04:02'
+    action:
+      id: compare
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - evaluation/evaluation_summary.json
+      - optional champion score
+      expected_outputs:
+      - evaluation/champion_challenger.json
+      - evaluation/benchmark_uplift.csv
+      artifact_rules:
+      - evaluation/champion_challenger.json
+      - evaluation/benchmark_uplift.csv
+    finished_at: '2026-07-09T18:04:03'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: evaluation/benchmark_uplift.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/benchmark_uplift.csv
+        rule_matched: true
+      - path: evaluation/champion_challenger.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: evaluation/champion_challenger.json
+        rule_matched: true
+      decision:
+        stage: compare
+        decision: done
+        reason: Champion/challenger comparison materialized
+        created_at: '2026-07-09T18:04:03'
+    progress:
+      step: action_done
+      status: done
+      message: 冠军挑战者对比完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T18:04:03'
+      elapsed_seconds: 0.0
+      last_event_status: done
+  report:
+    status: done
+    artifacts:
+    - reports/report_scope.json
+    - reports/model_report.xlsx
+    - reports/model_report.md
+    - reports/model_report.html
+    - reports/model_report_missing_results.md
+    - reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+    - reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+    - reports/woe_top_features/images/003_unpaid_principal_future_light_add_heavy_WOE.png
+    - reports/woe_top_features/images/004_first_day_diff_event_result_1_all_WOE.png
+    - reports/woe_top_features/images/005_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+    - reports/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+    - reports/woe_top_features/images/007_pge_id_cnt_90d_WOE.png
+    - reports/woe_top_features/images/008_cnt_avg_ord_span_30d_WOE.png
+    - reports/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+    - reports/woe_top_features/images/010_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+    - reports/woe_top_features/images/011_ddf_mdl_max_dau_dt_90d_WOE.png
+    - reports/woe_top_features/images/012_min_rsk_lmt_rate_3m_bt_ch_WOE.png
+    - reports/woe_top_features/images/013_clk_cnt_14d_WOE.png
+    - reports/woe_top_features/images/014_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+    - reports/woe_top_features/images/015_rsi_abf_1y_inter_1m_WOE.png
+    - reports/woe_top_features/images/016_his_30d_app_str_ctn_v2_WOE.png
+    - reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+    - reports/woe_top_features/images/018_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+    - reports/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+    - reports/woe_top_features/images/020_d180_apl_ord_cnt_all_WOE.png
+    - reports/woe_top_features/woe_top20_summary.csv
+    - reports/model_card.md
+    - reports/executive_summary.md
+    started_at: '2026-07-09T18:05:02'
+    action:
+      id: report
+      kind: stage
+      approval_required: false
+      approval_type: none
+      retry_policy: never
+      expected_inputs:
+      - run_state.yml
+      - audit/artifact_manifest.json
+      - modeling artifacts
+      - evaluation artifacts
+      expected_outputs:
+      - reports/model_report.xlsx
+      - reports/model_report.md
+      - reports/model_report.html
+      - reports/model_card.md
+      - reports/executive_summary.md
+      artifact_rules:
+      - reports/model_report.xlsx
+      - reports/model_report.md
+      - reports/model_report.html
+      - reports/model_card.md
+      - reports/executive_summary.md
+    finished_at: '2026-07-09T18:05:16'
+    last_result:
+      status: done
+      failure_code: ''
+      message: ''
+      retry_count: 0
+      artifacts:
+      - path: reports/report_scope.json
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/model_report.xlsx
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_report.xlsx
+        rule_matched: true
+      - path: reports/model_report.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_report.md
+        rule_matched: true
+      - path: reports/model_report.html
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_report.html
+        rule_matched: true
+      - path: reports/model_report_missing_results.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/002_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/003_unpaid_principal_future_light_add_heavy_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/004_first_day_diff_event_result_1_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/005_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/006_d180_apl_ord_days_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/007_pge_id_cnt_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/008_cnt_avg_ord_span_30d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/009_d30_apl_ord_days_cnt_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/010_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/011_ddf_mdl_max_dau_dt_90d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/012_min_rsk_lmt_rate_3m_bt_ch_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/013_clk_cnt_14d_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/014_first_day_diff_event_result_0_event_type_loan_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/015_rsi_abf_1y_inter_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/016_his_30d_app_str_ctn_v2_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/017_rsk_avl_lmt_ch_les_10000_cnt_12m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/018_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/019_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/images/020_d180_apl_ord_cnt_all_WOE.png
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/woe_top_features/woe_top20_summary.csv
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: ''
+        rule_matched: false
+      - path: reports/model_card.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/model_card.md
+        rule_matched: true
+      - path: reports/executive_summary.md
+        kind: file
+        source: generated
+        exists: false
+        description: ''
+        artifact_rule: reports/executive_summary.md
+        rule_matched: true
+      decision:
+        stage: report
+        decision: done
+        reason: Excel report generated for 1 report target(s)
+        created_at: '2026-07-09T18:05:16'
+    progress:
+      step: action_done
+      status: done
+      message: 报告生成完成
+      current: null
+      total: null
+      percent: 100.0
+      heartbeat_at: '2026-07-09T18:05:16'
+      elapsed_seconds: 0.0
+      last_event_status: done
+decisions:
+- stage: sample_check
+  decision: done
+  reason: Sample profiling completed from local data
+  created_at: '2026-07-09T17:15:55'
+- stage: train_baseline
+  decision: done
+  reason: lightgbm training completed from local feather data
+  created_at: '2026-07-09T18:02:31'
+- stage: evaluate
+  decision: done
+  reason: Evaluation completed from local score feather
+  created_at: '2026-07-09T18:03:37'
+- stage: compare
+  decision: done
+  reason: Champion/challenger comparison materialized
+  created_at: '2026-07-09T18:04:03'
+- stage: report
+  decision: report_target_done
+  reason: 'default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v8_20260709_1710/reports/model_report.xlsx'
+  created_at: '2026-07-09T18:04:24'
+- stage: report
+  decision: done
+  reason: Excel report generated for 1 report target(s)
+  created_at: '2026-07-09T18:04:24'
+- stage: report
+  decision: report_target_done
+  reason: 'default: generated /Users/guzijun/Desktop/AI攻坚/risk_model_workbench/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v8_20260709_1710/reports/model_report.xlsx'
+  created_at: '2026-07-09T18:05:15'
+- stage: report
+  decision: done
+  reason: Excel report generated for 1 report target(s)
+  created_at: '2026-07-09T18:05:16'
+- stage: report
+  decision: report_governance_updated
+  reason: model_card.md and executive_summary.md replaced with evidence-based summaries
+  created_at: '2026-07-09T18:14:13'
+updated_at: '2026-07-09T18:14:13'

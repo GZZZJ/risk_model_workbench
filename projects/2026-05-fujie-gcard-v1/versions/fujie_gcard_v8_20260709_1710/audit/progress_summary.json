@@ -1,0 +1,308 @@
+{
+  "version": 1,
+  "version_id": "fujie_gcard_v8_20260709_1710",
+  "run_id": "fujie_gcard_v8_20260709_1710",
+  "updated_at": "2026-07-09T18:05:16",
+  "stage": "report",
+  "stage_label": "报告生成",
+  "latest_event": {
+    "timestamp": "2026-07-09T18:05:16",
+    "version_id": "fujie_gcard_v8_20260709_1710",
+    "run_id": "fujie_gcard_v8_20260709_1710",
+    "stage": "report",
+    "step": "action_done",
+    "status": "done",
+    "message": "报告生成完成",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "report",
+      "failure_code": "",
+      "retry_count": 0,
+      "artifact_count": 28,
+      "decision": "done"
+    },
+    "level": "info",
+    "pid": 70335
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:15:00",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 12
+        },
+        "level": "info",
+        "pid": 53371
+      },
+      "updated_at": "2026-07-09T17:15:00"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:15:55",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 56164
+      },
+      "updated_at": "2026-07-09T17:15:55"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:17:58",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征元数据完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 3
+        },
+        "level": "info",
+        "pid": 60567
+      },
+      "updated_at": "2026-07-09T17:17:58"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:18:15",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: prescreen by design, intake evidence emitted",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 21
+        },
+        "level": "info",
+        "pid": 73463
+      },
+      "updated_at": "2026-07-09T17:18:15"
+    },
+    "build_wide_sql": {
+      "stage": "build_wide_sql",
+      "stage_label": "宽表 SQL 生成",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:18:21",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "build_wide_sql",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: wide table skipped by design",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "build_wide_sql",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 1
+        },
+        "level": "info",
+        "pid": 74474
+      },
+      "updated_at": "2026-07-09T17:18:21"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-07-09T17:53:45",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "feature_refine",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征精筛完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_refine",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 26
+        },
+        "level": "info",
+        "pid": 12688
+      },
+      "updated_at": "2026-07-09T17:53:45"
+    },
+    "train_baseline": {
+      "stage": "train_baseline",
+      "stage_label": "模型训练",
+      "latest_event": {
+        "timestamp": "2026-07-09T18:02:31",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "train_baseline",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型训练完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "train_baseline",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 43,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 42611
+      },
+      "updated_at": "2026-07-09T18:02:31"
+    },
+    "evaluate": {
+      "stage": "evaluate",
+      "stage_label": "模型评估",
+      "latest_event": {
+        "timestamp": "2026-07-09T18:03:38",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "evaluate",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型评估完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "evaluate",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 46,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 56573
+      },
+      "updated_at": "2026-07-09T18:03:38"
+    },
+    "compare": {
+      "stage": "compare",
+      "stage_label": "冠军挑战者对比",
+      "latest_event": {
+        "timestamp": "2026-07-09T18:04:03",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "compare",
+        "step": "action_done",
+        "status": "done",
+        "message": "冠军挑战者对比完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "compare",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 2,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 64515
+      },
+      "updated_at": "2026-07-09T18:04:03"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-07-09T18:05:16",
+        "version_id": "fujie_gcard_v8_20260709_1710",
+        "run_id": "fujie_gcard_v8_20260709_1710",
+        "stage": "report",
+        "step": "action_done",
+        "status": "done",
+        "message": "报告生成完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 28,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 70335
+      },
+      "updated_at": "2026-07-09T18:05:16"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+sample:
+  mode: local_file
+  local_sample_path: data/raw/sample.feather
+  local_feature_path: data/raw/features.feather
+  dp_sample_table: ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_sample
+  id_columns:
+    - uid
+    - mdl_dte
+  target_column: ftr_30d_ord_flag
+  time_column: mdl_dte
+  period_column: ds
+  split_column: final_flag
+
+quality_checks:
+  check_duplicate_keys: true
+  check_target_null: true
+  check_split_null: true
+  check_time_range: true
+
+sampling:
+  enabled: false
+  strategy: to_be_confirmed
+  random_seed: 0
+  max_rows: null
+
+split:
+  use_existing_column: true
+  ins_values:
+    - DEV
+  oos_values:
+    - DEV-OOS
+  oot_values:
+    - OOT
+    - OOT-OOS

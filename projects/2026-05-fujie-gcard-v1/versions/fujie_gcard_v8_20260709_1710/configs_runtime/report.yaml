@@ -1,0 +1,72 @@
+report:
+  output_formats:
+  - markdown
+  template: model_report.md.j2
+  output_dir: reports
+  sections:
+  - sample_overview
+  - feature_screening
+  - modeling_plan
+  - top_features
+  - model_performance
+  - champion_comparison
+  - risk_profile
+  - next_action
+  outputs:
+  - model_report.md
+  - model_card.md
+  - executive_summary.md
+  stage_steps:
+  - model_report
+  model_display_name: G卡V8
+  score_labels:
+    model_score: G卡V8
+    gcard_v2: G卡V2
+    gcard_v4: G卡V4
+    gcard_v5: G卡V5
+    gcard_v6: G卡V6
+  targets:
+  - name: default
+    description: standard model report
+    experiment: main_lgbm
+    train_dir: modeling/main_lgbm
+    eval_dir: evaluation
+    output_dir: reports
+    score_labels:
+      model_score: G卡V8
+      gcard_v2: G卡V2
+      gcard_v4: G卡V4
+      gcard_v5: G卡V5
+      gcard_v6: G卡V6
+sections:
+- sample_overview
+- feature_screening
+- modeling_plan
+- top_features
+- model_performance
+- champion_comparison
+- risk_profile
+- next_action
+outputs:
+- model_report.md
+- model_card.md
+- executive_summary.md
+score_labels:
+  model_score: G卡V8
+  gcard_v2: G卡V2
+  gcard_v4: G卡V4
+  gcard_v5: G卡V5
+  gcard_v6: G卡V6
+targets:
+- name: default
+  description: standard model report
+  experiment: main_lgbm
+  train_dir: modeling/main_lgbm
+  eval_dir: evaluation
+  output_dir: reports
+  score_labels:
+    model_score: G卡V8
+    gcard_v2: G卡V2
+    gcard_v4: G卡V4
+    gcard_v5: G卡V5
+    gcard_v6: G卡V6
