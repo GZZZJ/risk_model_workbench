@@ -27,8 +27,11 @@ def _context(project: Path, run_id: str) -> VersionContext:
 
 
 def _snapshot(context: VersionContext, stage: str) -> dict:
+    stage_state = load_run_state(context.workspace)["stages"][stage]
     return {
-        "status": load_run_state(context.workspace)["stages"][stage]["status"],
+        "status": stage_state["status"],
+        "scaffold": stage_state["status"] == "scaffold",
+        "failure_code": stage_state.get("failure_code", ""),
         "artifacts": sorted(x["path"] for x in load_artifact_manifest(context.workspace)["artifacts"] if x.get("stage") == stage),
     }
 
@@ -127,3 +130,102 @@ def test_feature_prescreen_sql_prepare_and_execute_cli_runner_parity(tmp_path, m
     result = runner.run(invocation=ActionInvocation(tool_name="feature_prescreen_execute", params={}, project=str(project.resolve()), version_id="direct"), context=direct, attempt_id="execute")
     assert result.status == "done"
     assert _snapshot(cli, "feature_prescreen") == _snapshot(direct, "feature_prescreen")
+
+
+def test_build_wide_sql_prepare_and_execute_cli_runner_parity(tmp_path, monkeypatch):
+    project = tmp_path / "project"
+    (project / "configs").mkdir(parents=True)
+    (project / "configs" / "project.yml").write_text(
+        yaml.safe_dump({"data": {"source_table": "mart.base", "target_column": "label"}})
+    )
+    (project / "configs" / "feature_select.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "feature_select": {
+                    "wide_table": {
+                        "base_table": "mart.base",
+                        "output_table": "mart.wide",
+                        "join_keys": ["uid"],
+                        "base_columns": ["uid"],
+                    }
+                }
+            }
+        )
+    )
+    remain = project / "remain.json"
+    remain.write_text('{"mart.features": ["f1"]}\n', encoding="utf-8")
+    cli = _context(project, "cli")
+    direct = _context(project, "direct")
+
+    def fake_generate_wide_sql(**kwargs):
+        for key in ["sql_output_path", "feature_map_path", "summary_path"]:
+            kwargs[key].parent.mkdir(parents=True, exist_ok=True)
+        kwargs["sql_output_path"].write_text("select uid, f1 from mart.features", encoding="utf-8")
+        kwargs["feature_map_path"].write_text("output_feature\\nf1\\n", encoding="utf-8")
+        kwargs["summary_path"].write_text('{"output_table": "mart.wide", "features": 1}\n', encoding="utf-8")
+        return kwargs["sql_output_path"], kwargs["feature_map_path"], kwargs["summary_path"]
+
+    def fake_execute_dp_sql(**_kwargs):
+        return {"status": "executed", "row_count": 1}
+
+    monkeypatch.setattr("risk_model_workbench.cli.generate_wide_sql", fake_generate_wide_sql)
+    monkeypatch.setattr("risk_model_workbench.dp_feather.execute_dp_sql", fake_execute_dp_sql)
+    runner = ActionRunner(handlers=production_handler_registry(), policy_check=lambda *_: True)
+    params = {"remain_features": str(remain), "sql_approved": False}
+
+    assert main(["build-wide-sql", "--project", str(project), "--run-id", "cli", "--remain-features", str(remain)]) == 0
+    result = runner.run(
+        invocation=ActionInvocation(tool_name="build_wide_sql_prepare", params=params, project=str(project.resolve()), version_id="direct"),
+        context=direct,
+        attempt_id="prepare",
+    )
+    assert result.status == "scaffold"
+    assert _snapshot(cli, "build_wide_sql") == _snapshot(direct, "build_wide_sql")
+
+    assert main(["build-wide-sql", "--project", str(project), "--run-id", "cli", "--remain-features", str(remain), "--execute", "--sql-approved"]) == 0
+    result = runner.run(
+        invocation=ActionInvocation(tool_name="build_wide_sql_execute", params={**params, "sql_approved": True}, project=str(project.resolve()), version_id="direct"),
+        context=direct,
+        attempt_id="execute",
+    )
+    assert result.status == "done"
+    assert _snapshot(cli, "build_wide_sql") == _snapshot(direct, "build_wide_sql")
+
+
+def test_feature_refine_sql_prepare_and_execute_cli_runner_parity(tmp_path, monkeypatch):
+    project = tmp_path / "project"
+    (project / "configs").mkdir(parents=True)
+    (project / "configs" / "project.yml").write_text(yaml.safe_dump({"data": {"target_column": "label"}}))
+    (project / "configs" / "feature_select.yaml").write_text(yaml.safe_dump({"feature_select": {"runtime_request": {}}}))
+    (project / "configs" / "refine_features.yaml").write_text(yaml.safe_dump({"feature_refine": {}}))
+    cli = _context(project, "cli")
+    direct = _context(project, "direct")
+
+    def fake_refine(**kwargs):
+        output = Path(kwargs["workspace"]) / "feature_selection"
+        output.mkdir(parents=True, exist_ok=True)
+        (output / "stage_summary.json").write_text('{"status": "done"}\n', encoding="utf-8")
+        (output / "resource_usage.json").write_text('{"runtime_seconds": 0}\n', encoding="utf-8")
+        (output / "final_500_features.txt").write_text("f1\\n", encoding="utf-8")
+        (output / "final_features.txt").write_text("f1\\n", encoding="utf-8")
+        return 0
+
+    monkeypatch.setattr("risk_model_workbench.feature_selection.refine.execute_refine_action", fake_refine)
+    runner = ActionRunner(handlers=production_handler_registry(), policy_check=lambda *_: True)
+    assert main(["feature", "refine", "--project", str(project), "--run-id", "cli"]) == 0
+    result = runner.run(
+        invocation=ActionInvocation(tool_name="feature_refine_prepare", params={}, project=str(project.resolve()), version_id="direct"),
+        context=direct,
+        attempt_id="prepare",
+    )
+    assert result.status == "scaffold"
+    assert _snapshot(cli, "feature_refine") == _snapshot(direct, "feature_refine")
+
+    assert main(["feature", "refine", "--project", str(project), "--run-id", "cli", "--sql-approved"]) == 0
+    result = runner.run(
+        invocation=ActionInvocation(tool_name="feature_refine_execute", params={}, project=str(project.resolve()), version_id="direct"),
+        context=direct,
+        attempt_id="execute",
+    )
+    assert result.status == "done"
+    assert _snapshot(cli, "feature_refine") == _snapshot(direct, "feature_refine")
