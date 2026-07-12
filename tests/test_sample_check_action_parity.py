@@ -76,3 +76,52 @@ def test_sample_check_cli_and_action_runner_have_scaffold_parity(tmp_path, capsy
     assert result.status == "scaffold"
     assert "local data not available" in cli_output
     assert _snapshot(cli_context) == _snapshot(direct_context)
+
+
+def test_sample_check_cli_and_action_runner_have_valid_input_parity(tmp_path, capsys):
+    """A real local sample must preserve its semantic profile across both entrypoints."""
+    project = tmp_path / "project"
+    cli_context = _workspace(project, "cli_sample")
+    direct_context = _workspace(project, "direct_sample")
+    raw = project / "data" / "sample.csv"
+    raw.parent.mkdir(parents=True, exist_ok=True)
+    raw.write_text(
+        "uid,label,split,amount\n1,0,DEV,10\n2,1,DEV,20\n2,1,OOT,30\n",
+        encoding="utf-8",
+    )
+    config = yaml.safe_load((project / "project.yml").read_text(encoding="utf-8"))
+    config["data"].update(
+        {
+            "raw_path": "data/sample.csv",
+            "id_columns": ["uid"],
+            "split_column": "split",
+        }
+    )
+    payload = yaml.safe_dump(config)
+    (project / "project.yml").write_text(payload, encoding="utf-8")
+    for context in [cli_context, direct_context]:
+        (context.runtime_config_dir / "project.yml").write_text(payload, encoding="utf-8")
+
+    assert main(["sample", "check", "--project", str(project), "--run-id", "cli_sample"]) == 0
+    assert "local data not available" not in capsys.readouterr().out
+    result = ActionRunner(
+        handlers=production_handler_registry(), policy_check=lambda *_: True
+    ).run(
+        invocation=ActionInvocation(
+            tool_name="sample_check", params={}, project=str(project.resolve()), version_id="direct_sample"
+        ),
+        context=direct_context,
+        attempt_id="attempt_sample_valid",
+    )
+
+    assert result.status == "done"
+    assert _snapshot(cli_context) == _snapshot(direct_context)
+    for context in [cli_context, direct_context]:
+        summary = json.loads(
+            (context.workspace / "sample_check" / "sample_summary.json").read_text(encoding="utf-8")
+        )
+        assert summary["status"] == "done"
+        assert summary["rows"] == 3
+        assert summary["duplicate_key_rows"] == 1
+        assert (context.workspace / "sample_check" / "label_distribution.csv").exists()
+        assert (context.workspace / "sample_check" / "sample_split_summary.csv").exists()

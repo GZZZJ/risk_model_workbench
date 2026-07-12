@@ -3,8 +3,14 @@ from pathlib import Path
 
 import yaml
 
+from risk_model_workbench.application.action_runner import ActionRunner
+from risk_model_workbench.application.context import VersionContext
+from risk_model_workbench.application.handlers import production_handler_registry
 from risk_model_workbench.cli import main
+from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.modeling.llm_tuning import HostAgentTuningPlanRequired
+from risk_model_workbench.registry import load_artifact_manifest
+from risk_model_workbench.state import load_run_state
 
 
 def _make_train_project(tmp_path: Path, *, input_exists: bool = True, feature_exists: bool = True) -> tuple[Path, Path]:
@@ -292,3 +298,131 @@ def test_runtime_code_has_no_external_encrypted_skill_dependency():
                 offenders.append(str(path.relative_to(repo)))
 
     assert offenders == []
+
+
+def _direct_train(project: Path, run_id: str):
+    workspace = project / "runs" / run_id
+    context = VersionContext(
+        project_dir=project.resolve(),
+        version_id=run_id,
+        workspace=workspace,
+        runtime_config_dir=workspace / "configs_runtime",
+        manifest_path=workspace / "audit" / "artifact_manifest.json",
+        version_state_path=workspace / "run_state.yml",
+    )
+    return ActionRunner(
+        handlers=production_handler_registry(), policy_check=lambda *_: True
+    ).run(
+        invocation=ActionInvocation(
+            tool_name="train_baseline",
+            params={"experiment": "baseline"},
+            project=str(project.resolve()),
+            version_id=run_id,
+        ),
+        context=context,
+        attempt_id=f"attempt_{run_id}",
+    )
+
+
+def _train_parity_snapshot(workspace: Path) -> dict:
+    state = load_run_state(workspace)
+    manifest = load_artifact_manifest(workspace)
+    stage = state["stages"]["train_baseline"]
+    status = json.loads((workspace / "modeling" / "baseline" / "training_status.json").read_text())
+    metrics = json.loads((workspace / "modeling" / "baseline" / "train_metrics.json").read_text())
+    return {
+        "stage": {key: stage.get(key) for key in ["status", "scaffold", "failure_code"]},
+        "training_status": {key: status.get(key) for key in ["status", "failure_code", "algorithm"]},
+        "metrics_status": metrics.get("status"),
+        "artifacts": sorted(
+            (item["path"], item.get("storage_class"), item.get("contract_role"))
+            for item in manifest["artifacts"]
+            if item.get("stage") == "train_baseline"
+        ),
+    }
+
+
+def _fake_completed_training(output_dir, score_output, **_kwargs):
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    metrics = {"train_auc": 0.8, "valid_auc": 0.7, "train_ks": 0.4, "valid_ks": 0.3}
+    (output / "metrics_train_valid.json").write_text(json.dumps(metrics), encoding="utf-8")
+    (output / "actual_feature_list.txt").write_text("f1\nf2\n", encoding="utf-8")
+    (output / "feature_importance.csv").write_text("feature,gain\nf1,1\n", encoding="utf-8")
+    (output / "run_config.json").write_text(json.dumps({"training_mode": "single_train"}), encoding="utf-8")
+    (output / "model.pkl").write_bytes(b"model")
+    (output / "tuning_trials.csv").write_text("trial_id,valid_auc\nbase,0.7\n", encoding="utf-8")
+    (output / "best_params.json").write_text("{}", encoding="utf-8")
+    Path(score_output).parent.mkdir(parents=True, exist_ok=True)
+    Path(score_output).write_bytes(b"scored rows")
+    return metrics
+
+
+def test_train_cli_and_runner_have_normal_and_evaluation_handoff_parity(tmp_path, monkeypatch):
+    """A completed training action has equivalent state and registered handoff artifacts."""
+    project, cli_workspace = _make_train_project(tmp_path)
+    assert main(["run", "init", "--project", str(project), "--workflow", "full_modeling", "--run-id", "r2"]) == 0
+    monkeypatch.setattr("risk_model_workbench.modeling.train_xgb.train_tabular_from_feather", _fake_completed_training)
+
+    assert main(["train", "--project", str(project), "--run-id", "r1", "--experiment", "baseline"]) == 0
+    direct_result = _direct_train(project, "r2")
+
+    assert direct_result.status == "done"
+    assert _train_parity_snapshot(cli_workspace) == _train_parity_snapshot(project / "runs" / "r2")
+    for workspace in [cli_workspace, project / "runs" / "r2"]:
+        entries = {item["path"] for item in load_artifact_manifest(workspace)["artifacts"]}
+        assert "modeling/baseline/model.pkl" in entries
+        assert "modeling/baseline/scores_all_splits.feather" in entries
+
+
+def test_train_cli_and_runner_have_scaffold_parity(tmp_path):
+    project, cli_workspace = _make_train_project(tmp_path, input_exists=False)
+    assert main(["run", "init", "--project", str(project), "--workflow", "full_modeling", "--run-id", "r2"]) == 0
+
+    assert main(["train", "--project", str(project), "--run-id", "r1", "--experiment", "baseline"]) == 0
+    direct_result = _direct_train(project, "r2")
+
+    assert direct_result.status == "scaffold"
+    assert _train_parity_snapshot(cli_workspace) == _train_parity_snapshot(project / "runs" / "r2")
+
+
+def test_train_cli_and_runner_have_advisor_required_parity(tmp_path, monkeypatch):
+    project, cli_workspace = _make_train_project(tmp_path)
+    assert main(["run", "init", "--project", str(project), "--workflow", "full_modeling", "--run-id", "r2"]) == 0
+
+    def require_advisor(output_dir, **_kwargs):
+        output = Path(output_dir)
+        context = output / "tuning_context_round_1.json"
+        context.write_text('{"round": 1}\n', encoding="utf-8")
+        raise HostAgentTuningPlanRequired(plan_path=output / "llm_tuning_plan_round_1.json", context_path=context)
+
+    monkeypatch.setattr("risk_model_workbench.modeling.train_xgb.train_tabular_from_feather", require_advisor)
+    assert main(["train", "--project", str(project), "--run-id", "r1", "--experiment", "baseline"]) == 2
+    direct_result = _direct_train(project, "r2")
+
+    assert direct_result.failure_code == "advisor_required"
+    assert _train_parity_snapshot(cli_workspace) == _train_parity_snapshot(project / "runs" / "r2")
+
+
+def test_train_cli_and_runner_preserve_consumed_plan_artifacts(tmp_path, monkeypatch):
+    """Both entrypoints retain the same plan/context artifacts after a resumed tuning round."""
+    project, cli_workspace = _make_train_project(tmp_path)
+    assert main(["run", "init", "--project", str(project), "--workflow", "full_modeling", "--run-id", "r2"]) == 0
+    for workspace in [cli_workspace, project / "runs" / "r2"]:
+        output = workspace / "modeling" / "baseline"
+        output.mkdir(parents=True, exist_ok=True)
+        (output / "llm_tuning_plan_round_1.json").write_text('{"round": 1, "candidates": []}\n', encoding="utf-8")
+        (output / "tuning_context_round_1.json").write_text('{"round": 1}\n', encoding="utf-8")
+
+    def consume_existing_plan(output_dir, **kwargs):
+        output = Path(output_dir)
+        assert (output / "llm_tuning_plan_round_1.json").exists()
+        assert (output / "tuning_context_round_1.json").exists()
+        return _fake_completed_training(output_dir, **kwargs)
+
+    monkeypatch.setattr("risk_model_workbench.modeling.train_xgb.train_tabular_from_feather", consume_existing_plan)
+    assert main(["train", "--project", str(project), "--run-id", "r1", "--experiment", "baseline"]) == 0
+    direct_result = _direct_train(project, "r2")
+
+    assert direct_result.status == "done"
+    assert _train_parity_snapshot(cli_workspace) == _train_parity_snapshot(project / "runs" / "r2")
