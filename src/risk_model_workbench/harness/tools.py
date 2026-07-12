@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from risk_model_workbench.harness.actions import get_action_spec
+from risk_model_workbench.harness.command_metadata import argv_template, display_template
 from risk_model_workbench.harness.invocation import ActionInvocation
 
 
@@ -21,30 +22,6 @@ def action_id_for_tool(tool_name: str) -> str:
         return TOOL_REGISTRY[tool_name].action_id
     except KeyError as exc:
         raise ValueError(f"unknown typed tool: {tool_name}") from exc
-
-_TYPED_ARGV: dict[str, tuple[str, ...]] = {
-    "project_status": ("project", "status", "--project", "{project}"),
-    "run_status": ("version", "status", "--project", "{project}", "--version-id", "{version_id}"),
-    "run_audit": ("version", "audit", "--project", "{project}", "--version-id", "{version_id}"),
-    "workflow_validate": ("workflow", "validate", "--workflow", "{workflow}"),
-    "rules_list": ("rules", "list"),
-    "sample_check": ("sample", "check", "--project", "{project}", "--version-id", "{version_id}"),
-    "feature_metadata": ("feature", "metadata", "--project", "{project}", "--version-id", "{version_id}"),
-    "feature_prescreen_local": ("feature", "prescreen", "--project", "{project}", "--version-id", "{version_id}"),
-    "feature_prescreen_prepare": ("feature", "prescreen", "--project", "{project}", "--version-id", "{version_id}", "--dry-run-sql"),
-    "feature_prescreen_execute": ("feature", "prescreen", "--project", "{project}", "--version-id", "{version_id}", "--sql-approved"),
-    "build_wide_sql_local": ("build-wide-sql", "--project", "{project}", "--version-id", "{version_id}"),
-    "build_wide_sql_prepare": ("build-wide-sql", "--project", "{project}", "--version-id", "{version_id}"),
-    "build_wide_sql_execute": ("build-wide-sql", "--project", "{project}", "--version-id", "{version_id}", "--execute", "--sql-approved"),
-    "feature_refine_local": ("feature", "refine", "--project", "{project}", "--version-id", "{version_id}"),
-    "feature_refine_prepare": ("feature", "refine", "--project", "{project}", "--version-id", "{version_id}", "--dry-run-sql"),
-    "feature_refine_execute": ("feature", "refine", "--project", "{project}", "--version-id", "{version_id}", "--sql-approved"),
-    "train_baseline": ("train", "--project", "{project}", "--version-id", "{version_id}", "--experiment", "{experiment}"),
-    "evaluate": ("evaluate", "--project", "{project}", "--version-id", "{version_id}"),
-    "compare": ("compare", "--project", "{project}", "--version-id", "{version_id}"),
-    "report": ("report", "--project", "{project}", "--version-id", "{version_id}"),
-}
-
 
 def _default_params_schema(name: str) -> dict[str, object]:
     properties: dict[str, object] = {}
@@ -75,7 +52,7 @@ def _default_params_schema(name: str) -> dict[str, object]:
 
 def _typed_renderer(tool_name: str) -> Callable[[ActionInvocation], list[str]]:
     try:
-        tokens = _TYPED_ARGV[tool_name]
+        tokens = argv_template(tool_name)
     except KeyError as exc:
         raise ValueError(f"tool {tool_name} requires an explicit typed renderer") from exc
 
@@ -167,7 +144,7 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="project_status",
         action_id="project_status",
-        command="rmw project status --project <project>",
+        command=display_template("project_status"),
         permission="read_only",
         description="Read project continuity status.",
         allowed_for_auditor=True,
@@ -175,7 +152,7 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="run_status",
         action_id="run_status",
-        command="rmw run status --project <project> --run-id <run_id>",
+        command=display_template("run_status"),
         permission="read_only",
         description="Read run_state.yml.",
         allowed_for_auditor=True,
@@ -183,7 +160,7 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="run_audit",
         action_id="run_audit",
-        command="rmw run audit --project <project> --run-id <run_id>",
+        command=display_template("run_audit"),
         permission="read_only",
         description="Audit run or stage evidence without mutation.",
         allowed_for_auditor=True,
@@ -191,7 +168,7 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="workflow_validate",
         action_id="workflow_validate",
-        command="rmw workflow validate --workflow <workflow>",
+        command=display_template("workflow_validate"),
         permission="read_only",
         description="Validate workflow contracts.",
         allowed_for_auditor=True,
@@ -199,7 +176,7 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="rules_list",
         action_id="rules_list",
-        command="rmw rules list",
+        command=display_template("rules_list"),
         permission="read_only",
         description="Read promoted workbench rules.",
         allowed_for_auditor=True,
@@ -207,35 +184,35 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="sample_check",
         action_id="sample_check",
-        command="rmw sample check --project <project> --run-id <run_id>",
+        command=display_template("sample_check"),
         permission="writes_run",
         description="Write sample check artifacts and stage state.",
     ),
     ToolSpec(
         name="feature_metadata",
         action_id="feature_metadata",
-        command="rmw feature metadata --project <project> --run-id <run_id>",
+        command=display_template("feature_metadata"),
         permission="writes_run",
         description="Write feature metadata artifacts and stage state.",
     ),
     ToolSpec(
         name="feature_prescreen_local",
         action_id="feature_prescreen",
-        command="rmw feature prescreen --project <project> --run-id <run_id>",
+        command=display_template("feature_prescreen_local"),
         permission="writes_run",
         description="Complete feature prescreen by design from an approved local Feather source.",
     ),
     ToolSpec(
         name="feature_prescreen_prepare",
         action_id="feature_prescreen",
-        command="rmw feature prescreen --project <project> --run-id <run_id> --dry-run-sql",
+        command=display_template("feature_prescreen_prepare"),
         permission="writes_run",
         description="Generate feature prescreen SQL review artifacts without DP pull.",
     ),
     ToolSpec(
         name="feature_prescreen_execute",
         action_id="feature_prescreen",
-        command="rmw feature prescreen --project <project> --run-id <run_id> --sql-approved",
+        command=display_template("feature_prescreen_execute"),
         permission="dp_sql_pull",
         description="Run feature prescreening with approved DP/SQL access.",
         requires_approval=True,
@@ -243,21 +220,21 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="build_wide_sql_local",
         action_id="build_wide_sql",
-        command="rmw build-wide-sql --project <project> --run-id <run_id>",
+        command=display_template("build_wide_sql_local"),
         permission="writes_run",
         description="Record the local-Feather wide SQL stage as skipped by design.",
     ),
     ToolSpec(
         name="build_wide_sql_prepare",
         action_id="build_wide_sql",
-        command="rmw build-wide-sql --project <project> --run-id <run_id>",
+        command=display_template("build_wide_sql_prepare"),
         permission="writes_run",
         description="Generate wide-table SQL artifacts.",
     ),
     ToolSpec(
         name="build_wide_sql_execute",
         action_id="build_wide_sql",
-        command="rmw build-wide-sql --project <project> --run-id <run_id> --execute --sql-approved",
+        command=display_template("build_wide_sql_execute"),
         permission="dp_sql_pull",
         description="Execute reviewed wide-table create SQL through TMLSQLClient.",
         requires_approval=True,
@@ -265,21 +242,21 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="feature_refine_local",
         action_id="feature_refine",
-        command="rmw feature refine --project <project> --run-id <run_id>",
+        command=display_template("feature_refine_local"),
         permission="writes_run",
         description="Run feature refinement against the approved local Feather source.",
     ),
     ToolSpec(
         name="feature_refine_prepare",
         action_id="feature_refine",
-        command="rmw feature refine --project <project> --run-id <run_id> --dry-run-sql",
+        command=display_template("feature_refine_prepare"),
         permission="writes_run",
         description="Generate feature refine SQL review artifacts without DP pull.",
     ),
     ToolSpec(
         name="feature_refine_execute",
         action_id="feature_refine",
-        command="rmw feature refine --project <project> --run-id <run_id> --sql-approved",
+        command=display_template("feature_refine_execute"),
         permission="dp_sql_pull",
         description="Run feature refinement with approved DP/SQL access.",
         requires_approval=True,
@@ -287,28 +264,28 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="train_baseline",
         action_id="train_baseline",
-        command="rmw train --project <project> --run-id <run_id> --experiment <name>",
+        command=display_template("train_baseline"),
         permission="writes_run",
         description="Train or scaffold baseline model artifacts.",
     ),
     ToolSpec(
         name="evaluate",
         action_id="evaluate",
-        command="rmw evaluate --project <project> --run-id <run_id>",
+        command=display_template("evaluate"),
         permission="writes_run",
         description="Write model evaluation artifacts.",
     ),
     ToolSpec(
         name="compare",
         action_id="compare",
-        command="rmw compare --project <project> --run-id <run_id>",
+        command=display_template("compare"),
         permission="writes_run",
         description="Write champion/challenger comparison artifacts.",
     ),
     ToolSpec(
         name="report",
         action_id="report",
-        command="rmw report --project <project> --run-id <run_id>",
+        command=display_template("report"),
         permission="writes_run",
         description="Write report artifacts.",
     ),

@@ -1,12 +1,16 @@
+import hashlib
 import json
 from pathlib import Path
 
 import yaml
+import pytest
 
 import risk_model_workbench.rules as rules_module
+import risk_model_workbench.workflow_contracts as workflow_contracts_module
 from risk_model_workbench.cli import main
 from risk_model_workbench.project_state import audit_run
 from risk_model_workbench.state import mark_stage_done, register_artifact
+from risk_model_workbench.workflow_contracts import load_stage_contracts
 
 
 def test_workflow_validate_stage_contracts(tmp_path):
@@ -63,6 +67,118 @@ def test_workflow_validate_stage_contracts(tmp_path):
         encoding="utf-8",
     )
     assert main(["workflow", "validate", "--workflow", str(empty_pattern)]) == 1
+
+
+def test_shipped_workflows_resolve_complete_stage_contracts():
+    expected_snapshots = {
+        "full_modeling": "a4d65095fbe2c60aaffd991a7e6f9fa2af4ec57811f1bc4214aaa165679cad42",
+        "feature_selection": "b16ecc34234f1e693f9fa092fb74bdee3c293a6bf67b88d6fe8d41592ffd7400",
+    }
+    workflows_dir = Path(__file__).resolve().parents[1] / "workflows"
+
+    for path in sorted(workflows_dir.glob("*.yml")):
+        if path.name == "stage_contracts.yml":
+            continue
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+        contracts, source = load_stage_contracts(path.stem)
+        assert source.endswith(f"workflows/{path.name}")
+        assert set(contracts) == set(workflow["stages"])
+
+        if path.stem in expected_snapshots:
+            legacy_contracts = contracts
+            if path.stem == "feature_selection":
+                # validate_config previously had no inline contract. The shared
+                # standard now closes that gap; all four pre-existing contracts
+                # must remain byte-for-byte semantically equivalent.
+                legacy_contracts = {
+                    stage: contract for stage, contract in contracts.items() if stage != "validate_config"
+                }
+            payload = json.dumps(legacy_contracts, sort_keys=True, separators=(",", ":"))
+            assert hashlib.sha256(payload.encode("utf-8")).hexdigest() == expected_snapshots[path.stem]
+
+
+@pytest.mark.parametrize(
+    "registry_text",
+    [
+        None,
+        "stage_contracts: [\n",
+        "stage_contracts: []\n",
+        "name: stage_contracts\nstages: [sample_check]\nstage_contracts:\n  sample_check: []\n",
+        (
+            "name: stage_contracts\nstages: [sample_check]\nstage_contracts:\n"
+            "  sample_check:\n    required_artifacts: [sample_check/a.json]\n"
+            "  sample_check:\n    required_artifacts: [sample_check/b.json]\n"
+        ),
+        (
+            "name: stage_contracts\ndescription: demo\nunknown: true\nstages: [sample_check]\n"
+            "stage_contracts:\n  sample_check:\n    required_artifacts: [sample_check/a.json]\n"
+        ),
+        "name: stage_contracts\nstages: [sample_check]\nstage_contracts:\n  sample_check: {}\n",
+    ],
+)
+def test_contract_registry_errors_fail_closed_with_registry_path(tmp_path, monkeypatch, registry_text):
+    registry = tmp_path / "stage_contracts.yml"
+    if registry_text is not None:
+        registry.write_text(registry_text, encoding="utf-8")
+    monkeypatch.setattr(workflow_contracts_module, "STAGE_CONTRACT_REGISTRY", registry)
+
+    with pytest.raises(ValueError) as exc_info:
+        load_stage_contracts("full_modeling")
+
+    assert str(registry) in str(exc_info.value)
+
+
+@pytest.mark.parametrize("invalid_overrides", [[], "sample_check", 0])
+def test_workflow_override_container_must_be_mapping(tmp_path, invalid_overrides):
+    workflow = tmp_path / "invalid_overrides.yml"
+    workflow.write_text(
+        yaml.safe_dump(
+            {
+                "name": "invalid_overrides",
+                "stages": ["sample_check"],
+                "stage_contracts": invalid_overrides,
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="stage_contracts must be a mapping"):
+        load_stage_contracts(str(workflow))
+
+
+@pytest.mark.parametrize("empty_value", [None, []])
+def test_workflow_override_cannot_clear_standard_artifact_rules(tmp_path, empty_value):
+    workflow = tmp_path / "cleared_contract.yml"
+    workflow.write_text(
+        yaml.safe_dump(
+            {
+                "name": "cleared_contract",
+                "stages": ["sample_check"],
+                "stage_contracts": {"sample_check": {"accepted_artifact_sets": empty_value}},
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="cannot clear standard artifact rule"):
+        load_stage_contracts(str(workflow))
+
+
+def test_runtime_audit_does_not_fail_open_when_registry_is_missing(tmp_path, monkeypatch, capsys):
+    project = _make_project(tmp_path)
+    _init_run(project, "registry_failure")
+    registry = tmp_path / "missing-stage-contracts.yml"
+    monkeypatch.setattr(workflow_contracts_module, "STAGE_CONTRACT_REGISTRY", registry)
+
+    with pytest.raises(ValueError) as exc_info:
+        audit_run(project, "registry_failure")
+    assert str(registry) in str(exc_info.value)
+
+    capsys.readouterr()
+    assert main(["run", "audit", "--project", str(project), "--run-id", "registry_failure", "--strict"]) == 1
+    assert str(registry) in capsys.readouterr().out
 
 
 def test_audit_contract_strict_json_and_evidence_sources(tmp_path, capsys):

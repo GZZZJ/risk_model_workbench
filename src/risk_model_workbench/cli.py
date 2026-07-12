@@ -1067,7 +1067,11 @@ def cmd_rules_list(args: argparse.Namespace) -> int:
 def cmd_run_audit(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     workspace_id = _workspace_arg(args)
-    audit = _read_only_action("run_audit", lambda: audit_run(project_dir, workspace_id, stage=args.stage))
+    try:
+        audit = _read_only_action("run_audit", lambda: audit_run(project_dir, workspace_id, stage=args.stage))
+    except ValueError as exc:
+        print(f"run audit failed: {exc}")
+        return 1
     if args.json:
         print(json.dumps(audit, ensure_ascii=False, indent=2))
     else:
@@ -1257,7 +1261,12 @@ def cmd_workflow_validate(args: argparse.Namespace) -> int:
     if not path.exists():
         print(f"missing workflow: {path}")
         return 1
-    errors = _read_only_action("workflow_validate", lambda: validate_workflow_definition(load_yaml(path)))
+    try:
+        errors = _read_only_action("workflow_validate", lambda: validate_workflow_definition(load_yaml(path)))
+    except ValueError as exc:
+        print(f"workflow validation failed: {path}")
+        print(f"- {exc}")
+        return 1
     if errors:
         print(f"workflow validation failed: {path}")
         for error in errors:
@@ -1269,6 +1278,8 @@ def cmd_workflow_validate(args: argparse.Namespace) -> int:
 
 def cmd_workflow_list(_: argparse.Namespace) -> int:
     for path in sorted((REPO_ROOT / "workflows").glob("*.yml")):
+        if path.name == "stage_contracts.yml":
+            continue
         print(path.stem)
     return 0
 

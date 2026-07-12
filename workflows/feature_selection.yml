@@ -7,25 +7,8 @@ stages:
   - build_wide_sql
   - feature_refine
 stage_contracts:
-  feature_metadata:
-    required_artifacts:
-      - feature_metadata/*
   feature_prescreen:
     accepted_artifact_sets:
       - [feature_selection/prescreen_run_summary.json, feature_selection/prescreen_final_remain_features.json]
       - [feature_selection/data_source_contract.json, feature_selection/resource_plan.json, feature_selection/sampling_plan.json, feature_selection/batch_plan.json]
       - [feature_selection/execution_environment.json, queries/sql_evidence_manifest.json]
-  build_wide_sql:
-    accepted_artifact_sets:
-      - [queries/*.sql]
-      - [feature_selection/wide_sql_summary.json, feature_selection/prescreen_wide_feature_map.csv]
-      - [feature_selection/wide_sql_summary.json, feature_selection/wide_table_execution.json]
-      - [feature_selection/wide_sql_summary.json, feature_selection/profiles/wide_table_profile.json]
-      - [feature_selection/wide_table_skipped.json]
-  feature_refine:
-    accepted_artifact_sets:
-      - [feature_selection/final_features.txt]
-      - [feature_selection/final_500_features.txt]
-      - [feature_selection/stage_summary.json, feature_selection/final_features.txt]
-      - [feature_selection/data_source_contract.json, feature_selection/resource_plan.json, feature_selection/sampling_plan.json, feature_selection/batch_plan.json]
-      - [feature_selection/stage_summary.json, feature_selection/resource_usage.json]

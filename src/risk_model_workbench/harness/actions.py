@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from risk_model_workbench.harness.command_metadata import display_template
 from risk_model_workbench.harness.errors import (
     ADVISOR_REQUIRED,
     ARTIFACT_CONTRACT_FAILED,
@@ -64,7 +65,7 @@ def declared_action_ids() -> frozenset[str]:
 ACTION_SPECS: tuple[ActionSpec, ...] = (
     ActionSpec(
         id="validate_config",
-        command="rmw run init --project <project> --workflow <workflow>",
+        command=display_template("validate_config"),
         description="Initialize a run and snapshot project configuration.",
         kind="stage",
         stage="validate_config",
@@ -77,7 +78,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="sample_check",
-        command="rmw sample check --project <project> --run-id <run_id>",
+        command=display_template("sample_check"),
         description="Profile sample fields, label distribution, splits, and configured segments.",
         kind="stage",
         stage="sample_check",
@@ -96,7 +97,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="feature_metadata",
-        command="rmw feature metadata --project <project> --run-id <run_id>",
+        command=display_template("feature_metadata"),
         description="Export feature table and column metadata for downstream screening.",
         kind="stage",
         stage="feature_metadata",
@@ -109,7 +110,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="feature_prescreen",
-        command="rmw feature prescreen --project <project> --run-id <run_id>",
+        command=display_template("feature_prescreen"),
         description="Run or dry-run coarse feature prescreening before wide-table refinement.",
         kind="stage",
         stage="feature_prescreen",
@@ -125,7 +126,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="build_wide_sql",
-        command="rmw build-wide-sql --project <project> --run-id <run_id>",
+        command=display_template("build_wide_sql"),
         description="Generate wide-table SQL and feature mapping from remaining features.",
         kind="stage",
         stage="build_wide_sql",
@@ -140,7 +141,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="feature_refine",
-        command="rmw feature refine --project <project> --run-id <run_id>",
+        command=display_template("feature_refine"),
         description="Filter executable model features and produce final feature lists.",
         kind="stage",
         stage="feature_refine",
@@ -156,7 +157,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="train_baseline",
-        command="rmw train --project <project> --run-id <run_id> --experiment <name>",
+        command=display_template("train_baseline"),
         description="Train the baseline model or create an explicit scaffold when real training inputs are absent.",
         kind="stage",
         stage="train_baseline",
@@ -193,7 +194,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="evaluate",
-        command="rmw evaluate --project <project> --run-id <run_id>",
+        command=display_template("evaluate"),
         description="Evaluate model scores and generate evaluation summaries.",
         kind="stage",
         stage="evaluate",
@@ -206,7 +207,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="compare",
-        command="rmw compare --project <project> --run-id <run_id>",
+        command=display_template("compare"),
         description="Compare current model evidence with configured champion or benchmark scores.",
         kind="stage",
         stage="compare",
@@ -219,7 +220,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="report",
-        command="rmw report --project <project> --run-id <run_id>",
+        command=display_template("report"),
         description="Generate Markdown, HTML, model card, executive summary, and optional Excel report.",
         kind="stage",
         stage="report",
@@ -232,7 +233,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="project_status",
-        command="rmw project status --project <project>",
+        command=display_template("project_status"),
         description="Summarize project continuity state and active run status.",
         kind="utility",
         inputs=("project_state.yml", "optional run_state.yml", "optional artifact_manifest.json"),
@@ -242,7 +243,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="run_status",
-        command="rmw run status --project <project> --run-id <run_id>",
+        command=display_template("run_status"),
         description="Show the run state source of truth.",
         kind="utility",
         inputs=("run_state.yml",),
@@ -252,7 +253,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="run_audit",
-        command="rmw run audit --project <project> --run-id <run_id>",
+        command=display_template("run_audit"),
         description="Audit run or stage closure readiness against run state, manifest, and workflow contracts.",
         kind="audit",
         inputs=("run_state.yml", "audit/artifact_manifest.json", "workflow contract"),
@@ -262,7 +263,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="workflow_validate",
-        command="rmw workflow validate --workflow <workflow>",
+        command=display_template("workflow_validate"),
         description="Validate workflow shape and stage contract syntax.",
         kind="audit",
         inputs=("workflow YAML",),
@@ -272,7 +273,7 @@ ACTION_SPECS: tuple[ActionSpec, ...] = (
     ),
     ActionSpec(
         id="rules_list",
-        command="rmw rules list",
+        command=display_template("rules_list"),
         description="List promoted workbench rules and guardrails.",
         kind="utility",
         inputs=("docs/workbench_rules.yml",),

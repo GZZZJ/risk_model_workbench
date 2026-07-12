@@ -6,8 +6,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any
 
-import yaml
-
+from risk_model_workbench.config import ConfigFormatError, load_yaml
 from risk_model_workbench.paths import REPO_ROOT, workflow_path
 
 
@@ -19,18 +18,36 @@ CONTRACT_FIELDS = {
     "closure_required",
 }
 
+STAGE_CONTRACT_REGISTRY = REPO_ROOT / "workflows" / "stage_contracts.yml"
+REGISTRY_FIELDS = {"name", "description", "stages", "stage_contracts"}
+
+
+class WorkflowContractError(ValueError):
+    """Raised when workflow contracts cannot be resolved safely."""
+
+    def __init__(self, path: str | Path, detail: str):
+        self.path = Path(path)
+        self.detail = detail
+        super().__init__(f"invalid workflow contract {self.path}: {detail}")
+
 
 def load_stage_contracts(workflow: str) -> tuple[dict[str, dict[str, Any]], str]:
-    """Load stage contracts for a workflow name when its YAML is available."""
+    """Resolve workflow overrides against the shared stage contract registry."""
     path = workflow_path(workflow)
     if not path.exists():
         return {}, ""
-    with path.open("r", encoding="utf-8") as handle:
-        payload = yaml.safe_load(handle) or {}
-    contracts = payload.get("stage_contracts")
-    if not isinstance(contracts, dict):
-        return {}, _display_path(path)
-    return {str(stage): contract for stage, contract in contracts.items() if isinstance(contract, dict)}, _display_path(path)
+    payload = _load_contract_yaml(path)
+    errors = validate_workflow_definition(payload)
+    if errors:
+        raise WorkflowContractError(path, "; ".join(errors))
+    stages = payload.get("stages")
+    assert isinstance(stages, list)
+    raw_overrides = payload.get("stage_contracts")
+    overrides = {} if raw_overrides is None else raw_overrides
+    assert isinstance(overrides, dict)
+    registry = _load_contract_registry()
+    contracts = _compose_stage_contracts(stages, registry, overrides)
+    return contracts, _display_path(path)
 
 
 def validate_workflow_definition(workflow: dict[str, Any]) -> list[str]:
@@ -45,10 +62,9 @@ def validate_workflow_definition(workflow: dict[str, Any]) -> list[str]:
     elif any(not isinstance(stage, str) or not stage.strip() for stage in stages):
         errors.append("stages must contain non-empty strings")
 
-    stage_names = set(stages)
-    contracts = workflow.get("stage_contracts", {})
-    if contracts in (None, {}):
-        return errors
+    stage_names = {stage for stage in stages if isinstance(stage, str)}
+    raw_contracts = workflow.get("stage_contracts")
+    contracts = {} if raw_contracts is None else raw_contracts
     if not isinstance(contracts, dict):
         errors.append("stage_contracts must be a mapping")
         return errors
@@ -60,15 +76,139 @@ def validate_workflow_definition(workflow: dict[str, Any]) -> list[str]:
         if not isinstance(contract, dict):
             errors.append(f"stage_contracts.{stage_name} must be a mapping")
             continue
-        unknown_fields = sorted(set(contract) - CONTRACT_FIELDS)
-        if unknown_fields:
-            errors.append(f"stage_contracts.{stage_name} has unknown fields: {', '.join(unknown_fields)}")
-        for key in ["allow_scaffold", "allow_imported", "closure_required"]:
-            if key in contract and not isinstance(contract[key], bool):
-                errors.append(f"stage_contracts.{stage_name}.{key} must be a boolean")
-        errors.extend(_validate_pattern_list(stage_name, "required_artifacts", contract.get("required_artifacts")))
-        errors.extend(_validate_artifact_sets(stage_name, contract.get("accepted_artifact_sets")))
+        if stage_name not in stage_names:
+            errors.extend(_validate_contract(stage_name, contract))
+
+    registry = _load_contract_registry()
+    effective_contracts = _compose_stage_contracts(stages, registry, contracts)
+    for stage_name in stages:
+        if not isinstance(stage_name, str):
+            continue
+        override = contracts.get(stage_name)
+        has_standard_contract = stage_name in registry
+        explicitly_open = isinstance(override, dict) and override.get("closure_required") is False
+        if not has_standard_contract and not explicitly_open:
+            errors.append(
+                f"stage {stage_name} must resolve a standard contract or explicitly set closure_required: false"
+            )
+            continue
+        if isinstance(override, dict):
+            errors.extend(_validate_override(stage_name, registry.get(stage_name), override))
+        errors.extend(_validate_contract(stage_name, effective_contracts.get(stage_name, {})))
     return errors
+
+
+def _load_contract_registry() -> dict[str, dict[str, Any]]:
+    path = STAGE_CONTRACT_REGISTRY
+    if not path.exists():
+        raise WorkflowContractError(path, "registry file is missing")
+    payload = _load_contract_yaml(path)
+    errors: list[str] = []
+    unknown_fields = sorted(set(payload) - REGISTRY_FIELDS)
+    if unknown_fields:
+        errors.append(f"unknown registry fields: {', '.join(unknown_fields)}")
+    if payload.get("name") != "stage_contracts":
+        errors.append("name must be stage_contracts")
+    stages = payload.get("stages")
+    if not isinstance(stages, list) or not stages:
+        errors.append("stages must be a non-empty list")
+        stages = []
+    elif any(not isinstance(stage, str) or not stage.strip() for stage in stages):
+        errors.append("stages must contain non-empty strings")
+    elif len(stages) != len(set(stages)):
+        errors.append("stages must not contain duplicates")
+    contracts = payload.get("stage_contracts")
+    if not isinstance(contracts, dict):
+        errors.append("stage_contracts must be a mapping")
+        contracts = {}
+    elif not contracts:
+        errors.append("stage_contracts must not be empty")
+
+    registry: dict[str, dict[str, Any]] = {}
+    for raw_stage, contract in contracts.items():
+        stage = str(raw_stage)
+        if not isinstance(contract, dict):
+            errors.append(f"stage_contracts.{stage} must be a mapping")
+            continue
+        registry[stage] = dict(contract)
+        errors.extend(_validate_contract(stage, contract))
+
+    valid_stages = {stage for stage in stages if isinstance(stage, str)}
+    if valid_stages != set(registry):
+        errors.append("stages must exactly match stage_contracts keys")
+    if errors:
+        raise WorkflowContractError(path, "; ".join(errors))
+    return registry
+
+
+def _load_contract_yaml(path: Path) -> dict[str, Any]:
+    try:
+        return load_yaml(path)
+    except ConfigFormatError as exc:
+        raise WorkflowContractError(path, exc.detail) from exc
+    except OSError as exc:
+        raise WorkflowContractError(path, str(exc)) from exc
+
+
+def _compose_stage_contracts(
+    stages: list[Any],
+    registry: dict[str, dict[str, Any]],
+    overrides: dict[Any, Any],
+) -> dict[str, dict[str, Any]]:
+    contracts: dict[str, dict[str, Any]] = {}
+    for raw_stage in stages:
+        stage = str(raw_stage)
+        standard = registry.get(stage)
+        override = overrides.get(stage)
+        if standard is None and not isinstance(override, dict):
+            continue
+        contract = dict(standard or {})
+        if isinstance(override, dict):
+            contract.update(override)
+        contracts[stage] = contract
+    return contracts
+
+
+def _validate_contract(stage: str, contract: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    unknown_fields = sorted(set(contract) - CONTRACT_FIELDS)
+    if unknown_fields:
+        errors.append(f"stage_contracts.{stage} has unknown fields: {', '.join(unknown_fields)}")
+    for key in ["allow_scaffold", "allow_imported", "closure_required"]:
+        if key in contract and not isinstance(contract[key], bool):
+            errors.append(f"stage_contracts.{stage}.{key} must be a boolean")
+    errors.extend(_validate_pattern_list(stage, "required_artifacts", contract.get("required_artifacts")))
+    errors.extend(_validate_artifact_sets(stage, contract.get("accepted_artifact_sets")))
+    closure_required = contract.get("closure_required", True)
+    if closure_required is not False and not _has_artifact_rule(contract):
+        errors.append(
+            f"stage_contracts.{stage} with closure_required true must declare at least one non-empty artifact rule"
+        )
+    return errors
+
+
+def _validate_override(
+    stage: str,
+    standard: dict[str, Any] | None,
+    override: dict[str, Any],
+) -> list[str]:
+    if not standard:
+        return []
+    errors = []
+    for field in ["required_artifacts", "accepted_artifact_sets"]:
+        if field in standard and field in override and (override[field] is None or override[field] == []):
+            errors.append(f"stage_contracts.{stage}.{field} cannot clear standard artifact rule")
+    return errors
+
+
+def _has_artifact_rule(contract: dict[str, Any]) -> bool:
+    required = contract.get("required_artifacts")
+    if isinstance(required, list) and bool(required):
+        return True
+    accepted = contract.get("accepted_artifact_sets")
+    return isinstance(accepted, list) and any(
+        isinstance(artifact_set, list) and bool(artifact_set) for artifact_set in accepted
+    )
 
 
 def audit_contract_artifacts(
