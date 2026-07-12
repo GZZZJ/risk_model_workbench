@@ -1,0 +1,21 @@
+{
+  "report_scope": "standard model report",
+  "target": "default",
+  "experiment": "main_lgbm",
+  "train_dir": "modeling/main_lgbm",
+  "eval_dir": "evaluation",
+  "output_dir": "reports",
+  "outputs": [
+    "model_report.html",
+    "model_report.md",
+    "model_report.xlsx",
+    "model_report_missing_results.md"
+  ],
+  "score_labels": {
+    "model_score": "G卡AgentV2-ContextPack",
+    "gcard_v2": "G卡V2",
+    "gcard_v4": "G卡V4",
+    "gcard_v5": "G卡V5",
+    "gcard_v6": "G卡V6"
+  }
+}

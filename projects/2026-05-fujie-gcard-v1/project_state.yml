@@ -13,13 +13,15 @@ risks:
 - scaffold artifacts exist and must not be treated as real modeling evidence
 - 当前闭环基于本地 sample_50pct.feather，仍不是生产全量宽表验证
 version: 1
-updated_at: '2026-07-12T02:39:19'
-last_handoff: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/handoffs/20260712_023919-fujie_gcard_action_runner_v1_20260710.md
+updated_at: '2026-07-12T11:30:59'
+last_handoff: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/handoffs/20260712_113059-fujie_gcard_agent_v2_20260712.md
 last_retrospective: /Users/guzijun/Desktop/AI攻坚/jingying_model_agent/projects/2026-05-fujie-gcard-v1/retrospectives/20260609_201910-session-2026-06-imported-gcard-main-lgbm.md
 blockers: []
 last_verified_at: '2026-07-12T02:46:22'
 last_verified_commands:
-- rmw agent status --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710 --json
-- rmw version audit --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710 --strict
+- rmw agent status --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710
+  --json
+- rmw version audit --project projects/2026-05-fujie-gcard-v1 --version-id fujie_gcard_action_runner_v1_20260710
+  --strict
 - pytest tests -q
-active_version_id: fujie_gcard_action_runner_v1_20260710
+active_version_id: fujie_gcard_agent_v2_20260712

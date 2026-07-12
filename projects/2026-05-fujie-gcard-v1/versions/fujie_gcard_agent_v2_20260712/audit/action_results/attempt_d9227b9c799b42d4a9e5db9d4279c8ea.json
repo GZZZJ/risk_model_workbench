@@ -1,0 +1,43 @@
+{
+  "action_id": "compare",
+  "artifacts": [
+    {
+      "artifact_rule": "evaluation/benchmark_uplift.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "evaluation/benchmark_uplift.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "evaluation/champion_challenger.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "evaluation/champion_challenger.json",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_d9227b9c799b42d4a9e5db9d4279c8ea",
+  "created_at": "2026-07-12T11:28:44",
+  "decision": {
+    "created_at": "2026-07-12T11:28:43",
+    "decision": "done",
+    "reason": "Champion/challenger comparison materialized",
+    "stage": "compare"
+  },
+  "failure_code": "",
+  "invocation_hash": "284d9200c2f99d8e354f9d3e527dce0d143cb53b9af414c425d3fbf97ffe9da7",
+  "message": "compare complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/evaluation/champion_challenger.json",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "compare_final",
+  "version_id": "fujie_gcard_agent_v2_20260712"
+}

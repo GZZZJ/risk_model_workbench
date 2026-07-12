@@ -1,0 +1,318 @@
+{
+  "version": 1,
+  "version_id": "fujie_gcard_agent_v2_20260712",
+  "run_id": "fujie_gcard_agent_v2_20260712",
+  "updated_at": "2026-07-12T11:29:09",
+  "stage": "report",
+  "stage_label": "报告生成",
+  "latest_event": {
+    "timestamp": "2026-07-12T11:29:09",
+    "version_id": "fujie_gcard_agent_v2_20260712",
+    "run_id": "fujie_gcard_agent_v2_20260712",
+    "stage": "report",
+    "step": "action_done",
+    "status": "done",
+    "message": "report complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/reports/model_report.xlsx",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "report",
+      "failure_code": "",
+      "retry_count": 0,
+      "artifact_count": 28,
+      "decision": "done"
+    },
+    "level": "info",
+    "pid": 3920
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-07-12T10:54:03",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 12
+        },
+        "level": "info",
+        "pid": 90698
+      },
+      "updated_at": "2026-07-12T10:54:03"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-07-12T10:54:38",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 4,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 90967
+      },
+      "updated_at": "2026-07-12T10:54:38"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-07-12T10:54:39",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather schema metadata generated",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 3
+        },
+        "level": "info",
+        "pid": 90967
+      },
+      "updated_at": "2026-07-12T10:54:39"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-07-12T10:54:48",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: prescreen by design, intake evidence emitted",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6
+        },
+        "level": "info",
+        "pid": 90967
+      },
+      "updated_at": "2026-07-12T10:54:48"
+    },
+    "build_wide_sql": {
+      "stage": "build_wide_sql",
+      "stage_label": "宽表 SQL 生成",
+      "latest_event": {
+        "timestamp": "2026-07-12T10:54:49",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "build_wide_sql",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: wide table skipped by design",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "build_wide_sql",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 1
+        },
+        "level": "info",
+        "pid": 90967
+      },
+      "updated_at": "2026-07-12T10:54:49"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-07-12T11:23:02",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "feature_refine",
+        "step": "action_done",
+        "status": "done",
+        "message": "特征精筛完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_refine",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 5
+        },
+        "level": "info",
+        "pid": 90967
+      },
+      "updated_at": "2026-07-12T11:23:02",
+      "feature_funnel": {
+        "initial": 2837,
+        "available_after_preprocess": 2563,
+        "after_quality_filter": 1773,
+        "after_stability_filter": 1773,
+        "after_global_correlation": 1773,
+        "after_random_importance": 1773,
+        "after_null_importance": 1022,
+        "final": 500
+      }
+    },
+    "train_baseline": {
+      "stage": "train_baseline",
+      "stage_label": "模型训练",
+      "latest_event": {
+        "timestamp": "2026-07-12T11:27:40",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "train_baseline",
+        "step": "action_done",
+        "status": "done",
+        "message": "模型训练完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "train_baseline",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 41,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 3920
+      },
+      "updated_at": "2026-07-12T11:27:40"
+    },
+    "evaluate": {
+      "stage": "evaluate",
+      "stage_label": "模型评估",
+      "latest_event": {
+        "timestamp": "2026-07-12T11:28:40",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "evaluate",
+        "step": "action_done",
+        "status": "done",
+        "message": "evaluation complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/evaluation/evaluation_summary.json",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "evaluate",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 46,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 3920
+      },
+      "updated_at": "2026-07-12T11:28:40"
+    },
+    "compare": {
+      "stage": "compare",
+      "stage_label": "冠军挑战者对比",
+      "latest_event": {
+        "timestamp": "2026-07-12T11:28:44",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "compare",
+        "step": "action_done",
+        "status": "done",
+        "message": "compare complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/evaluation/champion_challenger.json",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "compare",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 2,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 3920
+      },
+      "updated_at": "2026-07-12T11:28:44"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-07-12T11:29:09",
+        "version_id": "fujie_gcard_agent_v2_20260712",
+        "run_id": "fujie_gcard_agent_v2_20260712",
+        "stage": "report",
+        "step": "action_done",
+        "status": "done",
+        "message": "report complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/reports/model_report.xlsx",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 28,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 3920
+      },
+      "updated_at": "2026-07-12T11:29:09"
+    }
+  }
+}

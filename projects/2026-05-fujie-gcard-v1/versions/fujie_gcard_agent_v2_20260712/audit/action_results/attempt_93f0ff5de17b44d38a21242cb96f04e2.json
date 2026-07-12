@@ -1,0 +1,394 @@
+{
+  "action_id": "train_baseline",
+  "artifacts": [
+    {
+      "artifact_rule": "modeling/*/train_metrics.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/train_metrics.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/training_status.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/training_status.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/training_summary.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/training_summary.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/tuning_context.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/tuning_context_round_1.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/metrics_train_valid.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/metrics_train_valid.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/feature_importance.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/feature_importance.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/feature_drop_detail.csv",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/actual_feature_list.txt",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/actual_feature_list.txt",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/preprocessing.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/run_config.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/model.pkl",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/score_column_summary.csv",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/tuning_trials.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/tuning_trials.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/tuning_summary.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/tuning_summary.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/best_params.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/best_params.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/selection_reason.md",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "modeling/*/llm_tuning_decisions.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/llm_tuning_decisions.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/llm_tuning_plan_round_1.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/scores_all_splits.feather",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/006_dau_90d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/007_d30_apl_ord_days_cnt_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/008_6m_used_lmt_second_der_min_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/009_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/011_pmt_crd_amt_3m_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/012_first_day_diff_event_result_0_event_type_loan_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/014_clk_cnt_14d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/015_d180_apl_ord_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/017_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/018_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/019_d180_suc_ord_days_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "modeling/main_lgbm/woe_top_features/woe_top20_summary.csv",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_93f0ff5de17b44d38a21242cb96f04e2",
+  "created_at": "2026-07-12T11:27:40",
+  "decision": {
+    "created_at": "2026-07-12T11:27:39",
+    "decision": "done",
+    "reason": "lightgbm training completed from local feather data",
+    "stage": "train_baseline"
+  },
+  "failure_code": "",
+  "invocation_hash": "2ea7a0cc1dc4955a8cab76c6d91a8285e1779d5f9ac9a4b51eb67d94323c0982",
+  "message": "",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "train_main_lgbm",
+  "version_id": "fujie_gcard_agent_v2_20260712"
+}

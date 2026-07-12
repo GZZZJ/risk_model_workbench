@@ -1,0 +1,137 @@
+{
+  "round": 1,
+  "experiment": "main_lgbm",
+  "task_type": "binary_classification",
+  "algorithm": "lightgbm",
+  "base_params": {
+    "objective": "binary",
+    "metric": "auc",
+    "learning_rate": 0.05,
+    "num_leaves": 31,
+    "max_depth": 5,
+    "min_child_samples": 100,
+    "subsample": 0.7,
+    "colsample_bytree": 0.7,
+    "reg_alpha": 0.1,
+    "reg_lambda": 1.0,
+    "num_boost_round": 1000,
+    "early_stopping_rounds": 50
+  },
+  "training_summary": {
+    "train_samples": 183739,
+    "valid_samples": 183480,
+    "train_bad_rate": 0.153195565448816,
+    "valid_bad_rate": 0.17346304774362328,
+    "candidate_features": 500,
+    "kept_features": 500,
+    "train_values": [
+      "DEV"
+    ],
+    "valid_values": [
+      "DEV-OOS"
+    ]
+  },
+  "trial_history": [
+    {
+      "trial_id": 0,
+      "round": 0,
+      "candidate_name": "baseline",
+      "advisor_type": "baseline",
+      "reason": "configured baseline parameters",
+      "params": {
+        "objective": "binary",
+        "metric": "auc",
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "max_depth": 5,
+        "min_child_samples": 100,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_alpha": 0.1,
+        "reg_lambda": 1.0,
+        "num_boost_round": 1000,
+        "early_stopping_rounds": 50
+      },
+      "train_auc": 0.9457231627273331,
+      "valid_auc": 0.932504580515793,
+      "train_ks": 0.748625889188582,
+      "valid_ks": 0.7169557244086744,
+      "train_samples": 183739,
+      "valid_samples": 183480,
+      "train_bad_rate": 0.153195565448816,
+      "valid_bad_rate": 0.17346304774362328,
+      "best_iteration": 306,
+      "train_time_seconds": 16.9,
+      "auc_gap": 0.013218582211540153
+    }
+  ],
+  "constraints": {
+    "max_candidates": 3,
+    "remaining_trials": 4,
+    "param_bounds": {
+      "numeric": {
+        "learning_rate": [
+          0.005,
+          0.2
+        ],
+        "subsample": [
+          0.5,
+          1.0
+        ],
+        "colsample_bytree": [
+          0.5,
+          1.0
+        ],
+        "reg_alpha": [
+          0.0,
+          20.0
+        ],
+        "reg_lambda": [
+          0.0,
+          50.0
+        ],
+        "min_gain_to_split": [
+          0.0,
+          5.0
+        ]
+      },
+      "integer": {
+        "num_leaves": [
+          7,
+          255
+        ],
+        "max_depth": [
+          3,
+          12
+        ],
+        "min_child_samples": [
+          20,
+          1000
+        ],
+        "bagging_freq": [
+          0,
+          10
+        ],
+        "max_bin": [
+          63,
+          511
+        ],
+        "num_boost_round": [
+          100,
+          3000
+        ],
+        "early_stopping_rounds": [
+          20,
+          300
+        ]
+      }
+    },
+    "objective": {
+      "primary_metric": "valid_ks",
+      "secondary_metric": "valid_auc"
+    },
+    "guardrails": {
+      "max_train_valid_auc_gap": 0.03
+    }
+  }
+}

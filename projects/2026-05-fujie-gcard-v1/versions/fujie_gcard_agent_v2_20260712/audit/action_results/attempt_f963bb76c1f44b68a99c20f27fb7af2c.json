@@ -1,0 +1,65 @@
+{
+  "action_id": "feature_refine",
+  "artifacts": [
+    {
+      "artifact_rule": "feature_selection/*stage_summary.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/stage_summary.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_selection/*stage_summary.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/feature_stage_summary.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/resource_usage.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_selection/final_500_features.txt",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/final_500_features.txt",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_selection/final_features.txt",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/final_features.txt",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_f963bb76c1f44b68a99c20f27fb7af2c",
+  "created_at": "2026-07-12T11:23:02",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "6e571f3a51eff3f5578797fd1a6c68cd1f0c2f68707b8795cf8cfb151bf560ab",
+  "message": "",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_refine",
+  "version_id": "fujie_gcard_agent_v2_20260712"
+}

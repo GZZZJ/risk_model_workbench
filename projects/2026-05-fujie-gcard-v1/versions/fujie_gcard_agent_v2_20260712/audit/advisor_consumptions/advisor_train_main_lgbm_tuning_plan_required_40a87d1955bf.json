@@ -1,0 +1,21 @@
+{
+  "attempt_id": "attempt_066bf505e277493487dac93c34f9176d",
+  "blocker_id": "advisor_train_main_lgbm_tuning_plan_required_40a87d1955bf",
+  "consumed": true,
+  "context_hash": "a74dcfd68b7344a86f95a7c36e9148c48a7ea294ad57a9f7a8bf082674aa2770",
+  "created_at": "2026-07-12T11:24:59",
+  "decision": "continue",
+  "invocation_hash": "2ea7a0cc1dc4955a8cab76c6d91a8285e1779d5f9ac9a4b51eb67d94323c0982",
+  "output_files": [
+    "modeling/main_lgbm/llm_tuning_plan_round_1.json"
+  ],
+  "receipt_id": "advisor_consumption:advisor_train_main_lgbm_tuning_plan_required_40a87d1955bf",
+  "replacement_request_id": "",
+  "request_hash": "40a87d1955bf410ca152da5cbbccfe3b465d7214cf579ca2a8ea724517268a96",
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_40a87d1955bf",
+  "response_hash": "8678145c9739d8032be629e51bfd003439ce3e8a6ef20296e365bf6438c3ef09",
+  "round": 1,
+  "target_status": "running",
+  "task_id": "train_main_lgbm",
+  "version": 1
+}

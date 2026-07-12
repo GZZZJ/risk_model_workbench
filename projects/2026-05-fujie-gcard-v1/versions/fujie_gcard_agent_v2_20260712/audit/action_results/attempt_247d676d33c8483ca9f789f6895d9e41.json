@@ -1,0 +1,277 @@
+{
+  "action_id": "report",
+  "artifacts": [
+    {
+      "artifact_rule": "reports/model_report.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_card.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_card.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/executive_summary.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/executive_summary.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_report.html",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report.html",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/report_scope.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_report.xlsx",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report.xlsx",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report_missing_results.md",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/001_d180_apl_ord_days_cnt_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/002_first_day_diff_event_result_1_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/003_d360_apl_ord_ddf_mdl_ord_crt_dte_min_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/004_his_360_day_csh_apl_ord_cnt_his_rto_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/005_d180_apl_ord_days_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/006_dau_90d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/007_d30_apl_ord_days_cnt_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/008_6m_used_lmt_second_der_min_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/009_ord_apl_avg_prc_amt_720_day_per_mth_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/010_ddf_lst_app_str_tim_to_mdl_tim_sec_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/011_pmt_crd_amt_3m_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/012_first_day_diff_event_result_0_event_type_loan_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/013_cnt_avg_ord_span_30d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/014_clk_cnt_14d_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/015_d180_apl_ord_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/016_pst_ord_apl_suc_max_prc_amt_180_day_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/017_avg_avl_lmt_lft_rep_prc_3m_cash_1m_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/018_d180_apl_ord_ddf_mdl_ord_crt_dte_max_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/019_d180_suc_ord_days_cnt_all_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/images/020_his_30d_app_str_ctn_v2_WOE.png",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/woe_top_features/woe_top20_summary.csv",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_247d676d33c8483ca9f789f6895d9e41",
+  "created_at": "2026-07-12T11:29:09",
+  "decision": {
+    "created_at": "2026-07-12T11:29:08",
+    "decision": "done",
+    "reason": "Excel report generated for 1 report target(s)",
+    "stage": "report"
+  },
+  "failure_code": "",
+  "invocation_hash": "846e9fcd2e8c0a60ccef7a5a87c6a42217b277f80db3affe1764e50366b7957f",
+  "message": "report complete: /private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_agent_v2_20260712/reports/model_report.xlsx",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "report_final",
+  "version_id": "fujie_gcard_agent_v2_20260712"
+}

@@ -1,0 +1,74 @@
+{
+  "action_id": "feature_prescreen",
+  "artifacts": [
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/data_source_contract.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/execution_environment.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/resource_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/sampling_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batch_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/profiles/local_feather_profile.json",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "attempt_dd077c618c4b466ba3bd8af97dc7e86e",
+  "created_at": "2026-07-12T10:54:48",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "8b93ef1c030c32cbf27e5e67381e1cbf371d8d385d518064629286b9009a272e",
+  "message": "local feather mode: prescreen by design, intake evidence emitted",
+  "next_required_action": "none",
+  "project": "/private/tmp/rmw-agent-harness-p1-p2/projects/2026-05-fujie-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_prescreen",
+  "version_id": "fujie_gcard_agent_v2_20260712"
+}

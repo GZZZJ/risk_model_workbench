@@ -63,6 +63,15 @@ versions:
   path: versions/fujie_gcard_agent_v1_20260710
   created_at: '2026-07-11T19:33:12'
   updated_at: '2026-07-11T20:55:26'
+- version_id: fujie_gcard_agent_v2_20260712
+  display_name: fujie_gcard_agent_v2_20260712
+  source_type: workbench
+  managed_by: agent
+  status: running
+  workflow: full_modeling
+  path: versions/fujie_gcard_agent_v2_20260712
+  created_at: '2026-07-12T10:54:02'
+  updated_at: '2026-07-12T10:54:02'
 - version_id: fujie_gcard_v7_20260630
   display_name: fujie_gcard_v7_20260630
   source_type: workbench
@@ -72,5 +81,5 @@ versions:
   created_at: '2026-06-30T13:53:15'
   updated_at: '2026-07-01T14:31:40'
   legacy_run_id: 2026-06-30-gcard-main-lgbm-full
-active_version_id: fujie_gcard_action_runner_v1_20260710
-updated_at: '2026-07-12T02:37:26'
+active_version_id: fujie_gcard_agent_v2_20260712
+updated_at: '2026-07-12T10:54:03'

@@ -1,0 +1,19 @@
+{
+  "decision": "continue",
+  "output_files": ["modeling/main_lgbm/llm_tuning_plan_round_1.json"],
+  "request_id": "advisor_train_main_lgbm_tuning_plan_required_40a87d1955bf",
+  "request_identity": {
+    "attempt_id": "attempt_066bf505e277493487dac93c34f9176d",
+    "context_hash": "a74dcfd68b7344a86f95a7c36e9148c48a7ea294ad57a9f7a8bf082674aa2770",
+    "invocation_hash": "2ea7a0cc1dc4955a8cab76c6d91a8285e1779d5f9ac9a4b51eb67d94323c0982",
+    "round": 1,
+    "task_id": "train_main_lgbm"
+  },
+  "requires_user_confirmation": false,
+  "risk_notes": ["The plan uses only the immutable Context Pack and selects by configured validation metrics; OOT remains final assessment evidence."],
+  "status": "answered",
+  "summary": "Three bounded validation-led LightGBM candidates generated solely from the immutable v2 context pack.",
+  "type": "tuning_plan",
+  "version": 1
+}
+
