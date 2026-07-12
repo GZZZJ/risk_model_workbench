@@ -3,7 +3,10 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from risk_model_workbench.cli import _finish_feature_metadata_local_feather
+from risk_model_workbench.application.action_runner import ActionRunner
+from risk_model_workbench.application.context import VersionContext
+from risk_model_workbench.application.handlers import production_handler_registry
+from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.registry import load_artifact_manifest
 from risk_model_workbench.state import create_version_state, load_run_state, save_version_state
 
@@ -37,7 +40,21 @@ def test_local_feather_metadata_uses_arrow_schema_without_remote_access(tmp_path
     )
     save_version_state(workspace, state)
 
-    assert _finish_feature_metadata_local_feather(workspace, project) == 0
+    context = VersionContext.from_project(project, "demo_v1")
+    result = ActionRunner(
+        handlers=production_handler_registry(), policy_check=lambda *_: True
+    ).run(
+        invocation=ActionInvocation(
+            tool_name="feature_metadata",
+            params={},
+            project=str(project.resolve()),
+            version_id="demo_v1",
+        ),
+        context=context,
+        attempt_id="feature_metadata_local",
+    )
+
+    assert result.status == "done"
 
     columns = pd.read_csv(workspace / "feature_metadata" / "feature_columns.csv")
     assert columns["feature_name"].tolist() == ["uid", "label", "x1"]

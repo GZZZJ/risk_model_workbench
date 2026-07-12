@@ -75,6 +75,7 @@ def _profile_local(context: VersionContext, config: dict, data_cfg: dict, raw_pa
         df = pd.read_feather(raw_path)
     target_col = data_cfg.get("target_column")
     split_col = data_cfg.get("split_column") or (config.get("split") or {}).get("source_column")
+    time_col = data_cfg.get("time_column")
     id_columns = [col for col in data_cfg.get("id_columns", []) if col in df.columns]
     summary = {
         "status": "done",
@@ -104,6 +105,53 @@ def _profile_local(context: VersionContext, config: dict, data_cfg: dict, raw_pa
             )["_target_numeric"].mean().reset_index(name="target_rate")
             rows = rows.merge(rates, on=split_col, how="left")
         rows.to_csv(output / "sample_split_summary.csv", index=False, encoding="utf-8-sig")
+    if time_col in df.columns and target_col in df.columns:
+        month = pd.to_datetime(df[time_col], errors="coerce").dt.to_period("M").astype(str)
+        monthly = (
+            df.assign(_month=month)
+            .groupby("_month", dropna=False)
+            .agg(
+                samples=(target_col, "count"),
+                positive=(target_col, "sum"),
+                target_rate=(target_col, "mean"),
+            )
+            .reset_index()
+        )
+        monthly.to_csv(
+            output / "monthly_label_distribution.csv", index=False, encoding="utf-8-sig"
+        )
+    segment_cols = [
+        col
+        for col in [
+            "blue_customer_flag",
+            "zc_level",
+            "channel",
+            "channel_id",
+            "account_status",
+            "acct_status",
+            "roll_rate_status",
+            "credit_product",
+            "credit_product_code",
+            "product_code",
+            *data_cfg.get("segment_columns", []),
+        ]
+        if col in df.columns
+    ]
+    if segment_cols:
+        segment_rows = []
+        for column in dict.fromkeys(segment_cols):
+            for value, count in df[column].value_counts(dropna=False).items():
+                segment_rows.append(
+                    {
+                        "segment_column": column,
+                        "segment_value": str(value),
+                        "count": int(count),
+                        "ratio": float(count / len(df)) if len(df) else 0,
+                    }
+                )
+        pd.DataFrame(segment_rows).to_csv(
+            output / "segment_distribution.csv", index=False, encoding="utf-8-sig"
+        )
     (output / "sample_check_report.md").write_text("# Sample Check\n\nstatus: done\n", encoding="utf-8")
     for artifact in sorted(output.iterdir()):
         register_action_artifact(context.workspace, "sample_check", artifact)

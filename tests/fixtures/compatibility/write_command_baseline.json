@@ -11,6 +11,7 @@
     "feature_selection/sampling_plan.json",
     "feature_selection/wide_table_skipped.json",
     "sample_check/label_distribution.csv",
+    "sample_check/monthly_label_distribution.csv",
     "sample_check/sample_check_report.md",
     "sample_check/sample_split_summary.csv",
     "sample_check/sample_summary.json"
@@ -123,6 +124,17 @@
       "integrity_mode": "content",
       "kind": "file",
       "path": "sample_check/label_distribution.csv",
+      "retention_reason": "generated in the current workspace",
+      "source": "generated",
+      "stage": "sample_check",
+      "storage_class": "workspace_only"
+    },
+    {
+      "contract_role": "required",
+      "description": "",
+      "integrity_mode": "content",
+      "kind": "file",
+      "path": "sample_check/monthly_label_distribution.csv",
       "retention_reason": "generated in the current workspace",
       "source": "generated",
       "stage": "sample_check",
@@ -577,6 +589,7 @@
     "sample_check": {
       "artifacts": [
         "sample_check/label_distribution.csv",
+        "sample_check/monthly_label_distribution.csv",
         "sample_check/sample_check_report.md",
         "sample_check/sample_split_summary.csv",
         "sample_check/sample_summary.json"

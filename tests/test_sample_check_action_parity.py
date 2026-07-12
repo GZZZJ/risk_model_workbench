@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import pandas as pd
 import yaml
 
 from risk_model_workbench.application.action_runner import ActionRunner
@@ -86,7 +87,10 @@ def test_sample_check_cli_and_action_runner_have_valid_input_parity(tmp_path, ca
     raw = project / "data" / "sample.csv"
     raw.parent.mkdir(parents=True, exist_ok=True)
     raw.write_text(
-        "uid,label,split,amount\n1,0,DEV,10\n2,1,DEV,20\n2,1,OOT,30\n",
+        "uid,label,split,event_time,channel,amount\n"
+        "1,0,DEV,2026-01-02,APP,10\n"
+        "2,1,DEV,2026-01-15,WEB,20\n"
+        "2,1,OOT,2026-02-03,APP,30\n",
         encoding="utf-8",
     )
     config = yaml.safe_load((project / "project.yml").read_text(encoding="utf-8"))
@@ -95,6 +99,8 @@ def test_sample_check_cli_and_action_runner_have_valid_input_parity(tmp_path, ca
             "raw_path": "data/sample.csv",
             "id_columns": ["uid"],
             "split_column": "split",
+            "time_column": "event_time",
+            "segment_columns": ["channel"],
         }
     )
     payload = yaml.safe_dump(config)
@@ -125,3 +131,53 @@ def test_sample_check_cli_and_action_runner_have_valid_input_parity(tmp_path, ca
         assert summary["duplicate_key_rows"] == 1
         assert (context.workspace / "sample_check" / "label_distribution.csv").exists()
         assert (context.workspace / "sample_check" / "sample_split_summary.csv").exists()
+        monthly = pd.read_csv(
+            context.workspace / "sample_check" / "monthly_label_distribution.csv"
+        )
+        assert monthly.to_dict("records") == [
+            {"_month": "2026-01", "samples": 2, "positive": 1, "target_rate": 0.5},
+            {"_month": "2026-02", "samples": 1, "positive": 1, "target_rate": 1.0},
+        ]
+        segments = pd.read_csv(context.workspace / "sample_check" / "segment_distribution.csv")
+        assert segments[["segment_column", "segment_value", "count"]].to_dict("records") == [
+            {"segment_column": "channel", "segment_value": "APP", "count": 2},
+            {"segment_column": "channel", "segment_value": "WEB", "count": 1},
+        ]
+
+
+def test_sample_check_cli_and_action_runner_have_failure_parity(tmp_path, capsys, monkeypatch):
+    project = tmp_path / "project"
+    cli_context = _workspace(project, "cli_sample")
+    direct_context = _workspace(project, "direct_sample")
+    raw = project / "data" / "sample.csv"
+    raw.parent.mkdir(parents=True, exist_ok=True)
+    raw.write_text("uid,label\n1,0\n", encoding="utf-8")
+    config = yaml.safe_load((project / "project.yml").read_text(encoding="utf-8"))
+    config["data"]["raw_path"] = "data/sample.csv"
+    payload = yaml.safe_dump(config)
+    (project / "project.yml").write_text(payload, encoding="utf-8")
+    for context in [cli_context, direct_context]:
+        (context.runtime_config_dir / "project.yml").write_text(payload, encoding="utf-8")
+
+    def fail_read_csv(*_args, **_kwargs):
+        raise OSError("sample read failed")
+
+    monkeypatch.setattr(pd, "read_csv", fail_read_csv)
+    assert main(["sample", "check", "--project", str(project), "--run-id", "cli_sample"]) == 1
+    assert "sample read failed" in capsys.readouterr().err
+    result = ActionRunner(
+        handlers=production_handler_registry(), policy_check=lambda *_: True
+    ).run(
+        invocation=ActionInvocation(
+            tool_name="sample_check",
+            params={},
+            project=str(project.resolve()),
+            version_id="direct_sample",
+        ),
+        context=direct_context,
+        attempt_id="attempt_sample_failure",
+    )
+
+    assert result.status == "failed"
+    assert result.message == "sample read failed"
+    assert _snapshot(cli_context) == _snapshot(direct_context)
