@@ -122,3 +122,8 @@ def test_feature_prescreen_sql_prepare_and_execute_cli_runner_parity(tmp_path, m
     result = runner.run(invocation=ActionInvocation(tool_name="feature_prescreen_prepare", params={}, project=str(project.resolve()), version_id="direct"), context=direct, attempt_id="prepare")
     assert result.status == "scaffold"
     assert _snapshot(cli, "feature_prescreen") == _snapshot(direct, "feature_prescreen")
+
+    assert main(["feature", "prescreen", "--project", str(project), "--run-id", "cli", "--sql-approved"]) == 0
+    result = runner.run(invocation=ActionInvocation(tool_name="feature_prescreen_execute", params={}, project=str(project.resolve()), version_id="direct"), context=direct, attempt_id="execute")
+    assert result.status == "done"
+    assert _snapshot(cli, "feature_prescreen") == _snapshot(direct, "feature_prescreen")
