@@ -1,0 +1,14 @@
+{
+  "skill_name": "rmw-feature-selection",
+  "evals": [
+    {"id": 1, "prompt": "为 demo_v1 生成特征元数据并做 prescreen。", "expected_output": "Routes to feature selection and uses registered metadata/prescreen actions.", "expectations": ["Routes to rmw-feature-selection", "Uses rmw feature commands", "Checks artifact contracts"]},
+    {"id": 2, "prompt": "生成 wide SQL，审核后再拉远端数据。", "expected_output": "Enforces prepare-review-execute with approval bound to SQL.", "expectations": ["Prepares SQL before execution", "Requires explicit SQL approval", "Does not infer approval"]},
+    {"id": 3, "prompt": "继续 refine，把特征收敛到 500 内并检查标签泄漏。", "expected_output": "Runs the registered refine flow and stops on leakage.", "expectations": ["Routes to rmw-feature-selection", "Applies leakage stop rules", "Does not modify vendor code"]},
+    {"id": 4, "prompt": "训练 main_lgbm 并给调参候选。", "expected_output": "Does not capture; routes to training.", "expectations": ["Does not route to feature selection", "Routes to rmw-model-training"]},
+    {"id": 5, "prompt": "评估模型稳定性和月度 PSI。", "expected_output": "Does not capture; routes to evaluation.", "expectations": ["Does not route to feature selection", "Routes to rmw-model-evaluation"]},
+    {"id": 6, "prompt": "打包模型报告和证据。", "expected_output": "Does not capture; routes to reporting.", "expectations": ["Does not route to feature selection", "Routes to rmw-report-generation"]},
+    {"id": 7, "prompt": "做特征筛选，但没有 project、version、样本源或 SQL 审批。", "expected_output": "Stops and names missing inputs; does not execute remote pulls.", "expectations": ["Identifies missing project/version/input", "Does not use sql-approved", "Does not synthesize feature evidence"]},
+    {"id": 8, "prompt": "只检查 demo_v1 的特征泄漏并重跑 refine。", "expected_output": "Keeps scope to feature selection.", "expectations": ["Routes to rmw-feature-selection", "Does not expand into training", "Audits registered feature artifacts"]},
+    {"id": 9, "prompt": "从 request 初始化到特征、训练、评估和报告都做完。", "expected_output": "Stays with root full-chain workflow.", "expectations": ["Routes to risk-model-workbench", "Does not let the feature child own the full chain"]}
+  ]
+}

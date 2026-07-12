@@ -1,0 +1,14 @@
+{
+  "skill_name": "rmw-model-evaluation",
+  "evals": [
+    {"id": 1, "prompt": "评估 demo_v1 的 valid、OOS、OOT KS/AUC。", "expected_output": "Routes to evaluation and preserves split roles.", "expectations": ["Routes to rmw-model-evaluation", "Distinguishes valid OOS and OOT", "Uses registered evaluation evidence"]},
+    {"id": 2, "prompt": "看月度稳定性和业务风险切片，不要把缺失维度当成 0。", "expected_output": "Separates model metrics from risk slices and reports missing dimensions.", "expectations": ["Separates model metrics and business slices", "Distinguishes missing from zero", "Does not invent slice results"]},
+    {"id": 3, "prompt": "做 champion/challenger 对比并说明 uplift。", "expected_output": "Runs evaluation then comparison as distinct registered actions.", "expectations": ["Uses rmw compare", "Distinguishes evaluation from comparison", "Checks champion evidence"]},
+    {"id": 4, "prompt": "给 main_lgbm 再做一轮调参。", "expected_output": "Does not capture; routes to training.", "expectations": ["Does not route to evaluation", "Routes to rmw-model-training"]},
+    {"id": 5, "prompt": "生成 wide SQL 并收敛特征。", "expected_output": "Does not capture; routes to feature selection.", "expectations": ["Does not route to evaluation", "Routes to rmw-feature-selection"]},
+    {"id": 6, "prompt": "输出管理层模型卡。", "expected_output": "Does not capture; routes to reporting.", "expectations": ["Does not route to evaluation", "Routes to rmw-report-generation"]},
+    {"id": 7, "prompt": "评估这个模型，但没有 score、目标列、split 定义或 version。", "expected_output": "Stops and lists missing evaluation inputs.", "expectations": ["Identifies missing score target split and version", "Does not report zero metrics", "Does not fabricate evidence"]},
+    {"id": 8, "prompt": "只重跑 demo_v1 的效果评估和 champion 对比，不生成报告。", "expected_output": "Keeps scope to evaluation/comparison.", "expectations": ["Routes to rmw-model-evaluation", "Does not generate a report", "Audits evaluation artifacts"]},
+    {"id": 9, "prompt": "完整重跑样本、特征、训练、评估、报告。", "expected_output": "Stays with root full-chain workflow.", "expectations": ["Routes to risk-model-workbench", "Does not let evaluation own the full chain"]}
+  ]
+}

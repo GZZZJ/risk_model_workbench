@@ -1,6 +1,6 @@
 ---
 name: risk-model-workbench
-description: Use this skill for local risk scenario AI modeling workbench workflows, including sample checks, feature selection, model training, evaluation, champion/challenger comparison, and report generation.
+description: Orchestrate full-chain or ambiguous multi-stage risk modeling in the local Risk Model Workbench. Use when a request spans two or more modeling stages, initializes request/plan/version state, or needs cross-stage stop rules. Do not use for a clearly bounded single-stage training, feature-selection, evaluation, or reporting request; route those to the matching rmw child skill.
 ---
 
 # Risk Model Workbench
@@ -8,6 +8,25 @@ description: Use this skill for local risk scenario AI modeling workbench workfl
 Use the local `rmw` CLI for the 风险场景 AI 建模工作台. Do not reimplement
 modeling logic in chat. `jm` is a long-term compatibility alias for existing
 automation and handoffs.
+
+## Route by scope
+
+Keep this root skill for full-chain workflows, requests spanning more than one
+modeling stage, and ambiguous modeling requests that require cross-stage stop
+rules. For a clearly bounded single-stage request, load the matching thin skill
+instead of duplicating its operating procedure here:
+
+- Training, tuning, experiments, or Advisor candidates: `rmw-model-training`.
+- Metadata, prescreen, wide SQL, refine, leakage, or feature convergence:
+  `rmw-feature-selection`.
+- Effectiveness, stability, slices, valid/OOS/OOT, or champion/challenger:
+  `rmw-model-evaluation`.
+- Model reports, model cards, executive summaries, or evidence packages:
+  `rmw-report-generation`.
+
+The root skill retains request/plan/version initialization, orchestration across
+stages, and cross-stage stop decisions. Child skills never take ownership of a
+full modeling chain.
 
 ## Source Of Truth
 

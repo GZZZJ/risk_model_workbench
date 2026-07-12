@@ -1,0 +1,14 @@
+{
+  "skill_name": "rmw-report-generation",
+  "evals": [
+    {"id": 1, "prompt": "为 demo_v1 生成模型报告和模型卡。", "expected_output": "Routes to reporting and invokes deterministic rmw report over registered evidence.", "expectations": ["Routes to rmw-report-generation", "Uses rmw report", "Reads registered artifacts"]},
+    {"id": 2, "prompt": "把已有建模证据整理成管理层摘要。", "expected_output": "Packages available evidence and surfaces gaps without inventing results.", "expectations": ["Uses manifest evidence", "Surfaces missing requirements", "Does not invent metrics"]},
+    {"id": 3, "prompt": "生成审计证据包，标明 scaffold 和缺失的 MOB。", "expected_output": "Keeps provenance and explicitly marks unavailable future performance.", "expectations": ["Marks scaffold/import limitations", "Does not invent MOB", "Keeps report deterministic"]},
+    {"id": 4, "prompt": "训练 LightGBM 并继续调参。", "expected_output": "Does not capture; routes to training.", "expectations": ["Does not route to reporting", "Routes to rmw-model-training"]},
+    {"id": 5, "prompt": "检查特征泄漏并重跑 prescreen。", "expected_output": "Does not capture; routes to feature selection.", "expectations": ["Does not route to reporting", "Routes to rmw-feature-selection"]},
+    {"id": 6, "prompt": "比较 OOT KS 和 champion uplift。", "expected_output": "Does not capture; routes to evaluation.", "expectations": ["Does not route to reporting", "Routes to rmw-model-evaluation"]},
+    {"id": 7, "prompt": "生成报告，但没有 project、version、manifest 或评估产物。", "expected_output": "Stops and reports missing registered evidence.", "expectations": ["Identifies missing project/version/manifest", "Does not invent a report", "Does not treat loose files as evidence"]},
+    {"id": 8, "prompt": "只基于 demo_v1 已登记证据重生成报告，不重跑模型。", "expected_output": "Keeps scope to deterministic report generation.", "expectations": ["Routes to rmw-report-generation", "Does not retrain", "Runs report and audit"]},
+    {"id": 9, "prompt": "从样本到报告做一次完整建模闭环。", "expected_output": "Stays with root full-chain workflow.", "expectations": ["Routes to risk-model-workbench", "Does not let reporting own the full chain"]}
+  ]
+}

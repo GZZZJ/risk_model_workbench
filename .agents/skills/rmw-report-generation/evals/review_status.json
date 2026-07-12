@@ -1,0 +1,17 @@
+{
+  "status": "approved",
+  "reviewed_at": "2026-07-12",
+  "reviewer": "user-confirmed",
+  "review_evidence": "User explicitly confirmed: 4 个 Skill 评审通过",
+  "iteration": 1,
+  "with_skill_pass_rate": 1,
+  "baseline_pass_rate": 0.667,
+  "routing_precision": 1,
+  "routing_recall": 1,
+  "native_trigger_recall": 1,
+  "native_trigger_status": "passed",
+  "native_trigger_valid_decisions": 27,
+  "native_trigger_infra_errors": 0,
+  "review_artifact": "../../rmw-report-generation-workspace/iteration-1/review.html",
+  "native_trigger_precision": 1
+}

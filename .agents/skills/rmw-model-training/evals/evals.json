@@ -1,0 +1,14 @@
+{
+  "skill_name": "rmw-model-training",
+  "evals": [
+    {"id": 1, "prompt": "在 demo_v1 上训练 main_lgbm，先检查输入是否齐全。", "expected_output": "Routes to the training skill and checks registered prerequisites before rmw train.", "expectations": ["Routes to rmw-model-training", "Checks version state and manifest", "Uses rmw train rather than implementing LightGBM"]},
+    {"id": 2, "prompt": "训练返回 advisor_required，请给 3 个有解释的候选参数。", "expected_output": "Uses the immutable Advisor context and returns bounded candidates without optimizing on OOT.", "expectations": ["Requires the immutable Advisor context pack before accepting candidates", "Proposes 3-5 bounded candidates", "Does not optimize primarily on OOT"]},
+    {"id": 3, "prompt": "比较两轮 LightGBM 调参结果并继续这个 experiment。", "expected_output": "Treats this as a single training/tuning stage and follows the Advisor protocol.", "expectations": ["Keeps scope to training", "Uses registered evidence", "Does not edit state or manifest directly"]},
+    {"id": 4, "prompt": "把 final_features 收敛到 300 个并检查泄漏。", "expected_output": "Does not capture; routes to feature selection.", "expectations": ["Does not route to model training", "Routes to rmw-feature-selection"]},
+    {"id": 5, "prompt": "看看 OOT KS 和 champion/challenger 是否提升。", "expected_output": "Does not capture; routes to evaluation.", "expectations": ["Does not route to model training", "Routes to rmw-model-evaluation"]},
+    {"id": 6, "prompt": "生成模型卡和管理层摘要。", "expected_output": "Does not capture; routes to report generation.", "expectations": ["Does not route to model training", "Routes to rmw-report-generation"]},
+    {"id": 7, "prompt": "训练这个模型，但我还没有提供 project、version 或特征清单。", "expected_output": "Stops on missing inputs and asks for exact project/version evidence.", "expectations": ["Identifies missing project/version", "Does not fabricate or execute training", "Lists required registered inputs"]},
+    {"id": 8, "prompt": "只重跑 demo_v1 的 main_lgbm 训练，不做评估和报告。", "expected_output": "Owns only the explicit training stage.", "expectations": ["Routes to rmw-model-training", "Does not expand into evaluation or reporting", "Runs audit after the stage"]},
+    {"id": 9, "prompt": "从样本检查、特征筛选、训练、评估到报告全链路重跑。", "expected_output": "Stays with the root workflow skill.", "expectations": ["Routes to risk-model-workbench", "Does not let the training child own the full chain"]}
+  ]
+}
