@@ -1,0 +1,25 @@
+evaluation:
+  label_column: {{target_column}}
+  score_columns:
+    - model_score
+  score_labels:
+    model_score: 本轮模型
+  split_column: final_flag
+  time_column: {{time_column}}
+  period_column: {{period_column}}
+  segment_columns:
+    - blue_customer_flag
+    - zc_level
+
+metrics:
+  - auc
+  - ks
+  - psi
+  - decile_lift
+  - monotonicity
+
+risk_observation:
+  enabled: true
+  columns:
+    - prc_amt_xz_30d_3m
+    - ovd_amt_xz_30d_3m

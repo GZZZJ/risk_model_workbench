@@ -50,7 +50,7 @@ from risk_model_workbench.agent.workspace_store import WorkspaceStore
 from risk_model_workbench.application.action_runner import ActionRunner
 from risk_model_workbench.application.context import VersionContext
 from risk_model_workbench.application.handlers import production_handler_registry
-from risk_model_workbench.config import load_yaml
+from risk_model_workbench.config import ConfigError, load_yaml
 from risk_model_workbench.feature_screening import write_feature_screening_summary
 from risk_model_workbench.harness.errors import SQL_APPROVAL_REQUIRED, WorkspaceLockedError
 from risk_model_workbench.harness.runtime import (
@@ -65,7 +65,7 @@ from risk_model_workbench.harness.runtime import (
 from risk_model_workbench.harness.tools import TOOL_REGISTRY
 from risk_model_workbench.harness.invocation import ActionInvocation
 from risk_model_workbench.manifest import make_run_id
-from risk_model_workbench.paths import REPO_ROOT, project_config_path, resolve_project_path, workflow_path
+from risk_model_workbench.paths import REPO_ROOT, project_config_path, resolve_project_path, stage_config_path, workflow_path
 from risk_model_workbench.planning import create_execution_plan, save_execution_plan
 from risk_model_workbench.progress import (
     ProgressReporter,
@@ -458,8 +458,10 @@ def _query_artifact_relative(project_dir: Path, sql_path: Path) -> Path:
 
 
 def _resolve_refine_config_path(project_dir: Path, config: str | None) -> Path:
-    path = Path(config or "configs/refine_features.yaml")
-    return path if path.is_absolute() else project_dir / path
+    if config:
+        path = Path(config)
+        return path if path.is_absolute() else project_dir / path
+    return stage_config_path(project_dir, "refine_features")
 
 
 def _feature_refine_output_dir(project_dir: Path, config: str | None) -> Path:
@@ -477,11 +479,7 @@ def _feature_refine_output_dir_for_run(project_dir: Path, run_path: Path, config
 
 
 def _feature_prescreen_output_dir(project_dir: Path, config: str | None) -> Path:
-    candidates = (
-        [Path(config)]
-        if config
-        else [project_dir / "configs" / "feature_select.yaml", project_dir / "configs" / "feature_select.yml"]
-    )
+    candidates = [Path(config)] if config else [stage_config_path(project_dir, "feature_select")]
     cfg_path = None
     for path in candidates:
         candidate = path if path.is_absolute() else project_dir / path
@@ -567,13 +565,15 @@ def _runtime_config_path(run_path: Path, project_dir: Path, name: str) -> Path:
         candidates.extend([
             _runtime_config_dir(run_path) / f"{name}.yaml",
             _runtime_config_dir(run_path) / f"{name}.yml",
-            project_dir / "configs" / f"{name}.yaml",
-            project_dir / "configs" / f"{name}.yml",
         ])
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    return candidates[0]
+    if not raw.suffix:
+        project_candidate = stage_config_path(project_dir, name)
+        if project_candidate.exists():
+            return project_candidate
+    return candidates[0] if candidates else stage_config_path(project_dir, name)
 
 
 def _load_runtime_project_config(project_dir: Path, run_path: Path) -> dict[str, Any]:
@@ -911,19 +911,34 @@ def cmd_init_project(args: argparse.Namespace) -> int:
 
 def cmd_project_validate(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
-    config_path = project_config_path(project_dir)
     errors: list[str] = []
-    if not config_path.exists():
-        errors.append(f"missing project config: {config_path}")
-    else:
-        config = load_yaml(config_path)
-        for key in ["project", "data", "segments"]:
-            if key not in config:
-                errors.append(f"missing top-level key: {key}")
-        data = config.get("data", {})
-        for key in ["source_table", "id_columns", "target_column", "time_column", "period_column"]:
-            if not data.get(key):
-                errors.append(f"missing data.{key}")
+    try:
+        config_path = project_config_path(project_dir)
+        if not config_path.exists():
+            errors.append(f"missing project config: {config_path}")
+        else:
+            config = load_yaml(config_path)
+            for key in ["project", "data", "segments"]:
+                if key not in config:
+                    errors.append(f"missing top-level key: {key}")
+            data = config.get("data", {})
+            for key in ["source_table", "id_columns", "target_column", "time_column", "period_column"]:
+                if not data.get(key):
+                    errors.append(f"missing data.{key}")
+    except (ConfigError, OSError) as exc:
+        errors.append(str(exc))
+
+    configs_dir = project_dir / "configs"
+    if configs_dir.exists():
+        config_names = {path.stem for path in configs_dir.glob("*.yaml")}
+        config_names.update(path.stem for path in configs_dir.glob("*.yml"))
+        for name in sorted(config_names):
+            try:
+                path = stage_config_path(project_dir, name)
+                if path.exists():
+                    load_yaml(path)
+            except (ConfigError, OSError) as exc:
+                errors.append(str(exc))
     for directory in ["configs", "queries", "reports"]:
         if not (project_dir / directory).exists():
             errors.append(f"missing directory: {directory}")
@@ -946,10 +961,14 @@ def cmd_project_status(args: argparse.Namespace) -> int:
             return summarize_project(project_dir, run_id=args.run_id, version_id=args.version_id)
         return summarize_project(project_dir, run_id=args.run_id)
 
-    if args.write_state:
-        summary = _summarize_project_status()
-    else:
-        summary = _read_only_action("project_status", _summarize_project_status)
+    try:
+        if args.write_state:
+            summary = _summarize_project_status()
+        else:
+            summary = _read_only_action("project_status", _summarize_project_status)
+    except ConfigError as exc:
+        print(f"project status failed: {exc}")
+        return 1
     print(format_project_summary(summary), end="")
     if args.write_state:
         command = f"rmw project status --project {args.project}"
@@ -1099,6 +1118,11 @@ def cmd_version_show(args: argparse.Namespace) -> int:
 
 def cmd_version_migrate_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
+    try:
+        project_config_path(project_dir)
+    except ConfigError as exc:
+        print(f"version migration failed: {exc}")
+        return 1
     version_id = args.version_id or suggest_version_id(project_dir, args.run_id)
     result = migrate_run_to_version(
         project_dir,
@@ -1115,6 +1139,11 @@ def cmd_version_migrate_run(args: argparse.Namespace) -> int:
 
 def cmd_version_migrate_standard_runs(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
+    try:
+        project_config_path(project_dir)
+    except ConfigError as exc:
+        print(f"version migration failed: {exc}")
+        return 1
     mappings = _load_version_migration_map(args.mapping) if args.mapping else {}
     results = []
     for run_path in standard_run_dirs(project_dir):

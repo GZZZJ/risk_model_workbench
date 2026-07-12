@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.config import dump_yaml, load_yaml
-from risk_model_workbench.paths import project_config_path
+from risk_model_workbench.paths import project_config_path, stage_config_path
 from risk_model_workbench.request.data_source import LOCAL_FEATHER, resolve_data_source_mode, sample_location as request_sample_location
 from risk_model_workbench.request.splits import (
     DEFAULT_OOS_VALUES,
@@ -52,11 +52,8 @@ def _project_config(project_dir: Path) -> dict[str, Any]:
 
 
 def _config(project_dir: Path, name: str) -> dict[str, Any]:
-    for suffix in [".yaml", ".yml"]:
-        path = project_dir / "configs" / f"{name}{suffix}"
-        if path.exists():
-            return load_yaml(path)
-    return {}
+    path = stage_config_path(project_dir, name)
+    return load_yaml(path) if path.exists() else {}
 
 
 def _looks_like_local_data(value: str) -> bool:

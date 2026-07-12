@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path as resolve_project_config_path, stage_config_path
 
 
 DEFAULT_BASE_COLUMNS = [
@@ -271,8 +272,8 @@ def write_summary(
 
 
 def project_wide_defaults(project_dir: Path, *, config_path: Path | None = None, project_config_path: Path | None = None) -> dict[str, Any]:
-    project_config = load_yaml(project_config_path or (project_dir / "project.yml" if (project_dir / "project.yml").exists() else project_dir / "project.yaml"))
-    feature_config = load_yaml(config_path or (project_dir / "configs" / "feature_select.yaml")).get("feature_select", {})
+    project_config = load_yaml(project_config_path or resolve_project_config_path(project_dir))
+    feature_config = load_yaml(config_path or stage_config_path(project_dir, "feature_select")).get("feature_select", {})
     wide_config = feature_config.get("wide_table", {}) or {}
 
     return {

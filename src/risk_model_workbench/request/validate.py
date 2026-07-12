@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from risk_model_workbench.config import load_yaml
+from risk_model_workbench.config import ConfigError, load_yaml
 from risk_model_workbench.paths import project_config_path, workflow_path
 from risk_model_workbench.request.data_source import (
     LOCAL_FEATHER,
@@ -111,14 +111,17 @@ def validate_model_request(request_doc: dict[str, Any], project_dir: str | Path 
 
     if project_dir:
         project_path = Path(project_dir).resolve()
-        config_path = project_config_path(project_path)
-        if not config_path.exists():
-            errors.append(f"missing project config: {config_path}")
-        else:
-            project_config = load_yaml(config_path)
-            configured_ids = project_config.get("data", {}).get("id_columns") or []
-            if "training_defaults" in project_config:
-                _validate_training_config("training_defaults", project_config.get("training_defaults"), errors)
+        try:
+            config_path = project_config_path(project_path)
+            if not config_path.exists():
+                errors.append(f"missing project config: {config_path}")
+            else:
+                project_config = load_yaml(config_path)
+                configured_ids = project_config.get("data", {}).get("id_columns") or []
+                if "training_defaults" in project_config:
+                    _validate_training_config("training_defaults", project_config.get("training_defaults"), errors)
+        except (OSError, ConfigError) as exc:
+            errors.append(str(exc))
 
     for field in REQUIRED_FIELDS:
         if field not in metadata or metadata.get(field) in (None, "", []):

@@ -17,6 +17,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_failed,
     stage_action_started,
 )
+from risk_model_workbench.paths import project_config_path
 from risk_model_workbench.state import append_decision, load_run_state
 
 
@@ -27,10 +28,11 @@ def _last_result(context: VersionContext) -> ActionResult:
 
 
 def _config(context: VersionContext) -> dict:
-    for path in [context.runtime_config_dir / "project.yml", context.project_dir / "project.yml"]:
-        if path.exists():
-            return load_yaml(path)
-    return {}
+    runtime = context.runtime_config_dir / "project.yml"
+    if runtime.exists():
+        return load_yaml(runtime)
+    path = project_config_path(context.project_dir)
+    return load_yaml(path) if path.exists() else {}
 
 
 def _write_json(path: Path, payload: dict) -> None:

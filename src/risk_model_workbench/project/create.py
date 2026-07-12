@@ -94,11 +94,24 @@ def create_project(
         if source_path.is_dir():
             continue
         relative_path = source_path.relative_to(TEMPLATE_ROOT)
+        if relative_path == Path("project.yaml") or (
+            relative_path.parent == Path("configs") and relative_path.suffix == ".yml"
+        ):
+            continue
         target_path = project_dir / relative_path
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
         text = source_path.read_text(encoding="utf-8")
         target_path.write_text(render_text(text, context), encoding="utf-8")
+
+    canonical_project = project_dir / "project.yml"
+    (project_dir / "project.yaml").write_text(
+        canonical_project.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    for canonical in sorted((project_dir / "configs").glob("*.yaml")):
+        canonical.with_suffix(".yml").write_text(
+            canonical.read_text(encoding="utf-8"), encoding="utf-8"
+        )
 
     for directory in [
         "data/raw",

@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+from risk_model_workbench.config import load_yaml
 from risk_model_workbench.harness.errors import (
     ARTIFACT_CONTRACT_FAILED,
     DATA_MISSING,
@@ -902,12 +903,12 @@ def _latest_run_id(project_dir: Path) -> str | None:
 
 
 def _load_project_info(project_dir: Path) -> dict[str, Any]:
-    config_path = project_config_path(project_dir)
-    if not config_path.exists():
-        return {}
     try:
-        config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-    except (OSError, yaml.YAMLError):
+        config_path = project_config_path(project_dir)
+        if not config_path.exists():
+            return {}
+        config = load_yaml(config_path)
+    except OSError:
         return {}
     project = config.get("project")
     return project if isinstance(project, dict) else {}

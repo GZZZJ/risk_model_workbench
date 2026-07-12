@@ -6,8 +6,8 @@ project:
   template: {{template}}
 
 references:
-  planning_doc: ../../doc/AI经营建模Agent规划.md
-  model_inventory: ../../doc/现有经营模型梳理.md
+  planning_doc: ../../docs/legacy/AI经营建模Agent规划.md
+  model_inventory: ../../docs/legacy/现有经营模型梳理.md
   feature_select_v2: ../../vendor/feature-select-v2
 
 data:

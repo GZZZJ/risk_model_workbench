@@ -8,7 +8,7 @@ from typing import Any, Callable
 
 import yaml
 
-from risk_model_workbench.config import load_yaml
+from risk_model_workbench.config import ConfigError, load_yaml
 from risk_model_workbench.paths import project_config_path
 from risk_model_workbench.project_state import audit_run
 from risk_model_workbench.run_evidence import load_run_evidence
@@ -170,15 +170,14 @@ def _report_gap_scan(project_path: Path, run_id: str) -> dict[str, Any]:
 
 def _config_risk(project_path: Path, run_id: str) -> dict[str, Any]:
     findings: list[Finding] = []
-    config_path = project_config_path(project_path)
-    if not config_path.exists():
-        findings.append(_finding("error", "project_config_missing", "project.yml is missing.", _display(config_path)))
-        return _base_result("config_risk", project_path, run_id, findings)
-
     try:
+        config_path = project_config_path(project_path)
+        if not config_path.exists():
+            findings.append(_finding("error", "project_config_missing", "project.yml is missing.", _display(config_path)))
+            return _base_result("config_risk", project_path, run_id, findings)
         config = load_yaml(config_path)
-    except (OSError, yaml.YAMLError) as exc:
-        findings.append(_finding("error", "project_config_unreadable", f"project.yml could not be loaded: {exc}", _display(config_path)))
+    except (OSError, ConfigError) as exc:
+        findings.append(_finding("error", "project_config_unreadable", f"project.yml could not be loaded: {exc}", _display(project_path)))
         return _base_result("config_risk", project_path, run_id, findings)
 
     data = config.get("data") if isinstance(config.get("data"), dict) else {}

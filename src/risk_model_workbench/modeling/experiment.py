@@ -19,6 +19,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_started,
 )
 from risk_model_workbench.progress import ProgressReporter
+from risk_model_workbench.paths import project_config_path, stage_config_path
 from risk_model_workbench.request.training import merge_training_config, project_training_defaults
 from risk_model_workbench.state import append_decision
 
@@ -46,19 +47,19 @@ def _runtime_config(
     for path in [
         context.runtime_config_dir / f"{name}.yaml",
         context.runtime_config_dir / f"{name}.yml",
-        context.project_dir / "configs" / f"{name}.yaml",
-        context.project_dir / "configs" / f"{name}.yml",
     ]:
         if path.exists():
             return load_yaml(path), path
-    return {}, context.project_dir / "configs" / f"{name}.yaml"
+    path = stage_config_path(context.project_dir, name)
+    return (load_yaml(path) if path.exists() else {}), path
 
 
 def _project_config(context: VersionContext) -> dict[str, Any]:
-    for path in [context.runtime_config_dir / "project.yml", context.project_dir / "project.yml"]:
-        if path.exists():
-            return load_yaml(path)
-    return {}
+    runtime = context.runtime_config_dir / "project.yml"
+    if runtime.exists():
+        return load_yaml(runtime)
+    path = project_config_path(context.project_dir)
+    return load_yaml(path) if path.exists() else {}
 
 
 def _normal_algorithm(value: Any) -> str:

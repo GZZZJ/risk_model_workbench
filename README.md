@@ -6,6 +6,16 @@
 
 标准入口是 `rmw` CLI。`jm` 是长期兼容别名；`agent.py` 和 `jingying-agent` 仅作为历史兼容入口保留。
 
+<!-- RMW_CURRENT_STATE:START -->
+```yaml
+project: projects/2026-05-fujie-gcard-v1
+active_version_id: fujie_gcard_v8_20260709_1710
+objective: 复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告
+workflow: full_modeling
+status: done
+```
+<!-- RMW_CURRENT_STATE:END -->
+
 详细规划见 [docs/legacy/AI经营建模Agent规划.md](docs/legacy/AI经营建模Agent规划.md)。
 
 ## RMW Agent

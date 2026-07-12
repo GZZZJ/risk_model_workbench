@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path, stage_config_path
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -66,9 +67,9 @@ def _describe_d03(d03: dict[str, Any]) -> str:
 def build_feature_screening_summary(project_dir: str | Path) -> dict[str, Any]:
     """Build a source-backed summary of the current completed screening flow."""
     project_path = Path(project_dir).resolve()
-    project_config = load_yaml(project_path / "project.yml" if (project_path / "project.yml").exists() else project_path / "project.yaml")
-    feature_select_config = load_yaml(project_path / "configs" / "feature_select.yaml").get("feature_select", {})
-    refine_config = load_yaml(project_path / "configs" / "refine_features.yaml")["feature_refine"]
+    project_config = load_yaml(project_config_path(project_path))
+    feature_select_config = load_yaml(stage_config_path(project_path, "feature_select")).get("feature_select", {})
+    refine_config = load_yaml(stage_config_path(project_path, "refine_features"))["feature_refine"]
 
     prescreen_summary_path = _first_existing(
         [

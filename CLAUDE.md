@@ -8,12 +8,22 @@ The workbench is generic business modeling infrastructure. Fujie GCard is the
 current active case project and regression example, not the boundary of the
 workbench's reusable capability.
 
+<!-- RMW_CURRENT_STATE:START -->
+```yaml
+project: projects/2026-05-fujie-gcard-v1
+active_version_id: fujie_gcard_v8_20260709_1710
+objective: 复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告
+workflow: full_modeling
+status: done
+```
+<!-- RMW_CURRENT_STATE:END -->
+
 ## Current Project State
 
 - Active case project: `projects/2026-05-fujie-gcard-v1/`
 - Project checkpoint: `projects/2026-05-fujie-gcard-v1/project_state.yml`
-- Active version: `fujie_gcard_action_runner_v1_20260710`
-- Active objective: `ActionRunner Agent 建模闭环已完成，进入领域 Skill 验收、规则沉淀与更大样本泛化验证`
+- Active version: `fujie_gcard_v8_20260709_1710`
+- Active objective: `复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告`
 - Active workflow/status: `full_modeling` / `done`
 - Current strict audit verdict: `complete`
 

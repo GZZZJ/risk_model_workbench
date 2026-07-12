@@ -8,7 +8,7 @@
 
 ## 目录说明
 
-- `project.yaml`：项目总索引，记录模型、样本、标签、切分、客群等项目级口径。
+- `project.yml`：项目总索引的 canonical 真源；`project.yaml` 是自动生成的兼容镜像。
 - `configs/`：各步骤配置。
 - `scripts/`：当前项目可执行脚本。
 - `queries/`：DP 探查 SQL。
@@ -19,7 +19,7 @@
 
 ## 建议执行顺序
 
-1. 补齐 `project.yaml`、`configs/feature_tables.txt`、`configs/feature_select.yaml`、`configs/refine_features.yaml` 中的样本表、特征表、标签列、切分列、分区和宽表名。
+1. 补齐 `project.yml`、`configs/feature_tables.txt`、`configs/feature_select.yaml`、`configs/refine_features.yaml` 中的样本表、特征表、标签列、切分列、分区和宽表名。
 2. 导出特征表元数据：
    `python3 scripts/00_export_feature_metadata.py`
 3. 生成 feature-select-v2 适配配置：

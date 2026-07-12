@@ -22,7 +22,7 @@ training:
 
 # Sample data configuration
 input:
-  feather_path: /root/notebook/draft/筛选96维度特征样本.feather
+  feather_path: /root/notebook/draft/筛选300维度特征样本_f32.feather
   id_columns:
     - uid
     - mdl_dte

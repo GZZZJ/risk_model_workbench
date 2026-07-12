@@ -19,6 +19,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_failed,
     stage_action_started,
 )
+from risk_model_workbench.paths import stage_config_path
 from risk_model_workbench.state import append_decision, load_run_state
 
 
@@ -26,12 +27,11 @@ def _runtime_config(context: VersionContext, name: str) -> dict[str, Any]:
     for candidate in [
         context.runtime_config_dir / f"{name}.yaml",
         context.runtime_config_dir / f"{name}.yml",
-        context.project_dir / "configs" / f"{name}.yaml",
-        context.project_dir / "configs" / f"{name}.yml",
     ]:
         if candidate.exists():
             return load_yaml(candidate)
-    return {}
+    project_config = stage_config_path(context.project_dir, name)
+    return load_yaml(project_config) if project_config.exists() else {}
 
 
 def _string_list(value: Any) -> list[str]:

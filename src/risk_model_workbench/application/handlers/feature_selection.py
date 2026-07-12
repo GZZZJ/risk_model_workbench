@@ -25,6 +25,7 @@ from risk_model_workbench.harness.runtime import (
     stage_action_failed,
     stage_action_started,
 )
+from risk_model_workbench.paths import project_config_path, stage_config_path
 from risk_model_workbench.state import load_run_state
 from risk_model_workbench.wide_sql import generate_wide_sql
 
@@ -42,10 +43,13 @@ def _config_path(context: VersionContext, name: str, explicit: object = None) ->
     if explicit:
         path = Path(str(explicit))
         return path if path.is_absolute() else context.project_dir / path
-    for path in [context.runtime_config_dir / f"{name}.yaml", context.project_dir / "configs" / f"{name}.yaml"]:
+    for path in [
+        context.runtime_config_dir / f"{name}.yaml",
+        context.runtime_config_dir / f"{name}.yml",
+    ]:
         if path.exists():
             return path
-    return context.project_dir / "configs" / f"{name}.yaml"
+    return stage_config_path(context.project_dir, name)
 
 
 def _is_local(context: VersionContext) -> bool:
@@ -203,7 +207,9 @@ def _run_local_prescreen(context: VersionContext) -> None:
     from risk_model_workbench.data.local_feather_profile import profile_local_feather, write_local_feather_profile
     from risk_model_workbench.data.pull_engine import select_data_pull_engine, write_execution_environment
 
-    project_cfg = load_yaml(context.runtime_config_dir / "project.yml") if (context.runtime_config_dir / "project.yml").exists() else load_yaml(context.project_dir / "project.yml")
+    runtime_project = context.runtime_config_dir / "project.yml"
+    project_path = runtime_project if runtime_project.exists() else project_config_path(context.project_dir)
+    project_cfg = load_yaml(project_path)
     feature_cfg = load_yaml(_config_path(context, "feature_select")).get("feature_select", {})
     request = feature_cfg.get("runtime_request") or {}
     data_cfg = project_cfg.get("data") or {}
@@ -293,7 +299,11 @@ def run_build_wide_sql(invocation: ActionInvocation, context: VersionContext, at
                 name="build_wide_sql.sql",
             )
             register_action_artifact(context.workspace, "build_wide_sql", context.workspace / "queries/sql_evidence_manifest.json")
-            runtime_project = load_yaml(runtime_project_path) if runtime_project_path.exists() else (load_yaml(context.project_dir / "project.yml") if (context.project_dir / "project.yml").exists() else {})
+            if runtime_project_path.exists():
+                runtime_project = load_yaml(runtime_project_path)
+            else:
+                project_path = project_config_path(context.project_dir)
+                runtime_project = load_yaml(project_path) if project_path.exists() else {}
             data_cfg = runtime_project.get("data") or {}
             runtime_request = (load_yaml(config).get("feature_select") or {}).get("runtime_request") or {}
             gate = (runtime_request.get("step_params") or {}).get("sql_review_gate") or {}

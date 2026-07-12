@@ -36,6 +36,7 @@ from risk_model_workbench.dp_feather import (
     write_dataset_metadata,
 )
 from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path
 from risk_model_workbench.progress import ProgressReporter
 
 
@@ -193,7 +194,7 @@ def load_batch_settings(project_dir: Path, args: PrescreenAction | argparse.Name
     sampling_cfg = prescreen_cfg.get("sampling", {}) or {}
     dp_feather_cfg = prescreen_cfg.get("dp_feather", {}) or {}
 
-    project_cfg_path = project_dir / "project.yml" if (project_dir / "project.yml").exists() else project_dir / "project.yaml"
+    project_cfg_path = project_config_path(project_dir)
     split_cfg = load_yaml(project_cfg_path).get("split", {})
     data_cfg = load_yaml(project_cfg_path).get("data", {})
     target_col = prescreen_cfg.get("target_col") or data_cfg.get("target_column") or TARGET_COL

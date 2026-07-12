@@ -13,6 +13,7 @@ from typing import Any
 import pandas as pd
 
 from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path, stage_config_path
 
 
 REPORT_SHEETS = [
@@ -134,9 +135,9 @@ def _build_report_context(
     report_config: dict[str, Any] | None,
 ) -> dict[str, Any]:
     project_path = Path(project_dir) if project_dir else _infer_project_dir(eval_dir)
-    project_config = _load_first_yaml(project_path, ["project.yml", "project.yaml"]) if project_path else {}
-    evaluate_config = _load_first_yaml(project_path / "configs", ["evaluate.yaml", "evaluate.yml"]) if project_path else {}
-    loaded_report_config = report_config or (_load_first_yaml(project_path / "configs", ["report.yaml", "report.yml"]) if project_path else {})
+    project_config = _load_resolved_yaml(project_config_path(project_path)) if project_path else {}
+    evaluate_config = _load_resolved_yaml(stage_config_path(project_path, "evaluate")) if project_path else {}
+    loaded_report_config = report_config or (_load_resolved_yaml(stage_config_path(project_path, "report")) if project_path else {})
 
     project_display_name = project_config.get("project", {}).get("display_name") or (project_path.name if project_path else "Model")
     eval_cfg = evaluate_config.get("evaluation", {}) if isinstance(evaluate_config.get("evaluation"), dict) else {}
@@ -216,6 +217,10 @@ def _load_first_yaml(directory: Path, names: list[str]) -> dict[str, Any]:
             except (OSError, ValueError):
                 return {}
     return {}
+
+
+def _load_resolved_yaml(path: Path) -> dict[str, Any]:
+    return load_yaml(path) if path.exists() else {}
 
 
 def _build_gcard_summary_sheet(

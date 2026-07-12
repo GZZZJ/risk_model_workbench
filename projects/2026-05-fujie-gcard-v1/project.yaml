@@ -2,15 +2,18 @@ project:
   name: 2026-05-fujie-gcard-v1
   display_name: 复借G卡
   scenario: 复借意愿
+  owner: 牧羊咕
   created_date: 2026-05-29
   template: fujie-gcard
 
 references:
-  planning_doc: ../../doc/AI经营建模Agent规划.md
-  model_inventory: ../../doc/现有经营模型梳理.md
-  gcard_workbook: ../../doc/复借G卡模型文档.xlsx
+  planning_doc: ../../docs/legacy/AI经营建模Agent规划.md
+  model_inventory: ../../docs/legacy/现有经营模型梳理.md
+  gcard_workbook: ../../docs/legacy/复借G卡模型文档.xlsx
   feature_select_v2: ../../vendor/feature-select-v2
   glossary: docs/名词口径.md
+  sampling_logic: docs/样本与取样口径.md
+  sampling_sql_lineage: docs/复借G卡取样逻辑.sql
 
 data:
   source_table: ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_sample
@@ -24,6 +27,7 @@ data:
     - mdl_dte
   time_column: mdl_dte
   period_column: ds
+  split_column: final_flag
   target_column: ftr_30d_ord_flag
   label_definition: 观察日30天内是否发起
   sample_logic: 可经营、当前未逾期用户、重资产订单
@@ -37,6 +41,45 @@ split:
   oot_values:
     - OOT
     - OOT-OOS
+
+splits:
+  dev:
+    values:
+      - DEV
+  dev_oos:
+    values:
+      - DEV-OOS
+  oot:
+    values:
+      - OOT
+  oot_oos:
+    values:
+      - OOT-OOS
+
+champions:
+  score_columns:
+    - gcard_v2
+    - gcard_v4
+    - gcard_v5
+    - gcard_v6
+
+current_model:
+  candidate_score_column: model_score
+
+training_defaults:
+  mode: llm_guided_tune
+  tuning:
+    max_rounds: 2
+    candidates_per_round: 4
+    max_trials: 8
+    objective:
+      primary_metric: valid_ks
+      secondary_metric: valid_auc
+    guardrails:
+      max_train_valid_auc_gap: 0.03
+    advisor:
+      mode: host_agent
+      fallback_to_heuristic: true
 
 segments:
   - name: all

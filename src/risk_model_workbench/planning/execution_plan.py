@@ -8,7 +8,8 @@ from typing import Any
 
 import yaml
 
-from risk_model_workbench.paths import workflow_path
+from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path, workflow_path
 from risk_model_workbench.planning.steps import implemented_step_ids_for_stage, resolve_step_configuration, step_params_for
 from risk_model_workbench.request.data_source import LOCAL_FEATHER, has_remote_feature_source, resolve_data_source_mode
 
@@ -28,12 +29,8 @@ def _as_list(value: Any, default: list[Any] | None = None) -> list[Any]:
 
 def _load_project_yaml(project_path: str | Path) -> dict[str, Any]:
     project_dir = Path(project_path)
-    for name in ["project.yml", "project.yaml"]:
-        path = project_dir / name
-        if path.exists():
-            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-            return data if isinstance(data, dict) else {}
-    return {}
+    path = project_config_path(project_dir)
+    return load_yaml(path) if path.exists() else {}
 
 
 def _project_champions(project_path: str | Path) -> list[Any]:

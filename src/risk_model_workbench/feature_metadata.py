@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path, stage_config_path
 from risk_model_workbench.progress import ProgressReporter
 
 DEFAULT_BASE_SAMPLE_COLUMNS = {
@@ -48,8 +49,8 @@ def _resolve(project_dir: Path, value: str | None, default: Path) -> Path:
 
 
 def load_metadata_options(project_dir: Path, tables_file_arg: str, *, config: str | None = None, project_config: str | None = None) -> dict:
-    project_path = _resolve(project_dir, project_config, project_dir / ("project.yml" if (project_dir / "project.yml").exists() else "project.yaml"))
-    feature_path = _resolve(project_dir, config, project_dir / "configs" / "feature_select.yaml")
+    project_path = _resolve(project_dir, project_config, project_config_path(project_dir))
+    feature_path = _resolve(project_dir, config, stage_config_path(project_dir, "feature_select"))
     project_config = load_yaml(project_path)
     feature_config = load_yaml(feature_path).get("feature_select", {})
     metadata_config = feature_config.get("metadata", {}) or {}

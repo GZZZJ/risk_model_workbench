@@ -14,6 +14,7 @@ from typing import Any
 
 import yaml
 
+from risk_model_workbench.config import load_yaml
 from risk_model_workbench.paths import project_config_path
 from risk_model_workbench.state import (
     load_run_state,
@@ -236,12 +237,12 @@ def _load_version_state(path: Path) -> dict[str, Any]:
 
 
 def _project_key(project_dir: Path) -> str:
-    config_path = project_config_path(project_dir)
-    if config_path.exists():
-        try:
-            config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        except (OSError, yaml.YAMLError):
-            config = {}
+    try:
+        config_path = project_config_path(project_dir)
+        config = load_yaml(config_path) if config_path.exists() else {}
+    except OSError:
+        config = {}
+    if config:
         project = config.get("project") if isinstance(config.get("project"), dict) else {}
         explicit = project.get("project_key") or project.get("model_key")
         if explicit:

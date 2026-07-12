@@ -8,6 +8,9 @@ from typing import Any
 
 import yaml
 
+from risk_model_workbench.config import load_yaml
+from risk_model_workbench.paths import project_config_path
+
 from risk_model_workbench.request.training import effective_training_config, llm_guided_tuning_enabled
 
 
@@ -668,12 +671,8 @@ def _load_project_yaml(project_path: str | Path | None) -> dict[str, Any]:
     if project_path is None:
         return {}
     project_dir = Path(project_path)
-    for name in ["project.yml", "project.yaml"]:
-        path = project_dir / name
-        if path.exists():
-            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-            return data if isinstance(data, dict) else {}
-    return {}
+    path = project_config_path(project_dir)
+    return load_yaml(path) if path.exists() else {}
 
 
 def infer_scenario_profile(metadata: dict[str, Any], project_path: str | Path | None = None) -> str:
