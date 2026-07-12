@@ -74,6 +74,32 @@ def test_runner_denies_before_handler(tmp_path):
     assert not (context.workspace / "audit/action_results/attempt_001.json").exists()
 
 
+@pytest.mark.parametrize(
+    ("project", "version_id"),
+    [("/another/project", "v1"), (None, "another_version")],
+)
+def test_runner_rejects_invocation_subject_mismatch_before_handler(
+    tmp_path, project, version_id
+):
+    context = _context(tmp_path)
+    called = []
+    handlers = HandlerRegistry()
+    handlers.register("sample_check", lambda *_: called.append(True) or ActionResult(status="done"))
+    runner = ActionRunner(handlers=handlers, policy_check=lambda *_: True)
+    invocation = ActionInvocation(
+        tool_name="sample_check",
+        params={},
+        project=project or str(context.project_dir),
+        version_id=version_id,
+    )
+
+    with pytest.raises(ValueError, match="invocation subject does not match VersionContext"):
+        runner.run(invocation=invocation, context=context, attempt_id="attempt_001")
+
+    assert called == []
+    assert not (context.workspace / "audit/action_results/attempt_001.json").exists()
+
+
 @pytest.mark.parametrize("malformed_decision", [None, object()])
 def test_runner_fails_closed_for_malformed_policy_decision(tmp_path, malformed_decision):
     context = _context(tmp_path)
