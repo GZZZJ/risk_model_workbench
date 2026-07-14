@@ -62,19 +62,19 @@ Agent 产物写入 version workspace，包括 `agent_plan.yml`、
 
 ## 当前状态
 
-截至 2026-06-09：
+截至 2026-07-13：
 
 - 通用工作台代码在 `src/risk_model_workbench/`。
 - 项目模板在 `templates/project/`。
 - 工作流定义在 `workflows/`。
 - 当前活跃案例项目是 `projects/2026-05-fujie-gcard-v1/`。
 - 当前项目断点文件是 `projects/2026-05-fujie-gcard-v1/project_state.yml`。
-- 当前 active run 是 `2026-06-imported-gcard-main-lgbm`。
-- 当前目标是 `复借G卡主模型产物标准化与连续性交接机制建设`。
-- `rmw project status` 显示项目状态为 `active`，active run 的 stage counts 为 `done=6, pending=3, scaffold=1`。
-- `rmw run audit` 当前 verdict 是 `open`，因为 `feature_metadata`、`feature_prescreen`、`build_wide_sql` 仍为 pending，且已完成阶段是 imported evidence 或 scaffold evidence。
+- 当前 active version 是 `fujie_gcard_v8_20260709_1710`。
+- 当前目标是 `复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告`。
+- `rmw project status` 显示项目状态为 `active`，active version 状态为 `done`，10 个阶段均已完成。
+- `rmw version audit --strict` 当前 verdict 是 `complete`；历史产物仍有 retention metadata 警告，clean-clone 复现口径为 `workspace_dependent`。
 
-active run 是远端真实复借 G 卡训练、评估和报告产物导入后的标准 run。它是真实历史产物的标准化登记，不是当前本地环境端到端重跑证据。
+active version 是本地全链路重跑证据。历史 imported run 和 legacy run 继续保留用于兼容读取与 lineage 审计，但不作为本轮闭环证据。
 
 ## 当前案例：复借 G 卡
 
@@ -82,8 +82,8 @@ active run 是远端真实复借 G 卡训练、评估和报告产物导入后的
 - 特征表：70 张，见 `projects/2026-05-fujie-gcard-v1/configs/feature_tables.txt`
 - 候选特征字段：15,028 个
 - 特征元数据：`projects/2026-05-fujie-gcard-v1/data/profile/feature_metadata/feature_columns.csv`
-- 标准 imported run：`projects/2026-05-fujie-gcard-v1/runs/2026-06-imported-gcard-main-lgbm/`
-- 当前 imported run 最终特征数：96
+- 历史标准 imported run：`projects/2026-05-fujie-gcard-v1/runs/2026-06-imported-gcard-main-lgbm/`
+- 历史 imported run 最终特征数：96
 - 训练产物：`modeling/main_lgbm/model.pkl`、`metrics_train_valid.json`、`feature_importance.csv`、`run_config.json`
 - 评估产物：`evaluation/overall_metrics.csv`、`monthly_metrics.csv`、`segment_metrics.csv`、`decile_lift_*.csv`、`score_psi_by_month.csv`
 - 报告产物：`reports/model_report.xlsx`、`model_report.md`、`model_report.html`、`model_card.md`、`executive_summary.md`
@@ -95,13 +95,13 @@ active run 是远端真实复借 G 卡训练、评估和报告产物导入后的
 继续任何建模任务前先看这些文件：
 
 - `projects/2026-05-fujie-gcard-v1/project_state.yml`
-- `projects/2026-05-fujie-gcard-v1/runs/<run_id>/run_state.yml`
-- `projects/2026-05-fujie-gcard-v1/runs/<run_id>/audit/artifact_manifest.json`
+- `projects/2026-05-fujie-gcard-v1/versions/<version_id>/version_state.yml`
+- `projects/2026-05-fujie-gcard-v1/versions/<version_id>/audit/artifact_manifest.json`
 - `projects/2026-05-fujie-gcard-v1/handoffs/` 下最新交接文档
 - `projects/2026-05-fujie-gcard-v1/retrospectives/` 下最新复盘文档
 - `projects/2026-05-fujie-gcard-v1/docs/lessons.md`
 
-阶段状态以 `run_state.yml` 和 registered artifacts 为准。目录里存在但未登记到 manifest 的文件不能直接当作阶段闭环证据。
+阶段状态以 active version 的 `version_state.yml` 和 registered artifacts 为准。目录里存在但未登记到 manifest 的文件不能直接当作阶段闭环证据；`runs/<run_id>/` 仅作为 legacy/lineage 兼容读取路径。
 
 ## 安装与检查
 

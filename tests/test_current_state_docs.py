@@ -35,3 +35,14 @@ def test_entrypoint_docs_match_project_and_active_version_state():
 
     for name in ["README.md", "AGENTS.md", "CLAUDE.md"]:
         assert _state_block(ROOT / name) == expected
+
+
+def test_readme_current_state_text_uses_version_source_of_truth():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert "当前 active version 是 `fujie_gcard_v8_20260709_1710`" in text
+    assert "versions/<version_id>/version_state.yml" in text
+    assert "active version 的 `version_state.yml`" in text
+    assert "当前 active run 是 `2026-06-imported-gcard-main-lgbm`" not in text
+    assert "done=6, pending=3, scaffold=1" not in text
+    assert "当前 verdict 是 `open`" not in text
