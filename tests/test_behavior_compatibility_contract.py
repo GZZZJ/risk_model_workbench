@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import pytest
 import yaml
 
 import risk_model_workbench
@@ -105,6 +106,13 @@ print(
         sort_keys=True,
     )
 )
+"""
+_INSTALLED_MODULE_ORIGINS_SCRIPT = r"""
+import importlib
+import json
+
+module_names = ["risk_model_workbench", "jingying_agent", "jingying_model_agent"]
+print(json.dumps({name: importlib.import_module(name).__file__ for name in module_names}))
 """
 
 
@@ -565,9 +573,32 @@ def _venv_python(environment: Path) -> Path:
 
 def _clean_subprocess_env() -> dict[str, str]:
     environment = os.environ.copy()
+    environment.pop("RMW_TEST_RUNTIME_PYTHONPATH", None)
     environment.pop("PYTHONPATH", None)
     environment.pop("PYTHONHOME", None)
     return environment
+
+
+def _runtime_subprocess_env() -> dict[str, str]:
+    environment = _clean_subprocess_env()
+    runtime_pythonpath = os.environ.get("RMW_TEST_RUNTIME_PYTHONPATH")
+    if not runtime_pythonpath:
+        return environment
+    repo_root = REPO_ROOT.resolve()
+    for entry in runtime_pythonpath.split(os.pathsep):
+        candidate = Path(entry).resolve()
+        assert candidate != repo_root and repo_root not in candidate.parents, (
+            "RMW_TEST_RUNTIME_PYTHONPATH must contain dependencies only, not repository sources",
+            candidate,
+        )
+    environment["PYTHONPATH"] = runtime_pythonpath
+    return environment
+
+
+def test_runtime_dependency_path_rejects_repository_sources(monkeypatch):
+    monkeypatch.setenv("RMW_TEST_RUNTIME_PYTHONPATH", str(REPO_ROOT / "src"))
+    with pytest.raises(AssertionError, match="dependencies only"):
+        _runtime_subprocess_env()
 
 
 def _repo_build_inventory() -> set[str]:
@@ -578,7 +609,12 @@ def _repo_build_inventory() -> set[str]:
 
 
 def _build_python() -> str:
-    candidates = [sys.executable, shutil.which("python"), shutil.which("python3")]
+    candidates = [
+        os.environ.get("RMW_TEST_BUILD_PYTHON"),
+        sys.executable,
+        shutil.which("python"),
+        shutil.which("python3"),
+    ]
     for candidate in dict.fromkeys(value for value in candidates if value):
         result = subprocess.run(
             [str(candidate), "-c", "import setuptools.build_meta"],
@@ -592,9 +628,10 @@ def _build_python() -> str:
     raise AssertionError("wheel/editable compatibility test requires a Python with setuptools.build_meta")
 
 
-def _installed_surface(environment: Path) -> dict[str, Any]:
+def _installed_surface(environment: Path, expected_module_root: Path) -> dict[str, Any]:
     python = _venv_python(environment)
     bin_dir = python.parent
+    runtime_environment = _runtime_subprocess_env()
     scripts = ["rmw", "jm", "jingying-agent"]
     help_outputs = {}
     for script in scripts:
@@ -605,7 +642,7 @@ def _installed_surface(environment: Path) -> dict[str, Any]:
             check=False,
             capture_output=True,
             text=True,
-            env=_clean_subprocess_env(),
+            env=runtime_environment,
         )
         assert result.returncode == 0, result.stderr
         help_outputs[script] = result.stdout.replace(script, "<ENTRYPOINT>", 1)
@@ -615,7 +652,7 @@ def _installed_surface(environment: Path) -> dict[str, Any]:
         check=False,
         capture_output=True,
         text=True,
-        env=_clean_subprocess_env(),
+        env=runtime_environment,
     )
     assert action_list.returncode == 0, action_list.stderr
     legacy_contract = subprocess.run(
@@ -629,9 +666,26 @@ def _installed_surface(environment: Path) -> dict[str, Any]:
         check=False,
         capture_output=True,
         text=True,
-        env=_clean_subprocess_env(),
+        env=runtime_environment,
     )
     assert legacy_contract.returncode == 0, legacy_contract.stderr
+    module_origins = subprocess.run(
+        [str(python), "-c", _INSTALLED_MODULE_ORIGINS_SCRIPT],
+        cwd=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=runtime_environment,
+    )
+    assert module_origins.returncode == 0, module_origins.stderr
+    expected_root = expected_module_root.resolve()
+    for module_name, module_file in json.loads(module_origins.stdout).items():
+        resolved_module = Path(module_file).resolve()
+        assert resolved_module.is_relative_to(expected_root), (
+            module_name,
+            resolved_module,
+            expected_root,
+        )
     return {
         "help": help_outputs,
         "action_list": action_list.stdout,
@@ -652,7 +706,7 @@ def _repo_script_agent_py_surface(python: Path, cwd: Path) -> str:
         check=False,
         capture_output=True,
         text=True,
-        env=_clean_subprocess_env(),
+        env=_runtime_subprocess_env(),
     )
     assert result.returncode == 0, result.stderr
     return result.stdout
@@ -721,7 +775,8 @@ def _assert_isolated_install_contract(tmp_path: Path) -> None:
                 env=_clean_subprocess_env(),
             )
             assert install.returncode == 0, install.stderr
-            surfaces[mode] = _installed_surface(environment)
+            expected_module_root = isolated_source / "src" if mode == "editable" else environment
+            surfaces[mode] = _installed_surface(environment, expected_module_root)
             environments[mode] = environment
 
         assert surfaces["editable"] == surfaces["wheel"]
