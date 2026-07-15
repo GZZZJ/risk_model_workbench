@@ -1,0 +1,74 @@
+{
+  "action_id": "feature_prescreen",
+  "artifacts": [
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/data_source_contract.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/execution_environment.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/resource_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/sampling_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/batch_plan.json",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_selection/profiles/local_feather_profile.json",
+      "rule_matched": false,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "cli_feature_prescreen_local_b2f8109b1eab4aa79a0911f639e4367e",
+  "created_at": "2026-07-14T18:52:11",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "e2007b9e2eececa2dd480ffa5ae2e66335ecd47208cddfc6e211bd98bc81f6cc",
+  "message": "local feather mode: prescreen by design, intake evidence emitted",
+  "next_required_action": "none",
+  "project": "/root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_prescreen_local",
+  "version_id": "shoujie_t0_gcard_v1_20260714"
+}

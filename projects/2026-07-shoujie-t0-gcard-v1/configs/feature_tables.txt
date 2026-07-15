@@ -1,0 +1,4 @@
+# First line: sample/base table.
+# Following lines: feature tables that contain the sample keys plus feature columns.
+
+# project_name.feature_table_1

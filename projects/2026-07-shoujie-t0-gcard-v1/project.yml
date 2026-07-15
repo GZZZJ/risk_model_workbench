@@ -1,0 +1,99 @@
+project:
+  name: 2026-07-shoujie-t0-gcard-v1
+  display_name: 首借T0 G卡新模型
+  scenario: preloan_credit_card
+  owner: 辜子骏
+  created_date: 2026-07-14
+  template: generic
+
+references:
+  planning_doc: ../../docs/legacy/AI经营建模Agent规划.md
+  model_inventory: ../../docs/legacy/现有经营模型梳理.md
+  feature_select_v2: ../../vendor/feature-select-v2
+  glossary: docs/名词口径.md
+  sampling_logic: docs/样本与取样口径.md
+
+data:
+  source_table: ""
+  sample_location: /root/notebook/首借G卡/五百维特征样本.feather
+  raw_path: data/raw/sample.feather
+  feature_path: data/raw/features.feather
+  id_columns:
+    - uid
+    - mdl_dte
+  time_column: mdl_dte
+  period_column: mdl_dte
+  split_column: final_flag
+  target_column: is_14_fq
+  label_definition: 授信T0时点的首借候选用户；Y为授信后14天内是否发起交易
+  sample_logic: 授信T0时点首借候选用户
+  base_columns:
+    - uid
+    - mdl_dte
+    - is_14_fq
+    - is_30_fq
+    - final_flag
+    - sample_label
+    - v1_score
+    - credit_limit
+
+split:
+  source_column: final_flag
+
+splits:
+  dev:
+    values:
+      - DEV_INS
+  oos:
+    values:
+      - DEV_OOS
+  oot:
+    values:
+      - OOT
+
+champions:
+  score_columns:
+    - v1_score
+
+current_model:
+  candidate_score_column: model_score
+
+training_defaults:
+  mode: llm_guided_tune
+  tuning:
+    max_rounds: 2
+    candidates_per_round: 4
+    max_trials: 8
+    objective:
+      primary_metric: valid_ks
+      secondary_metric: valid_auc
+    guardrails:
+      max_train_valid_auc_gap: 0.03
+    advisor:
+      mode: host_agent
+      fallback_to_heuristic: false
+
+segments:
+  - name: all
+    display_name: 全客群
+    filter: null
+  - name: first_trial
+    display_name: 初审
+    filter: "sample_label == '初审'"
+  - name: reapply
+    display_name: 重申
+    filter: "sample_label == '重申'"
+  - name: reaudit
+    display_name: 重审
+    filter: "sample_label == '重审'"
+
+feature_source:
+  status: local_feather
+  note: 本地Feather宽表，约500维候选特征
+  candidate_start_column: loan_org_typ_bnk_non_dps_min_cur_ovd_amt_day_diff
+  expected_feature_count: 500
+
+open_questions:
+  - A卡字段(a_card_score, a_card_level)在本地文件中缺失，运行时需确认真实文件是否包含。
+  - 本地文件缺失 final_flag，需从 label+sample_split_tag 派生。
+  - OOT 重申样本偏少，需关注评估可靠性。
