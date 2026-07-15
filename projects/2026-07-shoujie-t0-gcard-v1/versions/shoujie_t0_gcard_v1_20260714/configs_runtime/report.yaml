@@ -1,0 +1,72 @@
+report:
+  output_formats:
+  - xlsx
+  - markdown
+  - html
+  template: model_report.md.j2
+  output_dir: reports
+  sections:
+  - sample_overview
+  - data_quality
+  - feature_screening
+  - model_performance
+  - champion_comparison
+  - monthly_stability
+  - score_stability
+  - score_correlation
+  - credit_limit_profile
+  - top_features
+  - limitations
+  - next_action
+  outputs:
+  - model_report.xlsx
+  - model_report.md
+  - model_report.html
+  - model_card.md
+  - executive_summary.md
+  stage_steps:
+  - model_report
+  model_display_name: 首借 T0 G 卡新模型
+  score_labels:
+    model_score: 首借 T0 G 卡新模型
+    v1_score: 旧版首借 T0 G 卡
+  targets:
+  - name: main_lgbm
+    experiment: main_lgbm
+    train_dir: modeling/main_lgbm
+    eval_dir: evaluation
+    output_dir: reports
+    score_labels:
+      model_score: 首借 T0 G 卡新模型
+      v1_score: 旧版首借 T0 G 卡
+sections:
+- sample_overview
+- data_quality
+- feature_screening
+- model_performance
+- champion_comparison
+- monthly_stability
+- score_stability
+- score_correlation
+- credit_limit_profile
+- top_features
+- limitations
+- next_action
+outputs:
+- model_report.xlsx
+- model_report.md
+- model_report.html
+- model_card.md
+- executive_summary.md
+score_labels:
+  model_score: 首借 T0 G 卡新模型
+  v1_score: 旧版首借 T0 G 卡
+targets:
+- name: main_lgbm
+  experiment: main_lgbm
+  train_dir: modeling/main_lgbm
+  eval_dir: evaluation
+  output_dir: reports
+  score_labels:
+    model_score: 首借 T0 G 卡新模型
+    v1_score: 旧版首借 T0 G 卡

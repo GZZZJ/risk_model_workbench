@@ -1,0 +1,70 @@
+{
+  "action_id": "report",
+  "artifacts": [
+    {
+      "artifact_rule": "reports/model_report.xlsx",
+      "description": "Excel report (8 sheets)",
+      "exists": true,
+      "kind": "file",
+      "path": "reports/model_report.xlsx",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_report.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_report.html",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_report.html",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/model_card.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/model_card.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "reports/executive_summary.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "reports/executive_summary.md",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "cli_report_dbf77b7d35dd4d2cbf3bc38b678fccd5",
+  "created_at": "2026-07-15T17:28:44",
+  "decision": {
+    "created_at": "2026-07-15T17:28:41",
+    "decision": "scaffold",
+    "reason": "report generated with missing real evaluation artifacts",
+    "stage": "report"
+  },
+  "failure_code": "scaffold_only",
+  "invocation_hash": "2749c56b1b2d69dfb9a8711688c8476a0e96646ffb19a00d16737865b6f95016",
+  "message": "report scaffold: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/reports/model_report.md",
+  "next_required_action": "none",
+  "project": "/root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": true,
+  "schema_version": 1,
+  "status": "scaffold",
+  "task_id": "report",
+  "version_id": "shoujie_t0_gcard_v1_20260714"
+}

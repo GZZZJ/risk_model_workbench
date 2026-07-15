@@ -1,0 +1,6 @@
+round,candidate,valid_ks,valid_auc,auc_gap,guardrail
+0,baseline,0.3725,0.7571,0.0288,PASS
+1,lower_lr_regularized,0.3755,0.7586,0.0571,FAIL
+1,moderate_depth_boost,0.3741,0.7581,0.0462,FAIL
+1,conservative_shallow,0.3726,0.7569,0.0277,PASS
+1,deep_ensemble_regularized,0.3771,0.7592,0.0844,FAIL

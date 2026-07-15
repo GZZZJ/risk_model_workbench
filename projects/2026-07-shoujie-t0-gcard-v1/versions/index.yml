@@ -1,0 +1,13 @@
+version: 1
+versions:
+- version_id: shoujie_t0_gcard_v1_20260714
+  display_name: 首借T0 G卡 V1
+  source_type: workbench
+  managed_by: workbench
+  status: running
+  workflow: full_modeling
+  path: versions/shoujie_t0_gcard_v1_20260714
+  created_at: '2026-07-14T18:47:49'
+  updated_at: '2026-07-14T18:47:49'
+active_version_id: shoujie_t0_gcard_v1_20260714
+updated_at: '2026-07-14T18:48:02'

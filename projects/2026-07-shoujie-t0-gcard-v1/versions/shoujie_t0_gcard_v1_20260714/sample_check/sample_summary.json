@@ -1,0 +1,27 @@
+{
+  "status": "done",
+  "reason": "",
+  "rows": 1653805,
+  "columns": 519,
+  "project": {
+    "name": "2026-07-shoujie-t0-gcard-v1",
+    "display_name": "首借T0 G卡新模型",
+    "scenario": "preloan_credit_card",
+    "owner": "辜子骏",
+    "created_date": "2026-07-14",
+    "template": "generic"
+  },
+  "target_column": "is_14_fq",
+  "target_column_present": true,
+  "id_columns": [
+    "uid",
+    "mdl_dte"
+  ],
+  "id_columns_present": [
+    "uid",
+    "mdl_dte"
+  ],
+  "duplicate_key_rows": 0,
+  "split_column": "final_flag",
+  "split_column_present": true
+}

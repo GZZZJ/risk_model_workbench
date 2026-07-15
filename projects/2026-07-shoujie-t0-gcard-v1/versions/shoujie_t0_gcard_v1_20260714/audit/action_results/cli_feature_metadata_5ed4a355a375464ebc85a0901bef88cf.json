@@ -1,0 +1,47 @@
+{
+  "action_id": "feature_metadata",
+  "artifacts": [
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_tables_meta.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_table_summary.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "feature_metadata/*",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "feature_metadata/feature_columns.csv",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "cli_feature_metadata_5ed4a355a375464ebc85a0901bef88cf",
+  "created_at": "2026-07-14T18:51:53",
+  "decision": null,
+  "failure_code": "",
+  "invocation_hash": "8f527696d0f3eebcdd4b8573d5b65ef629ff3112898b166fde824d00a8c4c7b7",
+  "message": "local feather schema metadata generated",
+  "next_required_action": "none",
+  "project": "/root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "feature_metadata",
+  "version_id": "shoujie_t0_gcard_v1_20260714"
+}

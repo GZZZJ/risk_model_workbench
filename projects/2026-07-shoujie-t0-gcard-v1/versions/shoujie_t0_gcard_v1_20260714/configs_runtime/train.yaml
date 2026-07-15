@@ -1,0 +1,119 @@
+training:
+  default_algorithm: lightgbm
+  random_seed: 0
+  feature_list_path: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/feature_selection/final_features.txt
+  label_column: is_14_fq
+  experiments:
+  - name: main_lgbm
+    display_name: 全量样本二分类 LightGBM；客群仅用于评估切片
+    segment: all
+    segment_filter: null
+    algorithm: lightgbm
+    method: lightgbm
+    description: 全量样本二分类 LightGBM；客群仅用于评估切片
+    sample_weight: null
+  mode: llm_guided_tune
+  tuning:
+    max_rounds: 2
+    candidates_per_round: 4
+    max_trials: 8
+    objective:
+      primary_metric: valid_ks
+      secondary_metric: valid_auc
+    guardrails:
+      max_train_valid_auc_gap: 0.03
+    advisor:
+      mode: host_agent
+      fallback_to_heuristic: false
+  split_column: final_flag
+  train_values:
+  - DEV_INS
+  valid_values:
+  - DEV_OOS
+  oos_values:
+  - DEV_OOS
+  - OOT
+  candidate_targets: []
+  sample_variants: []
+  runtime_step_params:
+    auc_ks: {}
+    baseline_importance_filter:
+      importance_type: gain
+      keep_top_n: 500
+    champion_challenger: {}
+    constant_value_filter:
+      max_unique_values: 1
+    correlation_dedup:
+      method: spearman
+      max_abs_corr: 0.8
+    cross_gain_matrix:
+      bins: 8
+    decile_lift:
+      bins: 10
+    feature_availability_filter: {}
+    feature_gain_summary: {}
+    feature_metadata_export: {}
+    feature_quality_prescreen:
+      require_sql_approval: true
+    field_contract: {}
+    iv_filter:
+      min_iv: 0.005
+    key_uniqueness: {}
+    lightgbm_binary_training:
+      early_stopping_rounds: 50
+      max_auc_gap: 0.03
+    llm_guided_tuning:
+      max_rounds: 2
+      candidates_per_round: 4
+      max_trials: 8
+      objective:
+        primary_metric: valid_ks
+        secondary_metric: valid_auc
+      guardrails:
+        max_train_valid_auc_gap: 0.03
+      advisor:
+        mode: host_agent
+        fallback_to_heuristic: false
+    missing_rate_filter:
+      threshold: 0.9
+    model_report: {}
+    monthly_label_distribution:
+      min_samples_per_month: 50
+    monthly_stability:
+      min_samples: 50
+    null_importance_filter:
+      null_rounds: 20
+      null_percentile: 75
+      score_threshold: 1.0
+    psi_filter:
+      max_psi: 0.2
+    score_psi:
+      bins: 10
+      warn_psi: 0.2
+    score_psi_bin_detail:
+      bins: 10
+    segment_distribution: {}
+    segment_metrics: {}
+    wide_sql_generation: {}
+input:
+  historical_score_columns:
+  - v1_score
+  id_columns:
+  - uid
+  - mdl_dte
+  label_column: is_14_fq
+  split_column: final_flag
+  feather_path: /root/notebook/首借G卡/五百维特征样本.feather
+lightgbm:
+  objective: binary
+  metric: auc
+  learning_rate: 0.05
+  num_leaves: 31
+  max_depth: 5
+  min_child_samples: 100
+  subsample: 0.7
+  colsample_bytree: 0.7
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  num_boost_round: 1000
+  early_stopping_rounds: 50

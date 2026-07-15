@@ -1,0 +1,88 @@
+feature_select:
+  engine: feature-select-v2
+  mode: local_file
+  skill_path: ../../vendor/feature-select-v2
+  output_dir: runs/{run_id}/feature_select
+
+  metadata:
+    tables_file: configs/feature_tables.txt
+    output_dir: data/profile/feature_metadata
+    docs_path: docs/特征表清单.md
+    sample_columns: []
+    exclude_columns: []
+
+  prescreen:
+    feature_columns: data/profile/feature_metadata/feature_columns.csv
+    output_dir: runs/feature_prescreen
+    target_col: target
+    split_col: final_flag
+    train_value: DEV
+    valid_value: OOT
+    round_num: 500
+    random_seed: 0
+    workers: 4
+    sampling:
+      partition_col: sample_month
+      train_partitions: []
+      valid_partitions: []
+      where: "sample_month is not null and final_flag in ('DEV','OOT') and target in (0,1)"
+    dp_feather:
+      data_dir: data/local/dp_feather/feature_prescreen
+      metadata_dir: data/profile/dp_feather_datasets/feature_prescreen
+
+  wide_table:
+    base_table: 
+    output_table: ""
+    join_keys:
+      - uid
+      - mdl_dte
+    base_columns:
+      - uid
+      - mdl_dte
+      - sample_month
+      - target
+      - final_flag
+    base_where: "sample_month is not null"
+    feature_where: "sample_month is not null"
+
+  steps:
+    - d01
+    - d02
+    - d03
+    - d05
+    - d07
+    - d08
+
+  thresholds:
+    iv: 0.005
+    empty: 0.95
+    corr: 0.80
+    psi: 0.10
+
+  feature_info:
+    table_or_path: ""
+    required_columns:
+      - feature_name
+      - feature_comment
+      - category_name
+
+  bigtable:
+    tables: []
+    local_files: []
+
+  params:
+    D01_PARAMS:
+      random_num: 3000000
+      random_seed: 0
+    D02_PARAMS:
+      random_num: 5000000
+      random_seed: 0
+    D03_D06_PARAMS:
+      ins_random_num: 3000000
+      oos_random_num: 1000000
+      random_seed: 0
+    D07_D08_PARAMS:
+      random_num: 5000000
+      random_seed: 0
+
+  train_baseline_model: true

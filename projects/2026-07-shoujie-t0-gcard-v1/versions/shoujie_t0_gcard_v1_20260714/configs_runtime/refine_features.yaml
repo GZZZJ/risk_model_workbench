@@ -1,0 +1,154 @@
+feature_refine:
+  input:
+    wide_table: null
+    feature_map: null
+    label_column: is_14_fq
+    split_column: final_flag
+    train_value: DEV_INS
+    valid_value: OOT
+    id_columns:
+    - uid
+    - mdl_dte
+    base_columns:
+    - uid
+    - mdl_dte
+    - sample_month
+    - target
+    - final_flag
+    local_feather_path: /root/notebook/首借G卡/五百维特征样本.feather
+  sampling:
+    where: sample_month is not null and final_flag in ('DEV','OOT') and target in
+      (0,1)
+    max_rows: 50000
+  dp_feather:
+    dataset_id: feature_refine_wide_sample
+    description: 特征初筛后宽表抽样，用于随机噪声、空标签重要性和基线重要性筛选。
+    data_dir: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/data/dp_feather/feature_refine
+    metadata_dir: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/feature_selection/dp_feather_datasets/feature_refine
+  output_dir: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/feature_selection/refine
+  random_seed: 0
+  target_feature_count: 500
+  preprocessing:
+    missing_sentinels:
+    - -999
+    - -998
+    min_non_null_rate: 0.09999999999999998
+    drop_constant: true
+    max_unique_values: 1
+  global_corr:
+    enabled: true
+    threshold: 0.8
+    score_metric: univariate_auc
+    method: spearman
+    max_abs_corr: 0.8
+  local_d01:
+    enabled: true
+    empty: 0.9
+    iv: 0.005
+    corr: 0.8
+    n_bins: 10
+  local_d02:
+    enabled: true
+    psi: 0.2
+  d03_random_importance:
+    enabled: false
+    mode: feature_select_v2
+    random_column: random_col
+    random_low: 1
+    random_high: 10
+    bagging_rounds: 5
+    bagging_fraction: 0.5
+    num_boost_round: 1000
+    thresholds: 0.95
+    importance_types:
+    - split
+    - gain
+    weight: 1.0
+    iter_rounds: 1
+  d04_null_importance:
+    enabled: true
+    max_features_for_null_importance: 1200
+    real_rounds: 3
+    null_rounds: 20
+    null_percentile: 75
+    score_threshold: 1.0
+  d05_baseline_importance:
+    enabled: true
+    importance_type: gain
+    keep_top_n: 500
+  lightgbm:
+    objective: binary
+    metric: auc
+    learning_rate: 0.05
+    num_leaves: 31
+    max_depth: 5
+    min_child_samples: 100
+    subsample: 0.7
+    colsample_bytree: 0.7
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    num_boost_round: 400
+    early_stopping_rounds: 50
+  runtime_request:
+    data_source_mode: local_feather
+    sample_location: /root/notebook/首借G卡/五百维特征样本.feather
+    step_params:
+      auc_ks: {}
+      baseline_importance_filter:
+        importance_type: gain
+        keep_top_n: 500
+      champion_challenger: {}
+      constant_value_filter:
+        max_unique_values: 1
+      correlation_dedup:
+        method: spearman
+        max_abs_corr: 0.8
+      cross_gain_matrix:
+        bins: 8
+      decile_lift:
+        bins: 10
+      feature_availability_filter: {}
+      feature_gain_summary: {}
+      feature_metadata_export: {}
+      feature_quality_prescreen:
+        require_sql_approval: true
+      field_contract: {}
+      iv_filter:
+        min_iv: 0.005
+      key_uniqueness: {}
+      lightgbm_binary_training:
+        early_stopping_rounds: 50
+        max_auc_gap: 0.03
+      llm_guided_tuning:
+        max_rounds: 2
+        candidates_per_round: 4
+        max_trials: 8
+        objective:
+          primary_metric: valid_ks
+          secondary_metric: valid_auc
+        guardrails:
+          max_train_valid_auc_gap: 0.03
+        advisor:
+          mode: host_agent
+          fallback_to_heuristic: false
+      missing_rate_filter:
+        threshold: 0.9
+      model_report: {}
+      monthly_label_distribution:
+        min_samples_per_month: 50
+      monthly_stability:
+        min_samples: 50
+      null_importance_filter:
+        null_rounds: 20
+        null_percentile: 75
+        score_threshold: 1.0
+      psi_filter:
+        max_psi: 0.2
+      score_psi:
+        bins: 10
+        warn_psi: 0.2
+      score_psi_bin_detail:
+        bins: 10
+      segment_distribution: {}
+      segment_metrics: {}
+      wide_sql_generation: {}

@@ -1,0 +1,7 @@
+{
+  "data_source_mode": "local_feather",
+  "source_table": null,
+  "local_feather_path": "/root/notebook/首借G卡/五百维特征样本.feather",
+  "stage": "feature_prescreen",
+  "note": "local_feather uses an existing local file and is independent from remote DP pull"
+}

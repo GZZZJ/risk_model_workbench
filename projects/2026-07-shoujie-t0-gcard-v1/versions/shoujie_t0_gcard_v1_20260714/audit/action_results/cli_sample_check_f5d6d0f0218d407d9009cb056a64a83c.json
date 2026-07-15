@@ -1,0 +1,70 @@
+{
+  "action_id": "sample_check",
+  "artifacts": [
+    {
+      "artifact_rule": "sample_check/label_distribution.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/label_distribution.csv",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/monthly_label_distribution.csv",
+      "rule_matched": false,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/sample_check_report.md",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/sample_check_report.md",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/sample_summary.json",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/sample_summary.json",
+      "rule_matched": true,
+      "source": "generated"
+    },
+    {
+      "artifact_rule": "sample_check/segment_distribution.csv",
+      "description": "",
+      "exists": false,
+      "kind": "file",
+      "path": "sample_check/segment_distribution.csv",
+      "rule_matched": true,
+      "source": "generated"
+    }
+  ],
+  "attempt_id": "cli_sample_check_f5d6d0f0218d407d9009cb056a64a83c",
+  "created_at": "2026-07-14T18:49:12",
+  "decision": {
+    "created_at": "2026-07-14T18:49:11",
+    "decision": "done",
+    "reason": "Sample profiling completed from local data",
+    "stage": "sample_check"
+  },
+  "failure_code": "",
+  "invocation_hash": "b1e7deef1515784fda3ffcd1d1aaf1a9730f5a6a687d6c3b047c364a546a7a87",
+  "message": "",
+  "next_required_action": "none",
+  "project": "/root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1",
+  "retry_count": 0,
+  "retryable": false,
+  "scaffold": false,
+  "schema_version": 1,
+  "status": "done",
+  "task_id": "sample_check",
+  "version_id": "shoujie_t0_gcard_v1_20260714"
+}

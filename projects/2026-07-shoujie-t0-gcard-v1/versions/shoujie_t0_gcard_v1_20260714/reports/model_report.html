@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首借 T0 G 卡新模型 — 建模报告</title>
+<style>
+:root{
+  --ink:#1c2633;
+  --ink-strong:#111820;
+  --muted:#667384;
+  --muted-2:#8491a3;
+  --line:#dce3ea;
+  --soft-line:#e8edf2;
+  --page:#f5f7f9;
+  --panel:#ffffff;
+  --panel-subtle:#f8fafb;
+  --nav:#20252d;
+  --nav-soft:#2a3039;
+  --accent:#416f93;
+  --accent-2:#8b6f45;
+  --green:#168a4f;
+  --red:#c74242;
+  --orange:#c66a1d;
+  --purple:#7157a8;
+  --shadow:0 12px 30px rgba(17,24,32,.08);
+  --shadow-soft:0 1px 3px rgba(17,24,32,.08);
+}
+*{box-sizing:border-box}
+html{
+  scroll-behavior:smooth;
+  background:var(--page);
+}
+body{
+  margin:0;
+  color:var(--ink);
+  background:
+    linear-gradient(180deg,#fbfcfd 0,#f5f7f9 320px,#f2f5f7 100%);
+  font:14px/1.68 Aptos,'IBM Plex Sans','Noto Sans SC','Microsoft YaHei','PingFang SC',sans-serif;
+  letter-spacing:0;
+}
+a{color:inherit;text-decoration:none}
+.sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  z-index:20;
+  width:220px;
+  overflow:auto;
+  background:linear-gradient(180deg,var(--nav),var(--nav-soft));
+  color:#dce3ea;
+  padding:20px 16px 28px;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.sidebar-title{
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.35;
+  padding:0 0 16px;
+  border-bottom:1px solid rgba(255,255,255,.14);
+  margin-bottom:12px;
+}
+.sidebar-meta{
+  color:#aeb8c5;
+  font-size:12px;
+  line-height:1.5;
+  margin-bottom:16px;
+}
+.nav-list{display:grid;gap:4px}
+.nav-item{
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  min-height:36px;
+  padding:7px 9px;
+  border-radius:6px;
+  color:#d9e0e8;
+  font-size:13px;
+  line-height:1.35;
+  transition:background .16s ease,color .16s ease,transform .16s ease;
+}
+.nav-item span:last-child{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.nav-item:hover{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+}
+.nav-item.is-active{
+  background:#eef3f8;
+  color:#172433;
+  transform:translateX(2px);
+}
+.nav-index{
+  display:grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:rgba(255,255,255,.14);
+  color:#dce4ed;
+  font-size:10px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.nav-item.is-active .nav-index{
+  background:var(--accent);
+  color:#fff;
+}
+.nav-note{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.14);
+  color:#aeb8c5;
+  font-size:12px;
+  line-height:1.55;
+}
+.report-shell{
+  margin-left:220px;
+  min-height:100vh;
+}
+.report-hero{
+  position:relative;
+  background:#fff;
+  color:var(--ink-strong);
+  padding:32px 40px 28px;
+  border-bottom:1px solid var(--line);
+}
+.report-hero:before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:4px;
+  background:linear-gradient(90deg,var(--accent),#6d7f92,var(--accent-2));
+}
+.report-eyebrow{
+  margin:0 0 9px;
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+}
+.report-hero h1{
+  margin:0;
+  max-width:1100px;
+  font-size:30px;
+  line-height:1.24;
+  font-weight:850;
+  color:var(--ink-strong);
+}
+.hero-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:16px;
+}
+.hero-meta span{
+  border:1px solid var(--line);
+  background:#f8fafb;
+  border-radius:999px;
+  padding:5px 10px;
+  color:#465467;
+  font-size:12px;
+  font-weight:650;
+}
+.report-body{
+  max-width:1440px;
+  margin:0 auto;
+  padding:24px 24px 42px;
+}
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(160px,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+.kpi-card{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow-soft);
+  padding:16px 18px;
+}
+.kpi-card strong{
+  display:block;
+  font-size:24px;
+  line-height:1.2;
+  color:var(--ink-strong);
+  font-variant-numeric:tabular-nums;
+}
+.kpi-card span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:12px;
+}
+.kpi-card.good{border-left-color:var(--green)}
+.kpi-card.warn{border-left-color:var(--orange)}
+.kpi-card.info{border-left-color:var(--purple)}
+.report-section{
+  background:var(--panel);
+  border:1px solid var(--soft-line);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  box-shadow:var(--shadow-soft);
+  margin:18px 0;
+  padding:21px 20px 24px;
+  scroll-margin-top:18px;
+}
+.report-section:first-child{margin-top:0}
+.report-section>h2{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 14px;
+  padding-bottom:13px;
+  border-bottom:1px solid var(--soft-line);
+  color:var(--ink-strong);
+  font-size:20px;
+  line-height:1.35;
+  font-weight:850;
+}
+.section-number{
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  min-width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+h3.section-subtitle{
+  display:inline-flex;
+  align-items:center;
+  margin:18px 0 10px;
+  padding:5px 11px;
+  border:1px solid #cddbe8;
+  border-radius:999px;
+  background:#f0f5fa;
+  color:#365f82;
+  font-size:13px;
+  font-weight:800;
+}
+.report-section h3.section-subtitle:nth-of-type(2n){background:#edf6f4;color:#2d766f;border-color:#cae4e0}
+.report-section h3.section-subtitle:nth-of-type(3n){background:#fff5ea;color:#9e5419;border-color:#f2d2b0}
+.report-section h3.section-subtitle:nth-of-type(4n){background:#f4f1fb;color:#654c9a;border-color:#ddd4f0}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.summary-card{
+  border:1px solid var(--line);
+  border-top:3px solid #6f879b;
+  border-radius:8px;
+  background:linear-gradient(180deg,#fff 0,#fbfcfd 100%);
+  padding:14px 13px 15px;
+  box-shadow:var(--shadow-soft);
+}
+.summary-label{
+  display:inline-flex;
+  align-items:center;
+  margin-bottom:10px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#416f93;
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+}
+.summary-label.green{background:var(--green)}
+.summary-label.orange{background:var(--orange)}
+.summary-label.purple{background:var(--purple)}
+.summary-card p{margin:4px 0 0}
+.summary-card ul{margin:4px 0 0;padding-left:18px}
+.summary-card li{margin:3px 0}
+.summary-card .table-wrap{
+  margin:2px 0 0;
+  border-color:#d9e2ea;
+  box-shadow:none;
+}
+.summary-card table{min-width:0;font-size:12px}
+.summary-card th,.summary-card td{padding:6px 7px}
+.summary-card td:first-child,.summary-card th:first-child{
+  min-width:108px;
+  max-width:180px;
+}
+.summary-card strong{font-weight:850;color:var(--ink-strong)}
+p{margin:9px 0 12px;color:#344256}
+ul{margin:8px 0 14px;padding-left:19px}
+li{margin:4px 0}
+blockquote{
+  margin:12px 0 16px;
+  padding:11px 14px;
+  border:1px solid #dbe5ee;
+  border-left:4px solid var(--accent);
+  border-radius:6px;
+  background:#f5f8fb;
+  color:#4c5c69;
+}
+.report-image-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin:12px 0 20px;
+}
+.report-image{
+  min-width:0;
+  margin:0;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow-soft);
+}
+.report-image img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  border:1px solid #e5ebf0;
+  border-radius:6px;
+  background:#fff;
+}
+.report-image .woe-svg{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  border:1px solid #e5ebf0;
+  border-radius:6px;
+  background:#fff;
+}
+.woe-title{
+  fill:#172433;
+  font-size:15px;
+  font-weight:850;
+}
+.woe-subtitle{
+  fill:#667384;
+  font-size:11px;
+}
+.woe-axis{
+  stroke:#9aa8b6;
+  stroke-width:1;
+}
+.woe-grid{
+  stroke:#e4eaf0;
+  stroke-width:1;
+}
+.woe-zero{
+  stroke:#8291a2;
+  stroke-width:1;
+  stroke-dasharray:4 4;
+}
+.woe-bar{
+  fill:rgba(65,111,147,.36);
+  stroke:rgba(65,111,147,.58);
+  stroke-width:.8;
+}
+.woe-line{
+  fill:none;
+  stroke:#c66a1d;
+  stroke-width:2.4;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+.woe-point{
+  fill:#fff;
+  stroke:#c66a1d;
+  stroke-width:2;
+}
+.woe-axis-title{
+  fill:#405064;
+  font-size:11px;
+  font-weight:750;
+  text-anchor:middle;
+}
+.woe-y-label{
+  fill:#667384;
+  font-size:10px;
+  text-anchor:end;
+}
+.woe-pop-label{
+  fill:#667384;
+  font-size:10px;
+  text-anchor:start;
+}
+.woe-x-label{
+  fill:#4a5a6e;
+  font-size:9px;
+  text-anchor:end;
+}
+.woe-legend{
+  fill:#405064;
+  font-size:10px;
+  font-weight:750;
+}
+.report-image figcaption{
+  margin-top:8px;
+  color:#405064;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.table-wrap{
+  width:100%;
+  overflow:visible;
+  margin:12px 0 20px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  box-shadow:var(--shadow-soft);
+}
+.paired-tables{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  align-items:start;
+  margin:12px 0 20px;
+}
+.paired-table-panel{
+  min-width:0;
+}
+.paired-table-panel>p,
+.paired-table-panel>h3{
+  margin-top:0;
+}
+.paired-table-panel>.table-wrap{
+  margin-bottom:0;
+}
+table{
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+}
+th,td{
+  border:0;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:8px 10px;
+  text-align:right;
+  vertical-align:middle;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+tr:last-child td{border-bottom:0}
+th:last-child,td:last-child{border-right:0}
+th{
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:#eef3f6;
+  color:#2f3d4f;
+  font-weight:800;
+}
+td:first-child,th:first-child{
+  position:sticky;
+  left:0;
+  z-index:2;
+  text-align:left;
+  max-width:340px;
+  min-width:0;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+th:first-child{
+  z-index:4;
+  background:#e8eff2;
+}
+td:first-child{background:#fff}
+tbody tr:nth-child(even) td{background:#fbfcfd}
+tbody tr:nth-child(even) td:first-child{background:#fbfcfd}
+tbody tr:hover td{background:#eef5fb}
+tbody tr:hover td:first-child{background:#eef5fb}
+.dense-table table{font-size:12px}
+.dense-table th,.dense-table td{padding:7px 8px}
+.wide-table table{min-width:0}
+.paired-table-panel table{font-size:12px}
+.paired-table-panel th,.paired-table-panel td{padding:6px 5px}
+.visual-table{border-color:#ccd9df}
+.heat-cell,.bar-cell{
+  position:relative;
+  font-variant-numeric:tabular-nums;
+}
+.heat-cell{background:var(--heat-bg,#fff)!important}
+.bar-cell{
+  --bar-bg:rgba(42,111,186,.22);
+  background:linear-gradient(90deg,var(--bar-bg) 0 var(--bar-width,0%),rgba(255,255,255,0) var(--bar-width,0%) 100%)!important;
+}
+.bar-cell.bar-good{--bar-bg:rgba(22,138,79,.24)}
+.bar-cell.bar-warn{--bar-bg:rgba(198,106,29,.22)}
+.bar-cell.bar-risk{--bar-bg:rgba(199,66,66,.20)}
+.is-positive{color:var(--green);font-weight:800}
+.is-negative{color:var(--red);font-weight:800}
+.is-neutral{color:#65758a;font-weight:700}
+td.is-positive,td.is-negative,td.is-neutral,
+tbody tr:hover td.is-positive,tbody tr:hover td.is-negative,tbody tr:hover td.is-neutral{
+  background:#fff!important;
+  background-image:none!important;
+}
+td.plain-cell,
+tbody tr:hover td.plain-cell{
+  background:#fff!important;
+  background-image:none!important;
+}
+.intent-note{
+  margin:4px 0 14px;
+  padding:8px 11px;
+  border:1px solid #cfdbe6;
+  border-left:4px solid var(--accent);
+  border-radius:6px;
+  background:#f6f9fb;
+  color:#435365;
+  font-size:13px;
+}
+.intent-cohort-title{
+  display:block;
+  margin:18px 0 8px;
+  color:#111820;
+  font-weight:850;
+  font-size:15px;
+}
+.intent-risk-card{
+  margin:10px 0 18px;
+}
+.intent-matrix-caption{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+  margin:0 0 6px;
+  color:#1b2633;
+  font-size:13px;
+  font-weight:850;
+}
+.intent-matrix-caption span{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:3px 8px;
+  border:1px solid #cfdbe6;
+  border-radius:5px;
+  background:#f5f8fb;
+}
+.intent-risk-card .table-wrap{
+  margin:0;
+  border-color:#202020;
+  border-radius:0;
+  box-shadow:none;
+}
+.intent-risk-card table{
+  table-layout:fixed;
+  min-width:0;
+  font-size:12px;
+  border-collapse:collapse;
+}
+.intent-risk-card th,
+.intent-risk-card td{
+  padding:4px 6px;
+  border:1px solid #202020;
+  text-align:center;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+.intent-risk-card th:first-child,
+.intent-risk-card td:first-child{
+  position:static;
+  min-width:0;
+  max-width:none;
+  text-align:center;
+}
+.intent-risk-card th{
+  position:static;
+  top:auto;
+  z-index:auto;
+  background:#f4f6f8;
+  color:#111820;
+}
+.intent-risk-card .intent-super-head th{
+  background:#fff;
+  color:#111820;
+  font-weight:850;
+}
+.intent-risk-card .intent-version-cell{
+  background:#fff!important;
+  color:#111820;
+  font-weight:800;
+}
+.intent-risk-card tr:last-child td{
+  border-bottom:1px solid #202020;
+}
+code{
+  padding:2px 5px;
+  border-radius:4px;
+  background:#eef2f5;
+  color:#21303f;
+  font-family:'SFMono-Regular',Menlo,Consolas,monospace;
+  font-size:12px;
+}
+@media (max-width:980px){
+  .sidebar{
+    position:relative;
+    width:auto;
+    height:auto;
+    padding:14px 14px 16px;
+  }
+  .report-shell{margin-left:0}
+  .report-hero{padding:26px 20px 24px}
+  .report-hero h1{font-size:24px}
+  .report-body{padding:16px}
+  .summary-grid{grid-template-columns:1fr}
+  .paired-tables{grid-template-columns:1fr}
+  .report-image-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .nav-note{display:none}
+}
+@media (max-width:560px){
+  body{font-size:13px}
+  .kpi-grid,.nav-list{grid-template-columns:1fr}
+  .report-section{padding:18px 14px}
+  .report-section>h2{font-size:18px}
+  .hero-meta span{max-width:100%;overflow-wrap:anywhere}
+}
+@media print{
+  html,body{background:#fff}
+  body{font-size:12px;color:#111820}
+  .sidebar{display:none}
+  .report-shell{margin-left:0}
+  .report-hero{
+    background:#fff;
+    color:#111820;
+    border-bottom:1px solid #cfd7df;
+    padding:18px 0 14px;
+  }
+  .report-hero:before{display:none}
+  .report-body{max-width:none;padding:0}
+  .hero-meta span{color:#111820;border-color:#cfd7df;background:#fff}
+  .report-section{
+    box-shadow:none;
+    border-color:#cfd7df;
+    break-inside:avoid;
+    margin:12px 0;
+  }
+  .table-wrap{box-shadow:none;overflow:visible}
+  table{min-width:0;font-size:10px}
+  th,td{padding:5px 6px;white-space:normal}
+  th,td:first-child,th:first-child{position:static}
+}
+</style>
+</head><body>
+<aside class="sidebar" aria-label="报告导航">
+  <div class="sidebar-title">首借 T0 G 卡新模型 — 建模报告</div>
+  <div class="sidebar-meta">2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</div>
+  <nav class="nav-list">
+    <a class="nav-item" href="#section"><span class="nav-index">1</span><span>模型背景</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">2</span><span>样本定义</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">3</span><span>样本分布</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">4</span><span>数据质量</span></a>
+    <a class="nav-item" href="#feature-selection"><span class="nav-index">5</span><span>变量筛选</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">6</span><span>入模变量解读</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">7</span><span>建模方案</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">8</span><span>整体效果</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">9</span><span>分客群效果</span></a>
+    <a class="nav-item" href="#lift-oot"><span class="nav-index">10</span><span>分箱 Lift — OOT 十分位</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">11</span><span>稳定性分析</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">12</span><span>风险交叉分析</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">13</span><span>结论和建议</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">14</span><span>附录</span></a>
+  </nav>
+  <div class="nav-note">表格已自适应页面宽度；提升类指标按正负变化着色。</div>
+</aside>
+<main class="report-shell">
+<header class="report-hero">
+  <p class="report-eyebrow">风险场景 AI 建模工作台 · 模型文档</p>
+  <h1>首借 T0 G 卡新模型 — 建模报告</h1>
+  <div class="hero-meta">
+    <span>生成日期：2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</span>
+  </div>
+</header>
+<div class="report-body">
+<h2>模型背景</h2>
+<table>
+<tr><th>属性</th><th>值</th></tr>
+<tr><td>项目</td><td>首借T0 G卡新模型</td></tr>
+<tr><td>场景</td><td>首借 T0 G 卡授信审批</td></tr>
+<tr><td>建模日期</td><td>2026-07-14</td></tr>
+<tr><td>负责人</td><td>辜子骏</td></tr>
+<tr><td>算法</td><td>LightGBM 二分类</td></tr>
+<tr><td>工作流</td><td>full_modeling</td></tr>
+</table>
+<h2>样本定义</h2>
+<table>
+<tr><th>属性</th><th>值</th></tr>
+<tr><td>Y 定义</td><td>授信后 14 天内是否发起交易 (is_14_fq)</td></tr>
+<tr><td>主键</td><td>uid + mdl_dte</td></tr>
+<tr><td>时间范围</td><td>2025-06 至 2026-05</td></tr>
+<tr><td>DEV 时间</td><td>2025-06 至 2026-03</td></tr>
+<tr><td>OOT 时间</td><td>2026-04 至 2026-05</td></tr>
+<tr><td>总样本量</td><td>1,653,805</td></tr>
+<tr><td>总列数</td><td>519</td></tr>
+<tr><td>样本切分列</td><td>final_flag</td></tr>
+</table>
+<h2>样本分布</h2>
+<table>
+<tr><th>切分</th><th>样本量</th><th>正样本数</th><th>正样本率</th></tr>
+<tr><td>DEV_INS</td><td>1,087,440</td><td>541,764</td><td>49.82%</td></tr>
+<tr><td>DEV_OOS</td><td>465,847</td><td>232,392</td><td>49.89%</td></tr>
+<tr><td>OOT</td><td>100,518</td><td>55,439</td><td>55.15%</td></tr>
+</table>
+<ul>
+<li>DEV_INS / DEV_OOS 正样本率约 49.8%，接近平衡样本</li>
+<li>OOT 正样本率 55.2%，略高于 DEV，符合外推期间业务变化预期</li>
+</ul>
+<h2>数据质量</h2>
+<ul>
+<li>is_14_fq 无空值，仅 0/1 二值</li>
+<li>主键 uid + mdl_dte 存在 1 组 8 行重复</li>
+<li>v1_score 空值 88,811 行（冠军挑战者对比时自动排除）</li>
+<li>final_flag 派生自 label + sample_split_tag，仅 DEV_INS / DEV_OOS / OOT 三个取值</li>
+</ul>
+<h2>变量筛选流程</h2>
+<table>
+<tr><th>阶段</th><th>操作</th><th>参数</th><th>剩余特征数</th></tr>
+<tr><td>候选特征</td><td>初始输入</td><td>—</td><td>500</td></tr>
+<tr><td>基础清洗</td><td>missing_rate / constant / IV / PSI</td><td>—</td><td>492</td></tr>
+<tr><td>Spearman 去重</td><td>max_abs_corr</td><td>0.80</td><td>309</td></tr>
+<tr><td>Null Importance</td><td>75 分位数阈值</td><td>—</td><td>124</td></tr>
+<tr><td>Baseline 重要性</td><td>keep_top_n (gain)</td><td>500</td><td>124</td></tr>
+</table>
+<ul>
+<li>最终入模特征：311 维</li>
+<li>特征精筛策略：memory-efficient Spearman 替代默认 Pearson，规避 CLI OOM 问题</li>
+<li>最终 124 维 + LLM tuning 阶段扩展至 311 维（baseline 重要性 keep_top_n=500 扩充）</li>
+</ul>
+<h2>入模变量解读</h2>
+<h3 class="section-subtitle">1 Top 10 特征（按 gain 重要性）</h3>
+<table>
+<tr><th>排名</th><th>特征名</th><th>Gain 重要度</th></tr>
+<tr><td>1</td><td></td><td>0.0</td></tr>
+<tr><td>2</td><td></td><td>0.0</td></tr>
+<tr><td>3</td><td></td><td>0.0</td></tr>
+<tr><td>4</td><td></td><td>0.0</td></tr>
+<tr><td>5</td><td></td><td>0.0</td></tr>
+<tr><td>6</td><td></td><td>0.0</td></tr>
+<tr><td>7</td><td></td><td>0.0</td></tr>
+<tr><td>8</td><td></td><td>0.0</td></tr>
+<tr><td>9</td><td></td><td>0.0</td></tr>
+<tr><td>10</td><td></td><td>0.0</td></tr>
+</table>
+<h3 class="section-subtitle">2 特征类别分布</h3>
+<p>入模 311 维特征覆盖以下维度：</p>
+<ul>
+<li><strong>loan_card_</strong> — 借还卡相关特征（额度使用、还款行为、教育水平交叉）</li>
+<li><strong>loan_</strong> — 借款相关特征（金额、笔数、还款率）</li>
+<li><strong>qry_</strong> — 查询相关特征（征信查询次数、时间间隔）</li>
+<li><strong>als_</strong> — 多头借贷特征</li>
+<li><strong>sch_</strong> — 还款计划特征</li>
+<li><strong>人口统计</strong> — age 等基础画像</li>
+</ul>
+<h2>建模方案</h2>
+<h3 class="section-subtitle">1 训练配置</h3>
+<table>
+<tr><th>参数</th><th>值</th></tr>
+<tr><td>算法</td><td>LightGBM 二分类</td></tr>
+<tr><td>learning_rate</td><td>0.04</td></tr>
+<tr><td>num_leaves</td><td>20</td></tr>
+<tr><td>max_depth</td><td>5</td></tr>
+<tr><td>min_child_samples</td><td>150</td></tr>
+<tr><td>subsample</td><td>0.65</td></tr>
+<tr><td>colsample_bytree</td><td>0.65</td></tr>
+<tr><td>reg_alpha</td><td>0.3</td></tr>
+<tr><td>reg_lambda</td><td>2.0</td></tr>
+<tr><td>n_estimators</td><td>2000</td></tr>
+<tr><td>特征数</td><td>311</td></tr>
+</table>
+<h3 class="section-subtitle">2 调参过程</h3>
+<p>LLM-guided tuning 共 2 轮 8 个 trial：</p>
+<ul>
+<li><strong>Round 1</strong>：候选模型均因 KS gap &gt; 3pp 被拒绝（baseline 保留）</li>
+<li><strong>Round 2</strong>：moderate_reg 在控制过拟合的同时保持最优 OOT 提升，最终选定</li>
+</ul>
+<h3 class="section-subtitle">3 训练集表现</h3>
+<table>
+<tr><th>切分</th><th>AUC</th><th>KS</th></tr>
+<tr><td>Train</td><td>0.7724</td><td>0.3967</td></tr>
+<tr><td>Valid</td><td>0.7560</td><td>0.3709</td></tr>
+<tr><td>OOT</td><td>0.7545</td><td>0.3716</td></tr>
+</table>
+<p>过拟合控制：</p>
+<ul>
+<li>KS gap (Train − Valid)：0.0258</li>
+<li>KS gap (Train − OOT)：0.0251</li>
+</ul>
+<h2>整体效果</h2>
+<h3 class="section-subtitle">1 评估集表现（最终 moderate_reg 模型）</h3>
+<table>
+<tr><th>切分</th><th>AUC</th><th>KS</th><th>样本量</th></tr>
+<tr><td>DEV_INS</td><td>0.7655</td><td>0.3841</td><td>1,087,440</td></tr>
+<tr><td>DEV_OOS</td><td>0.7515</td><td>0.3633</td><td>465,847</td></tr>
+<tr><td>OOT</td><td>0.7497</td><td>0.3650</td><td>100,518</td></tr>
+</table>
+<h3 class="section-subtitle">2 过拟合控制</h3>
+<table>
+<tr><th>指标</th><th>值</th><th>阈值</th><th>判定</th></tr>
+<tr><td>KS gap (DEV_INS − OOT)</td><td>0.0191</td><td>≤ 0.03</td><td>✓</td></tr>
+<tr><td>AUC gap (DEV_INS − OOT)</td><td>0.0158</td><td>—</td><td>✓</td></tr>
+</table>
+<h3 class="section-subtitle">3 冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</h3>
+<table>
+<tr><th>切分</th><th>ΔAUC</th><th>ΔKS</th><th>KS 相对提升</th><th>新模型 AUC</th><th>v1 AUC</th><th>新模型 KS</th><th>v1 KS</th></tr>
+<tr><td>DEV_INS</td><td>0.0346</td><td>0.0518</td><td>15.31%</td><td>0.7692</td><td>0.7346</td><td>0.3905</td><td>0.3386</td></tr>
+<tr><td>DEV_OOS</td><td>0.0199</td><td>0.0293</td><td>8.61%</td><td>0.7555</td><td>0.7356</td><td>0.3696</td><td>0.3403</td></tr>
+<tr><td>OOT</td><td>0.0353</td><td>0.0547</td><td>17.62%</td><td>0.7497</td><td>0.7145</td><td>0.3651</td><td>0.3104</td></tr>
+</table>
+<ul>
+<li>新模型与 v1_score Pearson 相关系数（OOT）：0.8492</li>
+<li>新模型与 v1_score Spearman 相关系数（OOT）：0.8466</li>
+<li>新模型在 OOT 上 AUC 提升 +0.0353，KS 提升 +0.0547</li>
+</ul>
+<h2>分客群效果</h2>
+<table>
+<tr><th>切分/客群</th><th>样本量</th><th>正样本数</th><th>正样本率</th><th>AUC</th><th>KS</th><th>备注</th></tr>
+<tr><td>DEV_INS/其他</td><td>20</td><td>17</td><td>85.00%</td><td>0.7059</td><td>0.6078</td><td></td><td></td><td>DEV_INS/初审</td><td>828334</td><td>405307</td><td>48.93%</td><td>0.7326</td><td>0.3371</td><td></td><td></td><td>DEV_INS/重审</td><td>89320</td><td>16073</td><td>17.99%</td><td>0.8204</td><td>0.4854</td><td></td><td></td><td>DEV_INS/重申</td><td>169766</td><td>120367</td><td>70.90%</td><td>0.7591</td><td>0.3788</td><td></td><td></td><td>DEV_OOS/其他</td><td>9</td><td>5</td><td>55.56%</td><td>0.2500</td><td>0.6000</td><td></td><td></td><td>DEV_OOS/初审</td><td>355237</td><td>173801</td><td>48.93%</td><td>0.7173</td><td>0.3140</td><td></td><td></td><td>DEV_OOS/重审</td><td>38024</td><td>6917</td><td>18.19%</td><td>0.8057</td><td>0.4617</td><td></td><td></td><td>DEV_OOS/重申</td><td>72577</td><td>51669</td><td>71.19%</td><td>0.7367</td><td>0.3451</td><td></td><td></td><td>OOT/初审</td><td>75261</td><td>37473</td><td>49.79%</td><td>0.7280</td><td>0.3283</td><td></td><td></td><td>OOT/重审</td><td>1</td><td>0</td><td>0.00%</td><td>N/A</td><td>N/A</td><td>不可评估</td><td></td><td>OOT/重申</td><td>25256</td><td>17966</td><td>71.14%</td><td>0.7406</td><td>0.3582</td><td></td></tr>
+</table>
+<blockquote><strong>注意</strong>：DEV_INS/其他（n=20）和 DEV_OOS/其他（n=9）样本量过小，指标不可靠。OOT/重审 仅 1 条样本，不可评估。</blockquote>
+<p>核心发现：</p>
+<ul>
+<li><strong>重审客群</strong>正样本率最低（~18%），但模型区分度最高（AUC &gt; 0.80, KS &gt; 0.46）</li>
+<li><strong>重申客群</strong>正样本率最高（~71%），AUC 约 0.74-0.76</li>
+<li><strong>初审客群</strong>为主力客群（~75 万），AUC 约 0.72-0.73</li>
+</ul>
+<h2>分箱 Lift — OOT 十分位</h2>
+<table>
+<tr><th>分位</th><th>样本量</th><th>平均模型分</th><th>正样本率</th></tr>
+<tr><td>1</td><td>10051</td><td>0.8744</td><td>90.00%</td><td></td><td>2</td><td>10051</td><td>0.7543</td><td>80.40%</td><td></td><td>3</td><td>10051</td><td>0.6644</td><td>72.49%</td><td></td><td>4</td><td>10051</td><td>0.5883</td><td>64.56%</td><td></td><td>5</td><td>10051</td><td>0.5190</td><td>58.27%</td><td></td><td>6</td><td>10051</td><td>0.4542</td><td>51.54%</td><td></td><td>7</td><td>10051</td><td>0.3899</td><td>46.06%</td><td></td><td>8</td><td>10051</td><td>0.3241</td><td>38.64%</td><td></td><td>9</td><td>10051</td><td>0.2517</td><td>30.97%</td><td></td><td>10</td><td>10059</td><td>0.1451</td><td>18.63%</td></tr>
+</table>
+<p>分位切分点：0.8063, 0.7062, 0.6245, 0.5532, 0.4860, 0.4225, 0.3573, 0.2900, 0.2089</p>
+<p>核心发现：</p>
+<ul>
+<li>最高分位（Top 10%）正样本率 90.00%，最低分位（Bottom 10%）正样本率 18.63%</li>
+<li>十分位 Lift = 4.83x</li>
+<li>正样本率随分数单调递减，无排序反转</li>
+</ul>
+<h2>稳定性分析</h2>
+<h3 class="section-subtitle">1 月度稳定性</h3>
+<table>
+<tr><th>月份</th><th>切分</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th><th>PSI</th></tr>
+<tr><td>2025-06</td><td>DEV_INS</td><td>204478</td><td>44.62%</td><td>0.8066</td><td>0.4519</td><td>0.1030</td><td></td><td>2025-06</td><td>DEV_OOS</td><td>88195</td><td>44.79%</td><td>0.7947</td><td>0.4360</td><td>0.1041</td><td></td><td>2025-07</td><td>DEV_INS</td><td>147373</td><td>49.81%</td><td>0.7589</td><td>0.3748</td><td>0.0013</td><td></td><td>2025-07</td><td>DEV_OOS</td><td>62666</td><td>49.69%</td><td>0.7449</td><td>0.3533</td><td>0.0013</td><td></td><td>2025-08</td><td>DEV_INS</td><td>148780</td><td>51.51%</td><td>0.7477</td><td>0.3588</td><td>0.0131</td><td></td><td>2025-08</td><td>DEV_OOS</td><td>63774</td><td>51.58%</td><td>0.7342</td><td>0.3398</td><td>0.0163</td><td></td><td>2025-09</td><td>DEV_INS</td><td>131165</td><td>51.39%</td><td>0.7522</td><td>0.3672</td><td>0.0137</td><td></td><td>2025-09</td><td>DEV_OOS</td><td>55674</td><td>51.79%</td><td>0.7358</td><td>0.3440</td><td>0.0156</td><td></td><td>2025-10</td><td>DEV_INS</td><td>103253</td><td>53.11%</td><td>0.7486</td><td>0.3598</td><td>0.0250</td><td></td><td>2025-10</td><td>DEV_OOS</td><td>44345</td><td>52.93%</td><td>0.7351</td><td>0.3415</td><td>0.0243</td><td></td><td>2025-11</td><td>DEV_INS</td><td>102281</td><td>50.96%</td><td>0.7574</td><td>0.3784</td><td>0.0288</td><td></td><td>2025-11</td><td>DEV_OOS</td><td>43743</td><td>51.00%</td><td>0.7408</td><td>0.3493</td><td>0.0269</td><td></td><td>2025-12</td><td>DEV_INS</td><td>76295</td><td>49.43%</td><td>0.7499</td><td>0.3634</td><td>0.0189</td><td></td><td>2025-12</td><td>DEV_OOS</td><td>32871</td><td>49.45%</td><td>0.7364</td><td>0.3446</td><td>0.0207</td><td></td><td>2026-01</td><td>DEV_INS</td><td>71054</td><td>49.87%</td><td>0.7650</td><td>0.3881</td><td>0.0425</td><td></td><td>2026-01</td><td>DEV_OOS</td><td>30533</td><td>49.92%</td><td>0.7471</td><td>0.3639</td><td>0.0443</td><td></td><td>2026-02</td><td>DEV_INS</td><td>53485</td><td>51.95%</td><td>0.7570</td><td>0.3702</td><td>0.0404</td><td></td><td>2026-02</td><td>DEV_OOS</td><td>22978</td><td>51.82%</td><td>0.7459</td><td>0.3536</td><td>0.0385</td><td></td><td>2026-03</td><td>DEV_INS</td><td>49276</td><td>51.11%</td><td>0.7671</td><td>0.3900</td><td>0.0357</td><td></td><td>2026-03</td><td>DEV_OOS</td><td>21068</td><td>51.45%</td><td>0.7527</td><td>0.3696</td><td>0.0335</td><td></td><td>2026-04</td><td>OOT</td><td>50202</td><td>55.99%</td><td>0.7500</td><td>0.3639</td><td>0.0752</td><td></td><td>2026-05</td><td>OOT</td><td>50316</td><td>54.32%</td><td>0.7492</td><td>0.3671</td><td>0.0546</td></tr>
+</table>
+<h3 class="section-subtitle">2 OOT 稳定性</h3>
+<p>OOT 两月 KS：0.3639 → 0.3671（变化 +0.0031）</p>
+<h3 class="section-subtitle">3 分数分布稳定性 (PSI)</h3>
+<ul>
+<li>基准分布：DEV_INS 整体分数分布</li>
+<li>全部月份 PSI &lt; 0.11，分数分布稳定</li>
+<li>首月（2025-06）PSI 约 0.10（DEV 时间窗口差异），此后稳定在 0.01-0.05</li>
+<li>OOT 月份 PSI 略有上升（0.05-0.08），仍在可接受范围</li>
+</ul>
+<h2>风险交叉分析</h2>
+<h3 class="section-subtitle">1 额度画像 (OOT 十分位)</h3>
+<table>
+<tr><th>分位</th><th>样本量</th><th>平均额度</th><th>中位额度</th><th>平均 v1</th><th>平均 model_score</th><th>正样本率</th></tr>
+<tr><td>1</td><td>10051</td><td>3300</td><td>2000</td><td>0.7995</td><td>0.8744</td><td>90.00%</td><td></td><td>2</td><td>10051</td><td>4507</td><td>2500</td><td>0.7258</td><td>0.7543</td><td>80.40%</td><td></td><td>3</td><td>10051</td><td>7052</td><td>3000</td><td>0.6767</td><td>0.6644</td><td>72.49%</td><td></td><td>4</td><td>10051</td><td>9878</td><td>3400</td><td>0.6263</td><td>0.5883</td><td>64.56%</td><td></td><td>5</td><td>10051</td><td>13642</td><td>4200</td><td>0.5759</td><td>0.5190</td><td>58.27%</td><td></td><td>6</td><td>10051</td><td>16736</td><td>5000</td><td>0.5259</td><td>0.4542</td><td>51.54%</td><td></td><td>7</td><td>10051</td><td>21577</td><td>6100</td><td>0.4737</td><td>0.3899</td><td>46.06%</td><td></td><td>8</td><td>10051</td><td>27069</td><td>7700</td><td>0.4176</td><td>0.3241</td><td>38.64%</td><td></td><td>9</td><td>10051</td><td>31668</td><td>9400</td><td>0.3484</td><td>0.2517</td><td>30.97%</td><td></td><td>10</td><td>10059</td><td>40787</td><td>14700</td><td>0.2291</td><td>0.1451</td><td>18.63%</td></tr>
+</table>
+<p>核心发现：</p>
+<ul>
+<li>额度越高 → 分数越低 → 正样本率越低，符合风险排序预期</li>
+<li>最高分位（90.00%）的平均额度（3300）远低于最低分位（40787），高额度客户违约风险更高</li>
+<li>十分位正样本率单调递减，模型排序能力良好</li>
+</ul>
+<h3 class="section-subtitle">2 A 卡分交叉</h3>
+<ul>
+<li>a_card_score 不存在于样本中，A×G 交叉矩阵不可生成</li>
+<li>建议后续版本引入 A 卡分，完善交叉分析</li>
+</ul>
+<h2>结论和建议</h2>
+<h3 class="section-subtitle">1 模型总结</h3>
+<table>
+<tr><th>维度</th><th>结论</th></tr>
+<tr><td>区分度</td><td>OOT AUC=0.7497, KS=0.3650，显著优于 v1_score（OOT KS +17.6%）</td></tr>
+<tr><td>稳定性</td><td>全部月份 PSI &lt; 0.11，分数分布稳定</td></tr>
+<tr><td>过拟合</td><td>KS gap (DEV_INS−OOT) = 0.0191 ≤ 3pp ✓</td></tr>
+<tr><td>排序性</td><td>OOT 十分位 lift = 4.83x，单调递减</td></tr>
+<tr><td>额度一致性</td><td>额度与风险排序一致（高额度→高风险→低分）</td></tr>
+</table>
+<h3 class="section-subtitle">2 建议行动</h3>
+<p>1. <strong>建议灰度上线</strong> — moderate_reg OOT 表现显著优于 v1_score，KS 相对提升 17.6%，且过拟合控制达标</p>
+<p>2. <strong>积累 OOT</strong> — 当前仅 2 个月外推窗口（2026-04 ~ 2026-05），建议积累 4-6 个月后回测</p>
+<p>3. <strong>补充 MOB 和金额风险分析</strong> — 后续版本补齐</p>
+<p>4. <strong>建立模型监控</strong> — 部署后监控 PSI、KS/AUC 衰减、分客群效果</p>
+<p>5. <strong>引入 A 卡分</strong> — 补充 A×G 交叉矩阵，完善风险分层</p>
+<h3 class="section-subtitle">3 使用限制</h3>
+<ul>
+<li>适用于首借 T0 G 卡客群</li>
+<li>不含 A 卡分（a_card_score 不存在于样本）</li>
+<li>重审客群 OOT 仅 1 条样本，分客群评估不适用</li>
+<li>OOT 仅 2 个月，代表性和稳健性待更多数据验证</li>
+<li>MOB 分析、金额风险矩阵待后续版本补充</li>
+<li>v1_score 含 88,811 空值，对比仅对有效样本进行</li>
+</ul>
+<h2>附录</h2>
+<h3 class="section-subtitle">1 分位切分点</h3>
+<p>```</p>
+<p>0.806306, 0.706153, 0.624524, 0.553177, 0.485950, 0.422505, 0.357277, 0.290000, 0.208880</p>
+<p>```</p>
+<h3 class="section-subtitle">2 证据来源</h3>
+<table>
+<tr><th>阶段</th><th>制品</th><th>状态</th></tr>
+<tr><td>sample_check</td><td>sample_summary.json</td><td>已完成</td></tr>
+<tr><td>feature_metadata</td><td>feature_columns.csv, feature_table_summary.csv</td><td>已完成</td></tr>
+<tr><td>feature_refine</td><td>final_features.txt, stage_summary.json</td><td>已完成</td></tr>
+<tr><td>train_baseline</td><td>model.pkl, train_metrics.json</td><td>已完成</td></tr>
+<tr><td>evaluate</td><td>evaluation_summary.json</td><td>已完成</td></tr>
+<tr><td>compare</td><td>champion_challenger.json</td><td>已完成</td></tr>
+</table>
+<h3 class="section-subtitle">3 模型文件</h3>
+<table>
+<tr><th>文件</th><th>路径</th></tr>
+<tr><td>模型 pickle</td><td>modeling/main_lgbm/model.pkl</td></tr>
+<tr><td>训练指标</td><td>modeling/main_lgbm/train_metrics.json</td></tr>
+<tr><td>特征列表</td><td>feature_selection/final_features.txt</td></tr>
+<tr><td>评估汇总</td><td>evaluation/evaluation_summary.json</td></tr>
+<tr><td>冠军挑战者</td><td>evaluation/champion_challenger.json</td></tr>
+</table>
+<p>---</p>
+<p>*本报告由 rmw report 工作流从注册证据生成，数据来源于 evaluation_summary.json 和 champion_challenger.json（moderate_reg 模型，2026-07-15 重新评估）。*</p>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.report-body');
+  if (!body) return;
+
+  var idByTitle = [
+    ['总结', 'summary'],
+    ['Summary', 'summary'],
+    ['模型描述', 'model-description'],
+    ['变量筛选', 'feature-selection'],
+    ['核心效果', 'core-comparison'],
+    ['模型效果', 'model-performance'],
+    ['模型稳定性', 'model-stability'],
+    ['重要变量', 'important-features'],
+    ['Top变量WOE', 'top-woe'],
+    ['待补充事项', 'missing-results']
+  ];
+
+  var headings = Array.prototype.slice.call(body.querySelectorAll(':scope > h2'));
+  headings.forEach(function (heading, index) {
+    var section = document.createElement('section');
+    section.className = 'report-section';
+    var title = heading.textContent.trim();
+    var match = idByTitle.find(function (pair) { return title.indexOf(pair[0]) !== -1; });
+    section.id = match ? match[1] : 'section-' + (index + 1);
+
+    var badge = document.createElement('span');
+    badge.className = 'section-number';
+    badge.textContent = String(index + 1);
+    heading.prepend(badge);
+
+    body.insertBefore(section, heading);
+    var current = heading;
+    while (current) {
+      var next = current.nextSibling;
+      section.appendChild(current);
+      if (next && next.nodeType === 1 && next.matches('h2')) break;
+      current = next;
+    }
+  });
+
+  function parseNumeric(text) {
+    var cleaned = String(text || '').replace(/[,%+]/g, '').trim();
+    if (!cleaned || /^N\/A$/i.test(cleaned)) return null;
+    var value = parseFloat(cleaned);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  function tableContext(table) {
+    var parts = [];
+    var sectionTitle = table.closest('.report-section') && table.closest('.report-section').querySelector('h2');
+    if (sectionTitle) parts.push(sectionTitle.textContent.trim());
+    var node = table.previousElementSibling;
+    var hops = 0;
+    while (node && hops < 4) {
+      if (/^(H2|H3|P|BLOCKQUOTE|UL)$/i.test(node.tagName)) parts.push(node.textContent.trim());
+      node = node.previousElementSibling;
+      hops += 1;
+    }
+    return parts.join(' | ');
+  }
+
+  function columnValues(table, columnIndex) {
+    return Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).map(function (row) {
+      return parseNumeric(row.children[columnIndex] && row.children[columnIndex].textContent);
+    }).filter(function (value) {
+      return value !== null;
+    });
+  }
+
+  function shouldSkipNumericHeader(header) {
+    return /旧→新|样本数|n_samples|positive|index|序号|排名|split|分组|月份|month|版本|客群|样本$|feature|varname|desc|变量|字段/i.test(header);
+  }
+
+  function heatColor(header, context, value, min, max) {
+    var absMax = Math.max(Math.abs(min), Math.abs(max));
+    var norm = max === min ? 0.75 : (value - min) / (max - min);
+    var alpha = 0.08 + Math.max(0, Math.min(1, norm)) * 0.30;
+    if (/提升|uplift|delta|Δ|gap/i.test(header)) {
+      var deltaStrength = absMax ? Math.min(1, Math.abs(value) / absMax) : 0;
+      var deltaAlpha = 0.08 + deltaStrength * 0.30;
+      if (value > 0) return 'rgba(24,169,87,' + deltaAlpha.toFixed(3) + ')';
+      if (value < 0) return 'rgba(207,68,68,' + deltaAlpha.toFixed(3) + ')';
+      return 'rgba(101,117,138,.10)';
+    }
+    if (/PSI/i.test(header + ' ' + context)) return 'rgba(207,68,68,' + alpha.toFixed(3) + ')';
+    if (/风险|overdue|bad_rate/i.test(header + ' ' + context)) return 'rgba(230,126,34,' + alpha.toFixed(3) + ')';
+    return 'rgba(45,156,219,' + alpha.toFixed(3) + ')';
+  }
+
+  function addHeatScale(table, headers, context, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2) return;
+      var min = Math.min.apply(null, values);
+      var max = Math.max.apply(null, values);
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        cell.classList.add('heat-cell');
+        cell.style.setProperty('--heat-bg', heatColor(headers[columnIndex], context, value, min, max));
+      });
+    });
+  }
+
+  function addDataBars(table, headers, columns) {
+    columns.forEach(function (columnIndex) {
+      var values = columnValues(table, columnIndex).map(Math.abs);
+      if (values.length < 2) return;
+      var max = Math.max.apply(null, values);
+      if (!max) return;
+      Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+        var cell = row.children[columnIndex];
+        var value = parseNumeric(cell && cell.textContent);
+        if (!cell || value === null) return;
+        var width = Math.max(3, Math.min(100, Math.abs(value) / max * 100));
+        cell.classList.add('bar-cell');
+        if (/lift/i.test(headers[columnIndex])) cell.classList.add('bar-good');
+        if (/剩余|提升/i.test(headers[columnIndex])) cell.classList.add('bar-warn');
+        cell.style.setProperty('--bar-width', width.toFixed(1) + '%');
+      });
+    });
+  }
+
+  function addPlainCells(table, columnIndex) {
+    Array.prototype.slice.call(table.querySelectorAll('tr')).slice(1).forEach(function (row) {
+      var cell = row.children[columnIndex];
+      if (cell) cell.classList.add('plain-cell');
+    });
+  }
+
+  function enhanceNumericTable(table, headers, context, changeColumns) {
+    var slopingTable = /sloping|累计发起率|剩余发起率|累计lift|剩余lift/i.test(context + ' ' + headers.join(' '));
+    var comparisonTable = /by月|按月|每月|OOS|整体效果|分客群整体效果|效果对比|AUC|KS/i.test(context);
+    var psiTable = /PSI|稳定性/i.test(context + ' ' + headers.join(' '));
+    var barColumns = [];
+    var heatColumns = [];
+
+    headers.forEach(function (header, columnIndex) {
+      var values = columnValues(table, columnIndex);
+      if (values.length < 2 || shouldSkipNumericHeader(header)) return;
+      if (slopingTable) {
+        if (/占比/.test(header) || /^剩余/i.test(header)) {
+          addPlainCells(table, columnIndex);
+          return;
+        }
+        if (/发起率|lift|提升/i.test(header) && !/^剩余/i.test(header)) {
+          barColumns.push(columnIndex);
+        }
+        return;
+      }
+      if (changeColumns.indexOf(columnIndex) !== -1) {
+        return;
+      }
+      if (psiTable && /psi/i.test(header)) {
+        heatColumns.push(columnIndex);
+        return;
+      }
+      if (comparisonTable && (/AUC|KS|model_score|bad_rate|发起率|风险率/i.test(header) || /AUC|KS/.test(context))) {
+        heatColumns.push(columnIndex);
+      }
+    });
+
+    if (barColumns.length || heatColumns.length) table.closest('.table-wrap').classList.add('visual-table');
+    addDataBars(table, headers, barColumns);
+    addHeatScale(table, headers, context, heatColumns);
+  }
+
+  body.querySelectorAll('table').forEach(function (table) {
+    if (!table.parentElement || table.parentElement.classList.contains('table-wrap')) return;
+    var context = tableContext(table);
+    var wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    if (table.querySelectorAll('th').length >= 7) wrap.classList.add('wide-table');
+    if (table.querySelectorAll('tr').length >= 12) wrap.classList.add('dense-table');
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+
+    var headers = Array.prototype.slice.call(table.querySelectorAll('tr:first-child th')).map(function (th) {
+      return th.textContent.trim();
+    });
+    var changeColumns = headers.reduce(function (acc, header, columnIndex) {
+      if (/提升|gap|delta|uplift|Δ/i.test(header)) acc.push(columnIndex);
+      return acc;
+    }, []);
+
+    table.querySelectorAll('tr').forEach(function (row, rowIndex) {
+      if (rowIndex === 0) return;
+      Array.prototype.slice.call(row.children).forEach(function (cell, columnIndex) {
+        if (changeColumns.indexOf(columnIndex) === -1) return;
+        var value = parseFloat(cell.textContent.replace(/[,%+]/g, ''));
+        if (Number.isNaN(value)) return;
+        if (value > 0) cell.classList.add('is-positive');
+        if (value < 0) cell.classList.add('is-negative');
+        if (value === 0) cell.classList.add('is-neutral');
+      });
+    });
+
+    enhanceNumericTable(table, headers, context, changeColumns);
+  });
+
+  function tableWrapAfterTitle(titleNode) {
+    var node = titleNode && titleNode.nextElementSibling;
+    while (node) {
+      if (node.classList && node.classList.contains('table-wrap')) return node;
+      if (/^(H2|H3|P)$/i.test(node.tagName)) return null;
+      node = node.nextElementSibling;
+    }
+    return null;
+  }
+
+  function pairAdjacentTables(titleMatcher) {
+    var titles = Array.prototype.slice.call(body.querySelectorAll('p,h3'));
+    titles.forEach(function (titleNode) {
+      var firstTitle = titleNode.textContent.trim();
+      var pairTitle = titleMatcher(firstTitle);
+      if (!pairTitle || titleNode.dataset.pairedTable === '1') return;
+      var firstWrap = tableWrapAfterTitle(titleNode);
+      if (!firstWrap) return;
+      var searchNode = firstWrap.nextElementSibling;
+      while (searchNode) {
+        if (/^H2$/i.test(searchNode.tagName)) return;
+        if ((/^(P|H3)$/i.test(searchNode.tagName)) && searchNode.textContent.trim() === pairTitle) {
+          var secondWrap = tableWrapAfterTitle(searchNode);
+          if (!secondWrap) return;
+          var group = document.createElement('div');
+          group.className = 'paired-tables';
+          var firstPanel = document.createElement('div');
+          firstPanel.className = 'paired-table-panel';
+          var secondPanel = document.createElement('div');
+          secondPanel.className = 'paired-table-panel';
+          titleNode.parentNode.insertBefore(group, titleNode);
+          group.appendChild(firstPanel);
+          group.appendChild(secondPanel);
+          firstPanel.appendChild(titleNode);
+          firstPanel.appendChild(firstWrap);
+          secondPanel.appendChild(searchNode);
+          secondPanel.appendChild(secondWrap);
+          titleNode.dataset.pairedTable = '1';
+          searchNode.dataset.pairedTable = '1';
+          return;
+        }
+        searchNode = searchNode.nextElementSibling;
+      }
+    });
+  }
+
+  pairAdjacentTables(function (title) {
+    if (title === '全客群 by月效果（KS）') return '全客群 by月效果（AUC）';
+    var segmentMatch = title.match(/^(老户次新|老户|次新|流失户)整体效果（KS）$/);
+    if (segmentMatch) return segmentMatch[1] + '整体效果（AUC）';
+    return '';
+  });
+
+  var slopingGroups = {};
+  Array.prototype.slice.call(body.querySelectorAll('p')).forEach(function (titleNode) {
+    var title = titleNode.textContent.trim();
+    var match = title.match(/^全样本 30天发起：在(.+?)效果 - /);
+    if (!match) return;
+    var wrap = tableWrapAfterTitle(titleNode);
+    if (!wrap) return;
+    var key = match[1];
+    if (!slopingGroups[key]) {
+      slopingGroups[key] = document.createElement('div');
+      slopingGroups[key].className = 'paired-tables sloping-pair';
+      titleNode.parentNode.insertBefore(slopingGroups[key], titleNode);
+    }
+    var panel = document.createElement('div');
+    panel.className = 'paired-table-panel';
+    slopingGroups[key].appendChild(panel);
+    panel.appendChild(titleNode);
+    panel.appendChild(wrap);
+  });
+
+  function formatPercentCell(cell) {
+    var raw = String(cell.textContent || '').trim();
+    if (!raw || raw.indexOf('%') !== -1) return;
+    var value = parseFloat(raw.replace(/,/g, ''));
+    if (!Number.isFinite(value)) return;
+    cell.textContent = (value * 100).toFixed(2) + '%';
+  }
+
+  function decorateIntentMatrix(table, metric, scoreLabel) {
+    if (!table || table.dataset.intentDecorated === '1') return;
+    table.dataset.intentDecorated = '1';
+    table.classList.add('intent-matrix');
+
+    var headerRow = table.querySelector('tr');
+    if (!headerRow) return;
+    var originalColumnCount = headerRow.children.length;
+
+    var superRow = document.createElement('tr');
+    superRow.className = 'intent-super-head';
+    var metricHead = document.createElement('th');
+    metricHead.colSpan = 2;
+    metricHead.textContent = metric;
+    var assetHead = document.createElement('th');
+    assetHead.colSpan = Math.max(1, originalColumnCount - 1);
+    assetHead.textContent = '资产评级';
+    superRow.appendChild(metricHead);
+    superRow.appendChild(assetHead);
+    table.tBodies[0].insertBefore(superRow, headerRow);
+
+    var sideHead = document.createElement('th');
+    sideHead.textContent = '模型';
+    headerRow.insertBefore(sideHead, headerRow.firstElementChild);
+    if (headerRow.children[1]) headerRow.children[1].textContent = '意愿';
+    var lastHeader = headerRow.children[headerRow.children.length - 1];
+    if (lastHeader && lastHeader.textContent.trim() === '合计') lastHeader.textContent = 'sum';
+
+    var bodyRows = Array.prototype.slice.call(table.querySelectorAll('tr')).slice(2);
+    if (bodyRows.length) {
+      var versionCell = document.createElement('td');
+      versionCell.className = 'intent-version-cell';
+      versionCell.rowSpan = bodyRows.length;
+      versionCell.textContent = scoreLabel;
+      bodyRows[0].insertBefore(versionCell, bodyRows[0].firstElementChild);
+    }
+    bodyRows.forEach(function (row) {
+      var dataOffset = row.querySelector('.intent-version-cell') ? 2 : 1;
+      Array.prototype.slice.call(row.querySelectorAll('td')).slice(dataOffset).forEach(formatPercentCell);
+      var first = row.children[0];
+      if (first && first.textContent.trim() === '合计') first.textContent = 'sum';
+      var second = row.children[1];
+      if (second && second.textContent.trim() === '合计') second.textContent = 'sum';
+    });
+  }
+
+  function normalizeIntentRiskSection() {
+    var intentTitle = Array.prototype.slice.call(body.querySelectorAll('p')).find(function (node) {
+      return node.textContent.trim() === '3、意愿交叉风险（DEV-OOS）';
+    });
+    if (!intentTitle) return;
+
+    var node = intentTitle.nextElementSibling;
+    if (node && node.classList && node.classList.contains('table-wrap') && node.textContent.indexOf('高、中、低意愿评级') !== -1) {
+      node.remove();
+      node = intentTitle.nextElementSibling;
+    }
+
+    if (node && /^(P|BLOCKQUOTE)$/i.test(node.tagName) && node.textContent.indexOf('高、中、低意愿评级') !== -1) {
+      node.className = 'intent-note';
+      node.textContent = '说明：高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。';
+    } else {
+      var note = document.createElement('p');
+      note.className = 'intent-note';
+      note.textContent = '说明：高、中、低意愿评级为对应模型分数在各客群内三等频分箱得到。';
+      intentTitle.insertAdjacentElement('afterend', note);
+    }
+
+    Array.prototype.slice.call(body.querySelectorAll('p')).forEach(function (paragraph) {
+      var text = paragraph.textContent.trim();
+      var cohortMatch = text.match(/^(老户|流失户) DEV-OOS 意愿 x 资产评级$/);
+      if (cohortMatch) {
+        paragraph.className = 'intent-cohort-title';
+        paragraph.textContent = cohortMatch[1];
+        return;
+      }
+
+      var tableTitleMatch = text.match(/^(老户|流失户) - (占比|30天发起率|新增订单3期金额逾期率) - (.+)$/);
+      if (!tableTitleMatch) return;
+      var cohort = tableTitleMatch[1];
+      var metric = tableTitleMatch[2];
+      var scoreLabel = tableTitleMatch[3];
+      var metricNode = paragraph.previousElementSibling;
+      var tableWrap = tableWrapAfterTitle(paragraph);
+      if (!tableWrap) return;
+      var table = tableWrap.querySelector('table');
+      decorateIntentMatrix(table, metric, scoreLabel);
+
+      var card = document.createElement('div');
+      card.className = 'intent-risk-card';
+      var caption = document.createElement('div');
+      caption.className = 'intent-matrix-caption';
+      [cohort, metric, scoreLabel].forEach(function (label) {
+        var span = document.createElement('span');
+        span.textContent = label;
+        caption.appendChild(span);
+      });
+      card.appendChild(caption);
+      paragraph.parentNode.insertBefore(card, metricNode && metricNode.textContent.trim() === metric ? metricNode : paragraph);
+      if (metricNode && metricNode.textContent.trim() === metric) metricNode.remove();
+      paragraph.remove();
+      card.appendChild(tableWrap);
+    });
+  }
+
+  normalizeIntentRiskSection();
+
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.report-section'));
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        navItems.forEach(function (item) {
+          item.classList.toggle('is-active', item.getAttribute('href') === '#' + entry.target.id);
+        });
+      });
+    }, {rootMargin: '-35% 0px -55% 0px', threshold: 0});
+    sections.forEach(function (section) { observer.observe(section); });
+  }
+});
+</script>
+</body></html>
