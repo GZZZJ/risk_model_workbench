@@ -743,24 +743,24 @@ stages:
         reason: Champion/challenger comparison materialized
         created_at: '2026-07-14T19:50:00'
   report:
-    status: done
+    status: scaffold
     artifacts:
     - reports/model_report.xlsx
     - reports/model_report.md
     - reports/model_report.html
     - reports/model_card.md
     - reports/executive_summary.md
-    started_at: '2026-07-15T15:23:00'
+    started_at: '2026-07-15T17:28:34'
     progress:
       step: action_done
-      status: done
-      message: '报告生成完成 (model_report.md 13,464 bytes, model_report.html 53,618 bytes, model_card.md, executive_summary.md; final model = moderate_reg)'
+      status: scaffold
+      message: 'report scaffold: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/reports/model_report.md'
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-07-15T15:25:00'
+      heartbeat_at: '2026-07-15T17:28:43'
       elapsed_seconds: 0.0
-      last_event_status: done
+      last_event_status: scaffold
     action:
       id: report
       kind: stage
@@ -784,11 +784,22 @@ stages:
       - reports/model_report.html
       - reports/model_card.md
       - reports/executive_summary.md
-    finished_at: '2026-07-15T15:25:00'
+    finished_at: '2026-07-15T17:28:42'
     last_result:
-      status: done
-      failure_code: ''
-      message: 'All 5 report artifacts generated from registered run evidence. Final model = moderate_reg (OOT AUC=0.7550, KS=0.3731, KS_gap=2.51pp). MD report: 12 sections, 13,464 bytes. HTML report: 53,618 bytes.'
+      schema_version: 1
+      attempt_id: ''
+      task_id: ''
+      action_id: ''
+      invocation_hash: ''
+      project: ''
+      version_id: ''
+      status: scaffold
+      failure_code: scaffold_only
+      next_required_action: none
+      retryable: false
+      scaffold: true
+      message: 'report scaffold: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/reports/model_report.md'
+      created_at: ''
       retry_count: 0
       artifacts:
       - path: reports/model_report.xlsx
@@ -801,36 +812,37 @@ stages:
       - path: reports/model_report.md
         kind: file
         source: generated
-        exists: true
-        description: Markdown report (12 sections, moderate_reg final model)
+        exists: false
+        description: ''
         artifact_rule: reports/model_report.md
         rule_matched: true
       - path: reports/model_report.html
         kind: file
         source: generated
-        exists: true
-        description: HTML report (rendered from markdown)
+        exists: false
+        description: ''
         artifact_rule: reports/model_report.html
         rule_matched: true
       - path: reports/model_card.md
         kind: file
         source: generated
-        exists: true
-        description: Standardized model card
+        exists: false
+        description: ''
         artifact_rule: reports/model_card.md
         rule_matched: true
       - path: reports/executive_summary.md
         kind: file
         source: generated
-        exists: true
-        description: Executive summary
+        exists: false
+        description: ''
         artifact_rule: reports/executive_summary.md
         rule_matched: true
       decision:
         stage: report
-        decision: done
-        reason: All 5 report artifacts generated from registered run evidence with moderate_reg final model
-        created_at: '2026-07-15T15:25:00'
+        decision: scaffold
+        reason: report generated with missing real evaluation artifacts
+        created_at: '2026-07-15T17:28:41'
+    failure_code: scaffold_only
 decisions:
 - stage: sample_check
   decision: done
@@ -864,8 +876,17 @@ decisions:
   created_at: '2026-07-14T19:50:00'
 - stage: report
   decision: done
-  reason: 'All 5 report artifacts generated from registered run evidence. Final model = moderate_reg (OOT AUC=0.7550, KS=0.3731, KS_gap=2.51pp).'
+  reason: All 5 report artifacts generated from registered run evidence. Final model
+    = moderate_reg (OOT AUC=0.7550, KS=0.3731, KS_gap=2.51pp).
   created_at: '2026-07-15T15:25:00'
-updated_at: '2026-07-15T15:25:00'
-transaction_id: txn_6a671fbd35ce41a58f87c084fea1c29a
-_workspace_revision: 162
+- stage: report
+  decision: report_target_skipped
+  reason: 'main_lgbm: missing train metrics at /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/modeling/main_lgbm'
+  created_at: '2026-07-15T17:28:41'
+- stage: report
+  decision: scaffold
+  reason: report generated with missing real evaluation artifacts
+  created_at: '2026-07-15T17:28:41'
+updated_at: '2026-07-15T17:28:44'
+transaction_id: txn_a395c496cf9b44a19ad3610c9a8f2e3f
+_workspace_revision: 179

@@ -2,11 +2,11 @@
   "version": 1,
   "version_id": "shoujie_t0_gcard_v1_20260714",
   "run_id": "shoujie_t0_gcard_v1_20260714",
-  "updated_at": "2026-07-15T15:20:37",
+  "updated_at": "2026-07-15T17:28:43",
   "stage": "report",
   "stage_label": "报告生成",
   "latest_event": {
-    "timestamp": "2026-07-15T15:20:37",
+    "timestamp": "2026-07-15T17:28:43",
     "version_id": "shoujie_t0_gcard_v1_20260714",
     "run_id": "shoujie_t0_gcard_v1_20260714",
     "stage": "report",
@@ -26,7 +26,7 @@
       "decision": "scaffold"
     },
     "level": "info",
-    "pid": 3289
+    "pid": 6018
   },
   "stages": {
     "validate_config": {
@@ -166,7 +166,7 @@
       "stage": "report",
       "stage_label": "报告生成",
       "latest_event": {
-        "timestamp": "2026-07-15T15:20:37",
+        "timestamp": "2026-07-15T17:28:43",
         "version_id": "shoujie_t0_gcard_v1_20260714",
         "run_id": "shoujie_t0_gcard_v1_20260714",
         "stage": "report",
@@ -186,9 +186,9 @@
           "decision": "scaffold"
         },
         "level": "info",
-        "pid": 3289
+        "pid": 6018
       },
-      "updated_at": "2026-07-15T15:20:37"
+      "updated_at": "2026-07-15T17:28:43"
     }
   }
 }

@@ -4,138 +4,138 @@
       "split": "DEV_INS",
       "n_total": 1087440,
       "n_valid": 1025382,
-      "model_auc": 0.7887007579437759,
+      "model_auc": 0.7691958980998264,
       "v1_auc": 0.7346354520231432,
-      "model_ks": 0.42394735936816863,
+      "model_ks": 0.39047418323159394,
       "v1_ks": 0.33863027672111207,
-      "auc_diff": 0.054065305920632745,
-      "ks_diff": 0.08531708264705656,
-      "auc_rel_change_pct": 7.359474113553878,
-      "ks_rel_change_pct": 25.194759155372783,
-      "pearson_corr": 0.8612145183501787,
-      "spearman_corr": 0.8491817910499505
+      "auc_diff": 0.03456044607668318,
+      "ks_diff": 0.051843906510481874,
+      "auc_rel_change_pct": 4.704434829752053,
+      "ks_rel_change_pct": 15.309885168117823,
+      "pearson_corr": 0.8676148827741755,
+      "spearman_corr": 0.8610705939319121
     },
     {
       "split": "DEV_OOS",
       "n_total": 465847,
       "n_valid": 439114,
-      "model_auc": 0.7601771320579347,
+      "model_auc": 0.7554710277682808,
       "v1_auc": 0.7355818025021736,
-      "model_ks": 0.3776939185597004,
+      "model_ks": 0.36963066292757696,
       "v1_ks": 0.34031273045981725,
-      "auc_diff": 0.024595329555761047,
-      "ks_diff": 0.03738118809988317,
-      "auc_rel_change_pct": 3.3436566092441318,
-      "ks_rel_change_pct": 10.984363720209693,
-      "pearson_corr": 0.8599887198382847,
-      "spearman_corr": 0.8495164274335089
+      "auc_diff": 0.019889225266107147,
+      "ks_diff": 0.02931793246775971,
+      "auc_rel_change_pct": 2.703876740622383,
+      "ks_rel_change_pct": 8.614997278575641,
+      "pearson_corr": 0.8676840187041458,
+      "spearman_corr": 0.8612206830387363
     },
     {
       "split": "OOT",
       "n_total": 100518,
       "n_valid": 100498,
-      "model_auc": 0.755033617189215,
+      "model_auc": 0.7497432114726688,
       "v1_auc": 0.714451738635008,
-      "model_ks": 0.3730819248122404,
+      "model_ks": 0.3650824705641671,
       "v1_ks": 0.3103882431145726,
-      "auc_diff": 0.04058187855420703,
-      "ks_diff": 0.06269368169766781,
-      "auc_rel_change_pct": 5.68014273878604,
-      "ks_rel_change_pct": 20.198471781202713,
-      "pearson_corr": 0.8400644674804982,
-      "spearman_corr": 0.8310255469964016
+      "auc_diff": 0.035291472837660764,
+      "ks_diff": 0.05469422744959451,
+      "auc_rel_change_pct": 4.9396580523530815,
+      "ks_rel_change_pct": 17.62123039866733,
+      "pearson_corr": 0.8492117585879155,
+      "spearman_corr": 0.8466164638399764
     }
   ],
   "credit_limit_profile": [
     {
       "score_bin": 0,
-      "n": 10052,
-      "avg_credit_limit": 36643.42,
-      "med_credit_limit": 11500.0,
-      "avg_v1_score": 0.2343,
-      "avg_model_score": 0.1755,
-      "pos_rate": 0.1767
+      "n": 10051,
+      "avg_credit_limit": 3300.29,
+      "med_credit_limit": 2000.0,
+      "avg_v1_score": 0.7995,
+      "avg_model_score": 0.8744,
+      "pos_rate": 0.9
     },
     {
       "score_bin": 1,
-      "n": 10052,
-      "avg_credit_limit": 31812.44,
-      "med_credit_limit": 8900.0,
-      "avg_v1_score": 0.3452,
-      "avg_model_score": 0.3027,
-      "pos_rate": 0.2981
+      "n": 10051,
+      "avg_credit_limit": 4507.47,
+      "med_credit_limit": 2500.0,
+      "avg_v1_score": 0.7258,
+      "avg_model_score": 0.7543,
+      "pos_rate": 0.804
     },
     {
       "score_bin": 2,
-      "n": 10052,
-      "avg_credit_limit": 27565.1,
-      "med_credit_limit": 7800.0,
-      "avg_v1_score": 0.4176,
-      "avg_model_score": 0.3848,
-      "pos_rate": 0.3865
+      "n": 10051,
+      "avg_credit_limit": 7051.58,
+      "med_credit_limit": 3000.0,
+      "avg_v1_score": 0.6767,
+      "avg_model_score": 0.6644,
+      "pos_rate": 0.7249
     },
     {
       "score_bin": 3,
       "n": 10051,
-      "avg_credit_limit": 22268.84,
-      "med_credit_limit": 6200.0,
-      "avg_v1_score": 0.4755,
-      "avg_model_score": 0.4504,
-      "pos_rate": 0.4594
+      "avg_credit_limit": 9877.84,
+      "med_credit_limit": 3400.0,
+      "avg_v1_score": 0.6263,
+      "avg_model_score": 0.5883,
+      "pos_rate": 0.6456
     },
     {
       "score_bin": 4,
-      "n": 10052,
-      "avg_credit_limit": 17661.73,
-      "med_credit_limit": 5100.0,
-      "avg_v1_score": 0.5252,
-      "avg_model_score": 0.5104,
-      "pos_rate": 0.5191
+      "n": 10051,
+      "avg_credit_limit": 13642.09,
+      "med_credit_limit": 4200.0,
+      "avg_v1_score": 0.5759,
+      "avg_model_score": 0.519,
+      "pos_rate": 0.5827
     },
     {
       "score_bin": 5,
-      "n": 10052,
-      "avg_credit_limit": 13722.76,
-      "med_credit_limit": 4200.0,
-      "avg_v1_score": 0.5761,
-      "avg_model_score": 0.5697,
-      "pos_rate": 0.5895
+      "n": 10051,
+      "avg_credit_limit": 16736.26,
+      "med_credit_limit": 5000.0,
+      "avg_v1_score": 0.5259,
+      "avg_model_score": 0.4542,
+      "pos_rate": 0.5154
     },
     {
       "score_bin": 6,
       "n": 10051,
-      "avg_credit_limit": 10712.57,
-      "med_credit_limit": 3500.0,
-      "avg_v1_score": 0.6275,
-      "avg_model_score": 0.6311,
-      "pos_rate": 0.648
+      "avg_credit_limit": 21577.45,
+      "med_credit_limit": 6100.0,
+      "avg_v1_score": 0.4737,
+      "avg_model_score": 0.3899,
+      "pos_rate": 0.4606
     },
     {
       "score_bin": 7,
-      "n": 10052,
-      "avg_credit_limit": 7758.44,
-      "med_credit_limit": 3000.0,
-      "avg_v1_score": 0.6754,
-      "avg_model_score": 0.6965,
-      "pos_rate": 0.7288
+      "n": 10051,
+      "avg_credit_limit": 27069.23,
+      "med_credit_limit": 7700.0,
+      "avg_v1_score": 0.4176,
+      "avg_model_score": 0.3241,
+      "pos_rate": 0.3864
     },
     {
       "score_bin": 8,
-      "n": 10052,
-      "avg_credit_limit": 4833.24,
-      "med_credit_limit": 2500.0,
-      "avg_v1_score": 0.7239,
-      "avg_model_score": 0.7735,
-      "pos_rate": 0.8084
+      "n": 10051,
+      "avg_credit_limit": 31668.36,
+      "med_credit_limit": 9400.0,
+      "avg_v1_score": 0.3484,
+      "avg_model_score": 0.2517,
+      "pos_rate": 0.3097
     },
     {
       "score_bin": 9,
-      "n": 10052,
-      "avg_credit_limit": 3256.98,
-      "med_credit_limit": 2000.0,
-      "avg_v1_score": 0.7979,
-      "avg_model_score": 0.8816,
-      "pos_rate": 0.9009
+      "n": 10059,
+      "avg_credit_limit": 40786.74,
+      "med_credit_limit": 14700.0,
+      "avg_v1_score": 0.2291,
+      "avg_model_score": 0.1451,
+      "pos_rate": 0.1863
     }
   ],
   "a_card_fields": "not_available",
@@ -144,7 +144,7 @@
     {
       "decile": 1,
       "n": 100518,
-      "avg_score": 0.5665,
+      "avg_score": 0.4965,
       "pos_rate": 0.5515
     }
   ]

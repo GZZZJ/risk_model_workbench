@@ -667,20 +667,20 @@ code{
 </head><body>
 <aside class="sidebar" aria-label="报告导航">
   <div class="sidebar-title">首借 T0 G 卡新模型 — 模型报告</div>
-  <div class="sidebar-meta">2026-07-15</div>
+  <div class="sidebar-meta">2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</div>
   <nav class="nav-list">
     <a class="nav-item" href="#section"><span class="nav-index">1</span><span>样本概览</span></a>
     <a class="nav-item" href="#section"><span class="nav-index">2</span><span>数据质量</span></a>
     <a class="nav-item" href="#section"><span class="nav-index">3</span><span>特征筛选</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">4</span><span>模型训练与选型</span></a>
-    <a class="nav-item" href="#model-performance"><span class="nav-index">5</span><span>模型效果</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">6</span><span>冠军挑战者对比</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">7</span><span>月度稳定性</span></a>
-    <a class="nav-item" href="#psi"><span class="nav-index">8</span><span>分数稳定性（PSI）</span></a>
-    <a class="nav-item" href="#vs"><span class="nav-index">9</span><span>分数相关性（新模型 vs 旧版）</span></a>
-    <a class="nav-item" href="#oot"><span class="nav-index">10</span><span>额度画像（OOT 十分位）</span></a>
-    <a class="nav-item" href="#top"><span class="nav-index">11</span><span>Top 重要特征</span></a>
-    <a class="nav-item" href="#missing-results"><span class="nav-index">12</span><span>待补充事项</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">4</span><span>模型训练与选择</span></a>
+    <a class="nav-item" href="#vs-t0-g-v1-score"><span class="nav-index">5</span><span>冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">6</span><span>月度稳定性</span></a>
+    <a class="nav-item" href="#psi"><span class="nav-index">7</span><span>分数稳定性 (PSI)</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">8</span><span>分数相关性</span></a>
+    <a class="nav-item" href="#oot"><span class="nav-index">9</span><span>额度画像 (OOT 十分位)</span></a>
+    <a class="nav-item" href="#top"><span class="nav-index">10</span><span>Top 特征</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">11</span><span>使用限制</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">12</span><span>下一步行动</span></a>
   </nav>
   <div class="nav-note">表格已自适应页面宽度；提升类指标按正负变化着色。</div>
 </aside>
@@ -689,103 +689,56 @@ code{
   <p class="report-eyebrow">风险场景 AI 建模工作台 · 模型文档</p>
   <h1>首借 T0 G 卡新模型 — 模型报告</h1>
   <div class="hero-meta">
-    <span>生成日期：2026-07-15</span>
-    <span>Run：shoujie_t0_gcard_v1_20260714</span>
-    <span>标签：<code>is_14_fq</code></span>
-    <span>算法：LightGBM</span>
+    <span>生成日期：2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</span>
   </div>
 </header>
 <div class="report-body">
 <h2>样本概览</h2>
 <table>
-<tr><th>指标</th><th>值</th></tr>
-<tr><td>样本来源</td><td>本地 Feather（五百维特征样本.feather）</td></tr>
-<tr><td>时间范围</td><td>2025-06-01 至 2026-05-31</td></tr>
-<tr><td>标签定义</td><td>授信后 14 天内是否发起交易（is_14_fq）</td></tr>
-<tr><td>候选特征数</td><td>500</td></tr>
-<tr><td>最终入模特征数</td><td>311</td></tr>
-</table>
-<table>
 <tr><th>切分</th><th>样本量</th><th>正样本数</th><th>正样本率</th></tr>
-<tr><td>DEV_INS (训练)</td><td>1,087,440</td><td>541,764</td><td>49.82%</td></tr>
-<tr><td>DEV_OOS (验证)</td><td>465,847</td><td>232,392</td><td>49.89%</td></tr>
-<tr><td>OOT (外推)</td><td>100,518</td><td>55,439</td><td>55.15%</td></tr>
+<tr><td>DEV_INS</td><td>1,087,440</td><td>541,764</td><td>49.82%</td></tr>
+<tr><td>DEV_OOS</td><td>465,847</td><td>232,392</td><td>49.89%</td></tr>
+<tr><td>OOT</td><td>100,518</td><td>55,439</td><td>55.15%</td></tr>
 </table>
-<p>整体正样本率 50.11%（1,653,805 行，828,528 正样本），OOT 正样本率高于 DEV（+5.3pp），属时间外推场景的正常分布漂移。</p>
-<h2>数据质量</h2>
-<table>
-<tr><th>检查项</th><th>结果</th></tr>
-<tr><td>主键唯一性</td><td>uid+mdl_dte 存在 1 组 8 行重复，已去重</td></tr>
-<tr><td>标签无空值</td><td>is_14_fq 仅 0/1，无空值</td></tr>
-<tr><td>final_flag 有效性</td><td>仅 DEV_INS / DEV_OOS / OOT</td></tr>
-<tr><td>v1_score 转换</td><td>string→float，88,453 空值已排除</td></tr>
-<tr><td>credit_limit</td><td>float64，0 空值</td></tr>
-<tr><td>A 卡字段</td><td>a_card_score / a_card_level 不存在于样本中</td></tr>
-</table>
-<p>缺失字段披露：</p>
 <ul>
-<li><code>a_card_score</code> / <code>a_card_level</code>：样本中不存在，A×G 交叉矩阵和 A 卡分客群评估无法生成，对应报告章节标记 <code>not_available</code>。</li>
-<li>缺失 A 卡字段不阻断主模型训练与评估。</li>
+<li>总样本：1,653,805</li>
+<li>时间范围：2025-06 至 2026-05</li>
+<li>Y 定义：授信后 14 天内是否发起交易 (is_14_fq)</li>
+<li>OOT：2026-04 至 2026-05</li>
+</ul>
+<h2>数据质量</h2>
+<ul>
+<li>is_14_fq 无空值，仅 0/1</li>
+<li>主键 uid + mdl_dte 存在 1 组 8 行重复</li>
+<li>v1_score 空值 88,811 行（评估时自动排除）</li>
+<li>final_flag 派生自 label + sample_split_tag，仅 DEV_INS / DEV_OOS / OOT</li>
 </ul>
 <h2>特征筛选</h2>
-<p>特征筛选流程：500 → 492 → 492 → 492 → 309 → 311</p>
 <table>
-<tr><th>阶段</th><th>操作</th><th>剩余特征</th><th>剔除</th></tr>
-<tr><td>缺失率 &gt; 90%</td><td>剔除</td><td>500</td><td>0</td></tr>
-<tr><td>常数值</td><td>剔除</td><td>500</td><td>0</td></tr>
-<tr><td>IV &lt; 0.005</td><td>剔除</td><td>492</td><td>8</td></tr>
-<tr><td>PSI &gt; 0.20</td><td>剔除</td><td>492</td><td>0</td></tr>
-<tr><td>Spearman</td><td>ρ</td><td>&gt; 0.80</td><td>去重</td><td>309</td><td>183</td></tr>
-<tr><td>基线重要性补回</td><td>补回至 311</td><td>311</td><td>—</td></tr>
+<tr><th>阶段</th><th>操作</th><th>剩余特征数</th></tr>
+<tr><td>候选特征</td><td>初始输入</td><td>500</td></tr>
+<tr><td>基础清洗</td><td>missing_rate / constant / IV / PSI</td><td>492</td></tr>
+<tr><td>Spearman 去重</td><td>max_abs_corr=0.80</td><td>309</td></tr>
+<tr><td>Null Importance</td><td>75 分位数阈值</td><td>124</td></tr>
+<tr><td>Baseline 重要性</td><td>keep_top_n=500 (gain)</td><td>311</td></tr>
 </table>
-<p>最终 311 个特征全部来自本地 Feather 样本，筛选过程使用 memory-efficient Spearman 相关去重（CLI OOM 规避）。</p>
-<p>Top 20 基线 Gain 重要性：</p>
-<table>
-<tr><th>排名</th><th>特征</th><th>Gain</th></tr>
-<tr><td>1</td><td>age</td><td>333</td></tr>
-<tr><td>2</td><td>qry_tot_qry_to_now_tot_min</td><td>237</td></tr>
-<tr><td>3</td><td>sch_repay_count_num_12m_24m_mean_dif_wave</td><td>220</td></tr>
-<tr><td>4</td><td>wjq_add_minupdate_qishu</td><td>213</td></tr>
-<tr><td>5</td><td>ddf_36m_qry_avg_day_diff</td><td>194</td></tr>
-<tr><td>6</td><td>als_m12_cell_nbank_orgnum</td><td>193</td></tr>
-<tr><td>7</td><td>alltrade_within1mon_actualpay_sum</td><td>190</td></tr>
-<tr><td>8</td><td>tot_org_ratio_720_fix_202502</td><td>188</td></tr>
-<tr><td>9</td><td>sch_repay_60m_contin_non_de_mon_count</td><td>186</td></tr>
-<tr><td>10</td><td>loan_micro_amt_mean</td><td>184</td></tr>
-<tr><td>11</td><td>loan_loan_amt_3w_y_sch_pay_max</td><td>183</td></tr>
-<tr><td>12</td><td>loan_stt_nor_repay_amt_mean</td><td>180</td></tr>
-<tr><td>13</td><td>loan_act_typ_r1_repay_amt_mean</td><td>178</td></tr>
-<tr><td>14</td><td>r1_conratioption91_within1mon_actualpay_sum</td><td>175</td></tr>
-<tr><td>15</td><td>oth_rpy_amt_last</td><td>173</td></tr>
-<tr><td>16</td><td>loan_org_typ_other_min_loan_amt_day_diff</td><td>172</td></tr>
-<tr><td>17</td><td>qry_is_720d_qry_typ_qry_to_now_y_other_count</td><td>171</td></tr>
-<tr><td>18</td><td>qry_is_recent_660d_qry_typ_qry_to_now_y_other_min_dif_wave</td><td>169</td></tr>
-<tr><td>19</td><td>als_m6_id_nbank_nsloan_allnum</td><td>166</td></tr>
-<tr><td>20</td><td>loan_card_stt_if_high_credit_nor_y_repay_amt_mean</td><td>162</td></tr>
-</table>
-<h2>模型训练与选型</h2>
+<p>最终入模特征：311 维</p>
+<p>Top 10 特征（按 gain 重要性）：</p>
+<p>1. loan_card_xhd_is_365d_edu_level_low_balance_rate</p>
+<p>2. loan_card_stt_if_high_credit_nor_y_repay_amt_sum</p>
+<p>3. loan_card_xhd_is_180d_edu_level_low_balance_max</p>
+<p>4. loan_card_xhd_tot_edu_level_org_class_low_xfd_edu_rate_max</p>
+<p>5. loan_card_if_high_credit_y_repay_amt_max</p>
+<p>6. loan_act_typ_loan_amt_3w_r1_n_repay_rate</p>
+<p>7. age</p>
+<p>8. loan_card_xhd_tot_account_state_nor_edu_rate_mean</p>
+<p>9. qry_qry_typ_qry_to_now_bnk_non_dps_count</p>
+<p>10. loan_gur_typ_credit_repay_amt_max</p>
+<h2>模型训练与选择</h2>
 <h3 class="section-subtitle">1 训练配置</h3>
 <table>
 <tr><th>参数</th><th>值</th></tr>
 <tr><td>算法</td><td>LightGBM 二分类</td></tr>
-<tr><td>调参模式</td><td>LLM-guided（host-agent，2 轮）</td></tr>
-<tr><td>早停轮数</td><td>50</td></tr>
-<tr><td>Guardrail</td><td>max_train_valid_auc_gap ≤ 0.03</td></tr>
-<tr><td>优化目标</td><td>primary=valid_ks, secondary=valid_auc</td></tr>
-</table>
-<h3 class="section-subtitle">2 候选模型对比（第 2 轮）</h3>
-<table>
-<tr><th>候选</th><th>TrainAUC</th><th>ValidAUC</th><th>OOT_AUC</th><th>TrainKS</th><th>ValidKS</th><th>OOT_KS</th><th>KSgap_o</th><th>AUCgap_o</th></tr>
-<tr><td>baseline</td><td>0.7089</td><td>0.6865</td><td>0.6828</td><td>0.4201</td><td>0.3731</td><td>0.3656</td><td>5.45</td><td>2.72</td></tr>
-<tr><td>l2_boost</td><td>0.7089</td><td>0.6866</td><td>0.6829</td><td>0.4178</td><td>0.3733</td><td>0.3658</td><td>5.20</td><td>2.60</td></tr>
-<tr><td>shallower</td><td>0.6957</td><td>0.6850</td><td>0.6816</td><td>0.3915</td><td>0.3700</td><td>0.3632</td><td>2.83</td><td>1.42</td></tr>
-<tr><td>low_sample</td><td>0.7083</td><td>0.6867</td><td>0.6836</td><td>0.4166</td><td>0.3733</td><td>0.3672</td><td>4.94</td><td>2.47</td></tr>
-<tr><td>conservative</td><td>0.6810</td><td>0.6785</td><td>0.6766</td><td>0.3620</td><td>0.3571</td><td>0.3533</td><td>0.88</td><td>0.44</td></tr>
-</table>
-<blockquote>注：上表为第 1 轮调参的 predict() 错误评估结果（AUC 偏低 ~7pp）。第 2 轮修复为 predict_proba() 后重新训练，最终选出 moderate_reg。</blockquote>
-<h3 class="section-subtitle">3 最终模型参数（moderate_reg）</h3>
-<table>
-<tr><th>参数</th><th>值</th></tr>
 <tr><td>learning_rate</td><td>0.04</td></tr>
 <tr><td>num_leaves</td><td>20</td></tr>
 <tr><td>max_depth</td><td>5</td></tr>
@@ -795,207 +748,127 @@ code{
 <tr><td>reg_alpha</td><td>0.3</td></tr>
 <tr><td>reg_lambda</td><td>2.0</td></tr>
 <tr><td>n_estimators</td><td>2000</td></tr>
-<tr><td>random_state</td><td>42</td></tr>
 </table>
-<h3 class="section-subtitle">4 选型理由</h3>
-<p>moderate_reg 在所有候选模型中实现最优的 KS gap 控制（DEV_INS 与 OOT 的 KS 差异 = 2.51pp，满足 ≤ 3pp 要求），同时保持了良好的区分度（OOT AUC=0.7545, OOT KS=0.3716）。shallower 虽然有更低的 KS gap（1.42pp），但其 OOT KS（0.3632）和 OOT AUC（0.6816）明显偏低，区分度不足。</p>
-<h2>模型效果</h2>
-<h3 class="section-subtitle">1 分切分指标（moderate_reg）</h3>
+<h3 class="section-subtitle">2 调参过程</h3>
+<p>LLM-guided tuning 共 2 轮 8 个 trial。Round 1 候选模型均因 KS gap &gt; 3pp 被拒绝（baseline 保留）。Round 2 中 moderate_reg 在控制过拟合的同时保持最优 OOT 提升，最终选择为最终模型。</p>
+<h3 class="section-subtitle">3 模型效果</h3>
 <table>
-<tr><th>切分</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th></tr>
-<tr><td>DEV_INS</td><td>1,087,440</td><td>49.82%</td><td>0.7858</td><td>0.4189</td></tr>
-<tr><td>DEV_OOS</td><td>465,847</td><td>49.89%</td><td>0.7567</td><td>0.3721</td></tr>
-<tr><td>OOT</td><td>100,518</td><td>55.15%</td><td>0.7550</td><td>0.3731</td></tr>
+<tr><th>切分</th><th>AUC</th><th>KS</th><th>样本量</th></tr>
+<tr><td>DEV_INS</td><td>0.7655</td><td>0.3841</td><td>1,087,440</td></tr>
+<tr><td>DEV_OOS</td><td>0.7515</td><td>0.3633</td><td>465,847</td></tr>
+<tr><td>OOT</td><td>0.7497</td><td>0.3650</td><td>100,518</td></tr>
 </table>
-<p>过拟合指标：</p>
-<table>
-<tr><th>指标</th><th>值</th><th>判定</th></tr>
-<tr><td>KS gap (DEV_INS − OOT)</td><td>2.51pp</td><td>通过（≤ 3pp）</td></tr>
-<tr><td>AUC gap (DEV_INS − OOT)</td><td>1.79pp</td><td>通过（≤ 3pp）</td></tr>
-<tr><td>KS gap (DEV_INS − DEV_OOS)</td><td>2.58pp</td><td>通过</td></tr>
-</table>
-<h3 class="section-subtitle">2 分客群指标（OOT）</h3>
-<table>
-<tr><th>客群</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th></tr>
-<tr><td>初审</td><td>75,261</td><td>49.79%</td><td>0.7343</td><td>0.3364</td></tr>
-<tr><td>重审</td><td>1</td><td>—</td><td>N/A</td><td>N/A</td></tr>
-<tr><td>重申</td><td>25,256</td><td>71.14%</td><td>0.7449</td><td>0.3623</td></tr>
-</table>
-<blockquote>重审客群 OOT 仅 1 条样本，指标不可计算。分客群指标为切片效果，不代表已训练分客群专属模型。</blockquote>
-<h3 class="section-subtitle">3 OOT 十分位 Lift</h3>
-<table>
-<tr><th>分位</th><th>样本量</th><th>平均分</th><th>正样本率</th></tr>
-<tr><td>1 (最低)</td><td>10,052</td><td>0.1755</td><td>17.67%</td></tr>
-<tr><td>2</td><td>10,052</td><td>0.3027</td><td>29.81%</td></tr>
-<tr><td>3</td><td>10,052</td><td>0.3848</td><td>38.65%</td></tr>
-<tr><td>4</td><td>10,051</td><td>0.4504</td><td>45.94%</td></tr>
-<tr><td>5</td><td>10,052</td><td>0.5104</td><td>51.91%</td></tr>
-<tr><td>6</td><td>10,052</td><td>0.5697</td><td>58.95%</td></tr>
-<tr><td>7</td><td>10,051</td><td>0.6311</td><td>64.80%</td></tr>
-<tr><td>8</td><td>10,052</td><td>0.6965</td><td>72.88%</td></tr>
-<tr><td>9</td><td>10,052</td><td>0.7735</td><td>80.84%</td></tr>
-<tr><td>10 (最高)</td><td>10,052</td><td>0.8816</td><td>90.09%</td></tr>
-</table>
-<p>分位 lift 严格单调递增，无排序反转。最高分位正样本率（90.09%）是最低分位（17.67%）的 5.1 倍，区分度良好。</p>
-<h3 class="section-subtitle">4 分数分位边界</h3>
-<table>
-<tr><th>P10</th><th>P20</th><th>P30</th><th>P40</th><th>P50</th><th>P60</th><th>P70</th><th>P80</th><th>P90</th></tr>
-<tr><td>0.2525</td><td>0.3477</td><td>0.4189</td><td>0.4811</td><td>0.5399</td><td>0.6003</td><td>0.6624</td><td>0.7326</td><td>0.8187</td></tr>
-</table>
-<h2>冠军挑战者对比</h2>
-<h3 class="section-subtitle">1 整体对比（首借 T0 G 卡新模型 vs 旧版首借 T0 G 卡）</h3>
-<table>
-<tr><th>切分</th><th>指标</th><th>新模型</th><th>旧版 v1</th><th>差异</th><th>相对提升</th></tr>
-<tr><td>DEV_INS</td><td>AUC</td><td>0.7887</td><td>0.7346</td><td>+0.0541</td><td>+7.36%</td></tr>
-<tr><td>DEV_INS</td><td>KS</td><td>0.4239</td><td>0.3386</td><td>+0.0853</td><td>+25.19%</td></tr>
-<tr><td>DEV_OOS</td><td>AUC</td><td>0.7602</td><td>0.7356</td><td>+0.0246</td><td>+3.34%</td></tr>
-<tr><td>DEV_OOS</td><td>KS</td><td>0.3777</td><td>0.3403</td><td>+0.0374</td><td>+10.98%</td></tr>
-<tr><td>OOT</td><td>AUC</td><td>0.7550</td><td>0.7145</td><td>+0.0406</td><td>+5.68%</td></tr>
-<tr><td>OOT</td><td>KS</td><td>0.3731</td><td>0.3104</td><td>+0.0627</td><td>+20.20%</td></tr>
-</table>
-<h3 class="section-subtitle">2 分数相关性</h3>
-<table>
-<tr><th>切分</th><th>Pearson r</th><th>Spearman ρ</th></tr>
-<tr><td>DEV_INS</td><td>0.8612</td><td>0.8492</td></tr>
-<tr><td>DEV_OOS</td><td>0.8600</td><td>0.8495</td></tr>
-<tr><td>OOT</td><td>0.8401</td><td>0.8310</td></tr>
-</table>
-<p>新模型与旧版分数高度相关（Spearman ρ 0.83–0.85），排名方向一致，同时新模型在区分度上有显著提升。</p>
-<h3 class="section-subtitle">3 结论</h3>
-<p>新模型在全部分析口径上均显著优于旧版 v1_score：</p>
+<p>过拟合控制：</p>
 <ul>
-<li><strong>OOT KS 提升 20.2%</strong>（0.3104 → 0.3731），区分度大幅改进</li>
-<li><strong>OOT AUC 提升 5.68%</strong>（0.7145 → 0.7550）</li>
-<li>过拟合控制良好：KS gap 2.51pp，AUC gap 1.79pp</li>
-<li>分数单调性和排序一致性均满足上线标准</li>
+<li>KS gap (DEV_INS − OOT)：0.0191 (1.91%) ✓ (≤ 3pp)</li>
+<li>AUC gap (DEV_INS − OOT)：0.0158 (1.58%) ✓</li>
+</ul>
+<h2>冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</h2>
+<table>
+<tr><th>切分</th><th>ΔAUC</th><th>ΔKS</th><th>KS 相对提升</th></tr>
+<tr><td>DEV_INS</td><td>0.0346</td><td>0.0518</td><td>15.31%</td></tr>
+<tr><td>DEV_OOS</td><td>0.0199</td><td>0.0293</td><td>8.61%</td></tr>
+<tr><td>OOT</td><td>0.0353</td><td>0.0547</td><td>17.62%</td></tr>
+</table>
+<ul>
+<li>模型与 v1_score Pearson 相关系数（OOT）：0.8492</li>
+<li>新模型在 OOT 上 AUC 提升 +0.0353，KS 提升 +0.0547</li>
 </ul>
 <h2>月度稳定性</h2>
-<h3 class="section-subtitle">1 分月 AUC/KS (DEV_OOS)</h3>
 <table>
-<tr><th>月份</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th></tr>
-<tr><td>2025-06</td><td>88,195</td><td>44.79%</td><td>0.7983</td><td>0.4427</td></tr>
-<tr><td>2025-07</td><td>62,666</td><td>49.69%</td><td>0.7499</td><td>0.3648</td></tr>
-<tr><td>2025-08</td><td>63,774</td><td>51.58%</td><td>0.7402</td><td>0.3478</td></tr>
-<tr><td>2025-09</td><td>55,674</td><td>51.79%</td><td>0.7405</td><td>0.3531</td></tr>
-<tr><td>2025-10</td><td>44,345</td><td>52.93%</td><td>0.7416</td><td>0.3534</td></tr>
-<tr><td>2025-11</td><td>43,743</td><td>50.99%</td><td>0.7454</td><td>0.3603</td></tr>
-<tr><td>2025-12</td><td>32,871</td><td>49.45%</td><td>0.7437</td><td>0.3574</td></tr>
-<tr><td>2026-01</td><td>30,533</td><td>49.92%</td><td>0.7526</td><td>0.3702</td></tr>
-<tr><td>2026-02</td><td>22,978</td><td>51.82%</td><td>0.7523</td><td>0.3632</td></tr>
-<tr><td>2026-03</td><td>21,068</td><td>51.45%</td><td>0.7583</td><td>0.3771</td></tr>
+<tr><th>月份</th><th>切分</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th></tr>
+<tr><td>2025-06</td><td>DEV_INS</td><td>204,478</td><td>44.62%</td><td>0.8066</td><td>0.4519</td></tr>
+<tr><td>2025-06</td><td>DEV_OOS</td><td>88,195</td><td>44.79%</td><td>0.7947</td><td>0.4360</td></tr>
+<tr><td>2025-07</td><td>DEV_INS</td><td>147,373</td><td>49.81%</td><td>0.7589</td><td>0.3748</td></tr>
+<tr><td>2025-07</td><td>DEV_OOS</td><td>62,666</td><td>49.69%</td><td>0.7449</td><td>0.3533</td></tr>
+<tr><td>2025-08</td><td>DEV_INS</td><td>148,780</td><td>51.51%</td><td>0.7477</td><td>0.3588</td></tr>
+<tr><td>2025-08</td><td>DEV_OOS</td><td>63,774</td><td>51.58%</td><td>0.7342</td><td>0.3398</td></tr>
+<tr><td>2025-09</td><td>DEV_INS</td><td>131,165</td><td>51.39%</td><td>0.7522</td><td>0.3672</td></tr>
+<tr><td>2025-09</td><td>DEV_OOS</td><td>55,674</td><td>51.79%</td><td>0.7358</td><td>0.3440</td></tr>
+<tr><td>2025-10</td><td>DEV_INS</td><td>103,253</td><td>53.11%</td><td>0.7486</td><td>0.3598</td></tr>
+<tr><td>2025-10</td><td>DEV_OOS</td><td>44,345</td><td>52.93%</td><td>0.7351</td><td>0.3415</td></tr>
+<tr><td>2025-11</td><td>DEV_INS</td><td>102,281</td><td>50.96%</td><td>0.7574</td><td>0.3784</td></tr>
+<tr><td>2025-11</td><td>DEV_OOS</td><td>43,743</td><td>51.00%</td><td>0.7408</td><td>0.3493</td></tr>
+<tr><td>2025-12</td><td>DEV_INS</td><td>76,295</td><td>49.43%</td><td>0.7499</td><td>0.3634</td></tr>
+<tr><td>2025-12</td><td>DEV_OOS</td><td>32,871</td><td>49.45%</td><td>0.7364</td><td>0.3446</td></tr>
+<tr><td>2026-01</td><td>DEV_INS</td><td>71,054</td><td>49.87%</td><td>0.7650</td><td>0.3881</td></tr>
+<tr><td>2026-01</td><td>DEV_OOS</td><td>30,533</td><td>49.92%</td><td>0.7471</td><td>0.3639</td></tr>
+<tr><td>2026-02</td><td>DEV_INS</td><td>53,485</td><td>51.95%</td><td>0.7570</td><td>0.3702</td></tr>
+<tr><td>2026-02</td><td>DEV_OOS</td><td>22,978</td><td>51.82%</td><td>0.7459</td><td>0.3536</td></tr>
+<tr><td>2026-03</td><td>DEV_INS</td><td>49,276</td><td>51.11%</td><td>0.7671</td><td>0.3900</td></tr>
+<tr><td>2026-03</td><td>DEV_OOS</td><td>21,068</td><td>51.45%</td><td>0.7527</td><td>0.3696</td></tr>
+<tr><td>2026-04</td><td>OOT</td><td>50,202</td><td>55.99%</td><td>0.7500</td><td>0.3639</td></tr>
+<tr><td>2026-05</td><td>OOT</td><td>50,316</td><td>54.32%</td><td>0.7492</td><td>0.3671</td></tr>
 </table>
-<p>DEV_OOS 各月 KS 在 0.3478–0.4427 区间波动，AUC 在 0.7402–0.7983，近期月份（2026-01 至 2026-03）KS 稳定在 0.36–0.38 区间。2025-06 为首月，正样本率较低（44.79%），KS 偏高属首月效应。</p>
-<h3 class="section-subtitle">2 分月 AUC/KS (OOT)</h3>
+<p>OOT 两月 KS 稳定：0.3639 → 0.3671</p>
+<h2>分数稳定性 (PSI)</h2>
+<p>全部月份 PSI &lt; 0.11，分数分布稳定。</p>
 <table>
-<tr><th>月份</th><th>样本量</th><th>AUC</th><th>KS</th></tr>
-<tr><td>2026-04</td><td>50,202</td><td>0.7546</td><td>0.3709</td></tr>
-<tr><td>2026-05</td><td>50,316</td><td>0.7552</td><td>0.3756</td></tr>
+<tr><th>月份</th><th>切分</th><th>样本量</th><th>PSI</th></tr>
+<tr><td>2025-06</td><td>DEV_INS</td><td>204,478</td><td>0.103042</td></tr>
+<tr><td>2025-06</td><td>DEV_OOS</td><td>88,195</td><td>0.104056</td></tr>
+<tr><td>2025-07</td><td>DEV_INS</td><td>147,373</td><td>0.001299</td></tr>
+<tr><td>2025-07</td><td>DEV_OOS</td><td>62,666</td><td>0.001263</td></tr>
+<tr><td>2025-08</td><td>DEV_INS</td><td>148,780</td><td>0.013062</td></tr>
+<tr><td>2025-08</td><td>DEV_OOS</td><td>63,774</td><td>0.016250</td></tr>
+<tr><td>2025-09</td><td>DEV_INS</td><td>131,165</td><td>0.013737</td></tr>
+<tr><td>2025-09</td><td>DEV_OOS</td><td>55,674</td><td>0.015575</td></tr>
+<tr><td>2025-10</td><td>DEV_INS</td><td>103,253</td><td>0.025028</td></tr>
+<tr><td>2025-10</td><td>DEV_OOS</td><td>44,345</td><td>0.024308</td></tr>
+<tr><td>2025-11</td><td>DEV_INS</td><td>102,281</td><td>0.028843</td></tr>
+<tr><td>2025-11</td><td>DEV_OOS</td><td>43,743</td><td>0.026860</td></tr>
+<tr><td>2025-12</td><td>DEV_INS</td><td>76,295</td><td>0.018862</td></tr>
+<tr><td>2025-12</td><td>DEV_OOS</td><td>32,871</td><td>0.020728</td></tr>
+<tr><td>2026-01</td><td>DEV_INS</td><td>71,054</td><td>0.042462</td></tr>
+<tr><td>2026-01</td><td>DEV_OOS</td><td>30,533</td><td>0.044252</td></tr>
+<tr><td>2026-02</td><td>DEV_INS</td><td>53,485</td><td>0.040355</td></tr>
+<tr><td>2026-02</td><td>DEV_OOS</td><td>22,978</td><td>0.038475</td></tr>
+<tr><td>2026-03</td><td>DEV_INS</td><td>49,276</td><td>0.035719</td></tr>
+<tr><td>2026-03</td><td>DEV_OOS</td><td>21,068</td><td>0.033487</td></tr>
+<tr><td>2026-04</td><td>OOT</td><td>50,202</td><td>0.075186</td></tr>
+<tr><td>2026-05</td><td>OOT</td><td>50,316</td><td>0.054636</td></tr>
 </table>
-<p>OOT 两个月指标稳定（KS 0.3709 vs 0.3756），未见明显衰减。</p>
-<h2>分数稳定性（PSI）</h2>
-<h3 class="section-subtitle">1 分月 PSI (以 DEV_INS 为基准)</h3>
-<table>
-<tr><th>月份</th><th>切分</th><th>PSI</th><th>判定</th></tr>
-<tr><td>2025-06</td><td>DEV_INS</td><td>0.0737</td><td>稳定</td></tr>
-<tr><td>2025-06</td><td>DEV_OOS</td><td>0.0548</td><td>稳定</td></tr>
-<tr><td>2025-07</td><td>DEV_INS</td><td>0.0012</td><td>极稳定</td></tr>
-<tr><td>2025-07</td><td>DEV_OOS</td><td>0.0026</td><td>极稳定</td></tr>
-<tr><td>2025-08</td><td>DEV_INS</td><td>0.0080</td><td>极稳定</td></tr>
-<tr><td>2025-08</td><td>DEV_OOS</td><td>0.0152</td><td>极稳定</td></tr>
-<tr><td>2025-09</td><td>DEV_INS</td><td>0.0062</td><td>极稳定</td></tr>
-<tr><td>2025-09</td><td>DEV_OOS</td><td>0.0115</td><td>极稳定</td></tr>
-<tr><td>2025-10</td><td>DEV_INS</td><td>0.0156</td><td>极稳定</td></tr>
-<tr><td>2025-10</td><td>DEV_OOS</td><td>0.0227</td><td>极稳定</td></tr>
-<tr><td>2025-11</td><td>DEV_INS</td><td>0.0165</td><td>极稳定</td></tr>
-<tr><td>2025-11</td><td>DEV_OOS</td><td>0.0195</td><td>极稳定</td></tr>
-<tr><td>2025-12</td><td>DEV_INS</td><td>0.0108</td><td>极稳定</td></tr>
-<tr><td>2025-12</td><td>DEV_OOS</td><td>0.0170</td><td>极稳定</td></tr>
-<tr><td>2026-01</td><td>DEV_INS</td><td>0.0210</td><td>极稳定</td></tr>
-<tr><td>2026-01</td><td>DEV_OOS</td><td>0.0209</td><td>极稳定</td></tr>
-<tr><td>2026-02</td><td>DEV_INS</td><td>0.0206</td><td>极稳定</td></tr>
-<tr><td>2026-02</td><td>DEV_OOS</td><td>0.0177</td><td>极稳定</td></tr>
-<tr><td>2026-03</td><td>DEV_INS</td><td>0.0153</td><td>极稳定</td></tr>
-<tr><td>2026-03</td><td>DEV_OOS</td><td>0.0142</td><td>极稳定</td></tr>
-<tr><td>2026-04</td><td>OOT</td><td>0.0560</td><td>稳定</td></tr>
-<tr><td>2026-05</td><td>OOT</td><td>0.0359</td><td>稳定</td></tr>
-</table>
-<p>全部月份 PSI &lt; 0.08，分数分布高度稳定。OOT 月份 PSI（0.036–0.056）在可接受范围。</p>
-<h2>分数相关性（新模型 vs 旧版）</h2>
-<table>
-<tr><th>切分</th><th>Pearson r</th><th>Spearman ρ</th></tr>
-<tr><td>DEV_INS</td><td>0.8612</td><td>0.8492</td></tr>
-<tr><td>DEV_OOS</td><td>0.8600</td><td>0.8495</td></tr>
-<tr><td>OOT</td><td>0.8401</td><td>0.8310</td></tr>
-</table>
-<p>新旧模型分数排名高度相关，新模型在保持排序逻辑一致的前提下提升了区分度。</p>
-<h2>额度画像（OOT 十分位）</h2>
-<table>
-<tr><th>分位</th><th>平均额度 (元)</th><th>中位额度 (元)</th><th>正样本率</th></tr>
-<tr><td>1 (最低分)</td><td>36,643</td><td>11,500</td><td>17.67%</td></tr>
-<tr><td>2</td><td>31,812</td><td>8,900</td><td>29.81%</td></tr>
-<tr><td>3</td><td>27,565</td><td>7,800</td><td>38.65%</td></tr>
-<tr><td>4</td><td>22,269</td><td>6,200</td><td>45.94%</td></tr>
-<tr><td>5</td><td>17,662</td><td>5,100</td><td>51.91%</td></tr>
-<tr><td>6</td><td>13,723</td><td>4,200</td><td>58.95%</td></tr>
-<tr><td>7</td><td>10,713</td><td>3,500</td><td>64.80%</td></tr>
-<tr><td>8</td><td>7,758</td><td>3,000</td><td>72.88%</td></tr>
-<tr><td>9</td><td>4,833</td><td>2,500</td><td>80.84%</td></tr>
-<tr><td>10 (最高分)</td><td>3,257</td><td>2,000</td><td>90.09%</td></tr>
-</table>
-<p>模型分与额度呈明显的负相关：高分用户（高风险）平均额度 3,257 元，低分用户（低风险）平均额度 36,643 元。模型捕捉到了额度维度的风险信号，且十分位额度单调递减，符合业务逻辑。</p>
-<h2>Top 重要特征</h2>
-<h3 class="section-subtitle">1 Top 20 特征 Gain 重要性</h3>
-<table>
-<tr><th>排名</th><th>特征</th><th>Gain</th></tr>
-<tr><td>1</td><td>age</td><td>333</td></tr>
-<tr><td>2</td><td>qry_tot_qry_to_now_tot_min</td><td>237</td></tr>
-<tr><td>3</td><td>sch_repay_count_num_12m_24m_mean_dif_wave</td><td>220</td></tr>
-<tr><td>4</td><td>wjq_add_minupdate_qishu</td><td>213</td></tr>
-<tr><td>5</td><td>ddf_36m_qry_avg_day_diff</td><td>194</td></tr>
-<tr><td>6</td><td>als_m12_cell_nbank_orgnum</td><td>193</td></tr>
-<tr><td>7</td><td>alltrade_within1mon_actualpay_sum</td><td>190</td></tr>
-<tr><td>8</td><td>tot_org_ratio_720_fix_202502</td><td>188</td></tr>
-<tr><td>9</td><td>sch_repay_60m_contin_non_de_mon_count</td><td>186</td></tr>
-<tr><td>10</td><td>loan_micro_amt_mean</td><td>184</td></tr>
-<tr><td>11</td><td>loan_loan_amt_3w_y_sch_pay_max</td><td>183</td></tr>
-<tr><td>12</td><td>loan_stt_nor_repay_amt_mean</td><td>180</td></tr>
-<tr><td>13</td><td>loan_act_typ_r1_repay_amt_mean</td><td>178</td></tr>
-<tr><td>14</td><td>r1_conratioption91_within1mon_actualpay_sum</td><td>175</td></tr>
-<tr><td>15</td><td>oth_rpy_amt_last</td><td>173</td></tr>
-<tr><td>16</td><td>loan_org_typ_other_min_loan_amt_day_diff</td><td>172</td></tr>
-<tr><td>17</td><td>qry_is_720d_qry_typ_qry_to_now_y_other_count</td><td>171</td></tr>
-<tr><td>18</td><td>qry_is_recent_660d_qry_typ_qry_to_now_y_other_min_dif_wave</td><td>169</td></tr>
-<tr><td>19</td><td>als_m6_id_nbank_nsloan_allnum</td><td>166</td></tr>
-<tr><td>20</td><td>loan_card_stt_if_high_credit_nor_y_repay_amt_mean</td><td>162</td></tr>
-</table>
-<p>特征涵盖：年龄、查询行为、还款历史、借贷金额、多头借贷等核心风险维度，无明显单特征主导。</p>
-<h2>局限与待补充</h2>
-<h3 class="section-subtitle">已有证据</h3>
+<h2>分数相关性</h2>
 <ul>
-<li>[x] 样本切分与标签分布</li>
-<li>[x] 500→311 特征筛选全流程</li>
-<li>[x] LightGBM 训练 + LLM 调参（2 轮）</li>
-<li>[x] 分切分/分客群 AUC/KS</li>
-<li>[x] 十分位 Lift（单调性验证）</li>
-<li>[x] 月度稳定性（2025-06 至 2026-05）</li>
-<li>[x] PSI 分数稳定性</li>
-<li>[x] 冠军挑战者对比（vs v1_score）</li>
-<li>[x] 额度风险画像</li>
+<li>新模型与 v1_score Spearman 相关系数（OOT）：0.846616</li>
+<li>新模型与 v1_score Pearson 相关系数（OOT）：0.849212</li>
 </ul>
-<h3 class="section-subtitle">待补充（当前版本未覆盖）</h3>
+<h2>额度画像 (OOT 十分位)</h2>
+<table>
+<tr><th>分位</th><th>样本量</th><th>平均额度</th><th>中位额度</th><th>平均 v1</th><th>平均 model_score</th><th>正样本率</th></tr>
+<tr><td>1</td><td>10,051</td><td>3300</td><td>2000</td><td>0.7995</td><td>0.8744</td><td>90.00%</td></tr>
+<tr><td>2</td><td>10,051</td><td>4507</td><td>2500</td><td>0.7258</td><td>0.7543</td><td>80.40%</td></tr>
+<tr><td>3</td><td>10,051</td><td>7052</td><td>3000</td><td>0.6767</td><td>0.6644</td><td>72.49%</td></tr>
+<tr><td>4</td><td>10,051</td><td>9878</td><td>3400</td><td>0.6263</td><td>0.5883</td><td>64.56%</td></tr>
+<tr><td>5</td><td>10,051</td><td>13642</td><td>4200</td><td>0.5759</td><td>0.5190</td><td>58.27%</td></tr>
+<tr><td>6</td><td>10,051</td><td>16736</td><td>5000</td><td>0.5259</td><td>0.4542</td><td>51.54%</td></tr>
+<tr><td>7</td><td>10,051</td><td>21577</td><td>6100</td><td>0.4737</td><td>0.3899</td><td>46.06%</td></tr>
+<tr><td>8</td><td>10,051</td><td>27069</td><td>7700</td><td>0.4176</td><td>0.3241</td><td>38.64%</td></tr>
+<tr><td>9</td><td>10,051</td><td>31668</td><td>9400</td><td>0.3484</td><td>0.2517</td><td>30.97%</td></tr>
+<tr><td>10</td><td>10,059</td><td>40787</td><td>14700</td><td>0.2291</td><td>0.1451</td><td>18.63%</td></tr>
+</table>
+<p>核心发现：额度越高 → 分数越低 → 正样本率越低。最高分位（90.00%）的正样本率为最低分位（18.63%）的 4.8 倍，十分位 lift 单调递增，无排序反转。</p>
+<h2>Top 特征</h2>
+<p>Top 5 特征（moderate_reg gain 重要性）：</p>
+<p>1. loan_card_xhd_is_365d_edu_level_low_balance_rate</p>
+<p>2. loan_card_stt_if_high_credit_nor_y_repay_amt_sum</p>
+<p>3. loan_card_xhd_is_180d_edu_level_low_balance_max</p>
+<p>4. loan_card_xhd_tot_edu_level_org_class_low_xfd_edu_rate_max</p>
+<p>5. loan_card_if_high_credit_y_repay_amt_max</p>
+<h2>使用限制</h2>
 <ul>
-<li>[ ] MOB（Month-on-Book）分析：缺少按账龄分层的效果评估</li>
-<li>[ ] 金额风险矩阵：缺少金额维度的风险交叉分析</li>
-<li>[ ] A×G 交叉矩阵：A 卡字段不存在于样本，本章节标记 <code>not_available</code></li>
-<li>[ ] 变量分箱 WOE：大规模 WOE 分箱明细待后续版本补充</li>
-<li>[ ] 未来表现监控：OOT 当前仅 2 个月（2026-04、2026-05），建议积累更多 OOT 月份后回测</li>
+<li>适用于首借 T0 G 卡客群</li>
+<li>不含 A 卡分（a_card_score 不存在于样本），A×G 交叉矩阵不可生成</li>
+<li>重审客群 OOT 仅 1 条样本，分客群评估不适用</li>
+<li>OOT 仅 2 个月（2026-04 ~ 2026-05），建议积累到 4–6 个月后回测</li>
+<li>MOB 分析、金额风险矩阵待后续版本补充</li>
+<li>v1_score 含 88,811 空值，对比仅对有效样本进行</li>
 </ul>
-<h3 class="section-subtitle">后续建议</h3>
-<p>1. <strong>灰度上线</strong>：moderate_reg 满足 KS gap ≤ 3pp 要求且 OOT KS 提升 20%，建议进入灰度验证</p>
-<p>2. <strong>积累 OOT</strong>：当前 OOT 仅 2 个月，建议积累至 4–6 个月后再次评估模型衰减</p>
-<p>3. <strong>MOB 分析</strong>：补充按账龄分层的效果评估，验证模型在不同账龄段的稳定性</p>
-<p>4. <strong>策略对接</strong>：结合额度策略与模型分确定最终 cut-off 和额度映射方案</p>
-<p>5. <strong>监控体系</strong>：建立模型分 PSI、AUC/KS 衰减、分客群效果的月度监控看板</p>
+<h2>下一步行动</h2>
+<p>1. <strong>建议灰度上线</strong> — moderate_reg OOT 表现显著优于 v1_score（KS +17.62%），且 KS gap 1.91% 满足 ≤ 3pp 过拟合控制要求</p>
+<p>2. <strong>积累 OOT</strong> — 当前仅 2 个月外推窗口，积累 4–6 个月后回测</p>
+<p>3. <strong>补充 MOB 和金额风险分析</strong> — 后续版本中补齐</p>
+<p>4. <strong>建立监控</strong> — 部署后监控模型分 PSI、KS/AUC 衰减和分客群效果</p>
 </div>
 </main>
 <script>
