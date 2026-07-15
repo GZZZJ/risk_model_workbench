@@ -325,7 +325,8 @@
       "size_bytes": 135,
       "source": "generated",
       "stage": "feature_metadata",
-      "storage_class": "workspace_only"
+      "storage_class": "workspace_only",
+      "size": 135
     },
     {
       "contract_role": "required",
@@ -340,7 +341,8 @@
       "size_bytes": 32982,
       "source": "generated",
       "stage": "feature_metadata",
-      "storage_class": "workspace_only"
+      "storage_class": "workspace_only",
+      "size": 32982
     },
     {
       "contract_role": "required",
