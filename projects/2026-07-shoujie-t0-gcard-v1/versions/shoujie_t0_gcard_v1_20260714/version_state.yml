@@ -750,7 +750,7 @@ stages:
     - reports/model_report.html
     - reports/model_card.md
     - reports/executive_summary.md
-    started_at: '2026-07-15T17:28:34'
+    started_at: '2026-07-15T18:03:25'
     progress:
       step: action_done
       status: scaffold
@@ -758,7 +758,7 @@ stages:
       current: null
       total: null
       percent: 100.0
-      heartbeat_at: '2026-07-15T17:28:43'
+      heartbeat_at: '2026-07-15T18:03:35'
       elapsed_seconds: 0.0
       last_event_status: scaffold
     action:
@@ -784,7 +784,7 @@ stages:
       - reports/model_report.html
       - reports/model_card.md
       - reports/executive_summary.md
-    finished_at: '2026-07-15T17:28:42'
+    finished_at: '2026-07-15T18:03:33'
     last_result:
       schema_version: 1
       attempt_id: ''
@@ -841,7 +841,7 @@ stages:
         stage: report
         decision: scaffold
         reason: report generated with missing real evaluation artifacts
-        created_at: '2026-07-15T17:28:41'
+        created_at: '2026-07-15T18:03:33'
     failure_code: scaffold_only
 decisions:
 - stage: sample_check
@@ -887,6 +887,14 @@ decisions:
   decision: scaffold
   reason: report generated with missing real evaluation artifacts
   created_at: '2026-07-15T17:28:41'
-updated_at: '2026-07-15T17:28:44'
-transaction_id: txn_a395c496cf9b44a19ad3610c9a8f2e3f
-_workspace_revision: 179
+- stage: report
+  decision: report_target_skipped
+  reason: 'main_lgbm: missing train metrics at /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/modeling/main_lgbm'
+  created_at: '2026-07-15T18:03:32'
+- stage: report
+  decision: scaffold
+  reason: report generated with missing real evaluation artifacts
+  created_at: '2026-07-15T18:03:33'
+updated_at: '2026-07-15T18:03:35'
+transaction_id: txn_5896d4bb8bb44d07a13bea12319496f2
+_workspace_revision: 196

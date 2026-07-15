@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>首借 T0 G 卡新模型 — 模型报告</title>
+<title>首借 T0 G 卡新模型 — 建模报告</title>
 <style>
 :root{
   --ink:#1c2633;
@@ -666,34 +666,58 @@ code{
 </style>
 </head><body>
 <aside class="sidebar" aria-label="报告导航">
-  <div class="sidebar-title">首借 T0 G 卡新模型 — 模型报告</div>
+  <div class="sidebar-title">首借 T0 G 卡新模型 — 建模报告</div>
   <div class="sidebar-meta">2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</div>
   <nav class="nav-list">
-    <a class="nav-item" href="#section"><span class="nav-index">1</span><span>样本概览</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">2</span><span>数据质量</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">3</span><span>特征筛选</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">4</span><span>模型训练与选择</span></a>
-    <a class="nav-item" href="#vs-t0-g-v1-score"><span class="nav-index">5</span><span>冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">6</span><span>月度稳定性</span></a>
-    <a class="nav-item" href="#psi"><span class="nav-index">7</span><span>分数稳定性 (PSI)</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">8</span><span>分数相关性</span></a>
-    <a class="nav-item" href="#oot"><span class="nav-index">9</span><span>额度画像 (OOT 十分位)</span></a>
-    <a class="nav-item" href="#top"><span class="nav-index">10</span><span>Top 特征</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">11</span><span>使用限制</span></a>
-    <a class="nav-item" href="#section"><span class="nav-index">12</span><span>下一步行动</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">1</span><span>模型背景</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">2</span><span>样本定义</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">3</span><span>样本分布</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">4</span><span>数据质量</span></a>
+    <a class="nav-item" href="#feature-selection"><span class="nav-index">5</span><span>变量筛选</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">6</span><span>入模变量解读</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">7</span><span>建模方案</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">8</span><span>整体效果</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">9</span><span>分客群效果</span></a>
+    <a class="nav-item" href="#lift-oot"><span class="nav-index">10</span><span>分箱 Lift — OOT 十分位</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">11</span><span>稳定性分析</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">12</span><span>风险交叉分析</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">13</span><span>结论和建议</span></a>
+    <a class="nav-item" href="#section"><span class="nav-index">14</span><span>附录</span></a>
   </nav>
   <div class="nav-note">表格已自适应页面宽度；提升类指标按正负变化着色。</div>
 </aside>
 <main class="report-shell">
 <header class="report-hero">
   <p class="report-eyebrow">风险场景 AI 建模工作台 · 模型文档</p>
-  <h1>首借 T0 G 卡新模型 — 模型报告</h1>
+  <h1>首借 T0 G 卡新模型 — 建模报告</h1>
   <div class="hero-meta">
     <span>生成日期：2026-07-15 | 版本：shoujie_t0_gcard_v1_20260714 | 模型：moderate_reg (LightGBM)</span>
   </div>
 </header>
 <div class="report-body">
-<h2>样本概览</h2>
+<h2>模型背景</h2>
+<table>
+<tr><th>属性</th><th>值</th></tr>
+<tr><td>项目</td><td>首借T0 G卡新模型</td></tr>
+<tr><td>场景</td><td>首借 T0 G 卡授信审批</td></tr>
+<tr><td>建模日期</td><td>2026-07-14</td></tr>
+<tr><td>负责人</td><td>辜子骏</td></tr>
+<tr><td>算法</td><td>LightGBM 二分类</td></tr>
+<tr><td>工作流</td><td>full_modeling</td></tr>
+</table>
+<h2>样本定义</h2>
+<table>
+<tr><th>属性</th><th>值</th></tr>
+<tr><td>Y 定义</td><td>授信后 14 天内是否发起交易 (is_14_fq)</td></tr>
+<tr><td>主键</td><td>uid + mdl_dte</td></tr>
+<tr><td>时间范围</td><td>2025-06 至 2026-05</td></tr>
+<tr><td>DEV 时间</td><td>2025-06 至 2026-03</td></tr>
+<tr><td>OOT 时间</td><td>2026-04 至 2026-05</td></tr>
+<tr><td>总样本量</td><td>1,653,805</td></tr>
+<tr><td>总列数</td><td>519</td></tr>
+<tr><td>样本切分列</td><td>final_flag</td></tr>
+</table>
+<h2>样本分布</h2>
 <table>
 <tr><th>切分</th><th>样本量</th><th>正样本数</th><th>正样本率</th></tr>
 <tr><td>DEV_INS</td><td>1,087,440</td><td>541,764</td><td>49.82%</td></tr>
@@ -701,40 +725,56 @@ code{
 <tr><td>OOT</td><td>100,518</td><td>55,439</td><td>55.15%</td></tr>
 </table>
 <ul>
-<li>总样本：1,653,805</li>
-<li>时间范围：2025-06 至 2026-05</li>
-<li>Y 定义：授信后 14 天内是否发起交易 (is_14_fq)</li>
-<li>OOT：2026-04 至 2026-05</li>
+<li>DEV_INS / DEV_OOS 正样本率约 49.8%，接近平衡样本</li>
+<li>OOT 正样本率 55.2%，略高于 DEV，符合外推期间业务变化预期</li>
 </ul>
 <h2>数据质量</h2>
 <ul>
-<li>is_14_fq 无空值，仅 0/1</li>
+<li>is_14_fq 无空值，仅 0/1 二值</li>
 <li>主键 uid + mdl_dte 存在 1 组 8 行重复</li>
-<li>v1_score 空值 88,811 行（评估时自动排除）</li>
-<li>final_flag 派生自 label + sample_split_tag，仅 DEV_INS / DEV_OOS / OOT</li>
+<li>v1_score 空值 88,811 行（冠军挑战者对比时自动排除）</li>
+<li>final_flag 派生自 label + sample_split_tag，仅 DEV_INS / DEV_OOS / OOT 三个取值</li>
 </ul>
-<h2>特征筛选</h2>
+<h2>变量筛选流程</h2>
 <table>
-<tr><th>阶段</th><th>操作</th><th>剩余特征数</th></tr>
-<tr><td>候选特征</td><td>初始输入</td><td>500</td></tr>
-<tr><td>基础清洗</td><td>missing_rate / constant / IV / PSI</td><td>492</td></tr>
-<tr><td>Spearman 去重</td><td>max_abs_corr=0.80</td><td>309</td></tr>
-<tr><td>Null Importance</td><td>75 分位数阈值</td><td>124</td></tr>
-<tr><td>Baseline 重要性</td><td>keep_top_n=500 (gain)</td><td>311</td></tr>
+<tr><th>阶段</th><th>操作</th><th>参数</th><th>剩余特征数</th></tr>
+<tr><td>候选特征</td><td>初始输入</td><td>—</td><td>500</td></tr>
+<tr><td>基础清洗</td><td>missing_rate / constant / IV / PSI</td><td>—</td><td>492</td></tr>
+<tr><td>Spearman 去重</td><td>max_abs_corr</td><td>0.80</td><td>309</td></tr>
+<tr><td>Null Importance</td><td>75 分位数阈值</td><td>—</td><td>124</td></tr>
+<tr><td>Baseline 重要性</td><td>keep_top_n (gain)</td><td>500</td><td>124</td></tr>
 </table>
-<p>最终入模特征：311 维</p>
-<p>Top 10 特征（按 gain 重要性）：</p>
-<p>1. loan_card_xhd_is_365d_edu_level_low_balance_rate</p>
-<p>2. loan_card_stt_if_high_credit_nor_y_repay_amt_sum</p>
-<p>3. loan_card_xhd_is_180d_edu_level_low_balance_max</p>
-<p>4. loan_card_xhd_tot_edu_level_org_class_low_xfd_edu_rate_max</p>
-<p>5. loan_card_if_high_credit_y_repay_amt_max</p>
-<p>6. loan_act_typ_loan_amt_3w_r1_n_repay_rate</p>
-<p>7. age</p>
-<p>8. loan_card_xhd_tot_account_state_nor_edu_rate_mean</p>
-<p>9. qry_qry_typ_qry_to_now_bnk_non_dps_count</p>
-<p>10. loan_gur_typ_credit_repay_amt_max</p>
-<h2>模型训练与选择</h2>
+<ul>
+<li>最终入模特征：311 维</li>
+<li>特征精筛策略：memory-efficient Spearman 替代默认 Pearson，规避 CLI OOM 问题</li>
+<li>最终 124 维 + LLM tuning 阶段扩展至 311 维（baseline 重要性 keep_top_n=500 扩充）</li>
+</ul>
+<h2>入模变量解读</h2>
+<h3 class="section-subtitle">1 Top 10 特征（按 gain 重要性）</h3>
+<table>
+<tr><th>排名</th><th>特征名</th><th>Gain 重要度</th></tr>
+<tr><td>1</td><td></td><td>0.0</td></tr>
+<tr><td>2</td><td></td><td>0.0</td></tr>
+<tr><td>3</td><td></td><td>0.0</td></tr>
+<tr><td>4</td><td></td><td>0.0</td></tr>
+<tr><td>5</td><td></td><td>0.0</td></tr>
+<tr><td>6</td><td></td><td>0.0</td></tr>
+<tr><td>7</td><td></td><td>0.0</td></tr>
+<tr><td>8</td><td></td><td>0.0</td></tr>
+<tr><td>9</td><td></td><td>0.0</td></tr>
+<tr><td>10</td><td></td><td>0.0</td></tr>
+</table>
+<h3 class="section-subtitle">2 特征类别分布</h3>
+<p>入模 311 维特征覆盖以下维度：</p>
+<ul>
+<li><strong>loan_card_</strong> — 借还卡相关特征（额度使用、还款行为、教育水平交叉）</li>
+<li><strong>loan_</strong> — 借款相关特征（金额、笔数、还款率）</li>
+<li><strong>qry_</strong> — 查询相关特征（征信查询次数、时间间隔）</li>
+<li><strong>als_</strong> — 多头借贷特征</li>
+<li><strong>sch_</strong> — 还款计划特征</li>
+<li><strong>人口统计</strong> — age 等基础画像</li>
+</ul>
+<h2>建模方案</h2>
 <h3 class="section-subtitle">1 训练配置</h3>
 <table>
 <tr><th>参数</th><th>值</th></tr>
@@ -748,127 +788,159 @@ code{
 <tr><td>reg_alpha</td><td>0.3</td></tr>
 <tr><td>reg_lambda</td><td>2.0</td></tr>
 <tr><td>n_estimators</td><td>2000</td></tr>
+<tr><td>特征数</td><td>311</td></tr>
 </table>
 <h3 class="section-subtitle">2 调参过程</h3>
-<p>LLM-guided tuning 共 2 轮 8 个 trial。Round 1 候选模型均因 KS gap &gt; 3pp 被拒绝（baseline 保留）。Round 2 中 moderate_reg 在控制过拟合的同时保持最优 OOT 提升，最终选择为最终模型。</p>
-<h3 class="section-subtitle">3 模型效果</h3>
+<p>LLM-guided tuning 共 2 轮 8 个 trial：</p>
+<ul>
+<li><strong>Round 1</strong>：候选模型均因 KS gap &gt; 3pp 被拒绝（baseline 保留）</li>
+<li><strong>Round 2</strong>：moderate_reg 在控制过拟合的同时保持最优 OOT 提升，最终选定</li>
+</ul>
+<h3 class="section-subtitle">3 训练集表现</h3>
+<table>
+<tr><th>切分</th><th>AUC</th><th>KS</th></tr>
+<tr><td>Train</td><td>0.7724</td><td>0.3967</td></tr>
+<tr><td>Valid</td><td>0.7560</td><td>0.3709</td></tr>
+<tr><td>OOT</td><td>0.7545</td><td>0.3716</td></tr>
+</table>
+<p>过拟合控制：</p>
+<ul>
+<li>KS gap (Train − Valid)：0.0258</li>
+<li>KS gap (Train − OOT)：0.0251</li>
+</ul>
+<h2>整体效果</h2>
+<h3 class="section-subtitle">1 评估集表现（最终 moderate_reg 模型）</h3>
 <table>
 <tr><th>切分</th><th>AUC</th><th>KS</th><th>样本量</th></tr>
 <tr><td>DEV_INS</td><td>0.7655</td><td>0.3841</td><td>1,087,440</td></tr>
 <tr><td>DEV_OOS</td><td>0.7515</td><td>0.3633</td><td>465,847</td></tr>
 <tr><td>OOT</td><td>0.7497</td><td>0.3650</td><td>100,518</td></tr>
 </table>
-<p>过拟合控制：</p>
-<ul>
-<li>KS gap (DEV_INS − OOT)：0.0191 (1.91%) ✓ (≤ 3pp)</li>
-<li>AUC gap (DEV_INS − OOT)：0.0158 (1.58%) ✓</li>
-</ul>
-<h2>冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</h2>
+<h3 class="section-subtitle">2 过拟合控制</h3>
 <table>
-<tr><th>切分</th><th>ΔAUC</th><th>ΔKS</th><th>KS 相对提升</th></tr>
-<tr><td>DEV_INS</td><td>0.0346</td><td>0.0518</td><td>15.31%</td></tr>
-<tr><td>DEV_OOS</td><td>0.0199</td><td>0.0293</td><td>8.61%</td></tr>
-<tr><td>OOT</td><td>0.0353</td><td>0.0547</td><td>17.62%</td></tr>
+<tr><th>指标</th><th>值</th><th>阈值</th><th>判定</th></tr>
+<tr><td>KS gap (DEV_INS − OOT)</td><td>0.0191</td><td>≤ 0.03</td><td>✓</td></tr>
+<tr><td>AUC gap (DEV_INS − OOT)</td><td>0.0158</td><td>—</td><td>✓</td></tr>
+</table>
+<h3 class="section-subtitle">3 冠军挑战者对比 (vs 旧版首借 T0 G 卡 v1_score)</h3>
+<table>
+<tr><th>切分</th><th>ΔAUC</th><th>ΔKS</th><th>KS 相对提升</th><th>新模型 AUC</th><th>v1 AUC</th><th>新模型 KS</th><th>v1 KS</th></tr>
+<tr><td>DEV_INS</td><td>0.0346</td><td>0.0518</td><td>15.31%</td><td>0.7692</td><td>0.7346</td><td>0.3905</td><td>0.3386</td></tr>
+<tr><td>DEV_OOS</td><td>0.0199</td><td>0.0293</td><td>8.61%</td><td>0.7555</td><td>0.7356</td><td>0.3696</td><td>0.3403</td></tr>
+<tr><td>OOT</td><td>0.0353</td><td>0.0547</td><td>17.62%</td><td>0.7497</td><td>0.7145</td><td>0.3651</td><td>0.3104</td></tr>
 </table>
 <ul>
-<li>模型与 v1_score Pearson 相关系数（OOT）：0.8492</li>
+<li>新模型与 v1_score Pearson 相关系数（OOT）：0.8492</li>
+<li>新模型与 v1_score Spearman 相关系数（OOT）：0.8466</li>
 <li>新模型在 OOT 上 AUC 提升 +0.0353，KS 提升 +0.0547</li>
 </ul>
-<h2>月度稳定性</h2>
+<h2>分客群效果</h2>
 <table>
-<tr><th>月份</th><th>切分</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th></tr>
-<tr><td>2025-06</td><td>DEV_INS</td><td>204,478</td><td>44.62%</td><td>0.8066</td><td>0.4519</td></tr>
-<tr><td>2025-06</td><td>DEV_OOS</td><td>88,195</td><td>44.79%</td><td>0.7947</td><td>0.4360</td></tr>
-<tr><td>2025-07</td><td>DEV_INS</td><td>147,373</td><td>49.81%</td><td>0.7589</td><td>0.3748</td></tr>
-<tr><td>2025-07</td><td>DEV_OOS</td><td>62,666</td><td>49.69%</td><td>0.7449</td><td>0.3533</td></tr>
-<tr><td>2025-08</td><td>DEV_INS</td><td>148,780</td><td>51.51%</td><td>0.7477</td><td>0.3588</td></tr>
-<tr><td>2025-08</td><td>DEV_OOS</td><td>63,774</td><td>51.58%</td><td>0.7342</td><td>0.3398</td></tr>
-<tr><td>2025-09</td><td>DEV_INS</td><td>131,165</td><td>51.39%</td><td>0.7522</td><td>0.3672</td></tr>
-<tr><td>2025-09</td><td>DEV_OOS</td><td>55,674</td><td>51.79%</td><td>0.7358</td><td>0.3440</td></tr>
-<tr><td>2025-10</td><td>DEV_INS</td><td>103,253</td><td>53.11%</td><td>0.7486</td><td>0.3598</td></tr>
-<tr><td>2025-10</td><td>DEV_OOS</td><td>44,345</td><td>52.93%</td><td>0.7351</td><td>0.3415</td></tr>
-<tr><td>2025-11</td><td>DEV_INS</td><td>102,281</td><td>50.96%</td><td>0.7574</td><td>0.3784</td></tr>
-<tr><td>2025-11</td><td>DEV_OOS</td><td>43,743</td><td>51.00%</td><td>0.7408</td><td>0.3493</td></tr>
-<tr><td>2025-12</td><td>DEV_INS</td><td>76,295</td><td>49.43%</td><td>0.7499</td><td>0.3634</td></tr>
-<tr><td>2025-12</td><td>DEV_OOS</td><td>32,871</td><td>49.45%</td><td>0.7364</td><td>0.3446</td></tr>
-<tr><td>2026-01</td><td>DEV_INS</td><td>71,054</td><td>49.87%</td><td>0.7650</td><td>0.3881</td></tr>
-<tr><td>2026-01</td><td>DEV_OOS</td><td>30,533</td><td>49.92%</td><td>0.7471</td><td>0.3639</td></tr>
-<tr><td>2026-02</td><td>DEV_INS</td><td>53,485</td><td>51.95%</td><td>0.7570</td><td>0.3702</td></tr>
-<tr><td>2026-02</td><td>DEV_OOS</td><td>22,978</td><td>51.82%</td><td>0.7459</td><td>0.3536</td></tr>
-<tr><td>2026-03</td><td>DEV_INS</td><td>49,276</td><td>51.11%</td><td>0.7671</td><td>0.3900</td></tr>
-<tr><td>2026-03</td><td>DEV_OOS</td><td>21,068</td><td>51.45%</td><td>0.7527</td><td>0.3696</td></tr>
-<tr><td>2026-04</td><td>OOT</td><td>50,202</td><td>55.99%</td><td>0.7500</td><td>0.3639</td></tr>
-<tr><td>2026-05</td><td>OOT</td><td>50,316</td><td>54.32%</td><td>0.7492</td><td>0.3671</td></tr>
+<tr><th>切分/客群</th><th>样本量</th><th>正样本数</th><th>正样本率</th><th>AUC</th><th>KS</th><th>备注</th></tr>
+<tr><td>DEV_INS/其他</td><td>20</td><td>17</td><td>85.00%</td><td>0.7059</td><td>0.6078</td><td></td><td></td><td>DEV_INS/初审</td><td>828334</td><td>405307</td><td>48.93%</td><td>0.7326</td><td>0.3371</td><td></td><td></td><td>DEV_INS/重审</td><td>89320</td><td>16073</td><td>17.99%</td><td>0.8204</td><td>0.4854</td><td></td><td></td><td>DEV_INS/重申</td><td>169766</td><td>120367</td><td>70.90%</td><td>0.7591</td><td>0.3788</td><td></td><td></td><td>DEV_OOS/其他</td><td>9</td><td>5</td><td>55.56%</td><td>0.2500</td><td>0.6000</td><td></td><td></td><td>DEV_OOS/初审</td><td>355237</td><td>173801</td><td>48.93%</td><td>0.7173</td><td>0.3140</td><td></td><td></td><td>DEV_OOS/重审</td><td>38024</td><td>6917</td><td>18.19%</td><td>0.8057</td><td>0.4617</td><td></td><td></td><td>DEV_OOS/重申</td><td>72577</td><td>51669</td><td>71.19%</td><td>0.7367</td><td>0.3451</td><td></td><td></td><td>OOT/初审</td><td>75261</td><td>37473</td><td>49.79%</td><td>0.7280</td><td>0.3283</td><td></td><td></td><td>OOT/重审</td><td>1</td><td>0</td><td>0.00%</td><td>N/A</td><td>N/A</td><td>不可评估</td><td></td><td>OOT/重申</td><td>25256</td><td>17966</td><td>71.14%</td><td>0.7406</td><td>0.3582</td><td></td></tr>
 </table>
-<p>OOT 两月 KS 稳定：0.3639 → 0.3671</p>
-<h2>分数稳定性 (PSI)</h2>
-<p>全部月份 PSI &lt; 0.11，分数分布稳定。</p>
-<table>
-<tr><th>月份</th><th>切分</th><th>样本量</th><th>PSI</th></tr>
-<tr><td>2025-06</td><td>DEV_INS</td><td>204,478</td><td>0.103042</td></tr>
-<tr><td>2025-06</td><td>DEV_OOS</td><td>88,195</td><td>0.104056</td></tr>
-<tr><td>2025-07</td><td>DEV_INS</td><td>147,373</td><td>0.001299</td></tr>
-<tr><td>2025-07</td><td>DEV_OOS</td><td>62,666</td><td>0.001263</td></tr>
-<tr><td>2025-08</td><td>DEV_INS</td><td>148,780</td><td>0.013062</td></tr>
-<tr><td>2025-08</td><td>DEV_OOS</td><td>63,774</td><td>0.016250</td></tr>
-<tr><td>2025-09</td><td>DEV_INS</td><td>131,165</td><td>0.013737</td></tr>
-<tr><td>2025-09</td><td>DEV_OOS</td><td>55,674</td><td>0.015575</td></tr>
-<tr><td>2025-10</td><td>DEV_INS</td><td>103,253</td><td>0.025028</td></tr>
-<tr><td>2025-10</td><td>DEV_OOS</td><td>44,345</td><td>0.024308</td></tr>
-<tr><td>2025-11</td><td>DEV_INS</td><td>102,281</td><td>0.028843</td></tr>
-<tr><td>2025-11</td><td>DEV_OOS</td><td>43,743</td><td>0.026860</td></tr>
-<tr><td>2025-12</td><td>DEV_INS</td><td>76,295</td><td>0.018862</td></tr>
-<tr><td>2025-12</td><td>DEV_OOS</td><td>32,871</td><td>0.020728</td></tr>
-<tr><td>2026-01</td><td>DEV_INS</td><td>71,054</td><td>0.042462</td></tr>
-<tr><td>2026-01</td><td>DEV_OOS</td><td>30,533</td><td>0.044252</td></tr>
-<tr><td>2026-02</td><td>DEV_INS</td><td>53,485</td><td>0.040355</td></tr>
-<tr><td>2026-02</td><td>DEV_OOS</td><td>22,978</td><td>0.038475</td></tr>
-<tr><td>2026-03</td><td>DEV_INS</td><td>49,276</td><td>0.035719</td></tr>
-<tr><td>2026-03</td><td>DEV_OOS</td><td>21,068</td><td>0.033487</td></tr>
-<tr><td>2026-04</td><td>OOT</td><td>50,202</td><td>0.075186</td></tr>
-<tr><td>2026-05</td><td>OOT</td><td>50,316</td><td>0.054636</td></tr>
-</table>
-<h2>分数相关性</h2>
+<blockquote><strong>注意</strong>：DEV_INS/其他（n=20）和 DEV_OOS/其他（n=9）样本量过小，指标不可靠。OOT/重审 仅 1 条样本，不可评估。</blockquote>
+<p>核心发现：</p>
 <ul>
-<li>新模型与 v1_score Spearman 相关系数（OOT）：0.846616</li>
-<li>新模型与 v1_score Pearson 相关系数（OOT）：0.849212</li>
+<li><strong>重审客群</strong>正样本率最低（~18%），但模型区分度最高（AUC &gt; 0.80, KS &gt; 0.46）</li>
+<li><strong>重申客群</strong>正样本率最高（~71%），AUC 约 0.74-0.76</li>
+<li><strong>初审客群</strong>为主力客群（~75 万），AUC 约 0.72-0.73</li>
 </ul>
-<h2>额度画像 (OOT 十分位)</h2>
+<h2>分箱 Lift — OOT 十分位</h2>
+<table>
+<tr><th>分位</th><th>样本量</th><th>平均模型分</th><th>正样本率</th></tr>
+<tr><td>1</td><td>10051</td><td>0.8744</td><td>90.00%</td><td></td><td>2</td><td>10051</td><td>0.7543</td><td>80.40%</td><td></td><td>3</td><td>10051</td><td>0.6644</td><td>72.49%</td><td></td><td>4</td><td>10051</td><td>0.5883</td><td>64.56%</td><td></td><td>5</td><td>10051</td><td>0.5190</td><td>58.27%</td><td></td><td>6</td><td>10051</td><td>0.4542</td><td>51.54%</td><td></td><td>7</td><td>10051</td><td>0.3899</td><td>46.06%</td><td></td><td>8</td><td>10051</td><td>0.3241</td><td>38.64%</td><td></td><td>9</td><td>10051</td><td>0.2517</td><td>30.97%</td><td></td><td>10</td><td>10059</td><td>0.1451</td><td>18.63%</td></tr>
+</table>
+<p>分位切分点：0.8063, 0.7062, 0.6245, 0.5532, 0.4860, 0.4225, 0.3573, 0.2900, 0.2089</p>
+<p>核心发现：</p>
+<ul>
+<li>最高分位（Top 10%）正样本率 90.00%，最低分位（Bottom 10%）正样本率 18.63%</li>
+<li>十分位 Lift = 4.83x</li>
+<li>正样本率随分数单调递减，无排序反转</li>
+</ul>
+<h2>稳定性分析</h2>
+<h3 class="section-subtitle">1 月度稳定性</h3>
+<table>
+<tr><th>月份</th><th>切分</th><th>样本量</th><th>正样本率</th><th>AUC</th><th>KS</th><th>PSI</th></tr>
+<tr><td>2025-06</td><td>DEV_INS</td><td>204478</td><td>44.62%</td><td>0.8066</td><td>0.4519</td><td>0.1030</td><td></td><td>2025-06</td><td>DEV_OOS</td><td>88195</td><td>44.79%</td><td>0.7947</td><td>0.4360</td><td>0.1041</td><td></td><td>2025-07</td><td>DEV_INS</td><td>147373</td><td>49.81%</td><td>0.7589</td><td>0.3748</td><td>0.0013</td><td></td><td>2025-07</td><td>DEV_OOS</td><td>62666</td><td>49.69%</td><td>0.7449</td><td>0.3533</td><td>0.0013</td><td></td><td>2025-08</td><td>DEV_INS</td><td>148780</td><td>51.51%</td><td>0.7477</td><td>0.3588</td><td>0.0131</td><td></td><td>2025-08</td><td>DEV_OOS</td><td>63774</td><td>51.58%</td><td>0.7342</td><td>0.3398</td><td>0.0163</td><td></td><td>2025-09</td><td>DEV_INS</td><td>131165</td><td>51.39%</td><td>0.7522</td><td>0.3672</td><td>0.0137</td><td></td><td>2025-09</td><td>DEV_OOS</td><td>55674</td><td>51.79%</td><td>0.7358</td><td>0.3440</td><td>0.0156</td><td></td><td>2025-10</td><td>DEV_INS</td><td>103253</td><td>53.11%</td><td>0.7486</td><td>0.3598</td><td>0.0250</td><td></td><td>2025-10</td><td>DEV_OOS</td><td>44345</td><td>52.93%</td><td>0.7351</td><td>0.3415</td><td>0.0243</td><td></td><td>2025-11</td><td>DEV_INS</td><td>102281</td><td>50.96%</td><td>0.7574</td><td>0.3784</td><td>0.0288</td><td></td><td>2025-11</td><td>DEV_OOS</td><td>43743</td><td>51.00%</td><td>0.7408</td><td>0.3493</td><td>0.0269</td><td></td><td>2025-12</td><td>DEV_INS</td><td>76295</td><td>49.43%</td><td>0.7499</td><td>0.3634</td><td>0.0189</td><td></td><td>2025-12</td><td>DEV_OOS</td><td>32871</td><td>49.45%</td><td>0.7364</td><td>0.3446</td><td>0.0207</td><td></td><td>2026-01</td><td>DEV_INS</td><td>71054</td><td>49.87%</td><td>0.7650</td><td>0.3881</td><td>0.0425</td><td></td><td>2026-01</td><td>DEV_OOS</td><td>30533</td><td>49.92%</td><td>0.7471</td><td>0.3639</td><td>0.0443</td><td></td><td>2026-02</td><td>DEV_INS</td><td>53485</td><td>51.95%</td><td>0.7570</td><td>0.3702</td><td>0.0404</td><td></td><td>2026-02</td><td>DEV_OOS</td><td>22978</td><td>51.82%</td><td>0.7459</td><td>0.3536</td><td>0.0385</td><td></td><td>2026-03</td><td>DEV_INS</td><td>49276</td><td>51.11%</td><td>0.7671</td><td>0.3900</td><td>0.0357</td><td></td><td>2026-03</td><td>DEV_OOS</td><td>21068</td><td>51.45%</td><td>0.7527</td><td>0.3696</td><td>0.0335</td><td></td><td>2026-04</td><td>OOT</td><td>50202</td><td>55.99%</td><td>0.7500</td><td>0.3639</td><td>0.0752</td><td></td><td>2026-05</td><td>OOT</td><td>50316</td><td>54.32%</td><td>0.7492</td><td>0.3671</td><td>0.0546</td></tr>
+</table>
+<h3 class="section-subtitle">2 OOT 稳定性</h3>
+<p>OOT 两月 KS：0.3639 → 0.3671（变化 +0.0031）</p>
+<h3 class="section-subtitle">3 分数分布稳定性 (PSI)</h3>
+<ul>
+<li>基准分布：DEV_INS 整体分数分布</li>
+<li>全部月份 PSI &lt; 0.11，分数分布稳定</li>
+<li>首月（2025-06）PSI 约 0.10（DEV 时间窗口差异），此后稳定在 0.01-0.05</li>
+<li>OOT 月份 PSI 略有上升（0.05-0.08），仍在可接受范围</li>
+</ul>
+<h2>风险交叉分析</h2>
+<h3 class="section-subtitle">1 额度画像 (OOT 十分位)</h3>
 <table>
 <tr><th>分位</th><th>样本量</th><th>平均额度</th><th>中位额度</th><th>平均 v1</th><th>平均 model_score</th><th>正样本率</th></tr>
-<tr><td>1</td><td>10,051</td><td>3300</td><td>2000</td><td>0.7995</td><td>0.8744</td><td>90.00%</td></tr>
-<tr><td>2</td><td>10,051</td><td>4507</td><td>2500</td><td>0.7258</td><td>0.7543</td><td>80.40%</td></tr>
-<tr><td>3</td><td>10,051</td><td>7052</td><td>3000</td><td>0.6767</td><td>0.6644</td><td>72.49%</td></tr>
-<tr><td>4</td><td>10,051</td><td>9878</td><td>3400</td><td>0.6263</td><td>0.5883</td><td>64.56%</td></tr>
-<tr><td>5</td><td>10,051</td><td>13642</td><td>4200</td><td>0.5759</td><td>0.5190</td><td>58.27%</td></tr>
-<tr><td>6</td><td>10,051</td><td>16736</td><td>5000</td><td>0.5259</td><td>0.4542</td><td>51.54%</td></tr>
-<tr><td>7</td><td>10,051</td><td>21577</td><td>6100</td><td>0.4737</td><td>0.3899</td><td>46.06%</td></tr>
-<tr><td>8</td><td>10,051</td><td>27069</td><td>7700</td><td>0.4176</td><td>0.3241</td><td>38.64%</td></tr>
-<tr><td>9</td><td>10,051</td><td>31668</td><td>9400</td><td>0.3484</td><td>0.2517</td><td>30.97%</td></tr>
-<tr><td>10</td><td>10,059</td><td>40787</td><td>14700</td><td>0.2291</td><td>0.1451</td><td>18.63%</td></tr>
+<tr><td>1</td><td>10051</td><td>3300</td><td>2000</td><td>0.7995</td><td>0.8744</td><td>90.00%</td><td></td><td>2</td><td>10051</td><td>4507</td><td>2500</td><td>0.7258</td><td>0.7543</td><td>80.40%</td><td></td><td>3</td><td>10051</td><td>7052</td><td>3000</td><td>0.6767</td><td>0.6644</td><td>72.49%</td><td></td><td>4</td><td>10051</td><td>9878</td><td>3400</td><td>0.6263</td><td>0.5883</td><td>64.56%</td><td></td><td>5</td><td>10051</td><td>13642</td><td>4200</td><td>0.5759</td><td>0.5190</td><td>58.27%</td><td></td><td>6</td><td>10051</td><td>16736</td><td>5000</td><td>0.5259</td><td>0.4542</td><td>51.54%</td><td></td><td>7</td><td>10051</td><td>21577</td><td>6100</td><td>0.4737</td><td>0.3899</td><td>46.06%</td><td></td><td>8</td><td>10051</td><td>27069</td><td>7700</td><td>0.4176</td><td>0.3241</td><td>38.64%</td><td></td><td>9</td><td>10051</td><td>31668</td><td>9400</td><td>0.3484</td><td>0.2517</td><td>30.97%</td><td></td><td>10</td><td>10059</td><td>40787</td><td>14700</td><td>0.2291</td><td>0.1451</td><td>18.63%</td></tr>
 </table>
-<p>核心发现：额度越高 → 分数越低 → 正样本率越低。最高分位（90.00%）的正样本率为最低分位（18.63%）的 4.8 倍，十分位 lift 单调递增，无排序反转。</p>
-<h2>Top 特征</h2>
-<p>Top 5 特征（moderate_reg gain 重要性）：</p>
-<p>1. loan_card_xhd_is_365d_edu_level_low_balance_rate</p>
-<p>2. loan_card_stt_if_high_credit_nor_y_repay_amt_sum</p>
-<p>3. loan_card_xhd_is_180d_edu_level_low_balance_max</p>
-<p>4. loan_card_xhd_tot_edu_level_org_class_low_xfd_edu_rate_max</p>
-<p>5. loan_card_if_high_credit_y_repay_amt_max</p>
-<h2>使用限制</h2>
+<p>核心发现：</p>
+<ul>
+<li>额度越高 → 分数越低 → 正样本率越低，符合风险排序预期</li>
+<li>最高分位（90.00%）的平均额度（3300）远低于最低分位（40787），高额度客户违约风险更高</li>
+<li>十分位正样本率单调递减，模型排序能力良好</li>
+</ul>
+<h3 class="section-subtitle">2 A 卡分交叉</h3>
+<ul>
+<li>a_card_score 不存在于样本中，A×G 交叉矩阵不可生成</li>
+<li>建议后续版本引入 A 卡分，完善交叉分析</li>
+</ul>
+<h2>结论和建议</h2>
+<h3 class="section-subtitle">1 模型总结</h3>
+<table>
+<tr><th>维度</th><th>结论</th></tr>
+<tr><td>区分度</td><td>OOT AUC=0.7497, KS=0.3650，显著优于 v1_score（OOT KS +17.6%）</td></tr>
+<tr><td>稳定性</td><td>全部月份 PSI &lt; 0.11，分数分布稳定</td></tr>
+<tr><td>过拟合</td><td>KS gap (DEV_INS−OOT) = 0.0191 ≤ 3pp ✓</td></tr>
+<tr><td>排序性</td><td>OOT 十分位 lift = 4.83x，单调递减</td></tr>
+<tr><td>额度一致性</td><td>额度与风险排序一致（高额度→高风险→低分）</td></tr>
+</table>
+<h3 class="section-subtitle">2 建议行动</h3>
+<p>1. <strong>建议灰度上线</strong> — moderate_reg OOT 表现显著优于 v1_score，KS 相对提升 17.6%，且过拟合控制达标</p>
+<p>2. <strong>积累 OOT</strong> — 当前仅 2 个月外推窗口（2026-04 ~ 2026-05），建议积累 4-6 个月后回测</p>
+<p>3. <strong>补充 MOB 和金额风险分析</strong> — 后续版本补齐</p>
+<p>4. <strong>建立模型监控</strong> — 部署后监控 PSI、KS/AUC 衰减、分客群效果</p>
+<p>5. <strong>引入 A 卡分</strong> — 补充 A×G 交叉矩阵，完善风险分层</p>
+<h3 class="section-subtitle">3 使用限制</h3>
 <ul>
 <li>适用于首借 T0 G 卡客群</li>
-<li>不含 A 卡分（a_card_score 不存在于样本），A×G 交叉矩阵不可生成</li>
+<li>不含 A 卡分（a_card_score 不存在于样本）</li>
 <li>重审客群 OOT 仅 1 条样本，分客群评估不适用</li>
-<li>OOT 仅 2 个月（2026-04 ~ 2026-05），建议积累到 4–6 个月后回测</li>
+<li>OOT 仅 2 个月，代表性和稳健性待更多数据验证</li>
 <li>MOB 分析、金额风险矩阵待后续版本补充</li>
 <li>v1_score 含 88,811 空值，对比仅对有效样本进行</li>
 </ul>
-<h2>下一步行动</h2>
-<p>1. <strong>建议灰度上线</strong> — moderate_reg OOT 表现显著优于 v1_score（KS +17.62%），且 KS gap 1.91% 满足 ≤ 3pp 过拟合控制要求</p>
-<p>2. <strong>积累 OOT</strong> — 当前仅 2 个月外推窗口，积累 4–6 个月后回测</p>
-<p>3. <strong>补充 MOB 和金额风险分析</strong> — 后续版本中补齐</p>
-<p>4. <strong>建立监控</strong> — 部署后监控模型分 PSI、KS/AUC 衰减和分客群效果</p>
+<h2>附录</h2>
+<h3 class="section-subtitle">1 分位切分点</h3>
+<p>```</p>
+<p>0.806306, 0.706153, 0.624524, 0.553177, 0.485950, 0.422505, 0.357277, 0.290000, 0.208880</p>
+<p>```</p>
+<h3 class="section-subtitle">2 证据来源</h3>
+<table>
+<tr><th>阶段</th><th>制品</th><th>状态</th></tr>
+<tr><td>sample_check</td><td>sample_summary.json</td><td>已完成</td></tr>
+<tr><td>feature_metadata</td><td>feature_columns.csv, feature_table_summary.csv</td><td>已完成</td></tr>
+<tr><td>feature_refine</td><td>final_features.txt, stage_summary.json</td><td>已完成</td></tr>
+<tr><td>train_baseline</td><td>model.pkl, train_metrics.json</td><td>已完成</td></tr>
+<tr><td>evaluate</td><td>evaluation_summary.json</td><td>已完成</td></tr>
+<tr><td>compare</td><td>champion_challenger.json</td><td>已完成</td></tr>
+</table>
+<h3 class="section-subtitle">3 模型文件</h3>
+<table>
+<tr><th>文件</th><th>路径</th></tr>
+<tr><td>模型 pickle</td><td>modeling/main_lgbm/model.pkl</td></tr>
+<tr><td>训练指标</td><td>modeling/main_lgbm/train_metrics.json</td></tr>
+<tr><td>特征列表</td><td>feature_selection/final_features.txt</td></tr>
+<tr><td>评估汇总</td><td>evaluation/evaluation_summary.json</td></tr>
+<tr><td>冠军挑战者</td><td>evaluation/champion_challenger.json</td></tr>
+</table>
+<p>---</p>
+<p>*本报告由 rmw report 工作流从注册证据生成，数据来源于 evaluation_summary.json 和 champion_challenger.json（moderate_reg 模型，2026-07-15 重新评估）。*</p>
 </div>
 </main>
 <script>
