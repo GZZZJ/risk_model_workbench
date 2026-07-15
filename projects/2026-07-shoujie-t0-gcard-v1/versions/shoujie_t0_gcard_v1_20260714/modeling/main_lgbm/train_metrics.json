@@ -1,0 +1,23 @@
+{
+  "train_auc": 0.7724196485783515,
+  "valid_auc": 0.7560201106638264,
+  "oot_auc": 0.7544885663166867,
+  "train_ks": 0.3967289893337762,
+  "valid_ks": 0.37094276030258866,
+  "oot_ks": 0.37163389994986834,
+  "ks_gap_vo": 0.0258,
+  "ks_gap_oo": 0.0251,
+  "auc_gap_vo": 0.0164,
+  "auc_gap_oo": 0.0179,
+  "candidate": "moderate_reg",
+  "params": {
+    "learning_rate": 0.04,
+    "num_leaves": 20,
+    "max_depth": 5,
+    "min_child_samples": 150,
+    "subsample": 0.65,
+    "colsample_bytree": 0.65,
+    "reg_alpha": 0.3,
+    "reg_lambda": 2.0
+  }
+}

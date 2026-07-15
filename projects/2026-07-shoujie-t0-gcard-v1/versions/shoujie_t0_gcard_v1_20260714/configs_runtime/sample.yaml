@@ -1,0 +1,50 @@
+sample:
+  mode: local_file
+  local_sample_path: data/raw/sample.feather
+  local_feature_path: data/raw/features.feather
+  dp_sample_table: null
+  id_columns:
+  - uid
+  - mdl_dte
+  target_column: is_14_fq
+  time_column: mdl_dte
+  period_column: mdl_dte
+  split_column: final_flag
+  splits:
+    dev:
+    - DEV_INS
+    oos:
+    - DEV_OOS
+    oot:
+    - OOT
+  definition: 授信 T0 时点的首借候选用户；Y 为授信后 14 天内是否发起交易
+  stage_steps:
+  - field_contract
+  - key_uniqueness
+  - monthly_label_distribution
+  - segment_distribution
+  step_params:
+    field_contract: {}
+    key_uniqueness: {}
+    monthly_label_distribution:
+      min_samples_per_month: 50
+    segment_distribution: {}
+quality_checks:
+  check_duplicate_keys: true
+  check_target_null: true
+  check_split_null: true
+  check_time_range: true
+sampling:
+  enabled: false
+  strategy: to_be_confirmed
+  random_seed: 0
+  max_rows: null
+split:
+  use_existing_column: true
+  ins_values:
+  - DEV
+  oos_values:
+  - DEV-OOS
+  oot_values:
+  - OOT
+  - OOT-OOS

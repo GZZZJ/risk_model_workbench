@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "version_id": "shoujie_t0_gcard_v1_20260714",
+  "run_id": "shoujie_t0_gcard_v1_20260714",
+  "updated_at": "2026-07-15T15:20:37",
+  "stage": "report",
+  "stage_label": "报告生成",
+  "latest_event": {
+    "timestamp": "2026-07-15T15:20:37",
+    "version_id": "shoujie_t0_gcard_v1_20260714",
+    "run_id": "shoujie_t0_gcard_v1_20260714",
+    "stage": "report",
+    "step": "action_done",
+    "status": "scaffold",
+    "message": "report scaffold: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/reports/model_report.md",
+    "current": null,
+    "total": null,
+    "percent": 100.0,
+    "elapsed_seconds": 0.0,
+    "eta_seconds": null,
+    "metrics": {
+      "action_id": "report",
+      "failure_code": "scaffold_only",
+      "retry_count": 0,
+      "artifact_count": 5,
+      "decision": "scaffold"
+    },
+    "level": "info",
+    "pid": 3289
+  },
+  "stages": {
+    "validate_config": {
+      "stage": "validate_config",
+      "stage_label": "配置校验",
+      "latest_event": {
+        "timestamp": "2026-07-14T18:48:01",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "validate_config",
+        "step": "action_done",
+        "status": "done",
+        "message": "配置校验完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "validate_config",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 12
+        },
+        "level": "info",
+        "pid": 266148
+      },
+      "updated_at": "2026-07-14T18:48:01"
+    },
+    "sample_check": {
+      "stage": "sample_check",
+      "stage_label": "样本检查",
+      "latest_event": {
+        "timestamp": "2026-07-14T18:51:12",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "sample_check",
+        "step": "action_done",
+        "status": "done",
+        "message": "样本检查完成",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "sample_check",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6,
+          "decision": "done"
+        },
+        "level": "info",
+        "pid": 266363
+      },
+      "updated_at": "2026-07-14T18:51:12"
+    },
+    "feature_metadata": {
+      "stage": "feature_metadata",
+      "stage_label": "特征元数据",
+      "latest_event": {
+        "timestamp": "2026-07-14T18:51:52",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "feature_metadata",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather schema metadata generated",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_metadata",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 3
+        },
+        "level": "info",
+        "pid": 266466
+      },
+      "updated_at": "2026-07-14T18:51:52"
+    },
+    "feature_prescreen": {
+      "stage": "feature_prescreen",
+      "stage_label": "特征初筛",
+      "latest_event": {
+        "timestamp": "2026-07-14T18:52:10",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "feature_prescreen",
+        "step": "action_done",
+        "status": "done",
+        "message": "local feather mode: prescreen by design, intake evidence emitted",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "feature_prescreen",
+          "failure_code": "",
+          "retry_count": 0,
+          "artifact_count": 6
+        },
+        "level": "info",
+        "pid": 266509
+      },
+      "updated_at": "2026-07-14T18:52:10"
+    },
+    "feature_refine": {
+      "stage": "feature_refine",
+      "stage_label": "特征精筛",
+      "latest_event": {
+        "timestamp": "2026-07-14T18:54:25",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "feature_refine",
+        "step": "d01_iv_start",
+        "status": "running",
+        "message": "基础质量筛选：IV 计算开始，输入 511 个变量",
+        "current": null,
+        "total": null,
+        "percent": 30.5,
+        "elapsed_seconds": 14.832,
+        "eta_seconds": null,
+        "metrics": {
+          "input_features": 511
+        },
+        "level": "info",
+        "pid": 266716
+      },
+      "updated_at": "2026-07-14T18:54:25"
+    },
+    "report": {
+      "stage": "report",
+      "stage_label": "报告生成",
+      "latest_event": {
+        "timestamp": "2026-07-15T15:20:37",
+        "version_id": "shoujie_t0_gcard_v1_20260714",
+        "run_id": "shoujie_t0_gcard_v1_20260714",
+        "stage": "report",
+        "step": "action_done",
+        "status": "scaffold",
+        "message": "report scaffold: /root/notebook/自动化建模/risk-model-workbench/projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/reports/model_report.md",
+        "current": null,
+        "total": null,
+        "percent": 100.0,
+        "elapsed_seconds": 0.0,
+        "eta_seconds": null,
+        "metrics": {
+          "action_id": "report",
+          "failure_code": "scaffold_only",
+          "retry_count": 0,
+          "artifact_count": 5,
+          "decision": "scaffold"
+        },
+        "level": "info",
+        "pid": 3289
+      },
+      "updated_at": "2026-07-15T15:20:37"
+    }
+  }
+}

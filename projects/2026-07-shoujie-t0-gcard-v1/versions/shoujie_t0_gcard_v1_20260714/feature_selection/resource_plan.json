@@ -1,0 +1,6 @@
+{
+  "stage": "feature_prescreen",
+  "data_source_mode": "local_feather",
+  "row_count": 1653805,
+  "feature_count": 515
+}

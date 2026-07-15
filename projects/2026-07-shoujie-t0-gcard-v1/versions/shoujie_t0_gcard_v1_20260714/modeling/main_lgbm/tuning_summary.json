@@ -1,0 +1,50 @@
+{
+  "round": 1,
+  "baseline": {
+    "train_auc": 0.7858,
+    "valid_auc": 0.7571,
+    "oot_auc": 0.7555,
+    "train_ks": 0.4189,
+    "valid_ks": 0.3725,
+    "oot_ks": 0.3738,
+    "auc_gap": 0.0288
+  },
+  "trials": [
+    {
+      "name": "lower_lr_regularized",
+      "valid_ks": 0.3755,
+      "valid_auc": 0.7586,
+      "auc_gap": 0.0571,
+      "guardrail": "FAIL"
+    },
+    {
+      "name": "moderate_depth_boost",
+      "valid_ks": 0.3741,
+      "valid_auc": 0.7581,
+      "auc_gap": 0.0462,
+      "guardrail": "FAIL"
+    },
+    {
+      "name": "conservative_shallow",
+      "valid_ks": 0.3726,
+      "valid_auc": 0.7569,
+      "auc_gap": 0.0277,
+      "guardrail": "PASS"
+    },
+    {
+      "name": "deep_ensemble_regularized",
+      "valid_ks": 0.3771,
+      "valid_auc": 0.7592,
+      "auc_gap": 0.0844,
+      "guardrail": "FAIL"
+    }
+  ],
+  "decision": "baseline_selected",
+  "reason": "All deeper models violate max_train_valid_auc_gap=0.03. conservative_shallow passes but offers no meaningful improvement over baseline (\u0394KS=+0.0001). Baseline selected as final model.",
+  "final_model": "baseline",
+  "final_valid_ks": 0.3725,
+  "final_valid_auc": 0.7571,
+  "final_oot_ks": 0.3738,
+  "final_oot_auc": 0.7555,
+  "feature_count": 311
+}

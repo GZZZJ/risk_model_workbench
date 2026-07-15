@@ -1,0 +1,2088 @@
+{
+  "version": 1,
+  "source": "local_feather_schema",
+  "source_path": "/root/notebook/首借G卡/五百维特征样本.feather",
+  "feature_count": 520,
+  "fields": [
+    {
+      "name": "sample_row_num",
+      "type": "large_string"
+    },
+    {
+      "name": "uid",
+      "type": "large_string"
+    },
+    {
+      "name": "first_credit_time_by_btch",
+      "type": "timestamp[ns]"
+    },
+    {
+      "name": "first_credit_law_type",
+      "type": "large_string"
+    },
+    {
+      "name": "sample_label",
+      "type": "large_string"
+    },
+    {
+      "name": "mdl_dte",
+      "type": "timestamp[s]"
+    },
+    {
+      "name": "sample_split_tag",
+      "type": "large_string"
+    },
+    {
+      "name": "label",
+      "type": "large_string"
+    },
+    {
+      "name": "is_14_fq",
+      "type": "int32"
+    },
+    {
+      "name": "is_30_fq",
+      "type": "int32"
+    },
+    {
+      "name": "v1_score",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag0",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag1",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag2",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag3",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag4",
+      "type": "double"
+    },
+    {
+      "name": "rand_flag5",
+      "type": "double"
+    },
+    {
+      "name": "credit_limit",
+      "type": "double"
+    },
+    {
+      "name": "loan_org_typ_bnk_non_dps_min_cur_ovd_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_bnk_non_dps_max_blc_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_other_min_loan_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_max_blc_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_d1_min_loan_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_nor_and_act_typ_d1_min_schedule_pay_date_to_now",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_max_loan_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_d1_min_cur_ovd_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_r4_min_cur_ovd_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_r1_max_blc_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_credit_max_loan_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_other_min_blc_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_ecm_ptf_rat",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m1_oth_rat",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_one_wek_ptf_apl",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_7d_div_12m",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_d7_oth_rat",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_1m_div_12m",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m1_ptt_lon",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_ptt_lon",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_6m_dif_3m",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_big_csm_fin_cmp",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_3m_div_6m",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m1_oth",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m6_bnk_rat",
+      "type": "float"
+    },
+    {
+      "name": "ddf_1m_qry_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_typ_m1_div_m6",
+      "type": "float"
+    },
+    {
+      "name": "ddf_36m_1d_continous_qry_cnt",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_d7_oth",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_other_min_cur_ovd_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_d7_csm_rat",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_oth",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_12m_dif_6m",
+      "type": "float"
+    },
+    {
+      "name": "ddf_36m_qry_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_blc_y_sum_18p_mid_max",
+      "type": "float"
+    },
+    {
+      "name": "ddf_3m_qry_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_bnk",
+      "type": "float"
+    },
+    {
+      "name": "ddf_6m_qry_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_other_max_loan_amt_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m12_ptt_lon_rat",
+      "type": "float"
+    },
+    {
+      "name": "tnd_rsk_itm_m6_oth_rat",
+      "type": "float"
+    },
+    {
+      "name": "sum_typ_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_net_bank_sum_typ_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_nbank_nsloan_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_cash_stage_sum_typ_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m1_m3_id_nbank_oth_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_licensed_net_loan_sum_typ_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_caon_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_nsloan_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_ca_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_old_bank_sum_typ_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_credit_card_sum_typ_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_greast_id_nbank_finlea_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_bank_ret_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_cf_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m6_m12_id_nbank_oth_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m6_m12_id_pdl_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_m12_id_nbank_nsloan_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_m6_m12_id_nbank_nsloan_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m3_id_nbank_oth_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_cons_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_pdl_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m1_m3_id_nbank_else_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_m12_id_nbank_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_else_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m6_m12_id_nbank_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_oth_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_caon_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_nbank_ca_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m3_id_nbank_else_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_d15_m1_id_nbank_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m1_m3_id_pdl_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_nbank_cons_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_m6_m12_id_nbank_oth_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_nbank_else_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m6_m12_id_nbank_cons_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_other_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_least_id_nbank_sloan_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_xj_payment_max",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_m1_m3_id_nbank_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "loan_repay_progress_mean_xd_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_12m_other_payment_mean",
+      "type": "float"
+    },
+    {
+      "name": "als_old_bank_sum_typ_orgnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_xd_payment_max",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_nbank_oth_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_m12_id_caon_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_m12_id_pdl_allnum_rte",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_6m_to_9m_xj_payment_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_9m_other_payment_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_12m_xj_payment_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_xd_payment_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_other_payment_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_cnt_count_non_xxhb_360d",
+      "type": "float"
+    },
+    {
+      "name": "loan_loanamount_min_non_xxhb_360d",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_48m_to_60m_xd_payment_max",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_60m_contin_non_de_mon_count",
+      "type": "float"
+    },
+    {
+      "name": "tot_org_ratio_720_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "loan_loanamount_min_non_xxhb",
+      "type": "float"
+    },
+    {
+      "name": "loan_loanamount_mean_xxhb_90d",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_ratio_90_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "loan_balance_sum_non_xxhb_360d",
+      "type": "float"
+    },
+    {
+      "name": "tot_acct_ratio_720_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_ratio_360_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "same_loan_price18_tot_balance_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_alld_xfd_unique_org_count",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_count_num_6m_9m_mean_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_acct_ratio_180_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "loan_balance_mean_non_xxhb",
+      "type": "float"
+    },
+    {
+      "name": "loan_balance_max_xxhb_30d",
+      "type": "float"
+    },
+    {
+      "name": "loan_open_to_now_min_non_xxhb",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_ratio_30_fix_202502",
+      "type": "float"
+    },
+    {
+      "name": "wjq_add_minupdate_qishu",
+      "type": "float"
+    },
+    {
+      "name": "jxhj_1d_should_pay_count",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_48m_contin_non_de_mon_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_xhd_use_lmt_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_xfd_blc_hhi",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_24m_contin_non_de_mon_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_720d_xfd_unique_org_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_repay_min_count",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_count_num_12m_24m_mean_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "sch_repay_count_num_12m_24m_mean_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "yq_city_maxupdate_days",
+      "type": "float"
+    },
+    {
+      "name": "ddf_48m_pcl_open_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "distinct_address_5y",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_id_min_monnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_id_nbank_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_cell_nbank_nsloan_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d7_id_nbank_oth_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_ca_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_cell_nbank_cf_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d7_id_nbank_nsloan_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m1_cell_nbank_nsloan_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_sloan_allnum",
+      "type": "float"
+    },
+    {
+      "name": "ddf_36m_pcl_open_avg_day_diff",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_avg_monnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m3_id_nbank_else_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_max_inteday",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_max_inteday",
+      "type": "float"
+    },
+    {
+      "name": "als_lst_id_nbank_consnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d15_id_nbank_oth_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_min_inteday",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_bank_ret_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_bank_avg_monnum",
+      "type": "float"
+    },
+    {
+      "name": "age",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_cell_nbank_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_id_nbank_nsloan_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_nbank_cf_allnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d7_cell_nbank_nsloan_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d15_id_nbank_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_d7_cell_nbank_oth_orgnum",
+      "type": "float"
+    },
+    {
+      "name": "als_lst_id_nbank_inteday",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_id_nbank_ca_allnum",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_loan_amt_d1_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_180d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_id_bank_min_inteday",
+      "type": "float"
+    },
+    {
+      "name": "loan_tot_blc_tot_min",
+      "type": "float"
+    },
+    {
+      "name": "als_m12_cell_bank_avg_monnum",
+      "type": "float"
+    },
+    {
+      "name": "als_m6_id_nbank_min_monnum",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_other_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_bnk_dps_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_180d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_90d_loan_amt_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "qry_tot_qry_to_now_tot_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_360d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_other_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_360d_loan_amt_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_15d_qry_to_now_y_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_360d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_15d_qry_typ_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_qry_typ_qry_to_now_bnk_non_dps_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_360d_qry_to_now_y_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_180d_loan_amt_y_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_blc_r1_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_90d_blc_y_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_opn_to_now_nor_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_30d_blc_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_90d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_cur_typ_loan_amt_cny_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_720d_used_ratio_y_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_other_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_720d_qry_rsn_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_opn_to_now_clr_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_blc_other_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_opn_to_now_other_sum",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_weekend_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_qry_typ_qry_to_now_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "edu_lvl",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_15d_qry_to_now_y_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_blc_credit_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_180d_qry_rsn_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_blc_bnk_dps_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_15d_blc_y_sum",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_30d_qry_to_now_y_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_720d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_opn_to_now_oth_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_opn_to_now_r1_mean",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_30d_qry_to_now_y_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_other_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_other_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_90d_qry_to_now_y_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_90d_loan_amt_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_org_typ_loan_amt_bnk_non_dps_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_qry_typ_qry_to_now_other_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_30d_blc_y_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_other_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_opn_to_now_other_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_360d_blc_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_typ_qry_to_now_y_bnk_non_dps_count_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_720d_qry_typ_qry_to_now_y_other_min_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_loan_amt_r1_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_typ_qry_to_now_y_other_min_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_30d_qry_rsn_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_720d_loan_amt_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_blc_r1_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_90d_qry_rsn_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_typ_qry_to_now_y_bnk_non_dps_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_720d_qry_rsn_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_30d_qry_to_now_count_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_720d_qry_typ_qry_to_now_y_other_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_rsn_qry_to_now_y_other_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_660d_qry_typ_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_typ_qry_to_now_y_other_max_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_660d_qry_typ_qry_to_now_y_other_min_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_660d_qry_typ_qry_to_now_y_other_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_540d_qry_typ_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_720d_qry_typ_qry_to_now_y_bnk_non_dps_count_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_90d_qry_to_now_count_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_900d_qry_typ_qry_to_now_y_other_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_blc_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_210d_loan_amt_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_blc_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_loan_amt_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_660d_1320d_opn_to_now_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_blc_y_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_420d_blc_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_60d_blc_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_loan_amt_y_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_270d_540d_blc_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_270d_loan_amt_y_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_if_high_credit_nor_y_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_tot_1_loan_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_credit_repay_amt_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_lon_typ_nor_other_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_y_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_sch_pay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_nor_repay_amt_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_3w_other_n_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_y_act_pay_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_lon_typ_d1_other_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_120d_blc_y_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_is_60d_blc_y_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_credit_sch_pay_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_nor_repay_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_y_act_pay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_gur_typ_other_credit_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_loan_amt_3w_n_blc_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_y_repay_amt_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_gur_typ_r1_other_loan_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_3w_other_n_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_y_sch_pay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_loan_amt_3w_y_blc_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_y_repay_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_gur_typ_r1_credit_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_tot_1_act_pay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_if_high_credit_y_y_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_sch_pay_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_loan_amt_3w_other_n_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_y_repay_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_sch_pay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_loan_amt_3w_nor_n_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_n_act_pay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_r1_repay_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_loan_amt_3w_other_n_loan_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_y_sch_pay_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_loan_amt_3w_y_sch_pay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_tot_1_sch_pay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_n_loan_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_gur_typ_nor_zhiya_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_stt_gur_typ_nor_credit_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_loan_amt_3w_r1_y_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_d1_sch_pay_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_active_user_y_repay_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_credit_sch_pay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_if_high_credit_nor_y_high_credit_blc_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_if_high_credit_nor_y_repay_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_loan_amt_3w_r1_n_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_gur_typ_other_other_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_lon_typ_d1_other_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_nor_loan_amt_avg_amt_6mon_sum_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_tot_1_repay_amt_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_if_high_credit_y_repay_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_gur_typ_credit_loan_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_loan_amt_3w_n_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_act_typ_r1_repay_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_loan_amt_3w_other_y_repay_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_other_blc_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_unkown_max",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12mth_neednot_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_lon_typ_gur_typ_other_other_loan_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_neednot_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_3term_nor_pct",
+      "type": "float"
+    },
+    {
+      "name": "oth_rpy_amt_act_last",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12mth_clr_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12term_nor_mean",
+      "type": "float"
+    },
+    {
+      "name": "lst_mon6_rpy_amt_act_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_stt_active_user_nor_n_high_credit_blc_count",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_unkown_sum",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_6term_nor_mean",
+      "type": "float"
+    },
+    {
+      "name": "oth_rpy_amt_last",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12term_ovd_pct",
+      "type": "float"
+    },
+    {
+      "name": "ccd_repay_12mth_nor_sum",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_6mth_clr_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12term_total_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_unkown_mean",
+      "type": "float"
+    },
+    {
+      "name": "lst_mon6_rpy_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_3term_total_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12term_m1_mean",
+      "type": "float"
+    },
+    {
+      "name": "lst_mon6_rpy_amt_act_std",
+      "type": "float"
+    },
+    {
+      "name": "oth_rpy_amt_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "lon_repay_12term_ovd_mean",
+      "type": "float"
+    },
+    {
+      "name": "oth_rpy_amt_rate_last",
+      "type": "float"
+    },
+    {
+      "name": "lst_stg24_rpy_amt_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "lst_stg12_rpy_amt_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_non_xxhb_cum_cv",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_24m_non_xxhb_payment_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_non_xxhb_cum_bias",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_480d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_12m_non_xxhb_payment_mean",
+      "type": "float"
+    },
+    {
+      "name": "ddf_18m_tqjq_avg_process",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_540d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_150d_qry_typ_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_30d_blc_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_recent_120d_qry_typ_qry_to_now_y_other_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_60d_blc_min_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_720d_opn_to_now_sum_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_540d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_660d_opn_to_now_sum_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_300d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_60d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_420d_840d_qry_rsn_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_720d_blc_count_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_540d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_60d_qry_typ_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_660d_opn_to_now_mean_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_420d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_30d_blc_mean_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_210d_qry_typ_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_900d_qry_rsn_qry_to_now_y_dk_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_240d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_330d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_420d_qry_rsn_qry_to_now_y_dk_max",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_330d_660d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_600d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_150d_qry_rsn_qry_to_now_y_dk_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_60d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_660d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_660d_opn_to_now_mean_div_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_240d_qry_typ_qry_to_now_y_other_min",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_420d_qry_rsn_qry_to_now_y_other_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_360d_loan_amt_max_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_120d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_900d_qry_typ_qry_to_now_y_bnk_non_dps_count",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_240d_qry_typ_qry_to_now_y_other_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_recent_720d_opn_to_now_sum_dif_wave",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_540d_qry_rsn_qry_to_now_y_dk_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_nothousecar_price_max",
+      "type": "float"
+    },
+    {
+      "name": "amt_sum_repay_cc",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_24m_xj_payment_min_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_600d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "ratio_repay_cc_720d",
+      "type": "float"
+    },
+    {
+      "name": "qry_is_150d_qry_to_now_y_min",
+      "type": "float"
+    },
+    {
+      "name": "amt_avg_repay_cc",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_xj_payment_min_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_9m_to_12m_xxhb_payment_max_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_9m_other_payment_mean_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_other_payment_max_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_bank_cum_bias_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_48m_to_60m_xd_payment_sum_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_12m_to_24m_bank_payment_min_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_non_xxhb_cum_bias_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_3m_xj_payment_sum_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "loan_r1_91_max_lmtamt",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_consumption91_within24mon_actualoverschedule_ratio",
+      "type": "float"
+    },
+    {
+      "name": "loan_d1r4_91_max_lmtamt",
+      "type": "float"
+    },
+    {
+      "name": "loan_bank_cum_cv_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_consumption91_within12mon_actualoverschedule_ratio",
+      "type": "float"
+    },
+    {
+      "name": "loan_future_36m_to_48m_xd_payment_max_act_pay",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_consumption91_within5yr_actualpay_max",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_alltrade_within5yr_overdue_sum",
+      "type": "float"
+    },
+    {
+      "name": "alltrade_within1mon_pay_over_loan_ratio",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_state_medium_nor_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "r1_alltrade_within1mon_actualpay_sum",
+      "type": "float"
+    },
+    {
+      "name": "r1_conratioption91_within1mon_actualpay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_high_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "alltrade_within1mon_actualpay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_account_state_high_nor_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_r1_91_max_within_halfyear_lmtamt",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_high_xyk_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_org_class_xfd_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_businessloan41_within5yr_schedulepay_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_edu_level_currency_class_low_rmb_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_r1_91_max_within_2year_lmtamt",
+      "type": "float"
+    },
+    {
+      "name": "r1_conratioption91_within1mon_schedulepay_sum",
+      "type": "float"
+    },
+    {
+      "name": "r2r3_alltrade_within1mon_actualpay_sum",
+      "type": "float"
+    },
+    {
+      "name": "balance_91_irr_less12",
+      "type": "float"
+    },
+    {
+      "name": "d1r4_consumption91_within12mon_actualpay_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_loan_class_high_xedk_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_edu_level_account_class_high_xhd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_rate_label_low_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_low_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_low_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_level_low_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_medium_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_loan_class_zdyh_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_loan_class_org_class_zdyh_xfd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_currency_class_high_rmb_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_high_xfd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_class_medium_xhd_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_edu_level_medium_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_account_class_xhd_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_account_class_currency_class_xhd_rmb_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_edu_level_low_is_720d_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_medium_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_high_xyk_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_state_medium_nor_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_org_class_xfd_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_loan_class_medium_xedk_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_level_low_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_level_medium_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_medium_xfd_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_loan_class_xedk_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_high_xyk_edu_rate_std",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_account_class_low_xyk_edu_rate_std",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_account_class_currency_class_xyk_rmb_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_loan_class_xedk_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_edu_level_low_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_low_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_account_state_nor_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_low_xfd_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_account_class_high_xhd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_medium_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_class_high_xhd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_level_medium_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_account_class_xhd_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_account_class_xhd_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_rate_label_low_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_edu_rate_label_high_is_720d_count",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_180d_edu_level_org_class_medium_xfd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_edu_level_low_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_currency_class_rmb_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_loan_class_account_state_xedk_nor_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_state_low_nor_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_org_class_currency_class_xyk_rmb_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_loan_class_high_zdyh_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_org_class_medium_xfd_edu_rate_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_class_medium_xyk_edu_rate_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_rate_label_overdraft_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_365d_account_class_xyk_balance_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_edu_level_medium_balance_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_loan_class_org_class_zdyh_xfd_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_is_720d_account_class_loan_class_xyk_xedk_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_level_account_class_high_xhd_edu_rate_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_tot_edu_rate_label_high_balance_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_xhd_edu_rate_label_low_tot_count",
+      "type": "float"
+    },
+    {
+      "name": "cs_r2_use_lmt_rate",
+      "type": "float"
+    },
+    {
+      "name": "loan_micro_amt_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_micro_amt_mean",
+      "type": "float"
+    },
+    {
+      "name": "cr_ely_ccd_rec_age",
+      "type": "float"
+    },
+    {
+      "name": "loan_entrust_opn_to_now_max",
+      "type": "float"
+    },
+    {
+      "name": "cs_r2_6m_use_avg_lmt_diff",
+      "type": "float"
+    },
+    {
+      "name": "cs_r2_tot_lmt",
+      "type": "float"
+    },
+    {
+      "name": "loan_dnclr_non_blc_account",
+      "type": "float"
+    },
+    {
+      "name": "cs_r2_6m_use_avg_lmt_ratio",
+      "type": "float"
+    },
+    {
+      "name": "loan_consum_blc_account",
+      "type": "float"
+    },
+    {
+      "name": "loan_cus_blc_max",
+      "type": "float"
+    },
+    {
+      "name": "loan_consum_blc_amt_pct",
+      "type": "float"
+    },
+    {
+      "name": "query_tot_org_ratio_180",
+      "type": "float"
+    },
+    {
+      "name": "cr_ely_tot_rec_age",
+      "type": "float"
+    },
+    {
+      "name": "tot_lvl_max_mon_cnt_1_24m",
+      "type": "float"
+    },
+    {
+      "name": "loan_max_mon_loan_cnt_1_24m",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_max_mon_cnt_1_60m",
+      "type": "float"
+    },
+    {
+      "name": "query_tot_org_ratio_360",
+      "type": "float"
+    },
+    {
+      "name": "loan_cus_opn_to_now_min",
+      "type": "float"
+    },
+    {
+      "name": "tot_lvl_cnt_n_24m",
+      "type": "float"
+    },
+    {
+      "name": "cr_ely_tot_rec_mon_cnt",
+      "type": "float"
+    },
+    {
+      "name": "loan_micro_amt_max",
+      "type": "float"
+    },
+    {
+      "name": "cs_r2_max_lmt",
+      "type": "float"
+    },
+    {
+      "name": "loan_cus_opn_to_now_mean",
+      "type": "float"
+    },
+    {
+      "name": "loan_cus_blc_sum",
+      "type": "float"
+    },
+    {
+      "name": "loan_bank_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_card_high_use_loan_card_acct_cnt_ratio",
+      "type": "float"
+    },
+    {
+      "name": "tot_lvl_max_mon_cnt_1_60m",
+      "type": "float"
+    },
+    {
+      "name": "loan_dnclr_360d_price_min",
+      "type": "float"
+    },
+    {
+      "name": "query_loan_acct_ratio_720",
+      "type": "float"
+    },
+    {
+      "name": "loan_bank_blc_min",
+      "type": "float"
+    },
+    {
+      "name": "cr_ely_loan_rec_age",
+      "type": "float"
+    },
+    {
+      "name": "loan_micro_amt_min",
+      "type": "float"
+    },
+    {
+      "name": "loan_cnt_ovd_loan_24m",
+      "type": "float"
+    },
+    {
+      "name": "query_loan_acct_ratio_180",
+      "type": "float"
+    },
+    {
+      "name": "final_flag",
+      "type": "large_string"
+    },
+    {
+      "name": "__index_level_0__",
+      "type": "int64"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+metric,model_score,v1_score,uplift
+OOT_AUC,0.7550,0.7145,0.0406
+OOT_KS,0.3731,0.3104,0.0627

@@ -1,0 +1,153 @@
+{
+  "round": 2,
+  "objective": "reduce KS gap to <3pp (corrected with predict_proba)",
+  "guardrail": "KS_gap_oot < 3pp",
+  "candidates": [
+    {
+      "train_auc": 0.7870576249684189,
+      "valid_auc": 0.7573881798262759,
+      "oot_auc": 0.7555982922234513,
+      "train_ks": 0.42040237659847995,
+      "valid_ks": 0.37351829104712875,
+      "oot_ks": 0.37487350526668156,
+      "ks_gap_vo": 0.0469,
+      "ks_gap_oo": 0.0455,
+      "auc_gap_vo": 0.0297,
+      "auc_gap_oo": 0.0315,
+      "candidate": "baseline",
+      "params": {
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "max_depth": 5,
+        "min_child_samples": 100,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_alpha": 0.1,
+        "reg_lambda": 1.0
+      },
+      "best_iter": 2000
+    },
+    {
+      "train_auc": 0.7855400174527996,
+      "valid_auc": 0.7574687154282035,
+      "oot_auc": 0.7554545790803661,
+      "train_ks": 0.41791007617410825,
+      "valid_ks": 0.3740145338373779,
+      "oot_ks": 0.37345194802648574,
+      "ks_gap_vo": 0.0439,
+      "ks_gap_oo": 0.0445,
+      "auc_gap_vo": 0.0281,
+      "auc_gap_oo": 0.0301,
+      "candidate": "l2_boost",
+      "params": {
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "max_depth": 5,
+        "min_child_samples": 200,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_alpha": 0.5,
+        "reg_lambda": 5.0
+      },
+      "best_iter": 2000
+    },
+    {
+      "train_auc": 0.7691896221118074,
+      "valid_auc": 0.7554957603696618,
+      "oot_auc": 0.7538838786175845,
+      "train_ks": 0.39152282670515026,
+      "valid_ks": 0.370207929208309,
+      "oot_ks": 0.3714797758032473,
+      "ks_gap_vo": 0.0213,
+      "ks_gap_oo": 0.02,
+      "auc_gap_vo": 0.0137,
+      "auc_gap_oo": 0.0153,
+      "candidate": "shallower",
+      "params": {
+        "learning_rate": 0.05,
+        "num_leaves": 15,
+        "max_depth": 4,
+        "min_child_samples": 200,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_alpha": 0.3,
+        "reg_lambda": 3.0
+      },
+      "best_iter": 2000
+    },
+    {
+      "train_auc": 0.7619360284872906,
+      "valid_auc": 0.7531765214051549,
+      "oot_auc": 0.7519283883684378,
+      "train_ks": 0.37999484984400705,
+      "valid_ks": 0.3655726796124738,
+      "oot_ks": 0.3665491447757632,
+      "ks_gap_vo": 0.0144,
+      "ks_gap_oo": 0.0134,
+      "auc_gap_vo": 0.0088,
+      "auc_gap_oo": 0.01,
+      "candidate": "shallower_lr",
+      "params": {
+        "learning_rate": 0.03,
+        "num_leaves": 15,
+        "max_depth": 4,
+        "min_child_samples": 200,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_alpha": 0.3,
+        "reg_lambda": 3.0
+      },
+      "best_iter": 2000
+    },
+    {
+      "train_auc": 0.7724196485783515,
+      "valid_auc": 0.7560201106638264,
+      "oot_auc": 0.7544885663166867,
+      "train_ks": 0.3967289893337762,
+      "valid_ks": 0.37094276030258866,
+      "oot_ks": 0.37163389994986834,
+      "ks_gap_vo": 0.0258,
+      "ks_gap_oo": 0.0251,
+      "auc_gap_vo": 0.0164,
+      "auc_gap_oo": 0.0179,
+      "candidate": "moderate_reg",
+      "params": {
+        "learning_rate": 0.04,
+        "num_leaves": 20,
+        "max_depth": 5,
+        "min_child_samples": 150,
+        "subsample": 0.65,
+        "colsample_bytree": 0.65,
+        "reg_alpha": 0.3,
+        "reg_lambda": 2.0
+      },
+      "best_iter": 2000
+    },
+    {
+      "train_auc": 0.7847530981218851,
+      "valid_auc": 0.7575116246186495,
+      "oot_auc": 0.7557447014997427,
+      "train_ks": 0.4166765502359843,
+      "valid_ks": 0.37353728633932476,
+      "oot_ks": 0.37433320185275765,
+      "ks_gap_vo": 0.0431,
+      "ks_gap_oo": 0.0423,
+      "auc_gap_vo": 0.0272,
+      "auc_gap_oo": 0.029,
+      "candidate": "low_sample",
+      "params": {
+        "learning_rate": 0.05,
+        "num_leaves": 31,
+        "max_depth": 5,
+        "min_child_samples": 200,
+        "subsample": 0.5,
+        "colsample_bytree": 0.5,
+        "reg_alpha": 0.5,
+        "reg_lambda": 3.0
+      },
+      "best_iter": 2000
+    }
+  ],
+  "best_candidate": "moderate_reg",
+  "recommendation": "Select moderate_reg: OOT AUC=0.7545, KS=0.3716, KS_gap=2.51pp"
+}

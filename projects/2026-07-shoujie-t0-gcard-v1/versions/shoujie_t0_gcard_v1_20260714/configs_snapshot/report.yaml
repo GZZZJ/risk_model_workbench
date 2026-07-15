@@ -1,0 +1,22 @@
+report:
+  output_formats:
+    - markdown
+    - html
+  template: model_report.md.j2
+  output_dir: reports
+
+sections:
+  - 模型背景
+  - 样本定义
+  - 样本分布
+  - 数据质量
+  - 变量筛选流程
+  - 入模变量解读
+  - 建模方案
+  - 整体效果
+  - 分客群效果
+  - 分箱lift
+  - 稳定性分析
+  - 风险交叉分析
+  - 结论和建议
+  - 附录

@@ -1,0 +1,39 @@
+training:
+  default_algorithm: lightgbm
+  random_seed: 0
+  feature_list_path: runs/{run_id}/feature_select/results/final_features.txt
+  label_column: target
+
+  experiments:
+    - name: baseline_all
+      display_name: 全客群统一模型
+      segment: all
+      algorithm: lightgbm
+      sample_weight: null
+    - name: segment_e2e3
+      display_name: E2/E3分客群模型
+      segment: e2e3
+      algorithm: lightgbm
+      sample_weight: null
+    - name: segment_b2
+      display_name: B2分客群模型
+      segment: b2
+      algorithm: lightgbm
+      sample_weight: null
+
+input:
+  historical_score_columns: []
+
+lightgbm:
+  objective: binary
+  metric: auc
+  learning_rate: 0.05
+  num_leaves: 31
+  max_depth: 5
+  min_child_samples: 100
+  subsample: 0.7
+  colsample_bytree: 0.7
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  num_boost_round: 1000
+  early_stopping_rounds: 50

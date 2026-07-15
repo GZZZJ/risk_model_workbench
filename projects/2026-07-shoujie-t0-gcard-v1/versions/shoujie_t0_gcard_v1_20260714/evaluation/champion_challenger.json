@@ -1,0 +1,151 @@
+{
+  "comparison": [
+    {
+      "split": "DEV_INS",
+      "n_total": 1087440,
+      "n_valid": 1025382,
+      "model_auc": 0.7887007579437759,
+      "v1_auc": 0.7346354520231432,
+      "model_ks": 0.42394735936816863,
+      "v1_ks": 0.33863027672111207,
+      "auc_diff": 0.054065305920632745,
+      "ks_diff": 0.08531708264705656,
+      "auc_rel_change_pct": 7.359474113553878,
+      "ks_rel_change_pct": 25.194759155372783,
+      "pearson_corr": 0.8612145183501787,
+      "spearman_corr": 0.8491817910499505
+    },
+    {
+      "split": "DEV_OOS",
+      "n_total": 465847,
+      "n_valid": 439114,
+      "model_auc": 0.7601771320579347,
+      "v1_auc": 0.7355818025021736,
+      "model_ks": 0.3776939185597004,
+      "v1_ks": 0.34031273045981725,
+      "auc_diff": 0.024595329555761047,
+      "ks_diff": 0.03738118809988317,
+      "auc_rel_change_pct": 3.3436566092441318,
+      "ks_rel_change_pct": 10.984363720209693,
+      "pearson_corr": 0.8599887198382847,
+      "spearman_corr": 0.8495164274335089
+    },
+    {
+      "split": "OOT",
+      "n_total": 100518,
+      "n_valid": 100498,
+      "model_auc": 0.755033617189215,
+      "v1_auc": 0.714451738635008,
+      "model_ks": 0.3730819248122404,
+      "v1_ks": 0.3103882431145726,
+      "auc_diff": 0.04058187855420703,
+      "ks_diff": 0.06269368169766781,
+      "auc_rel_change_pct": 5.68014273878604,
+      "ks_rel_change_pct": 20.198471781202713,
+      "pearson_corr": 0.8400644674804982,
+      "spearman_corr": 0.8310255469964016
+    }
+  ],
+  "credit_limit_profile": [
+    {
+      "score_bin": 0,
+      "n": 10052,
+      "avg_credit_limit": 36643.42,
+      "med_credit_limit": 11500.0,
+      "avg_v1_score": 0.2343,
+      "avg_model_score": 0.1755,
+      "pos_rate": 0.1767
+    },
+    {
+      "score_bin": 1,
+      "n": 10052,
+      "avg_credit_limit": 31812.44,
+      "med_credit_limit": 8900.0,
+      "avg_v1_score": 0.3452,
+      "avg_model_score": 0.3027,
+      "pos_rate": 0.2981
+    },
+    {
+      "score_bin": 2,
+      "n": 10052,
+      "avg_credit_limit": 27565.1,
+      "med_credit_limit": 7800.0,
+      "avg_v1_score": 0.4176,
+      "avg_model_score": 0.3848,
+      "pos_rate": 0.3865
+    },
+    {
+      "score_bin": 3,
+      "n": 10051,
+      "avg_credit_limit": 22268.84,
+      "med_credit_limit": 6200.0,
+      "avg_v1_score": 0.4755,
+      "avg_model_score": 0.4504,
+      "pos_rate": 0.4594
+    },
+    {
+      "score_bin": 4,
+      "n": 10052,
+      "avg_credit_limit": 17661.73,
+      "med_credit_limit": 5100.0,
+      "avg_v1_score": 0.5252,
+      "avg_model_score": 0.5104,
+      "pos_rate": 0.5191
+    },
+    {
+      "score_bin": 5,
+      "n": 10052,
+      "avg_credit_limit": 13722.76,
+      "med_credit_limit": 4200.0,
+      "avg_v1_score": 0.5761,
+      "avg_model_score": 0.5697,
+      "pos_rate": 0.5895
+    },
+    {
+      "score_bin": 6,
+      "n": 10051,
+      "avg_credit_limit": 10712.57,
+      "med_credit_limit": 3500.0,
+      "avg_v1_score": 0.6275,
+      "avg_model_score": 0.6311,
+      "pos_rate": 0.648
+    },
+    {
+      "score_bin": 7,
+      "n": 10052,
+      "avg_credit_limit": 7758.44,
+      "med_credit_limit": 3000.0,
+      "avg_v1_score": 0.6754,
+      "avg_model_score": 0.6965,
+      "pos_rate": 0.7288
+    },
+    {
+      "score_bin": 8,
+      "n": 10052,
+      "avg_credit_limit": 4833.24,
+      "med_credit_limit": 2500.0,
+      "avg_v1_score": 0.7239,
+      "avg_model_score": 0.7735,
+      "pos_rate": 0.8084
+    },
+    {
+      "score_bin": 9,
+      "n": 10052,
+      "avg_credit_limit": 3256.98,
+      "med_credit_limit": 2000.0,
+      "avg_v1_score": 0.7979,
+      "avg_model_score": 0.8816,
+      "pos_rate": 0.9009
+    }
+  ],
+  "a_card_fields": "not_available",
+  "feature_count": 311,
+  "decile_lift_oot": [
+    {
+      "decile": 1,
+      "n": 100518,
+      "avg_score": 0.5665,
+      "pos_rate": 0.5515
+    }
+  ]
+}
