@@ -317,32 +317,32 @@
       "description": "",
       "integrity_mode": "content",
       "kind": "file",
-      "mtime": "2026-07-14T18:51:50",
+      "mtime": "2026-07-15T18:46:16",
       "path": "feature_metadata/feature_table_summary.csv",
       "registered_at": "2026-07-14T18:51:50",
       "retention_reason": "generated in the current workspace",
-      "sha256": "eb029f8a21bf8f5cc05cab1bf7a69cd04c464dbdb23ecfef30459f6f3beab79b",
+      "sha256": "203744fb18be5f82a36c86b211df8ae8453914eecc2abece7bcf4dfb113b4c45",
       "size_bytes": 135,
       "source": "generated",
       "stage": "feature_metadata",
       "storage_class": "workspace_only",
-      "size": 135
+      "size": 133
     },
     {
       "contract_role": "required",
       "description": "",
       "integrity_mode": "content",
       "kind": "file",
-      "mtime": "2026-07-14T18:51:50",
+      "mtime": "2026-07-15T18:46:17",
       "path": "feature_metadata/feature_columns.csv",
       "registered_at": "2026-07-14T18:51:51",
       "retention_reason": "generated in the current workspace",
-      "sha256": "f693fbb0379938d782be36ab8cb061a83770bc64d66e0ad90627538e08500986",
+      "sha256": "9ed1c9180f84deb016267c4f6abce1b41c8ad7c792c660158b3973f81a25d128",
       "size_bytes": 32982,
       "source": "generated",
       "stage": "feature_metadata",
       "storage_class": "workspace_only",
-      "size": 32982
+      "size": 32461
     },
     {
       "contract_role": "required",
