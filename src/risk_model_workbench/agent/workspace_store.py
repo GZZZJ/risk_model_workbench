@@ -195,6 +195,9 @@ class WorkspaceStore:
                 os.link(temporary_path, target)
             except FileExistsError:
                 return False
+            except OSError:
+                # hard links not supported on this filesystem; fall back to rename
+                os.rename(temporary_path, target)
             _fsync_directory(target.parent)
             return True
         finally:
