@@ -62,7 +62,7 @@ Agent 产物写入 version workspace，包括 `agent_plan.yml`、
 
 ## 当前状态
 
-截至 2026-07-13：
+截至 2026-07-27：
 
 - 通用工作台代码在 `src/risk_model_workbench/`。
 - 项目模板在 `templates/project/`。
@@ -72,23 +72,19 @@ Agent 产物写入 version workspace，包括 `agent_plan.yml`、
 - 当前 active version 是 `fujie_gcard_v8_20260709_1710`。
 - 当前目标是 `复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告`。
 - `rmw project status` 显示项目状态为 `active`，active version 状态为 `done`，10 个阶段均已完成。
-- `rmw version audit --strict` 当前 verdict 是 `complete`；历史产物仍有 retention metadata 警告，clean-clone 复现口径为 `workspace_dependent`。
+- `rmw version audit --strict` 的执行 verdict 为 `complete`；复现性口径为 `workspace_dependent`，原因是该版本依赖本地 workspace 证据。
 
 active version 是本地全链路重跑证据。历史 imported run 和 legacy run 继续保留用于兼容读取与 lineage 审计，但不作为本轮闭环证据。
 
 ## 当前案例：复借 G 卡
 
+- 活跃版本：`projects/2026-05-fujie-gcard-v1/versions/fujie_gcard_v8_20260709_1710/`
 - 样本表：`ads_app_off_feature.ds29531_backtrack_fj_gcard_model_v6_1_sample`
-- 特征表：70 张，见 `projects/2026-05-fujie-gcard-v1/configs/feature_tables.txt`
-- 候选特征字段：15,028 个
-- 特征元数据：`projects/2026-05-fujie-gcard-v1/data/profile/feature_metadata/feature_columns.csv`
-- 历史标准 imported run：`projects/2026-05-fujie-gcard-v1/runs/2026-06-imported-gcard-main-lgbm/`
-- 历史 imported run 最终特征数：96
-- 训练产物：`modeling/main_lgbm/model.pkl`、`metrics_train_valid.json`、`feature_importance.csv`、`run_config.json`
+- 本地建模样本：489,743 行；样本检查无重复主键。
+- 训练产物：`modeling/main_lgbm/model.pkl`、`train_metrics.json`、`feature_importance.csv`、`run_config.json`
 - 评估产物：`evaluation/overall_metrics.csv`、`monthly_metrics.csv`、`segment_metrics.csv`、`decile_lift_*.csv`、`score_psi_by_month.csv`
 - 报告产物：`reports/model_report.xlsx`、`model_report.md`、`model_report.html`、`model_card.md`、`executive_summary.md`
-- 核心效果：OOT/Valid AUC `0.9363136508774058`，OOT/Valid KS `0.7356204499371735`
-- 评估样本总量：`9,600,000`
+- 核心效果：OOT AUC `0.9345`，OOT KS `0.7318`。
 
 ## Source Of Truth
 
@@ -129,44 +125,34 @@ rmw project status --project projects/2026-05-fujie-gcard-v1
 rmw project status --project projects/2026-05-fujie-gcard-v1 --write-state
 ```
 
-更新项目断点：
+更新项目断点（新建或切换版本时使用 `--active-version-id`）：
 
 ```bash
 rmw project update-state \
   --project projects/2026-05-fujie-gcard-v1 \
-  --active-run-id 2026-06-imported-gcard-main-lgbm \
-  --objective "复借G卡主模型产物标准化与连续性交接机制建设" \
-  --next-action "核对 imported run 中 pending 阶段是否需要标记为 skipped/imported" \
-  --risk "imported run 不是本地全链路重跑证据"
+  --active-version-id fujie_gcard_v8_20260709_1710 \
+  --objective "复借G卡主模型从0重跑：全链路样本检查/特征收敛/LGBM训练/评估/对比/报告" \
+  --next-action "评审报告、模型卡和执行摘要，决定是否进入发布/准入评审"
 ```
 
-查看 run 状态：
+查看版本状态与审计：
 
 ```bash
-rmw run status \
+rmw version status \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id 2026-06-imported-gcard-main-lgbm
-```
+  --version-id fujie_gcard_v8_20260709_1710 \
+  --progress
 
-审计 run 或单个阶段是否可收尾：
-
-```bash
-rmw run audit \
+rmw version audit \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id 2026-06-imported-gcard-main-lgbm
-
-rmw run audit \
-  --project projects/2026-05-fujie-gcard-v1 \
-  --run-id 2026-06-imported-gcard-main-lgbm \
-  --stage report
+  --version-id fujie_gcard_v8_20260709_1710 \
+  --strict
 ```
 
 写会话交接：
 
 ```bash
-rmw handoff write \
-  --project projects/2026-05-fujie-gcard-v1 \
-  --run-id 2026-06-imported-gcard-main-lgbm
+rmw handoff write --project projects/2026-05-fujie-gcard-v1
 ```
 
 写显式复盘：
@@ -174,7 +160,6 @@ rmw handoff write \
 ```bash
 rmw retrospective write \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id 2026-06-imported-gcard-main-lgbm \
   --scope session \
   --note "本次会话完成连续性交接能力建设"
 ```
@@ -211,19 +196,20 @@ rmw plan create \
   --request projects/2026-05-fujie-gcard-v1/requests/model_request_template.md
 ```
 
-把需求文档和执行计划绑定到一次新 run：
+把需求文档和执行计划绑定到一个新版本：
 
 ```bash
-rmw run init \
+rmw version init \
   --project projects/2026-05-fujie-gcard-v1 \
   --workflow full_modeling \
+  --version-id <version_id> \
   --request projects/2026-05-fujie-gcard-v1/requests/model_request_template.md \
   --plan projects/2026-05-fujie-gcard-v1/requests/2026-06-fujie-gcard-baseline.execution_plan.yml
 ```
 
-不要覆盖已有 run。需要重跑时创建新的 `run_id`，除非使用者明确批准覆盖。
+不要覆盖已有版本。需要重跑时创建新的 `version_id`；`--force` 仅用于明确批准的覆盖场景。
 
-## 项目与 Run 初始化
+## 项目与版本初始化
 
 新建模型项目：
 
@@ -235,30 +221,31 @@ rmw init-project \
   --template generic
 ```
 
-登记一次空 run：
+登记一个未绑定需求文档的版本：
 
 ```bash
-rmw run init \
+rmw version init \
   --project projects/2026-05-fujie-gcard-v1 \
-  --workflow full_modeling
+  --workflow full_modeling \
+  --version-id <version_id>
 ```
 
-导入真实复借 G 卡训练、评估和报告产物到标准 run：
+`rmw run` 仅保留给历史 run 的兼容读取和迁移；新工作应使用 `rmw version`。需要迁移旧 run 时，使用：
 
 ```bash
-rmw run import-gcard-model-artifacts \
+rmw version migrate-run \
   --project projects/2026-05-fujie-gcard-v1 \
   --run-id 2026-06-imported-gcard-main-lgbm
 ```
 
-导入命令用于标准化历史产物，不代表本地重新执行了全链路。
+迁移或导入的历史产物不代表本地重新执行了全链路。
 
 ## 特征筛选与 SQL Gate
 
 导出特征表元数据：
 
 ```bash
-rmw feature metadata --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
+rmw feature metadata --project projects/2026-05-fujie-gcard-v1 --version-id <version_id>
 ```
 
 先生成特征初筛取数 SQL 给使用者确认，不拉数：
@@ -266,7 +253,7 @@ rmw feature metadata --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
 ```bash
 rmw feature prescreen \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --dry-run-sql
 ```
 
@@ -275,7 +262,7 @@ rmw feature prescreen \
 ```bash
 rmw feature prescreen \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --refresh-dp-cache \
   --sql-approved
 ```
@@ -283,7 +270,7 @@ rmw feature prescreen \
 生成特征初筛后的宽表 SQL：
 
 ```bash
-rmw build-wide-sql --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
+rmw build-wide-sql --project projects/2026-05-fujie-gcard-v1 --version-id <version_id>
 ```
 
 先生成宽表后收敛取数 SQL 给使用者确认，不拉数：
@@ -291,7 +278,7 @@ rmw build-wide-sql --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
 ```bash
 rmw feature refine \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --dry-run-sql
 ```
 
@@ -300,7 +287,7 @@ rmw feature refine \
 ```bash
 rmw feature refine \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --refresh-dp-cache \
   --sql-approved
 ```
@@ -314,10 +301,10 @@ rmw feature refine \
 ```bash
 rmw train \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --experiment main_lgbm \
-  --input-feather runs/modeling_input/modeling_sample.feather \
-  --feature-list runs/modeling_feature_set/feature_list.txt
+  --input-feather <path/to/modeling_sample.feather> \
+  --feature-list <path/to/feature_list.txt>
 ```
 
 在有本地打分 feather 时执行标准评估：
@@ -325,8 +312,8 @@ rmw train \
 ```bash
 rmw evaluate \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
-  --scores-feather runs/model_scores/scores_all_splits.feather
+  --version-id <version_id> \
+  --scores-feather <path/to/scores_all_splits.feather>
 ```
 
 生成 champion/challenger 对比：
@@ -334,14 +321,14 @@ rmw evaluate \
 ```bash
 rmw compare \
   --project projects/2026-05-fujie-gcard-v1 \
-  --run-id <run_id> \
+  --version-id <version_id> \
   --champion gcard_v6
 ```
 
 从标准训练和评估产物生成报告：
 
 ```bash
-rmw report --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
+rmw report --project projects/2026-05-fujie-gcard-v1 --version-id <version_id>
 ```
 
 如果本地 feather 训练数据或打分结果不可用，部分命令可能生成 scaffold artifact。scaffold artifact 不能当成真实建模证据。
@@ -362,7 +349,8 @@ rmw report --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
 - `src/jingying_model_agent/`、`src/jingying_agent/`、`jingying_agent/`、`agent.py`：兼容层和历史入口。
 - `projects/2026-05-fujie-gcard-v1/configs/`：项目配置。
 - `projects/2026-05-fujie-gcard-v1/queries/`：SQL 草稿和生成 SQL。
-- `projects/2026-05-fujie-gcard-v1/runs/`：run workspace、状态、审计、模型、评估和报告产物。
+- `projects/2026-05-fujie-gcard-v1/versions/`：版本 workspace、状态、审计、模型、评估和报告产物；新工作以此为准。
+- `projects/2026-05-fujie-gcard-v1/runs/`：历史 run 兼容读取与 lineage 审计目录。
 - `projects/2026-05-fujie-gcard-v1/legacy_scripts/`：历史项目脚本，仅作回溯和迁移参考。
 - `tools/model_request_builder/`：静态模型需求生成器。
 - `vendor/feature-select-v2/`：vendored feature selection 实现。
@@ -381,9 +369,9 @@ rmw report --project projects/2026-05-fujie-gcard-v1 --run-id <run_id>
 
 ## 标准化边界
 
-通用逻辑放在 `src/risk_model_workbench/`。项目特定口径放在项目配置、请求文档、run workspace 或 `legacy_scripts/`。
+通用逻辑放在 `src/risk_model_workbench/`。项目特定口径放在项目配置、请求文档、version workspace 或 `legacy_scripts/`。
 
-真实项目里的临时脚本和产物应先导入到一次标准 run，再判断哪些逻辑值得固化为通用 CLI。不要直接把一次性路径、样本口径或业务假设写进通用模块。
+真实项目里的临时脚本和产物应先迁移或登记到标准 version，再判断哪些逻辑值得固化为通用 CLI。不要直接把一次性路径、样本口径或业务假设写进通用模块。
 
 `vendor/feature-select-v2/scripts/code/` 视为只读，除非使用者明确要求修改。
 
