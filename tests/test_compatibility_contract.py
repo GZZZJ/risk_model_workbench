@@ -62,9 +62,11 @@ READ_ONLY_CASES = (
 CURRENT_PICKLE_MODULES = {
     "collections",
     "lightgbm.basic",
+    "lightgbm.sklearn",
     "numpy",
     "numpy._core.multiarray",
     "numpy.core.multiarray",
+    "sklearn.preprocessing._label",
 }
 LEGACY_PICKLE_PREFIXES = ("jingying_agent", "jingying_model_agent")
 _MEMORY_ADDRESS = re.compile(r" at 0x[0-9a-fA-F]+")

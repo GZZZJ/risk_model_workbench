@@ -15,6 +15,7 @@ from risk_model_workbench.reporting.excel_report import (
 from risk_model_workbench.reporting.html_report import (
     _report_html_script,
     _report_html_style,
+    normalize_markdown_tables,
     render_model_report_html,
 )
 
@@ -50,7 +51,7 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
     assert '<aside class="sidebar"' in html
     assert 'href="#model-description"' in html
     assert '<main class="report-shell">' in html
-    assert "<h2>模型描述</h2>" in html
+    assert '<h2 data-section-id="model-description">模型描述</h2>' in html
     assert "一、模型描述" not in html
     assert '<h3 class="section-subtitle">模型效果</h3>' in html
     assert "二、模型效果" not in html
@@ -58,6 +59,98 @@ def test_html_report_renderer_module_matches_legacy_wrapper():
     assert "<table>" in html
     assert '<div class="report-image-grid">' in html
     assert '<img src="woe_top_features/images/001_feature_a_WOE.png" alt="Top 1: feature_a">' in html
+
+
+def test_html_report_normalizes_compacted_table_rows_and_preserves_regular_rows():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "## 1. 样本分布",
+            "",
+            "| 切分 | 样本量 |",
+            "| --- | --- |",
+            "| DEV | 100 || OOT | 200 |",
+            "| HOLDOUT | 50 |",
+        ]
+    )
+
+    normalized = normalize_markdown_tables(markdown + "\n")
+    html = render_model_report_html(markdown)
+
+    assert "| DEV | 100 |\n| OOT | 200 |" in normalized
+    assert "| HOLDOUT | 50 |" in normalized
+    assert normalized.endswith("\n")
+    assert html.count("<tr>") == 4  # header + DEV + OOT + ordinary row
+    assert "<tr><td>DEV</td><td>100</td></tr>" in html
+    assert "<tr><td>OOT</td><td>200</td></tr>" in html
+    assert "<tr><td>HOLDOUT</td><td>50</td></tr>" in html
+
+
+def test_html_report_restores_blank_trailing_cells_in_compacted_rows():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "## 1. 分客群效果",
+            "",
+            "| 客群 | AUC | 备注 |",
+            "| --- | --- | --- |",
+            "| DEV | 0.7000 | || OOT | N/A | 不可评估 |",
+        ]
+    )
+
+    normalized = normalize_markdown_tables(markdown)
+    html = render_model_report_html(markdown)
+
+    assert "| DEV | 0.7000 | |\n| OOT | N/A | 不可评估 |" in normalized
+    assert "<tr><td>DEV</td><td>0.7000</td><td></td></tr>" in html
+    assert "<tr><td>OOT</td><td>N/A</td><td>不可评估</td></tr>" in html
+
+
+def test_html_report_keeps_a_legitimate_empty_middle_table_cell_as_one_row():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "## 1. 合法空单元格",
+            "",
+            "| 第一列 | 第二列 | 第三列 |",
+            "| --- | --- | --- |",
+            "| A || B |",
+        ]
+    )
+
+    normalized = normalize_markdown_tables(markdown)
+    html = render_model_report_html(markdown)
+
+    assert normalized == markdown
+    assert html.count("<tr>") == 2
+    assert "<tr><td>A</td><td></td><td>B</td></tr>" in html
+
+
+def test_html_report_sidebar_uses_the_same_ids_as_rendered_sections():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "## 1. 样本分布",
+            "",
+            "## 2. 模型描述",
+            "",
+            "## 3. 模型描述",
+        ]
+    )
+
+    html = render_model_report_html(markdown)
+
+    assert 'href="#section-1"' in html
+    assert 'data-section-id="section-1"' in html
+    assert 'href="#model-description"' in html
+    assert 'data-section-id="model-description"' in html
+    assert 'href="#model-description-2"' in html
+    assert 'data-section-id="model-description-2"' in html
+    assert "heading.dataset.sectionId" in _report_html_script()
 
 
 def test_html_report_loads_style_and_script_assets():
@@ -68,6 +161,130 @@ def test_html_report_loads_style_and_script_assets():
     assert ".report-shell" in style
     assert "DOMContentLoaded" in script
     assert "enhanceNumericTable" in script
+
+
+def test_html_report_renders_pipe_metadata_as_distinct_hero_and_sidebar_items():
+    markdown = "\n".join(
+        [
+            "# 首借模型报告",
+            "",
+            "生成日期：2026-07-15 | 版本：shoujie_t0_gcard_v1 | 模型：moderate_reg (LightGBM)",
+            "",
+            "## 1. 模型描述",
+        ]
+    )
+
+    html = render_model_report_html(markdown)
+
+    assert '<span class="hero-meta-key">生成日期：</span><span class="hero-meta-value">2026-07-15</span>' in html
+    assert '<span class="hero-meta-key">版本：</span><span class="hero-meta-value">shoujie_t0_gcard_v1</span>' in html
+    assert '<span class="hero-meta-key">模型：</span><span class="hero-meta-value">moderate_reg (LightGBM)</span>' in html
+    assert '<span class="sidebar-meta-key">版本</span><span class="sidebar-meta-value">shoujie_t0_gcard_v1</span>' in html
+    assert "生成日期：2026-07-15 | 版本：" not in html
+
+
+def test_html_report_renders_extended_markdown_blocks_without_breaking_sections_or_tables():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "生成日期：2026-07-15",
+            "",
+            "## 1. 结论",
+            "",
+            "1. **建议灰度** — 先验证 *OOT* 表现。",
+            "2. 保留 `feature_a*b` 作为代码文本。",
+            "",
+            "---",
+            "",
+            "```text",
+            "0.806306, 0.706153",
+            "```",
+            "",
+            "| 指标 | 值 |",
+            "| --- | --- |",
+            "| KS | 0.365 |",
+        ]
+    )
+
+    html = render_model_report_html(markdown)
+
+    assert '<h2 data-section-id="section-1">结论</h2>' in html
+    assert "<ol>" in html
+    assert "<strong>建议灰度</strong>" in html
+    assert "<em>OOT</em>" in html
+    assert "<code>feature_a*b</code>" in html
+    assert "<hr>" in html
+    assert '<pre><code class="language-text">0.806306, 0.706153</code></pre>' in html
+    assert "<table>" in html
+
+
+def test_html_report_turns_canonical_summary_table_into_decision_cards():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "生成日期：2026-07-15",
+            "",
+            "## 总结",
+            "",
+            "| 维度 | 结论 | 证据 |",
+            "| --- | --- | --- |",
+            "| 整体效果 | **建议灰度** | OOT KS +2.1pp，AUC +1.3pp。 |",
+            "| 上线边界 | 保留监控 | OOT 仅覆盖 2 个月。 |",
+            "",
+            "## 模型描述",
+            "",
+            "| 维度 | 结论 | 证据 |",
+            "| --- | --- | --- |",
+            "| 普通表格 | 应保留表格 | 不属于总结。 |",
+        ]
+    )
+
+    html = render_model_report_html(markdown)
+
+    assert '<div class="summary-decision-grid">' in html
+    assert html.count('<article class="summary-decision-card">') == 2
+    assert '<h3 class="summary-decision-title">整体效果</h3>' in html
+    assert '<strong>建议灰度</strong>' in html
+    assert 'OOT KS +2.1pp，AUC +1.3pp。' in html
+    assert '<span class="summary-decision-evidence-label">证据</span>' in html
+    assert '<td>普通表格</td><td>应保留表格</td><td>不属于总结。</td>' in html
+
+
+def test_html_report_renders_details_directive_as_collapsed_markdown_content():
+    markdown = "\n".join(
+        [
+            "# Demo Report",
+            "",
+            "生成日期：2026-07-15",
+            "",
+            "## 模型效果",
+            "",
+            "正文结论。",
+            "",
+            ":::details 查看全量分客群明细",
+            "该明细默认折叠。",
+            "",
+            "| 客群 | OOT KS |",
+            "| --- | --- |",
+            "| 初审 | 0.321 |",
+            "| 重审 | 0.287 |",
+            ":::",
+            "",
+            "后续说明。",
+        ]
+    )
+
+    html = render_model_report_html(markdown)
+
+    assert '<details class="report-details">' in html
+    assert '<summary>查看全量分客群明细</summary>' in html
+    assert '<div class="report-details-content">' in html
+    assert '<p>该明细默认折叠。</p>' in html
+    assert '<table>\n<tr><th>客群</th><th>OOT KS</th></tr>\n<tr><td>初审</td><td>0.321</td></tr>' in html
+    assert '</details>' in html
+    assert '<p>后续说明。</p>' in html
 
 
 def test_markdown_table_localizes_headers_and_percentages():

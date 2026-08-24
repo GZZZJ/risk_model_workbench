@@ -1,6 +1,6 @@
 # ADR 0003: External Host-Agent and Deterministic Harness Contract
 
-- status: accepted
+- status: superseded by ADR 0005
 - date: 2026-07-10
 
 ## Context

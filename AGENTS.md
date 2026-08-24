@@ -62,7 +62,7 @@ As of 2026-07-01:
 
 ## Commands
 
-- Install editable package: `pip install -e ".[modeling]"`
+- Install editable package: `pip install -e ".[modeling,agent-openai]"`
 - Check environment: `rmw doctor`
 - Validate project: `rmw project validate --project projects/2026-05-fujie-gcard-v1`
 - Show project status: `rmw project status --project projects/2026-05-fujie-gcard-v1`
@@ -99,18 +99,21 @@ and handoffs.
   `rmw request validate`, create an execution plan with `rmw plan create`, and
   bind the request/plan into a new version with `rmw version init`.
 
-## Host-Agent LLM Tuning
+## Embedded-Agent LLM Tuning
 
-For binary LightGBM requests with `training.mode: llm_guided_tune`, the outer
-Codex or ClaudeCode session is the preferred tuning advisor. The workbench
-should not require a separate LLM API client for this workflow.
+For binary LightGBM requests with `training.mode: llm_guided_tune`, the embedded
+LangGraph/LangChain reasoning runtime is the tuning advisor. Runtime execution
+must not depend on an outer Codex or Claude Code session. Model providers,
+including Anthropic Claude, are accessed through the provider-neutral
+LangChain gateway and do not receive RMW actions directly.
 
-If `rmw train` returns `advisor_required`, read the emitted
-`modeling/<experiment>/tuning_context_round_<n>.json`, write a structured plan to
-`modeling/<experiment>/llm_tuning_plan_round_<n>.json`, then rerun `rmw train`.
-Use 3-5 bounded candidates, explain each candidate, and let the workbench's
-metric rules select the final trial. Do not optimize directly against OOT as the
-primary tuning target.
+If `rmw train` returns `advisor_required`, `rmw agent run/resume` must load the
+emitted `modeling/<experiment>/tuning_context_round_<n>.json`, call the embedded
+model with structured output, validate and write
+`modeling/<experiment>/llm_tuning_plan_round_<n>.json`, then rerun the bounded
+training action. Use 3-5 candidates, explain each candidate, and let the
+workbench's metric rules select the final trial. Do not optimize directly
+against OOT as the primary tuning target.
 
 Plan file shape:
 

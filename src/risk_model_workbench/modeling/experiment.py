@@ -300,9 +300,9 @@ def run_experiment(context: VersionContext, params: dict[str, Any]) -> None:
         append_decision(context.workspace, stage="train_baseline", decision="done", reason=f"{algorithm} training completed from local feather data")
         stage_action_done(context.workspace, "train_baseline")
     except Exception as exc:
-        from risk_model_workbench.modeling.llm_tuning import HostAgentTuningPlanRequired
+        from risk_model_workbench.modeling.llm_tuning import AdvisorTuningPlanRequired
 
-        advisor = isinstance(exc, HostAgentTuningPlanRequired)
+        advisor = isinstance(exc, AdvisorTuningPlanRequired)
         status_name = "advisor_required" if advisor else "failed"
         failure_code = "advisor_required" if advisor else classify_exception(exc)
         _write_json(output / "train_metrics.json", {"status": status_name, "reason": str(exc), "experiment": experiment, "algorithm": algorithm})

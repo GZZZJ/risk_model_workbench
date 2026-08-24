@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     section.className = 'report-section';
     var title = heading.textContent.trim();
     var match = idByTitle.find(function (pair) { return title.indexOf(pair[0]) !== -1; });
-    section.id = match ? match[1] : 'section-' + (index + 1);
+    section.id = heading.dataset.sectionId || (match ? match[1] : 'section-' + (index + 1));
 
     var badge = document.createElement('span');
     badge.className = 'section-number';

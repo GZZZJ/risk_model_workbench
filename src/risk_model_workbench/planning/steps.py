@@ -226,9 +226,9 @@ STEP_REGISTRY: dict[str, dict[str, Any]] = {
     "llm_guided_tuning": {
         "id": "llm_guided_tuning",
         "stage": "train_baseline",
-        "description": "Run bounded host-agent LightGBM candidate tuning and select the final trial by metric guardrails.",
+        "description": "Run bounded embedded-Agent LightGBM candidate tuning and select the final trial by metric guardrails.",
         "default_params": {"max_rounds": 2, "candidates_per_round": 4, "max_trials": 8},
-        "source_reference": "RMW host-agent tuning flow",
+        "source_reference": "RMW embedded-Agent tuning flow",
         "implementation_status": "implemented",
     },
     "scale_pos_weight": {

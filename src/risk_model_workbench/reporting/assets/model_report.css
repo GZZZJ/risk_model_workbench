@@ -59,6 +59,15 @@ a{color:inherit;text-decoration:none}
   line-height:1.5;
   margin-bottom:16px;
 }
+.sidebar-meta-row{
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr);
+  gap:6px;
+  align-items:baseline;
+  margin:4px 0;
+}
+.sidebar-meta-key{color:#8795a5;font-size:11px}
+.sidebar-meta-value{color:#d5dee8;overflow-wrap:anywhere}
 .nav-list{display:grid;gap:4px}
 .nav-item{
   display:grid;
@@ -158,6 +167,9 @@ a{color:inherit;text-decoration:none}
   font-size:12px;
   font-weight:650;
 }
+.hero-meta .hero-badge{display:inline-flex;align-items:baseline;gap:4px}
+.hero-meta-key{color:#718094;font-weight:750}
+.hero-meta-value{color:#344256;font-weight:750}
 .report-body{
   max-width:1440px;
   margin:0 auto;
@@ -286,9 +298,130 @@ h3.section-subtitle{
   max-width:180px;
 }
 .summary-card strong{font-weight:850;color:var(--ink-strong)}
+.summary-decision-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:12px 0 18px;
+}
+.summary-decision-card{
+  min-width:0;
+  padding:15px;
+  border:1px solid #d8e2eb;
+  border-top:3px solid var(--accent);
+  border-radius:8px;
+  background:linear-gradient(145deg,#fff 0,#f8fbfd 100%);
+  box-shadow:var(--shadow-soft);
+}
+.summary-decision-title{
+  display:inline-flex;
+  align-items:center;
+  margin:0 0 9px;
+  color:#315d80;
+  font-size:13px;
+  font-weight:850;
+}
+.summary-decision-conclusion{
+  color:var(--ink-strong);
+  font-size:15px;
+  font-weight:800;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.summary-decision-evidence{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:7px;
+  align-items:start;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid #e2e9ef;
+}
+.summary-decision-evidence-label{
+  padding:2px 6px;
+  border-radius:4px;
+  background:#e8f0f6;
+  color:#526c82;
+  font-size:11px;
+  font-weight:800;
+}
+.summary-decision-evidence p{
+  margin:0;
+  color:#516174;
+  font-size:12px;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.summary-decision-empty{color:var(--muted)}
+.report-details{
+  margin:14px 0 18px;
+  overflow:hidden;
+  border:1px solid #d5e0e8;
+  border-radius:8px;
+  background:#fbfcfd;
+}
+.report-details>summary{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:42px;
+  padding:10px 14px;
+  cursor:pointer;
+  color:#365f82;
+  font-weight:800;
+  list-style:none;
+}
+.report-details>summary::-webkit-details-marker{display:none}
+.report-details>summary:before{
+  content:"›";
+  display:grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#e6eff6;
+  color:var(--accent);
+  font-size:17px;
+  line-height:1;
+  transition:transform .16s ease,background .16s ease;
+}
+.report-details[open]>summary{
+  border-bottom:1px solid #e0e8ee;
+  background:#f3f8fc;
+}
+.report-details[open]>summary:before{
+  transform:rotate(90deg);
+  background:#d9eaf6;
+}
+.report-details>summary:focus-visible{
+  outline:3px solid rgba(65,111,147,.32);
+  outline-offset:-3px;
+}
+.report-details-content{padding:4px 14px 2px}
+.report-details-content .table-wrap{margin:10px 0 16px}
+.report-details-content .summary-decision-grid{margin-top:10px}
 p{margin:9px 0 12px;color:#344256}
-ul{margin:8px 0 14px;padding-left:19px}
+ul,ol{margin:8px 0 14px;padding-left:19px}
 li{margin:4px 0}
+em{color:#536579}
+hr{
+  height:1px;
+  margin:22px 0;
+  border:0;
+  background:linear-gradient(90deg,transparent,var(--line),transparent);
+}
+pre{
+  margin:12px 0 18px;
+  padding:13px 15px;
+  overflow:auto;
+  border:1px solid #d6e0e8;
+  border-radius:7px;
+  background:#f3f6f8;
+  color:#21303f;
+  font:12px/1.6 'SFMono-Regular',Menlo,Consolas,monospace;
+  white-space:pre;
+}
+pre code{padding:0;background:transparent;color:inherit;font-size:inherit}
 blockquote{
   margin:12px 0 16px;
   padding:11px 14px;
@@ -618,6 +751,7 @@ code{
   .report-hero h1{font-size:24px}
   .report-body{padding:16px}
   .summary-grid{grid-template-columns:1fr}
+  .summary-decision-grid{grid-template-columns:1fr}
   .paired-tables{grid-template-columns:1fr}
   .report-image-grid{grid-template-columns:1fr}
   .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}

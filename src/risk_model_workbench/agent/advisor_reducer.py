@@ -295,7 +295,7 @@ def _validate_tuning_outputs(workspace: Path, request: dict[str, Any], response:
                 validate_tuning_plan(
                     plan,
                     tuning_cfg,
-                    advisor_type="host_agent_response",
+                    advisor_type="embedded_agent_response",
                     expected_experiment=expected_experiment,
                     expected_round=expected_round,
                 )

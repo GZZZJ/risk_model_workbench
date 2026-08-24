@@ -1,14 +1,46 @@
 # RMW Agent Product
 
-`RMW Agent` is the local semi-autonomous Agent runtime for
+`RMW Agent` is the standalone embedded Agent runtime for
 `risk_model_workbench`. It turns a model request into a version-scoped,
 auditable execution loop while preserving explicit approval for high-risk
-actions.
+actions. The implementation uses LangGraph/LangChain. Optional provider
+adapters can use OpenAI or Anthropic Claude without introducing another Agent
+runtime.
 
 ## User Flow
 
-1. Create or receive a Markdown model request.
-2. Start an Agent-managed version:
+1. Create a Python 3.12 environment and install the Agent provider adapter:
+
+   ```bash
+   /opt/anaconda3/bin/python -m venv .venv
+   .venv/bin/python -m pip install -e ".[modeling,agent-openai]"
+   ```
+
+2. Configure a model without writing its credential into project files:
+
+   ```bash
+   export RMW_AGENT_PROVIDER=openai
+   export RMW_AGENT_MODEL=<model-name>
+   export OPENAI_API_KEY=<secret>
+   .venv/bin/rmw agent model status
+   ```
+
+   `RMW_AGENT_BASE_URL` may point the OpenAI adapter at a compatible local or
+   private endpoint. LangSmith tracing is not enabled by RMW and should remain
+   off unless the data-governance review explicitly permits it.
+
+   To use Claude through the same LangGraph runtime:
+
+   ```bash
+   .venv/bin/python -m pip install -e ".[modeling,agent-anthropic]"
+   export RMW_AGENT_PROVIDER=anthropic
+   export RMW_AGENT_MODEL=<claude-model-name>
+   export ANTHROPIC_API_KEY=<secret>
+   .venv/bin/rmw agent model status
+   ```
+
+3. Create or receive a Markdown model request.
+4. Start an Agent-managed version:
 
    ```bash
    rmw agent start \
@@ -18,21 +50,21 @@ actions.
      --workflow full_modeling
    ```
 
-3. Run or resume the Agent:
+5. Run or resume the Agent:
 
    ```bash
    rmw agent run --project <project> --version-id <version_id>
    rmw agent resume --project <project> --version-id <version_id>
    ```
 
-4. Inspect state:
+6. Inspect state:
 
    ```bash
    rmw agent status --project <project> --version-id <version_id>
    rmw version audit --project <project> --version-id <version_id> --strict
    ```
 
-5. When a SQL/DP action pauses for approval, review the generated SQL and
+7. When a SQL/DP action pauses for approval, review the generated SQL and
    approval record, then approve explicitly:
 
    ```bash
@@ -51,14 +83,15 @@ Agent states:
 - `draft`: Agent plan and state are initialized but not executing.
 - `running`: a safe task is executing or pending execution.
 - `waiting_for_approval`: a high-risk SQL/DP action needs explicit approval.
-- `waiting_for_advisor`: Host-Agent input is required, such as a tuning plan.
+- `waiting_for_advisor`: the embedded reasoning layer must produce and validate
+  a structured decision, such as a tuning plan.
 - `waiting_for_user`: an accepted Advisor decision needs explicit human
   confirmation.
 - `reconciliation_required`: an external operation outcome cannot be proved
   locally and must not be retried automatically.
 - `blocked`: no task can safely run.
 - `failed`: a task failed with a non-recoverable failure.
-- `stopped`: an explicit Host-Agent or human decision stopped execution.
+- `stopped`: an explicit embedded-Advisor or human decision stopped execution.
 - `done`: all tasks completed and strict evidence can close.
 - `done_with_gaps`: execution finished with scaffold/imported/incomplete
   evidence or strict audit did not reach `complete`.
@@ -93,28 +126,24 @@ Default policy:
 The Agent writes approval requests to `audit/approvals.yml`. Approval is bound
 to the exact command hash, so changing the command requires a new approval.
 
-## Host-Agent Boundary
+## Embedded Reasoning Boundary
 
-The local runtime does not call an LLM API. When it needs judgment, it writes an
-advisor request under `audit/advisor_requests/` and pauses. Codex or Claude Code
-can inspect the context, write the required plan or fix inputs, then the user
-can resume the Agent.
+When deterministic execution needs judgment, the Harness writes an immutable
+Advisor request and bounded Context Pack. LangGraph invokes the configured model
+provider through structured output, writes model invocation evidence, submits
+the answer through the existing Advisor validator, and consumes it exactly once
+before execution continues. Provider adapters cannot call ActionRunner or
+receive RMW tools directly.
 
-Advisor exchange is a local file protocol:
+The model may recommend `continue`, `retry`, `stop`, or explicit user
+confirmation. It cannot call ActionRunner directly, bypass approval, mutate
+Agent state, or write the artifact manifest. Missing credentials, provider
+failure, malformed output, stale context, and exhausted retry budgets all fail
+closed locally; they do not hand control to an external coding Agent.
 
-1. The Agent writes `audit/advisor_requests/<request_id>.json`.
-2. The Host-Agent or human expert writes a matching response JSON.
-3. The user accepts the response:
-
-   ```bash
-   rmw agent advisor accept \
-     --project <project> \
-     --version-id <version_id> \
-     --response <response.json>
-   ```
-
-4. `rmw agent resume` verifies that the response matches the request before
-   execution continues.
+The Advisor file commands remain available for audit inspection and reading
+legacy workspaces. Manual `advisor accept` is a compatibility and expert-review
+path, not a required runtime step.
 
 Useful inspection commands:
 
@@ -141,15 +170,20 @@ An Agent-managed version includes:
 - `audit/agent_trace.jsonl`: append-only observation, decision, action, and
   result log.
 - `audit/approvals.yml`: approval ledger for high-risk actions.
-- `audit/advisor_requests/*.json`: structured Host-Agent handoff requests.
+- `audit/advisor_requests/*.json`: durable structured reasoning requests.
 - `audit/advisor_responses/*.json`: accepted Advisor responses.
+- `audit/model_invocations/*.json`: provider/model, prompt and response hashes,
+  token usage, decision identity, and fail-closed evidence.
+- `audit/agent_graph.sqlite`: local LangGraph orchestration checkpoints; never
+  the business source of truth.
 
 Completion still depends on `version_state.yml`, `audit/artifact_manifest.json`,
 workflow contracts, and `rmw version audit --strict`.
 
-The normative Host-Agent/Harness boundary, state-transition table, version
-compatibility policy, and completion invariants are defined in
-[ADR 0003](adr/0003-host-agent-harness-contract.md).
+The embedded runtime decision and state-ownership boundary is defined in
+[ADR 0005](adr/0005-embedded-langgraph-agent-runtime.md). The original external
+Host-Agent contract remains in [ADR 0003](adr/0003-host-agent-harness-contract.md)
+as compatibility history.
 
 ## Harness Evaluation
 
@@ -180,14 +214,16 @@ The JSON result reports exact numerators and denominators:
   scenario IDs responsible for the count.
 
 Count metrics fail closed: a failed guard fixture is reported as a potential
-escape or forbidden execution until the scenario passes. Host-Agent answer
-quality is intentionally excluded. Runtime tests use golden Advisor responses;
-recommendation quality belongs to the domain Skill evaluations.
+escape or forbidden execution until the scenario passes. Embedded model-answer
+quality is evaluated separately with golden structured answers, parameter
+bounds, safe-stop cases, and trajectory tests; an LLM judge is supplementary,
+not the source of truth.
 
 ## Optional MCP Action Adapter
 
-Codex and Claude may expose the same local typed action protocol through
-`risk_model_workbench.adapters.mcp.MCPActionAdapter`. The adapter is not an
+External clients may expose the same local typed action protocol through
+`risk_model_workbench.adapters.mcp.MCPActionAdapter`. MCP is optional and is not
+required by the standalone runtime. The adapter is not an
 execution engine or server: it publishes MCP-safe capability schemas, validates
 parameters, delegates once to an injected policy-gated ActionRunner, and
 returns the structured ActionResult.

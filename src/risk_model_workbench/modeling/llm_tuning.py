@@ -41,20 +41,25 @@ DEFAULT_TUNING = {
     "max_trials": 8,
     "objective": {"primary_metric": "valid_ks", "secondary_metric": "valid_auc"},
     "guardrails": {"max_train_valid_auc_gap": 0.03},
-    "advisor": {"mode": "host_agent", "fallback_to_heuristic": True},
+    "advisor": {"mode": "embedded_agent", "fallback_to_heuristic": False},
 }
 
 
-class HostAgentTuningPlanRequired(RuntimeError):
-    """Raised when Codex/ClaudeCode should provide the next tuning plan."""
+class AdvisorTuningPlanRequired(RuntimeError):
+    """Raised when the embedded Agent should provide the next tuning plan."""
 
     def __init__(self, *, plan_path: str | Path | None, context_path: str | Path | None = None) -> None:
         self.plan_path = str(plan_path or "")
         self.context_path = str(context_path or "")
-        detail = f"host agent tuning plan required: write {self.plan_path}"
+        detail = f"embedded advisor tuning plan required: write {self.plan_path}"
         if self.context_path:
             detail += f" from {self.context_path}"
         super().__init__(detail)
+
+
+# Compatibility alias for imported legacy project scripts and serialized test
+# fixtures. New runtime code uses the provider-neutral name above.
+HostAgentTuningPlanRequired = AdvisorTuningPlanRequired
 
 
 def llm_guided_tuning_enabled(config: dict[str, Any]) -> bool:
@@ -113,8 +118,18 @@ def suggest_lgb_candidates(
             plan = _suggest_with_heuristic(context, tuning_cfg)
             plan["fallback_reason"] = str(exc)
             return plan
-    mode = str(advisor.get("mode") or advisor.get("type") or "host_agent").strip().lower()
-    if mode in {"host_agent", "agent_in_loop", "codex", "claudecode", "claude_code", "claude-code"}:
+    mode = str(advisor.get("mode") or advisor.get("type") or "embedded_agent").strip().lower()
+    if mode in {
+        "embedded_agent",
+        "advisor",
+        # Read legacy configurations without requiring the named Host Agent.
+        "host_agent",
+        "agent_in_loop",
+        "codex",
+        "claudecode",
+        "claude_code",
+        "claude-code",
+    }:
         if plan_path and Path(plan_path).exists():
             plan = json.loads(Path(plan_path).read_text(encoding="utf-8"))
             expected_round = int(context.get("round", 0) or 0) or None
@@ -122,15 +137,15 @@ def suggest_lgb_candidates(
             return validate_tuning_plan(
                 plan,
                 tuning_cfg,
-                advisor_type="host_agent_plan_file",
+                advisor_type="embedded_agent_plan_file",
                 expected_experiment=expected_experiment,
                 expected_round=expected_round,
             )
         if advisor.get("fallback_to_heuristic", True) is False:
-            raise HostAgentTuningPlanRequired(plan_path=plan_path, context_path=context_path)
+            raise AdvisorTuningPlanRequired(plan_path=plan_path, context_path=context_path)
         plan = _suggest_with_heuristic(context, tuning_cfg)
-        plan["advisor_type"] = "host_agent_unavailable_local_heuristic_fallback"
-        plan["fallback_reason"] = "host agent plan file not found; used local heuristic fallback"
+        plan["advisor_type"] = "embedded_agent_unavailable_local_heuristic_fallback"
+        plan["fallback_reason"] = "embedded Advisor plan file not found; used local heuristic fallback"
         return plan
     return _suggest_with_heuristic(context, tuning_cfg)
 

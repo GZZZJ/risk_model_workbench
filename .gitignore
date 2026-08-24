@@ -30,6 +30,10 @@ projects/*/runs/**/*.feather
 projects/*/versions/**/*.feather
 projects/*/runs/**/sample.pkl
 projects/*/versions/**/sample.pkl
+projects/*/runs/**/audit/agent_graph.sqlite*
+projects/*/versions/**/audit/agent_graph.sqlite*
+projects/*/runs/**/audit/.progress.lock
+projects/*/versions/**/audit/.progress.lock
 
 # Local generated package metadata.
 *.egg-info/

@@ -1,4 +1,10 @@
 pyyaml>=6.0
+pydantic>=2.7,<3.0
+langchain>=1.0,<2.0
+langchain-openai>=1.0,<2.0
+langchain-anthropic>=1.6,<1.7
+langgraph>=1.0,<2.0
+langgraph-checkpoint-sqlite>=2.0,<4.0
 pandas
 pyarrow
 scikit-learn

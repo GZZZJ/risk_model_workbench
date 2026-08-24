@@ -583,11 +583,25 @@ def _runtime_subprocess_env() -> dict[str, str]:
     environment = _clean_subprocess_env()
     runtime_pythonpath = os.environ.get("RMW_TEST_RUNTIME_PYTHONPATH")
     if not runtime_pythonpath:
-        return environment
+        # Nested venvs created from a venv do not inherit the outer venv's
+        # site-packages even with --system-site-packages. Reuse dependency-only
+        # site directories while still proving the installed RMW package comes
+        # from the isolated source/wheel under test.
+        runtime_pythonpath = os.pathsep.join(
+            entry
+            for entry in sys.path
+            if entry and "site-packages" in entry and Path(entry).is_dir()
+        )
+        if not runtime_pythonpath:
+            return environment
     repo_root = REPO_ROOT.resolve()
     for entry in runtime_pythonpath.split(os.pathsep):
         candidate = Path(entry).resolve()
-        assert candidate != repo_root and repo_root not in candidate.parents, (
+        dependency_only_repo_venv = (
+            candidate.is_relative_to(repo_root / ".venv")
+            and "site-packages" in candidate.parts
+        )
+        assert dependency_only_repo_venv or (candidate != repo_root and repo_root not in candidate.parents), (
             "RMW_TEST_RUNTIME_PYTHONPATH must contain dependencies only, not repository sources",
             candidate,
         )

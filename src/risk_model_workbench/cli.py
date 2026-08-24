@@ -28,7 +28,16 @@ from risk_model_workbench.agent.advisor import (
 from risk_model_workbench.agent.advisor_reducer import confirm_advisor_response, reject_advisor_response
 from risk_model_workbench.agent.approvals import approve_request, load_approvals, reject_request
 from risk_model_workbench.agent.executor import run_agent
+from risk_model_workbench.agent.embedded_runtime import run_embedded_agent
+from risk_model_workbench.agent.embedded_eval import evaluate_embedded_suite
 from risk_model_workbench.agent.eval import evaluate_harness_suite
+from risk_model_workbench.agent.goal_planner import GoalPlanningError, create_request_draft_from_objective
+from risk_model_workbench.agent.model_gateway import (
+    AgentModelConfig,
+    LangChainModelGateway,  # legacy public CLI surface; runtime uses build_model_gateway
+    ModelGatewayError,
+    build_model_gateway as _build_model_gateway_factory,
+)
 from risk_model_workbench.agent.recovery import diagnose_recovery, reconcile_operation
 from risk_model_workbench.agent.plan import (
     agent_capabilities,
@@ -938,7 +947,12 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
         upsert_version_index(project_dir, entry, active=index.get("active_version_id") == args.version_id)
     agent_plan = bind_agent_plan(execution_plan, project_dir=project_dir, version_id=args.version_id)
     save_agent_plan(workspace, agent_plan)
-    init_agent_state(workspace, project=str(project_dir), version_id=args.version_id, agent_plan=agent_plan)
+    init_agent_state(
+        workspace,
+        project=str(project_dir),
+        version_id=args.version_id,
+        agent_plan=agent_plan,
+    )
     append_trace(
         workspace,
         "observation",
@@ -969,7 +983,7 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
     print(f"agent_plan: {workspace / 'agent_plan.yml'}")
     print(f"agent_state: {workspace / 'audit' / 'agent_state.yml'}")
     if args.execute:
-        state = run_agent(project_dir, args.version_id)
+        state = run_embedded_agent(project_dir, args.version_id)
         print(f"agent_status: {state.get('status')}")
     return 0
 
@@ -977,15 +991,24 @@ def cmd_agent_start(args: argparse.Namespace) -> int:
 def cmd_agent_run(args: argparse.Namespace) -> int:
     project_dir = resolve_project_path(args.project)
     try:
-        state = run_agent(project_dir, args.version_id)
-    except (ValueError, WorkspaceLockedError) as exc:
+        state = run_embedded_agent(project_dir, args.version_id)
+    except (FileNotFoundError, ValueError, WorkspaceLockedError) as exc:
         print(f"agent run failed: {exc}")
         return 1
     print(f"agent_status: {state.get('status')}")
+    if state.get("checkpoint"):
+        print(f"agent_checkpoint: {state.get('checkpoint')}")
+    if state.get("last_error"):
+        print(f"embedded_reasoning_error: {state.get('last_error')}")
     blocker = state.get("blocker") if isinstance(state.get("blocker"), dict) else {}
     if blocker:
         print(f"blocker: {blocker.get('reason', '')}")
-    return 0 if state.get("status") not in {"failed", "blocked"} else 1
+    return 0 if state.get("status") not in {
+        "failed",
+        "blocked",
+        "waiting_for_advisor",
+        "reconciliation_required",
+    } else 1
 
 
 def cmd_agent_resume(args: argparse.Namespace) -> int:
@@ -1006,16 +1029,6 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
         ]
         if not approved:
             print(f"agent resume blocked: approval pending: {blocker.get('approval_id')}")
-            return 1
-    if state.get("status") == "waiting_for_advisor":
-        request_id = str(blocker.get("advisor_request_id") or "")
-        try:
-            advisor_request = load_advisor_request(workspace, request_id) if request_id else {}
-        except (KeyError, ValueError) as exc:
-            print(f"agent resume blocked: invalid advisor request: {exc}")
-            return 1
-        if request_id and advisor_request.get("status") not in {"answered", "rejected"}:
-            print(f"agent resume blocked: advisor response pending: {request_id}")
             return 1
     if state.get("status") == "waiting_for_user":
         request_id = str(blocker.get("advisor_request_id") or "")
@@ -1052,11 +1065,17 @@ def cmd_agent_resume(args: argparse.Namespace) -> int:
             },
         )
     try:
-        resumed = run_agent(project_dir, args.version_id)
-    except (ValueError, WorkspaceLockedError) as exc:
+        resumed = run_embedded_agent(
+            project_dir,
+            args.version_id,
+            resume_human_gate=True,
+        )
+    except (FileNotFoundError, ValueError, WorkspaceLockedError) as exc:
         print(f"agent resume failed: {exc}")
         return 1
     print(f"agent_status: {resumed.get('status')}")
+    if resumed.get("last_error"):
+        print(f"embedded_reasoning_error: {resumed.get('last_error')}")
     return 0 if resumed.get("status") not in {
         "failed",
         "blocked",
@@ -1166,16 +1185,73 @@ def cmd_agent_status(args: argparse.Namespace) -> int:
 
 
 def cmd_agent_eval(args: argparse.Namespace) -> int:
-    report = evaluate_harness_suite()
+    report = evaluate_harness_suite() if args.suite == "harness" else evaluate_embedded_suite()
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
         print(f"suite: {report['suite']}")
         print(f"passed: {str(report['passed']).lower()}")
-        print(f"scenario_count: {report['scenario_count']}")
+        print(f"scenario_count: {report.get('scenario_count', report.get('case_count', 0))}")
         for name, metric in report["metrics"].items():
             print(f"{name}: {json.dumps(metric, ensure_ascii=False)}")
     return 0 if report["passed"] else 1
+
+
+def cmd_agent_model_status(args: argparse.Namespace) -> int:
+    payload: dict[str, Any] = {
+        "runtime": "embedded_langgraph",
+        "configured": False,
+        "provider": "",
+        "model": "",
+        "langsmith_tracing": os.environ.get("LANGSMITH_TRACING", "").lower() in {"1", "true", "yes"},
+        "error": "",
+    }
+    try:
+        config = AgentModelConfig.from_env()
+        payload["provider"] = config.provider
+        payload["model"] = config.model
+        _build_model_gateway_factory(config)
+        payload["configured"] = True
+    except (ModelGatewayError, ValueError, ImportError) as exc:
+        payload["error"] = f"{type(exc).__name__}: {str(exc)[:500]}"
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print(f"agent_runtime: {payload['runtime']}")
+        print(f"model_configured: {str(payload['configured']).lower()}")
+        if payload["provider"]:
+            print(f"model_provider: {payload['provider']}")
+        if payload["model"]:
+            print(f"model: {payload['model']}")
+        print(f"langsmith_tracing: {str(payload['langsmith_tracing']).lower()}")
+        if payload["error"]:
+            print(f"model_error: {payload['error']}")
+    return 0 if payload["configured"] else 1
+
+
+def cmd_agent_request_draft(args: argparse.Namespace) -> int:
+    project_dir = resolve_project_path(args.project)
+    try:
+        gateway = _build_model_gateway_factory(AgentModelConfig.from_env())
+        result = create_request_draft_from_objective(
+            project_dir,
+            objective=args.objective,
+            request_id=args.request_id,
+            gateway=gateway,
+            output=args.output,
+        )
+    except (GoalPlanningError, ModelGatewayError, ValueError, OSError) as exc:
+        print(f"agent request draft failed: {exc}")
+        return 1
+    if args.json:
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    else:
+        print(f"request_draft: {result['request_path']}")
+        print(f"model_invocation: {result['audit_path']}")
+        print("requires_user_confirmation: true")
+        for warning in result["validation"].get("warnings") or []:
+            print(f"warning: {warning}")
+    return 0
 
 
 def cmd_agent_approve(args: argparse.Namespace) -> int:
@@ -2232,12 +2308,12 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     start.add_argument("--execute", action="store_true")
     start.set_defaults(func=cmd_agent_start)
 
-    run = agent_sub.add_parser("run", help="run an initialized Agent plan")
+    run = agent_sub.add_parser("run", help="run an initialized standalone RMW Agent plan")
     run.add_argument("--project", required=True)
     run.add_argument("--version-id", required=True)
     run.set_defaults(func=cmd_agent_run)
 
-    resume = agent_sub.add_parser("resume", help="resume an Agent plan after approval or advisor input")
+    resume = agent_sub.add_parser("resume", help="resume the standalone Agent after a human gate or fixed blocker")
     resume.add_argument("--project", required=True)
     resume.add_argument("--version-id", required=True)
     resume.set_defaults(func=cmd_agent_resume)
@@ -2268,9 +2344,25 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     status.set_defaults(func=cmd_agent_status)
 
     agent_eval = agent_sub.add_parser("eval", help="run the Agent Harness product evaluation suite")
-    agent_eval.add_argument("--suite", required=True, choices=["harness"])
+    agent_eval.add_argument("--suite", required=True, choices=["harness", "embedded"])
     agent_eval.add_argument("--json", action="store_true")
     agent_eval.set_defaults(func=cmd_agent_eval)
+
+    model = agent_sub.add_parser("model", help="inspect embedded model configuration")
+    model_sub = model.add_subparsers(dest="agent_model_command", required=True)
+    model_status = model_sub.add_parser("status", help="validate the configured embedded model adapter")
+    model_status.add_argument("--json", action="store_true")
+    model_status.set_defaults(func=cmd_agent_model_status)
+
+    request = agent_sub.add_parser("request", help="create and inspect Agent-owned model request drafts")
+    request_sub = request.add_subparsers(dest="agent_request_command", required=True)
+    request_draft = request_sub.add_parser("draft", help="interpret a natural-language objective into a validated request draft")
+    request_draft.add_argument("--project", required=True)
+    request_draft.add_argument("--objective", required=True)
+    request_draft.add_argument("--request-id", required=True)
+    request_draft.add_argument("--output", default=None)
+    request_draft.add_argument("--json", action="store_true")
+    request_draft.set_defaults(func=cmd_agent_request_draft)
 
     approve = agent_sub.add_parser("approve", help="record approval for a blocked high-risk Agent action")
     approve.add_argument("--project", required=True)
@@ -2302,7 +2394,7 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     tools.add_argument("--json", action="store_true")
     tools.set_defaults(func=cmd_agent_tools)
 
-    capabilities = agent_sub.add_parser("capabilities", help="export the Host-Agent capability contract")
+    capabilities = agent_sub.add_parser("capabilities", help="export the embedded Agent capability contract")
     capabilities.add_argument("--json", action="store_true")
     capabilities.set_defaults(func=cmd_agent_capabilities)
 
@@ -2317,7 +2409,7 @@ def _add_agent_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentPa
     rebind.add_argument("--json", action="store_true")
     rebind.set_defaults(func=cmd_agent_plan_rebind)
 
-    advisor = agent_sub.add_parser("advisor", help="Advisor request/response protocol commands")
+    advisor = agent_sub.add_parser("advisor", help="durable Advisor protocol inspection and compatibility commands")
     advisor_sub = advisor.add_subparsers(dest="advisor_command", required=True)
 
     advisor_list = advisor_sub.add_parser("list", help="list Advisor requests")

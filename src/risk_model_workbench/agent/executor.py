@@ -376,7 +376,7 @@ def _run_agent_locked(
                 workspace,
                 "decision",
                 {
-                    "summary": f"Paused for host-agent advisor on task {task_id}.",
+                    "summary": f"Paused for embedded Advisor on task {task_id}.",
                     "task_id": task_id,
                     "advisor_request": str(request.get("path") or ""),
                     "advisor_request_id": str(request.get("request_id") or ""),

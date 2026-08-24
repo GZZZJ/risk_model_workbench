@@ -35,10 +35,10 @@ status_values:
   - waiting_for_user
 field_notes:
   request_id: Stable id for this Advisor request inside one version workspace.
-  type: The kind of judgment needed from the Host-Agent or human expert.
+  type: The kind of judgment needed from the embedded reasoning layer or human expert.
   attempt_id: Agent action attempt bound to this request.
   invocation_hash: Bound tool invocation hash used to reject stale answers.
-  context_hash: Canonical hash of the immutable Host-Agent Context Pack.
+  context_hash: Canonical hash of the immutable reasoning Context Pack.
   context_pack: Required for version 2; absent for legacy version 1 requests. Workspace-relative content-addressed Context Pack snapshot.
   context_manifest: Compatibility alias for context_pack; no longer a live glob expansion.
   round: Advisor round, such as LLM tuning round.

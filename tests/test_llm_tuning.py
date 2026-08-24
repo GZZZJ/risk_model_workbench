@@ -18,7 +18,12 @@ def test_heuristic_advisor_returns_bounded_candidates():
         {
             "training": {
                 "mode": "llm_guided_tune",
-                "tuning": {"max_rounds": 1, "candidates_per_round": 2, "max_trials": 2},
+                "tuning": {
+                    "max_rounds": 1,
+                    "candidates_per_round": 2,
+                    "max_trials": 2,
+                    "advisor": {"mode": "heuristic", "fallback_to_heuristic": True},
+                },
             }
         }
     )
@@ -43,7 +48,7 @@ def test_heuristic_advisor_returns_bounded_candidates():
 
     plan = suggest_lgb_candidates(context, tuning_cfg)
 
-    assert plan["advisor_type"] == "host_agent_unavailable_local_heuristic_fallback"
+    assert plan["advisor_type"] == "local_heuristic_fallback"
     assert len(plan["candidates"]) == 2
     for candidate in plan["candidates"]:
         params = candidate["params"]
@@ -103,7 +108,7 @@ def test_host_agent_plan_file_is_used(tmp_path):
 
     plan = suggest_lgb_candidates(context, tuning_cfg, plan_path=plan_path)
 
-    assert plan["advisor_type"] == "host_agent_plan_file"
+    assert plan["advisor_type"] == "embedded_agent_plan_file"
     assert plan["candidates"][0]["name"] == "agent_candidate"
 
 
