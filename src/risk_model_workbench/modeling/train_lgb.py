@@ -126,13 +126,12 @@ def train_lightgbm_from_feather(
     from sklearn.metrics import roc_auc_score
     from risk_model_workbench.modeling.llm_tuning import (
         TRAIN_CONTROL_PARAMS,
-        build_tuning_context,
         llm_guided_tuning_enabled,
+        load_feature_review_summary,
         public_lgb_params,
         resolve_tuning_config,
-        select_best_trial,
-        suggest_lgb_candidates,
-        write_selection_reason,
+        run_tuning_loop,
+        TuningChampionUnavailable,
     )
 
     input_feather = Path(input_feather)
@@ -203,6 +202,8 @@ def train_lightgbm_from_feather(
     # 一旦默认进入 valid_sets 会参与早停/调参选优，污染时间外评估。
     valid_values = train_cfg.get("valid_values", ["DEV-OOS"])
     oos_values = train_cfg.get("oos_values", ["DEV-OOS", "OOT-OOS"])
+    if llm_guided_tuning_enabled(config) and any(str(value).upper().startswith("OOT") for value in valid_values):
+        raise ValueError("LLM-guided tuning validation split must be development-only; OOT is prohibited")
     train_mask = raw[split_col].isin(train_values) & raw[label_col].isin([0, 1])
     valid_mask = raw[split_col].isin(valid_values) & raw[label_col].isin([0, 1])
 
@@ -344,9 +345,7 @@ def train_lightgbm_from_feather(
     final_control = {"num_boost_round": base_num_boost_round, "early_stopping_rounds": base_early_stopping_rounds}
     if llm_guided_tuning_enabled(config):
         training_mode = "llm_guided_tune"
-        tuning_cfg = resolve_tuning_config(config)
-        trial_history: list[dict[str, Any]] = []
-        tuning_decisions: list[str] = []
+        tuning_cfg = resolve_tuning_config(config, algorithm="lightgbm")
         experiment_name = runtime_experiment.get("name") or "main_lgbm"
         training_summary = {
             "train_samples": int(len(tr_y)),
@@ -359,15 +358,22 @@ def train_lightgbm_from_feather(
             "valid_values": valid_values,
         }
 
-        def _run_trial(round_index: int, name: str, trial_params: dict[str, Any], reason: str, advisor_type: str) -> dict[str, Any]:
+        def _run_trial(
+            round_index: int,
+            name: str,
+            trial_params: dict[str, Any],
+            reason: str,
+            advisor_type: str,
+            diagnosis: dict[str, Any],
+        ) -> dict[str, Any]:
             fitted, iteration, trial_metrics, trial_lgb_params, control = _fit_once(trial_params)
             display_params = {**public_lgb_params(trial_lgb_params), **control}
             record: dict[str, Any] = {
-                "trial_id": len(trial_history),
                 "round": round_index,
                 "candidate_name": name,
                 "advisor_type": advisor_type,
                 "reason": reason,
+                "diagnosis_state": diagnosis.get("state", "") if diagnosis else "",
                 "params": display_params,
                 **trial_metrics,
                 "_model": fitted,
@@ -375,70 +381,22 @@ def train_lightgbm_from_feather(
                 "_lgb_params": trial_lgb_params,
                 "_control": control,
             }
-            trial_history.append(record)
             return record
 
         if progress:
             progress.emit(step="tuning_baseline", message="LLM-guided tuning：开始 baseline trial", percent=52)
-        baseline = _run_trial(0, "baseline", {}, "configured baseline parameters", "baseline")
-        best_valid_ks = float(baseline.get("valid_ks", 0.0) or 0.0)
-        no_improvement_rounds = 0
-        stop_rules = tuning_cfg.get("stop_rules") if isinstance(tuning_cfg.get("stop_rules"), dict) else {}
-        min_improvement = float(stop_rules.get("min_ks_improvement", 0.001))
-        stop_patience = int(stop_rules.get("stop_if_no_improvement_rounds", 1))
-        for round_index in range(1, int(tuning_cfg["max_rounds"]) + 1):
-            if len(trial_history) - 1 >= int(tuning_cfg["max_trials"]):
-                tuning_decisions.append(f"round {round_index}: skipped because max_trials reached")
-                break
-            context = build_tuning_context(
-                round_index=round_index,
-                experiment=experiment_name,
-                algorithm="lightgbm",
-                base_params={**public_lgb_params(params), **final_control},
-                training_summary=training_summary,
-                trial_history=trial_history,
-                tuning_cfg=tuning_cfg,
-            )
-            context_path = output_dir / f"tuning_context_round_{round_index}.json"
-            plan_path = output_dir / f"llm_tuning_plan_round_{round_index}.json"
-            (output_dir / "tuning_context.json").write_text(json.dumps(context, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            context_path.write_text(json.dumps(context, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            plan = suggest_lgb_candidates(context, tuning_cfg, plan_path=plan_path, context_path=context_path)
-            plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            tuning_decisions.append(f"round {round_index}: {plan.get('diagnosis', '')}")
-            if plan.get("stop"):
-                tuning_decisions.append(f"round {round_index}: advisor requested stop")
-                break
-            before_round_best = max(float(item.get("valid_ks", 0.0) or 0.0) for item in trial_history)
-            for candidate in plan.get("candidates", []):
-                if len(trial_history) - 1 >= int(tuning_cfg["max_trials"]):
-                    break
-                if progress:
-                    progress.emit(
-                        step="tuning_trial",
-                        message=f"LLM-guided tuning：round {round_index} trial {len(trial_history)} {candidate.get('name')}",
-                        percent=min(70, 52 + round_index * 6),
-                    )
-                _run_trial(
-                    round_index,
-                    str(candidate.get("name") or f"round_{round_index}_candidate"),
-                    candidate.get("params") if isinstance(candidate.get("params"), dict) else {},
-                    str(candidate.get("reason") or ""),
-                    str(plan.get("advisor_type") or "unknown"),
-                )
-            after_round_best = max(float(item.get("valid_ks", 0.0) or 0.0) for item in trial_history)
-            if after_round_best - before_round_best < min_improvement:
-                no_improvement_rounds += 1
-                tuning_decisions.append(
-                    f"round {round_index}: improvement {after_round_best - before_round_best:.6f} < {min_improvement:.6f}"
-                )
-            else:
-                best_valid_ks = max(best_valid_ks, after_round_best)
-                no_improvement_rounds = 0
-            if no_improvement_rounds >= stop_patience:
-                tuning_decisions.append(f"round {round_index}: stopped after {no_improvement_rounds} no-improvement round(s)")
-                break
-        best_trial, selection = select_best_trial(trial_history, tuning_cfg)
+        trial_history, best_trial, tuning_summary, _ = run_tuning_loop(
+            output_dir=output_dir,
+            experiment=experiment_name,
+            algorithm="lightgbm",
+            base_params={**public_lgb_params(params), **final_control},
+            training_summary=training_summary,
+            tuning_cfg=tuning_cfg,
+            run_trial=_run_trial,
+            feature_review_summary=load_feature_review_summary(output_dir.parent.parent),
+        )
+        if best_trial is None:
+            raise TuningChampionUnavailable(tuning_summary["selection"])
         model = best_trial["_model"]
         best_iter = int(best_trial["_best_iteration"])
         params = dict(best_trial["_lgb_params"])
@@ -460,24 +418,7 @@ def train_lightgbm_from_feather(
             ]
             if key in best_trial
         }
-        trial_rows = [_trial_row(item) for item in trial_history]
-        pd.DataFrame(trial_rows).to_csv(output_dir / "tuning_trials.csv", index=False, encoding="utf-8-sig")
-        tuning_summary = {
-            "mode": training_mode,
-            "advisor_types": sorted({str(item.get("advisor_type")) for item in trial_history}),
-            "trial_count": len(trial_history),
-            "best_trial_id": selection.get("best_trial_id"),
-            "selection": selection,
-            "best_params": best_trial.get("params"),
-            "decisions": tuning_decisions,
-        }
-        (output_dir / "tuning_summary.json").write_text(json.dumps(tuning_summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         (output_dir / "best_params.json").write_text(json.dumps(best_trial.get("params"), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        write_selection_reason(output_dir / "selection_reason.md", best_trial, selection)
-        (output_dir / "llm_tuning_decisions.md").write_text(
-            "# LLM Tuning Decisions\n\n" + "\n".join(f"- {item}" for item in tuning_decisions) + "\n",
-            encoding="utf-8",
-        )
     else:
         model, best_iter, metrics, params, final_control = _fit_once({}, log_period=50)
     if progress:

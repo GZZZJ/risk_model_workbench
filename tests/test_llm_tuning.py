@@ -1,240 +1,163 @@
 import json
-import sys
 
 import pytest
 
 from risk_model_workbench.modeling.llm_tuning import (
-    HostAgentTuningPlanRequired,
+    DIAGNOSIS_STATES,
     build_tuning_context,
+    deterministic_stop_reason,
     resolve_tuning_config,
     select_best_trial,
     suggest_lgb_candidates,
     validate_tuning_plan,
 )
+from risk_model_workbench.agent.reasoning_contracts import TuningPlan
 
 
-def test_heuristic_advisor_returns_bounded_candidates():
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {
-                    "max_rounds": 1,
-                    "candidates_per_round": 2,
-                    "max_trials": 2,
-                    "advisor": {"mode": "heuristic", "fallback_to_heuristic": True},
-                },
-            }
-        }
+def _config(*, algorithm="lightgbm", candidates=2, **tuning):
+    return resolve_tuning_config(
+        {"training": {"mode": "llm_guided_tune", "tuning": {"candidates_per_round": candidates, **tuning}}},
+        algorithm=algorithm,
     )
-    context = build_tuning_context(
-        round_index=1,
-        experiment="main_lgbm",
-        algorithm="lightgbm",
-        base_params={"learning_rate": 0.05, "num_leaves": 31, "max_depth": 5},
-        training_summary={"train_samples": 1000, "valid_samples": 300, "kept_features": 20},
-        trial_history=[
-            {
-                "trial_id": 0,
-                "candidate_name": "baseline",
-                "params": {"learning_rate": 0.05, "num_leaves": 31, "max_depth": 5},
-                "valid_auc": 0.72,
-                "valid_ks": 0.35,
-                "auc_gap": 0.01,
-            }
+
+
+def _diagnosis(*, state="healthy", evidence=None):
+    return {
+        "state": state,
+        "summary": "deterministic metric evidence reviewed",
+        "evidence": evidence or ["baseline_only"],
+        "recommended_direction": ["bounded_local_exploration"],
+        "confidence": 0.8,
+    }
+
+
+def _plan(*, algorithm="lightgbm", candidates=None, diagnosis=None, decision="continue", stop_reason=None):
+    return {
+        "algorithm": algorithm,
+        "experiment": "main_model",
+        "round": 1,
+        "diagnosis": diagnosis or _diagnosis(),
+        "decision": decision,
+        "stop_reason": stop_reason,
+        "candidates": candidates if candidates is not None else [
+            {"name": "candidate_1", "params": {"learning_rate": 0.03}, "reason": "bounded trial"},
         ],
-        tuning_cfg=tuning_cfg,
+    }
+
+
+def test_heuristic_plan_supports_two_runtime_candidates():
+    cfg = _config(candidates=2, advisor={"mode": "heuristic"})
+    context = build_tuning_context(
+        round_index=1, experiment="main_model", algorithm="lightgbm",
+        base_params={"learning_rate": 0.05, "num_leaves": 31, "max_depth": 5},
+        training_summary={"train_samples": 1000, "valid_samples": 300, "train_bad_rate": .1, "valid_bad_rate": .11, "kept_features": 20},
+        trial_history=[{"trial_id": 0, "round": 0, "params": {}, "train_auc": .75, "valid_auc": .72, "train_ks": .4, "valid_ks": .35, "auc_gap": .03}],
+        tuning_cfg=cfg,
     )
-
-    plan = suggest_lgb_candidates(context, tuning_cfg)
-
-    assert plan["advisor_type"] == "local_heuristic_fallback"
+    plan = suggest_lgb_candidates(context, cfg)
+    assert plan["algorithm"] == "lightgbm"
     assert len(plan["candidates"]) == 2
-    for candidate in plan["candidates"]:
-        params = candidate["params"]
-        assert 0.005 <= params["learning_rate"] <= 0.2
-        assert 7 <= params["num_leaves"] <= 255
-        assert 3 <= params["max_depth"] <= 12
-
-
-def test_select_best_trial_prefers_guardrail_passing_candidate():
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {"guardrails": {"max_train_valid_auc_gap": 0.03}},
-            }
-        }
-    )
-    trials = [
-        {"trial_id": 0, "valid_ks": 0.75, "valid_auc": 0.90, "auc_gap": 0.08},
-        {"trial_id": 1, "valid_ks": 0.73, "valid_auc": 0.89, "auc_gap": 0.02},
-    ]
-
-    best, selection = select_best_trial(trials, tuning_cfg)
-
-    assert best["trial_id"] == 1
-    assert selection["guardrail_status"] == "passed"
-
-
-def test_host_agent_plan_file_is_used(tmp_path):
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {"advisor": {"mode": "host_agent", "fallback_to_heuristic": False}},
-            }
-        }
-    )
-    context = {"round": 1, "trial_history": [], "base_params": {}}
-    plan_path = tmp_path / "llm_tuning_plan_round_1.json"
-    plan_path.write_text(
-        json.dumps(
-            {
-                "round": 1,
-                "diagnosis": "increase capacity",
-                "candidates": [
-                    {
-                        "name": "agent_candidate",
-                        "params": {"learning_rate": 0.03, "num_leaves": 63, "max_depth": 7},
-                        "reason": "host agent diagnosis",
-                    }
-                ],
-                "stop": False,
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    plan = suggest_lgb_candidates(context, tuning_cfg, plan_path=plan_path)
-
-    assert plan["advisor_type"] == "embedded_agent_plan_file"
-    assert plan["candidates"][0]["name"] == "agent_candidate"
-
-
-def test_host_agent_plan_file_rejects_wrong_experiment(tmp_path):
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {"advisor": {"mode": "host_agent", "fallback_to_heuristic": False}},
-            }
-        }
-    )
-    context = {"round": 1, "experiment": "main_lgbm", "trial_history": [], "base_params": {}}
-    plan_path = tmp_path / "llm_tuning_plan_round_1.json"
-    plan_path.write_text(
-        json.dumps(
-            {
-                "experiment": "other_lgbm",
-                "round": 1,
-                "diagnosis": "wrong experiment",
-                "candidates": [
-                    {
-                        "name": "agent_candidate",
-                        "params": {"learning_rate": 0.03, "num_leaves": 63, "max_depth": 7},
-                        "reason": "host agent diagnosis",
-                    }
-                ],
-                "stop": False,
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    with pytest.raises(ValueError, match="experiment mismatch"):
-        suggest_lgb_candidates(context, tuning_cfg, plan_path=plan_path)
-
-
-def test_external_advisor_command_rejects_wrong_round(tmp_path):
-    script = tmp_path / "advisor_command.py"
-    script.write_text(
-        "import json\n"
-        "print(json.dumps({"
-        "'experiment': 'main_lgbm', 'round': 2, 'diagnosis': 'wrong round', "
-        "'candidates': [{'name': 'candidate', 'params': {'learning_rate': 0.03}, 'reason': 'ok'}], "
-        "'stop': False"
-        "}))\n",
-        encoding="utf-8",
-    )
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {
-                    "advisor": {
-                        "command": f"{sys.executable} {script}",
-                        "fallback_to_heuristic": False,
-                    }
-                },
-            }
-        }
-    )
-
-    with pytest.raises(ValueError, match="round mismatch"):
-        suggest_lgb_candidates({"round": 1, "experiment": "main_lgbm"}, tuning_cfg)
-
-
-def test_host_agent_mode_can_require_plan_file(tmp_path):
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {"advisor": {"mode": "host_agent", "fallback_to_heuristic": False}},
-            }
-        }
-    )
-
-    with pytest.raises(HostAgentTuningPlanRequired):
-        suggest_lgb_candidates({"round": 1}, tuning_cfg, plan_path=tmp_path / "missing_plan.json")
+    assert plan["diagnosis"]["state"] in DIAGNOSIS_STATES
 
 
 @pytest.mark.parametrize(
-    ("plan", "message"),
+    ("algorithm", "params", "message"),
     [
-        ({"experiment": "other", "round": 1, "candidates": [], "stop": False}, "experiment mismatch"),
-        ({"experiment": "main_lgbm", "round": 2, "candidates": [], "stop": False}, "round mismatch"),
-        ({"experiment": "main_lgbm", "round": 1, "candidates": [], "stop": False}, "candidate count"),
-        (
-            {
-                "experiment": "main_lgbm",
-                "round": 1,
-                "candidates": [
-                    {"name": f"candidate_{idx}", "params": {"learning_rate": 0.03}, "reason": "ok"}
-                    for idx in range(10)
-                ],
-                "stop": False,
-            },
-            "candidate count",
-        ),
-        (
-            {
-                "experiment": "main_lgbm",
-                "round": 1,
-                "candidates": [
-                    {"name": "bad_bounds", "params": {"learning_rate": 9.0}, "reason": "bad"}
-                ],
-                "stop": False,
-            },
-            "outside allowed bounds",
-        ),
+        ("lightgbm", {"learning_rate": 9}, "outside allowed bounds"),
+        ("xgboost", {"learning_rate": 9}, "outside allowed bounds"),
+        ("lightgbm", {"gamma": 1}, "unsupported"),
+        ("xgboost", {"num_leaves": 31}, "unsupported"),
     ],
 )
-def test_validate_tuning_plan_rejects_stale_or_unbounded_plan(plan, message):
-    tuning_cfg = resolve_tuning_config(
-        {
-            "training": {
-                "mode": "llm_guided_tune",
-                "tuning": {"candidates_per_round": 4},
-            }
-        }
-    )
-
+def test_algorithm_specific_parameter_validation(algorithm, params, message):
+    cfg = _config(algorithm=algorithm)
     with pytest.raises(ValueError, match=message):
         validate_tuning_plan(
-            plan,
-            tuning_cfg,
-            advisor_type="host_agent_response",
-            expected_experiment="main_lgbm",
-            expected_round=1,
+            _plan(algorithm=algorithm, candidates=[{"name": "bad", "params": params, "reason": "bad"}]),
+            cfg, advisor_type="test", expected_experiment="main_model", expected_round=1,
+            expected_algorithm=algorithm, allowed_evidence={"baseline_only"},
+        )
+
+
+def test_algorithm_mismatch_and_invalid_diagnosis_are_rejected():
+    cfg = _config()
+    with pytest.raises(ValueError, match="algorithm mismatch"):
+        validate_tuning_plan(_plan(algorithm="xgboost"), cfg, advisor_type="test", expected_algorithm="lightgbm")
+    with pytest.raises(ValueError, match="diagnosis state"):
+        validate_tuning_plan(
+            _plan(diagnosis=_diagnosis(state="invented_state")), cfg, advisor_type="test",
+            expected_algorithm="lightgbm", allowed_evidence={"baseline_only"},
+        )
+
+
+def test_context_is_deterministic_and_row_free():
+    cfg = _config()
+    history = [{"trial_id": 0, "round": 0, "params": {"max_depth": 5}, "train_auc": .78, "valid_auc": .72, "train_ks": .45, "valid_ks": .35, "auc_gap": .06}]
+    context = build_tuning_context(
+        round_index=1, experiment="main_model", algorithm="lightgbm",
+        base_params={"learning_rate": .05, "max_depth": 5},
+        training_summary={"train_samples": 100, "valid_samples": 50, "train_bad_rate": .2, "valid_bad_rate": .25, "kept_features": 8},
+        trial_history=history, tuning_cfg=cfg,
+        feature_review_summary={"selected_feature_count": 8, "review_required_count": 1, "raw_dataframe": "must_not_be_present"},
+    )
+    assert context["dataset_summary"] == {"train_sample_count": 100, "valid_sample_count": 50, "train_bad_rate": .2, "valid_bad_rate": .25, "feature_count": 8}
+    assert context["current_model_diagnostics"]["auc_gap"] == pytest.approx(.06)
+    assert "max_depth increased" not in context["experiment_trajectory"]["parameter_directions_explored"]
+    assert "raw_dataframe" not in json.dumps(context)
+    assert "train_valid_auc_gap_above_guardrail" in context["deterministic_diagnosis"]["allowed_evidence"]
+
+
+def test_oot_is_not_a_tuning_context_input_or_selection_metric():
+    cfg = _config()
+    common = dict(round_index=1, experiment="main_model", algorithm="lightgbm", base_params={"learning_rate": .05}, training_summary={"train_samples": 10, "valid_samples": 5, "train_bad_rate": .2, "valid_bad_rate": .2, "kept_features": 1}, trial_history=[{"trial_id": 0, "round": 0, "params": {}, "train_auc": .7, "valid_auc": .68, "train_ks": .3, "valid_ks": .28, "auc_gap": .02}], tuning_cfg=cfg)
+    first, second = build_tuning_context(**common), build_tuning_context(**common)
+    assert first == second
+    champion_a, select_a = select_best_trial(common["trial_history"], cfg)
+    champion_b, select_b = select_best_trial(common["trial_history"], cfg)
+    assert champion_a == champion_b and select_a == select_b
+
+
+def test_plateau_and_all_guardrail_failure_are_deterministic():
+    cfg = _config(stop_rules={"stop_if_no_improvement_rounds": 2})
+    history = [{"trial_id": 0, "valid_ks": .3}, {"trial_id": 1, "valid_ks": .3}]
+    assert deterministic_stop_reason(trial_history=history, tuning_cfg=cfg, no_improvement_rounds=2) == "plateau"
+    best, selection = select_best_trial(
+        [{"trial_id": 0, "valid_ks": .4, "valid_auc": .7, "auc_gap": .08}, {"trial_id": 1, "valid_ks": .5, "valid_auc": .72, "auc_gap": .05}],
+        _config(guardrails={"max_train_valid_auc_gap": .03}),
+    )
+    assert best is None
+    assert selection["guardrail_status"] == "all_trials_failed_guardrail"
+    assert selection["numerical_best_trial_id"] == 1
+
+
+def test_baseline_can_win_when_candidates_fail_guardrail():
+    best, selection = select_best_trial(
+        [{"trial_id": 0, "valid_ks": .4, "valid_auc": .7, "auc_gap": .02}, {"trial_id": 1, "valid_ks": .5, "valid_auc": .72, "auc_gap": .08}],
+        _config(),
+    )
+    assert best["trial_id"] == 0
+    assert selection["guardrail_status"] == "passed"
+
+
+def test_structured_advisor_stop_is_validated():
+    cfg = _config()
+    plan = validate_tuning_plan(
+        _plan(decision="stop", stop_reason="advisor_recommends_stop", candidates=[]),
+        cfg, advisor_type="test", expected_experiment="main_model", expected_round=1,
+        expected_algorithm="lightgbm", allowed_evidence={"baseline_only"},
+    )
+    assert plan["stop"] is True
+    assert plan["stop_reason"] == "advisor_recommends_stop"
+
+
+def test_pydantic_contract_permits_two_candidates_but_runtime_still_binds_count():
+    payload = _plan(candidates=[
+        {"name": "one", "params": {"learning_rate": .03}, "reason": "one"},
+        {"name": "two", "params": {"learning_rate": .02}, "reason": "two"},
+    ])
+    assert len(TuningPlan.model_validate(payload).candidates) == 2
+    with pytest.raises(ValueError, match="candidate count"):
+        validate_tuning_plan(
+            payload, _config(candidates=1), advisor_type="test", expected_algorithm="lightgbm",
+            allowed_evidence={"baseline_only"},
         )

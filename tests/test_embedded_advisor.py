@@ -66,7 +66,7 @@ def test_embedded_advisor_writes_bounded_tuning_plan_for_existing_trainer(tmp_pa
     workspace = project / "versions" / version_id
     context = workspace / "modeling" / "main_lgbm" / "tuning_context_round_1.json"
     context.parent.mkdir(parents=True, exist_ok=True)
-    context.write_text('{"round":1,"experiment":"main_lgbm","trial_history":[]}\n', encoding="utf-8")
+    context.write_text('{"round":1,"experiment":"main_lgbm","algorithm":"lightgbm","trial_history":[]}\n', encoding="utf-8")
     task = {
         "task_id": "train_main",
         "type": "train",
@@ -137,10 +137,17 @@ def test_embedded_advisor_writes_bounded_tuning_plan_for_existing_trainer(tmp_pa
                 "decision": "continue",
                 "summary": "Run three bounded candidates against validation metrics.",
                 "tuning_plan": {
+                    "algorithm": "lightgbm",
                     "round": 1,
-                    "diagnosis": "No trial history is available; start with bounded capacity variants.",
+                    "diagnosis": {
+                        "state": "insufficient_evidence",
+                        "summary": "No trial history is available; start with bounded capacity variants.",
+                        "evidence": ["baseline_only"],
+                        "recommended_direction": ["collect_more_valid_evidence"],
+                        "confidence": 0.8,
+                    },
+                    "decision": "continue",
                     "candidates": candidates,
-                    "stop": False,
                 },
             }
         ]

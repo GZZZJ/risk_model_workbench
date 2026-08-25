@@ -276,7 +276,6 @@ def _current_identity_errors(request: dict[str, Any], task: dict[str, Any]) -> l
 def _validate_tuning_outputs(workspace: Path, request: dict[str, Any], response: dict[str, Any]) -> list[str]:
     if response.get("type") != "tuning_plan" or response.get("status") != "answered":
         return []
-    tuning_cfg = _load_tuning_config(workspace)
     errors: list[str] = []
     expected_experiment = _experiment_from_request(request)
     expected_round = int(request.get("round", 0) or 0)
@@ -292,25 +291,56 @@ def _validate_tuning_outputs(workspace: Path, request: dict[str, Any], response:
         if path.name.startswith("llm_tuning_plan_round_") and path.suffix == ".json":
             try:
                 plan = json.loads(path.read_text(encoding="utf-8"))
+                expected_algorithm = _algorithm_from_tuning_context(workspace, expected_experiment, expected_round)
                 validate_tuning_plan(
                     plan,
-                    tuning_cfg,
+                    _load_tuning_config(workspace, algorithm=expected_algorithm),
                     advisor_type="embedded_agent_response",
                     expected_experiment=expected_experiment,
                     expected_round=expected_round,
+                    expected_algorithm=expected_algorithm,
+                    allowed_evidence=_diagnosis_evidence_from_tuning_context(workspace, expected_experiment, expected_round),
                 )
             except (OSError, json.JSONDecodeError, ValueError) as exc:
                 errors.append(str(exc))
     return errors
 
 
-def _load_tuning_config(workspace: Path) -> dict[str, Any]:
+def _load_tuning_config(workspace: Path, *, algorithm: str = "lightgbm") -> dict[str, Any]:
     config_path = workspace / "configs_runtime" / "train.yaml"
     if config_path.exists():
         payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
         if isinstance(payload, dict):
-            return resolve_tuning_config(payload)
-    return resolve_tuning_config({"training": {"mode": "llm_guided_tune"}})
+            return resolve_tuning_config(payload, algorithm=algorithm)
+    return resolve_tuning_config({"training": {"mode": "llm_guided_tune"}}, algorithm=algorithm)
+
+
+def _algorithm_from_tuning_context(workspace: Path, experiment: str | None, round_index: int) -> str:
+    if experiment:
+        path = workspace / "modeling" / experiment / f"tuning_context_round_{round_index}.json"
+        if path.exists():
+            try:
+                algorithm = json.loads(path.read_text(encoding="utf-8")).get("algorithm")
+                if algorithm:
+                    return str(algorithm)
+            except (OSError, json.JSONDecodeError):
+                pass
+    return "lightgbm"
+
+
+def _diagnosis_evidence_from_tuning_context(
+    workspace: Path, experiment: str | None, round_index: int
+) -> set[str] | None:
+    if not experiment:
+        return None
+    path = workspace / "modeling" / experiment / f"tuning_context_round_{round_index}.json"
+    if not path.exists():
+        return None
+    try:
+        evidence = ((json.loads(path.read_text(encoding="utf-8")).get("deterministic_diagnosis") or {}).get("allowed_evidence"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return {str(item) for item in evidence} if isinstance(evidence, list) else None
 
 
 def _experiment_from_request(request: dict[str, Any]) -> str | None:

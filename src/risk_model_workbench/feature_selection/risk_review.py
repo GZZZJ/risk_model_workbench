@@ -362,7 +362,50 @@ def importance_stability_evidence(
     max_rank_std: float = 10.0,
     min_selection_rate: float = 0.60,
 ) -> pd.DataFrame:
-    """Aggregate available multi-seed/bagging evidence; fall back to D05 once."""
+    """Read formal D05 stability evidence, with a legacy D03 fallback only.
+
+    D05 owns the multi-seed model runs.  This review function must not create a
+    competing importance experiment; it simply consumes D05's aggregate when
+    available.  D03 remains a compatibility fallback for historical artifacts.
+    """
+    formal_columns = {
+        "feature", "importance_median", "importance_mean", "importance_std",
+        "rank_median", "rank_mean", "rank_std", "top_n_selection_rate", "runs",
+    }
+    if isinstance(d05_importance, pd.DataFrame) and formal_columns.issubset(d05_importance.columns):
+        formal = d05_importance.drop_duplicates("feature", keep="last").set_index("feature")
+        rows = []
+        for feature in features:
+            row = formal.loc[feature] if feature in formal.index else pd.Series(dtype="object")
+            run_count = int(row.get("runs", 0)) if not row.empty else 0
+            rank_std = float(row.get("rank_std", np.nan)) if not row.empty else np.nan
+            selection_rate = float(row.get("top_n_selection_rate", np.nan)) if not row.empty else np.nan
+            if "importance_status" in row and pd.notna(row.get("importance_status")):
+                status = str(row["importance_status"])
+            elif run_count < 2:
+                status = "unknown_importance_stability"
+            elif rank_std > max_rank_std or selection_rate < min_selection_rate:
+                status = "unstable_importance"
+            else:
+                status = "stable_importance"
+            rows.append(
+                {
+                    "feature": feature,
+                    "importance_median": row.get("importance_median", np.nan),
+                    "importance_mean": row.get("importance_mean", np.nan),
+                    "importance_std": row.get("importance_std", np.nan),
+                    "rank_median": row.get("rank_median", np.nan),
+                    "rank_mean": row.get("rank_mean", np.nan),
+                    "rank_std": row.get("rank_std", np.nan),
+                    "top_n_selection_rate": row.get("top_n_selection_rate", np.nan),
+                    "importance_runs": run_count,
+                    "final_rank": row.get("final_rank", np.nan),
+                    "selected": bool(row.get("selected", False)),
+                    "importance_status": status,
+                }
+            )
+        return pd.DataFrame(rows)
+
     frames = []
     if isinstance(d03_detail, pd.DataFrame) and not d03_detail.empty and {"feature", "gain"}.issubset(d03_detail.columns):
         frame = d03_detail.copy()
@@ -389,12 +432,14 @@ def importance_stability_evidence(
             values["feature"] = feature
             values["importance"] = values["importance"].fillna(0.0)
             values["rank"] = values["rank"].fillna(pd.Series(run_fallback_rank))
-            values["selected_top_n"] = values["selected_top_n"].fillna(False).astype(bool)
+            values["selected_top_n"] = values["selected_top_n"].astype("boolean").fillna(False).astype(bool)
             values = values.reset_index(names="run")
         run_count = len(run_ids)
         importance_median = float(values["importance"].median()) if not values.empty else np.nan
+        importance_mean = float(values["importance"].mean()) if not values.empty else np.nan
         importance_std = float(values["importance"].std(ddof=0)) if not values.empty else np.nan
         rank_median = float(values["rank"].median()) if not values.empty else np.nan
+        rank_mean = float(values["rank"].mean()) if not values.empty else np.nan
         rank_std = float(values["rank"].std(ddof=0)) if not values.empty else np.nan
         selection_rate = float(values["selected_top_n"].mean()) if not values.empty else np.nan
         if run_count < 2:
@@ -407,11 +452,15 @@ def importance_stability_evidence(
             {
                 "feature": feature,
                 "importance_median": importance_median,
+                "importance_mean": importance_mean,
                 "importance_std": importance_std,
                 "rank_median": rank_median,
+                "rank_mean": rank_mean,
                 "rank_std": rank_std,
                 "top_n_selection_rate": selection_rate,
                 "importance_runs": run_count,
+                "final_rank": np.nan,
+                "selected": bool(pd.notna(rank_median) and rank_median <= int(top_n)),
                 "importance_status": status,
             }
         )
@@ -458,9 +507,14 @@ def build_feature_decision_ledger(
         "business_contradiction": _map_column(patterns, "feature", "business_contradiction"),
         "relationship": _map_column(relationship, "feature", "relationship_stability"),
         "importance_median": _map_column(importance, "feature", "importance_median"),
+        "importance_mean": _map_column(importance, "feature", "importance_mean"),
         "rank_median": _map_column(importance, "feature", "rank_median"),
+        "rank_mean": _map_column(importance, "feature", "rank_mean"),
         "rank_std": _map_column(importance, "feature", "rank_std"),
         "selection_rate": _map_column(importance, "feature", "top_n_selection_rate"),
+        "d05_final_rank": _map_column(importance, "feature", "final_rank"),
+        "d05_selected": _map_column(importance, "feature", "selected"),
+        "d05_selection_reason": _map_column(importance, "feature", "selection_reason"),
         "importance_status": _map_column(importance, "feature", "importance_status"),
         "correlation_group": _map_column(corr_drops, "feature", "kept_feature"),
     }
@@ -475,7 +529,7 @@ def build_feature_decision_ledger(
         badrate_review = business_review or high_importance and (
             pattern == "irregular" or bool(maps["sparse"].get(feature, False)) or relationship_status == "unstable"
         )
-        unstable_review = high_importance and maps["importance_status"].get(feature) == "unstable_importance"
+        unstable_review = feature in selected and maps["importance_status"].get(feature) == "unstable_importance"
         psi_review = maps["psi_status"].get(feature) == "high_drift"
         review_required = bool(badrate_review or unstable_review or psi_review or leakage_status in {"warning", "unknown_metadata"})
 
@@ -485,7 +539,7 @@ def build_feature_decision_ledger(
             reasons.append("deterministic_leakage_failed")
         elif feature in force_keep and feature in selected:
             final_status = "force_kept"
-            reasons.append("configured_force_keep")
+            reasons.append("force_kept")
         elif feature not in selected:
             final_status = "dropped"
             preprocess_reason = maps["preprocess_drop"].get(feature)
@@ -502,18 +556,21 @@ def build_feature_decision_ledger(
                 reasons.append("random_importance")
             elif d04_set and feature not in d04_set:
                 reasons.append("null_importance")
+            elif feature in maps["d05_final_rank"]:
+                reasons.append(str(maps["d05_selection_reason"].get(feature) or "not_in_stable_importance_top_n"))
             else:
-                reasons.append("not_in_final_top_n")
+                reasons.append("not_in_stable_importance_top_n")
         elif review_required:
             final_status = "review_required"
+            reasons.append("selected_by_stable_importance")
             reasons.append("retained_with_review_flags")
         else:
             final_status = "selected"
-            reasons.append("passed_existing_selection_policy")
+            reasons.append("selected_by_stable_importance")
         if badrate_review:
             reasons.append("high_importance_badrate_review")
         if unstable_review:
-            reasons.append("high_importance_unstable")
+            reasons.append("importance_unstable_review")
         if psi_review:
             reasons.append("monthly_psi_high_drift")
         if leakage_status in {"warning", "unknown_metadata"}:
@@ -535,9 +592,14 @@ def build_feature_decision_ledger(
                 "business_contradiction": bool(maps["business_contradiction"].get(feature, False)),
                 "relationship_stability": relationship_status,
                 "importance_median": maps["importance_median"].get(feature, np.nan),
+                "importance_mean": maps["importance_mean"].get(feature, np.nan),
                 "rank_median": rank_median,
+                "rank_mean": maps["rank_mean"].get(feature, np.nan),
                 "rank_std": maps["rank_std"].get(feature, np.nan),
                 "selection_rate": maps["selection_rate"].get(feature, np.nan),
+                "d05_final_rank": maps["d05_final_rank"].get(feature, np.nan),
+                "d05_selected": maps["d05_selected"].get(feature, False),
+                "d05_selection_reason": maps["d05_selection_reason"].get(feature, ""),
                 "correlation_group": maps["correlation_group"].get(feature, ""),
                 "final_status": final_status,
                 "review_required": review_required and final_status != "dropped",
@@ -729,7 +791,7 @@ def generate_feature_risk_review(
         "metadata_incomplete_features": feature_list(ledger["leakage_status"] == "unknown_metadata"),
         "psi_high_drift_features": feature_list(ledger["psi_status"] == "high_drift"),
         "high_importance_abnormal_badrate_features": feature_list(ledger["badrate_review_required"]),
-        "high_importance_unstable_features": feature_list(ledger["decision_reason"].str.contains("high_importance_unstable", na=False)),
+        "high_importance_unstable_features": feature_list(ledger["decision_reason"].str.contains("importance_unstable_review", na=False)),
         "top_review_features": ledger.loc[ledger["review_required"]].sort_values("rank_median", na_position="last")["feature"].head(30).tolist(),
         "artifacts": list(artifacts),
     }

@@ -278,10 +278,14 @@ def run_experiment(context: VersionContext, params: dict[str, Any]) -> None:
             "actual_feature_list.txt", "preprocessing.json", "run_config.json", "model.pkl",
             "score_column_summary.csv", "distillation_summary.json", "tuning_context.json",
             "tuning_trials.csv", "tuning_summary.json", "best_params.json",
-            "selection_reason.md", "llm_tuning_decisions.md",
+            "selection_reason.md", "llm_tuning_decisions.md", "tuning_trajectory.json",
         ]
         _register(context, experiment, artifact_names)
-        for artifact in sorted(output.glob("llm_tuning_plan_round_*.json")) + sorted(output.glob("tuning_context_round_*.json")):
+        for artifact in (
+            sorted(output.glob("llm_tuning_plan_round_*.json"))
+            + sorted(output.glob("tuning_context_round_*.json"))
+            + sorted(output.glob("tuning_diagnosis_round_*.json"))
+        ):
             register_action_artifact(context.workspace, "train_baseline", artifact)
         if score_output.exists():
             register_action_artifact(
@@ -304,13 +308,21 @@ def run_experiment(context: VersionContext, params: dict[str, Any]) -> None:
 
         advisor = isinstance(exc, AdvisorTuningPlanRequired)
         status_name = "advisor_required" if advisor else "failed"
-        failure_code = "advisor_required" if advisor else classify_exception(exc)
+        failure_code = "advisor_required" if advisor else str(getattr(exc, "failure_code", "") or classify_exception(exc))
         _write_json(output / "train_metrics.json", {"status": status_name, "reason": str(exc), "experiment": experiment, "algorithm": algorithm})
         status = _status(output, status=status_name, experiment=experiment, algorithm=algorithm, message=str(exc), failure_code=failure_code, error=exc)
         _summary(output, status, plan)
-        _register(context, experiment, ["train_metrics.json", "training_status.json", "training_summary.md"])
-        if advisor:
-            for artifact in sorted(output.glob("tuning_context*.json")):
+        _register(context, experiment, [
+            "train_metrics.json", "training_status.json", "training_summary.md",
+            "tuning_trials.csv", "tuning_summary.json", "selection_reason.md",
+            "llm_tuning_decisions.md", "tuning_trajectory.json",
+        ])
+        if advisor or failure_code == "all_trials_failed_guardrail":
+            for artifact in (
+                sorted(output.glob("tuning_context*.json"))
+                + sorted(output.glob("llm_tuning_plan_round_*.json"))
+                + sorted(output.glob("tuning_diagnosis_round_*.json"))
+            ):
                 register_action_artifact(context.workspace, "train_baseline", artifact)
         append_decision(context.workspace, stage="train_baseline", decision=status_name, reason=str(exc))
         stage_action_failed(context.workspace, "train_baseline", str(exc), failure_code=failure_code)

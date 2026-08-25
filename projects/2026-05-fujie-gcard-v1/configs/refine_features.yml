@@ -47,6 +47,14 @@ feature_refine:
   random_seed: 0
   target_feature_count: 500
 
+  # Feature selection uses only DEV; the final DEV month is validation.
+  # input.valid_value remains the OOT definition for final evaluation and is
+  # intentionally not used to build selection DatasetParts.
+  selection_split:
+    mode: dev_temporal
+    month_column: mdl_dte
+    valid_months: 1
+
   preprocessing:
     missing_sentinels:
       - -999
@@ -68,7 +76,7 @@ feature_refine:
     n_bins: 10
 
   local_d02:
-    # DEV vs OOT per-feature PSI stability filter (local-feather mode)
+    # DEV first-natural-month base PSI evidence; OOT is never used here.
     enabled: true
     psi: 0.2
 
@@ -87,6 +95,9 @@ feature_refine:
     enabled: true
     importance_type: gain
     keep_top_n: 300
+    seeds: [0, 17, 42, 73, 101]
+    min_selection_rate: 0.60
+    max_rank_std: 50
 
   lightgbm:
     objective: binary

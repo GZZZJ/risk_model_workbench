@@ -134,7 +134,7 @@ def _write_train_context(workspace: Path) -> None:
     model_dir = workspace / "modeling" / "baseline_all"
     model_dir.mkdir(parents=True, exist_ok=True)
     (model_dir / "tuning_context_round_1.json").write_text(
-        json.dumps({"round": 1, "experiment": "baseline_all"}),
+        json.dumps({"round": 1, "experiment": "baseline_all", "algorithm": "lightgbm"}),
         encoding="utf-8",
     )
 
@@ -144,9 +144,17 @@ def _write_advisor_response(workspace: Path, request: dict) -> Path:
     plan_path.write_text(
         json.dumps(
             {
+                "algorithm": "lightgbm",
                 "experiment": "baseline_all",
                 "round": 1,
-                "diagnosis": "bounded synthetic candidate",
+                "diagnosis": {
+                    "state": "healthy",
+                    "summary": "bounded synthetic candidate",
+                    "evidence": ["baseline_only"],
+                    "recommended_direction": ["bounded_local_exploration"],
+                    "confidence": 0.8,
+                },
+                "decision": "continue",
                 "candidates": [
                     {
                         "name": "regularized",
@@ -154,7 +162,6 @@ def _write_advisor_response(workspace: Path, request: dict) -> Path:
                         "reason": "synthetic local path",
                     }
                 ],
-                "stop": False,
             }
         ),
         encoding="utf-8",

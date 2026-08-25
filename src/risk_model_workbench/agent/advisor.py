@@ -613,7 +613,8 @@ def _constraints_for(request_type: str) -> list[str]:
         return [
             *common,
             "Do not optimize directly against OOT as the primary tuning target.",
-            "Use 3-5 bounded candidates.",
+            "Use the bounded candidate count in the tuning context (the schema permits 1-5).",
+            "Return a structured diagnosis whose evidence codes are drawn only from deterministic context.",
             "Explain each candidate briefly.",
         ]
     return common

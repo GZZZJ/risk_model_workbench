@@ -113,10 +113,11 @@ def _persist_tuning_plan(workspace: Path, request: dict[str, Any], plan: dict[st
     if not experiment:
         raise EmbeddedAdvisorError("tuning request does not bind an experiment")
     expected_round = int(request.get("round", 0) or 0)
+    expected_algorithm = _algorithm_from_tuning_context(workspace, experiment, expected_round)
     payload = dict(plan)
     payload["round"] = expected_round
     payload["experiment"] = experiment
-    tuning_cfg = _load_tuning_config(workspace)
+    tuning_cfg = _load_tuning_config(workspace, algorithm=expected_algorithm)
     try:
         normalized = validate_tuning_plan(
             payload,
@@ -124,6 +125,8 @@ def _persist_tuning_plan(workspace: Path, request: dict[str, Any], plan: dict[st
             advisor_type="embedded_langgraph",
             expected_experiment=experiment,
             expected_round=expected_round,
+            expected_algorithm=expected_algorithm,
+            allowed_evidence=_diagnosis_evidence_from_tuning_context(workspace, experiment, expected_round),
         )
     except ValueError as exc:
         raise EmbeddedAdvisorError(f"embedded tuning plan violates bounds: {exc}") from exc
@@ -136,13 +139,37 @@ def _persist_tuning_plan(workspace: Path, request: dict[str, Any], plan: dict[st
     return relative.as_posix()
 
 
-def _load_tuning_config(workspace: Path) -> dict[str, Any]:
+def _load_tuning_config(workspace: Path, *, algorithm: str = "lightgbm") -> dict[str, Any]:
     path = workspace / "configs_runtime" / "train.yaml"
     if path.exists():
         payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         if isinstance(payload, dict):
-            return resolve_tuning_config(payload)
-    return resolve_tuning_config({"training": {"mode": "llm_guided_tune"}})
+            return resolve_tuning_config(payload, algorithm=algorithm)
+    return resolve_tuning_config({"training": {"mode": "llm_guided_tune"}}, algorithm=algorithm)
+
+
+def _algorithm_from_tuning_context(workspace: Path, experiment: str, round_index: int) -> str:
+    path = workspace / "modeling" / experiment / f"tuning_context_round_{round_index}.json"
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            algorithm = str(payload.get("algorithm") or "")
+            if algorithm:
+                return algorithm
+        except (OSError, json.JSONDecodeError):
+            pass
+    return "lightgbm"
+
+
+def _diagnosis_evidence_from_tuning_context(workspace: Path, experiment: str, round_index: int) -> set[str] | None:
+    path = workspace / "modeling" / experiment / f"tuning_context_round_{round_index}.json"
+    if not path.exists():
+        return None
+    try:
+        evidence = ((json.loads(path.read_text(encoding="utf-8")).get("deterministic_diagnosis") or {}).get("allowed_evidence"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return {str(item) for item in evidence} if isinstance(evidence, list) else None
 
 
 def _experiment_from_command(command: list[str]) -> str:

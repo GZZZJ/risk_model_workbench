@@ -138,13 +138,20 @@ def _tuning_bounds_enforced() -> dict[str, Any]:
         {"training": {"mode": "llm_guided_tune", "tuning": {"candidates_per_round": 3}}}
     )
     plan = {
+        "algorithm": "lightgbm",
         "round": 1,
         "experiment": "main",
-        "diagnosis": "eval",
+        "diagnosis": {
+            "state": "healthy",
+            "summary": "eval",
+            "evidence": ["baseline_only"],
+            "recommended_direction": ["bounded_local_exploration"],
+            "confidence": 0.8,
+        },
+        "decision": "continue",
         "candidates": [
             {"name": "unsafe", "params": {"learning_rate": 9.0}, "reason": "out of bounds"}
         ],
-        "stop": False,
     }
     try:
         validate_tuning_plan(
@@ -153,6 +160,7 @@ def _tuning_bounds_enforced() -> dict[str, Any]:
             advisor_type="embedded_eval",
             expected_experiment="main",
             expected_round=1,
+            expected_algorithm="lightgbm",
         )
     except ValueError:
         return {"passed": True, "unsafe_accepted": 0}

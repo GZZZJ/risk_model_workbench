@@ -31,7 +31,7 @@ AdvisorDecision = Literal["continue", "retry", "stop", "needs_user_confirmation"
 
 
 class TuningCandidate(BaseModel):
-    """One bounded LightGBM candidate proposed by the embedded Advisor."""
+    """One bounded algorithm-specific candidate proposed by the embedded Advisor."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -40,15 +40,43 @@ class TuningCandidate(BaseModel):
     reason: str = Field(min_length=1, max_length=1000)
 
 
+class ModelDiagnosis(BaseModel):
+    """LLM interpretation of deterministic, precomputed tuning evidence."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    state: Literal["overfit", "underfit", "healthy", "plateau", "unstable", "insufficient_evidence"]
+    summary: str = Field(min_length=1, max_length=2000)
+    evidence: list[str] = Field(min_length=1, max_length=20)
+    recommended_direction: list[str] = Field(default_factory=list, max_length=12)
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
 class TuningPlan(BaseModel):
     """File payload consumed by the existing LLM-guided tuning workflow."""
 
     model_config = ConfigDict(extra="forbid")
 
+    algorithm: Literal["lightgbm", "xgboost"]
+    experiment: str | None = Field(default=None, max_length=80)
     round: int = Field(ge=1, le=20)
-    diagnosis: str = Field(min_length=1, max_length=2000)
-    candidates: list[TuningCandidate] = Field(min_length=3, max_length=5)
-    stop: bool = False
+    diagnosis: ModelDiagnosis
+    decision: Literal["continue", "stop"]
+    candidates: list[TuningCandidate] = Field(default_factory=list, max_length=5)
+    stop_reason: Literal["advisor_recommends_stop", "insufficient_evidence", "manual_stop"] | None = None
+
+    @model_validator(mode="after")
+    def validate_tuning_shape(self) -> "TuningPlan":
+        if self.decision == "continue":
+            if not self.candidates:
+                raise ValueError("continuing tuning plan requires at least one candidate")
+            if self.stop_reason is not None:
+                raise ValueError("continuing tuning plan must not include stop_reason")
+        elif self.candidates:
+            raise ValueError("stop tuning plan must not include candidates")
+        elif self.stop_reason is None:
+            raise ValueError("stop tuning plan requires stop_reason")
+        return self
 
 
 class EmbeddedAdvisorAnswer(BaseModel):
@@ -66,9 +94,13 @@ class EmbeddedAdvisorAnswer(BaseModel):
 
     @model_validator(mode="after")
     def validate_decision_shape(self) -> "EmbeddedAdvisorAnswer":
-        if self.type == "tuning_plan" and self.status == "answered" and self.decision in {"continue", "retry"}:
+        if self.type == "tuning_plan" and self.status == "answered" and self.decision in {"continue", "retry", "stop"}:
             if self.tuning_plan is None:
-                raise ValueError("tuning_plan is required for a continuing tuning decision")
+                raise ValueError("tuning_plan is required for a tuning decision")
+            if self.decision == "stop" and self.tuning_plan.decision != "stop":
+                raise ValueError("stop Advisor decision requires a stop tuning plan")
+            if self.decision in {"continue", "retry"} and self.tuning_plan.decision != "continue":
+                raise ValueError("continuing Advisor decision requires a continuing tuning plan")
         elif self.tuning_plan is not None:
             raise ValueError("tuning_plan is only allowed for tuning_plan responses")
         if self.decision == "needs_user_confirmation" and not self.requires_user_confirmation:

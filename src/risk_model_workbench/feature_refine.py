@@ -8,7 +8,7 @@ convergence stage:
 1. global correlation de-duplication
 2. D03 random-importance filtering
 3. D04 null-importance filtering
-4. D05 baseline model importance top-N selection
+4. D05 multi-seed baseline importance stability selection
 """
 
 from __future__ import annotations
@@ -263,6 +263,11 @@ def coerce_feature_frame(df: pd.DataFrame, features: list[str], cfg: dict[str, A
 
 
 def make_dataset_parts(df: pd.DataFrame, x: pd.DataFrame, cfg: dict[str, Any]) -> DatasetParts:
+    """Legacy split helper retained for callers outside feature refinement.
+
+    The refine workflow itself uses ``make_selection_dataset_parts`` so that
+    ``input.valid_value`` (normally OOT) can never enter feature selection.
+    """
     input_cfg = cfg["input"]
     label = input_cfg["label_column"]
     split = input_cfg["split_column"]
@@ -275,6 +280,135 @@ def make_dataset_parts(df: pd.DataFrame, x: pd.DataFrame, cfg: dict[str, Any]) -
         train_y=df.loc[train_mask, label].astype(int).reset_index(drop=True),
         valid_x=x.loc[valid_mask].reset_index(drop=True),
         valid_y=df.loc[valid_mask, label].astype(int).reset_index(drop=True),
+    )
+
+
+def _selection_split_values(value: Any, *, field_name: str) -> list[str]:
+    if value is None:
+        return []
+    values = [value] if isinstance(value, str) else list(value)
+    normalized = [str(item) for item in values if str(item)]
+    if not normalized:
+        raise ValueError(f"feature_refine.selection_split.{field_name} must not be empty.")
+    return normalized
+
+
+def make_selection_dataset_parts(
+    df: pd.DataFrame,
+    x: pd.DataFrame,
+    cfg: dict[str, Any],
+) -> tuple[DatasetParts, dict[str, Any]]:
+    """Build the train/validation pair used exclusively by feature selection.
+
+    OOT is a final evaluation dataset, never a fallback validation set.  The
+    default therefore creates a deterministic last-month validation slice from
+    DEV; projects with a DEV-OOS label may instead select it explicitly.
+    """
+    input_cfg = cfg["input"]
+    label_column = str(input_cfg["label_column"])
+    split_column = str(input_cfg["split_column"])
+    dev_value = str(input_cfg["train_value"])
+    oot_values = {str(value) for value in (input_cfg.get("oot_values") or [])}
+    legacy_valid_value = str(input_cfg.get("valid_value", ""))
+    if legacy_valid_value.upper() == "OOT":
+        oot_values.add(legacy_valid_value)
+    oot_values.discard("")
+    step_cfg = cfg.get("selection_split", {}) or {}
+    mode = str(step_cfg.get("mode", "dev_temporal")).lower()
+    eligible = df[label_column].isin([0, 1])
+
+    if mode == "explicit":
+        train_values = _selection_split_values(step_cfg.get("train_values", [dev_value]), field_name="train_values")
+        valid_values = _selection_split_values(step_cfg.get("valid_values"), field_name="valid_values")
+        if oot_values.intersection(train_values) or oot_values.intersection(valid_values):
+            raise ValueError(
+                "feature_refine.selection_split must not use input.valid_value/OOT; "
+                "configure a DEV validation split or mode: dev_temporal."
+            )
+        train_mask = eligible & df[split_column].astype(str).isin(train_values)
+        valid_mask = eligible & df[split_column].astype(str).isin(valid_values)
+        details: dict[str, Any] = {
+            "mode": "explicit",
+            "train_values": train_values,
+            "valid_values": valid_values,
+            "month_column": None,
+            "train_months": [],
+            "valid_months": [],
+        }
+    elif mode == "dev_temporal":
+        from risk_model_workbench.feature_selection.risk_review import normalize_months
+
+        month_column = str(step_cfg.get("month_column") or "")
+        if not month_column or month_column not in df.columns:
+            raise ValueError(
+                "feature_refine.selection_split.mode=dev_temporal requires an existing month_column; "
+                "it will not fall back to OOT."
+            )
+        dev_mask = eligible & (df[split_column].astype(str) == dev_value)
+        months = normalize_months(df.loc[dev_mask, month_column])
+        valid_months = sorted(month for month in months.dropna().unique().tolist() if month != "<NA>")
+        requested_valid_months = int(step_cfg.get("valid_months", 1))
+        if requested_valid_months <= 0 or len(valid_months) <= requested_valid_months:
+            raise ValueError(
+                "feature_refine.selection_split.mode=dev_temporal requires at least one DEV train month "
+                "and one DEV validation month."
+            )
+        held_out_months = valid_months[-requested_valid_months:]
+        train_months = valid_months[:-requested_valid_months]
+        month_by_index = pd.Series(months.to_numpy(), index=df.index[dev_mask], dtype="string")
+        train_mask = dev_mask & month_by_index.reindex(df.index).isin(train_months).fillna(False)
+        valid_mask = dev_mask & month_by_index.reindex(df.index).isin(held_out_months).fillna(False)
+        details = {
+            "mode": "dev_temporal",
+            "train_values": [dev_value],
+            "valid_values": [dev_value],
+            "month_column": month_column,
+            "train_months": train_months,
+            "valid_months": held_out_months,
+        }
+    elif mode == "random":
+        valid_fraction = float(step_cfg.get("valid_fraction", 0.2))
+        if not 0 < valid_fraction < 1:
+            raise ValueError("feature_refine.selection_split.valid_fraction must be between 0 and 1 for mode=random.")
+        dev_indices = df.index[eligible & (df[split_column].astype(str) == dev_value)].to_numpy()
+        if len(dev_indices) < 2:
+            raise ValueError("feature_refine.selection_split.mode=random requires at least two DEV samples.")
+        rng = np.random.default_rng(int(step_cfg.get("random_seed", cfg.get("random_seed", 0))))
+        valid_count = min(max(1, int(math.ceil(len(dev_indices) * valid_fraction))), len(dev_indices) - 1)
+        valid_indices = set(rng.permutation(dev_indices)[:valid_count].tolist())
+        train_mask = pd.Series(~df.index.isin(valid_indices), index=df.index) & eligible & (df[split_column].astype(str) == dev_value)
+        valid_mask = pd.Series(df.index.isin(valid_indices), index=df.index) & eligible & (df[split_column].astype(str) == dev_value)
+        details = {
+            "mode": "random",
+            "train_values": [dev_value],
+            "valid_values": [dev_value],
+            "month_column": None,
+            "train_months": [],
+            "valid_months": [],
+        }
+    else:
+        raise ValueError("feature_refine.selection_split.mode must be one of: explicit, dev_temporal, random.")
+
+    if not train_mask.any() or not valid_mask.any():
+        raise RuntimeError("Feature selection requires non-empty selection train and validation datasets; OOT is not allowed.")
+    overlap = bool((train_mask & valid_mask).any())
+    if overlap:
+        raise RuntimeError("Feature selection train and validation datasets overlap.")
+    details.update(
+        {
+            "train_samples": int(train_mask.sum()),
+            "valid_samples": int(valid_mask.sum()),
+            "oot_used": False,
+        }
+    )
+    return (
+        DatasetParts(
+            train_x=x.loc[train_mask].reset_index(drop=True),
+            train_y=df.loc[train_mask, label_column].astype(int).reset_index(drop=True),
+            valid_x=x.loc[valid_mask].reset_index(drop=True),
+            valid_y=df.loc[valid_mask, label_column].astype(int).reset_index(drop=True),
+        ),
+        details,
     )
 
 
@@ -1173,36 +1307,139 @@ def d05_top_importance(
     *,
     progress: ProgressReporter | None = None,
 ) -> tuple[list[str], pd.DataFrame, float]:
+    """Select features from deterministic multi-seed importance stability evidence.
+
+    The returned frame remains compatible with the former baseline importance
+    artifact through ``gain``, ``split`` and ``rank`` while the explicit
+    stability columns are the authoritative D05 decision evidence.
+    """
     step_cfg = cfg["d05_baseline_importance"]
     keep_top_n = int(step_cfg.get("keep_top_n", cfg.get("target_feature_count", 500)))
     if not step_cfg.get("enabled", True):
         return features[:keep_top_n], pd.DataFrame(), float("nan")
 
+    configured_seeds = step_cfg.get("seeds")
+    if configured_seeds is None:
+        base_seed = int(cfg.get("random_seed", 0))
+        seeds = [base_seed + offset for offset in (0, 17, 42, 73, 101)]
+    else:
+        seeds = [int(seed) for seed in configured_seeds]
+    seeds = list(dict.fromkeys(seeds))
+    if not seeds:
+        raise ValueError("feature_refine.d05_baseline_importance.seeds must contain at least one seed.")
+    min_selection_rate = float(step_cfg.get("min_selection_rate", 0.60))
+    max_rank_std = float(step_cfg.get("max_rank_std", float("inf")))
+    force_keep = [
+        feature
+        for feature in (cfg.get("feature_risk_review", {}) or {}).get("force_keep_features", []) or []
+        if feature in features
+    ]
+
     if progress:
-        progress.emit(step="d05_train", message=f"基线模型重要性筛选开始，输入 {len(features)} 个变量", percent=84)
-    heartbeat = (
-        progress.heartbeat(
-            step="d05_train_heartbeat",
-            message=f"基线模型重要性筛选仍在训练，输入 {len(features)} 个变量",
+        progress.emit(
+            step="d05_train",
+            message=f"基线模型稳定性重要性筛选开始，输入 {len(features)} 个变量，{len(seeds)} 个固定 seed",
             percent=84,
-            metrics={"input_features": len(features), "keep_top_n": keep_top_n},
         )
-        if progress
-        else nullcontext()
+    run_frames: list[pd.DataFrame] = []
+    aucs: list[float] = []
+    for run_index, seed in enumerate(seeds, start=1):
+        heartbeat = (
+            progress.heartbeat(
+                step="d05_train_heartbeat",
+                message=f"基线模型稳定性重要性筛选仍在训练：第 {run_index}/{len(seeds)} 轮",
+                percent=84 + (run_index - 1) / len(seeds) * 6,
+                metrics={"input_features": len(features), "keep_top_n": keep_top_n, "seed": seed},
+            )
+            if progress
+            else nullcontext()
+        )
+        with heartbeat:
+            model, auc = train_lgbm(parts, features, cfg, seed=seed)
+        run = model_importance(model, features)
+        run = run.sort_values(["gain", "feature"], ascending=[False, True], kind="mergesort").reset_index(drop=True)
+        run["rank"] = np.arange(1, len(run) + 1)
+        run["seed"] = seed
+        run["selected_top_n"] = run["rank"] <= keep_top_n
+        run_frames.append(run)
+        aucs.append(float(auc))
+        if progress:
+            progress.emit(
+                step="d05_seed_done",
+                message=f"基线模型稳定性重要性筛选：第 {run_index}/{len(seeds)} 轮完成",
+                current=run_index,
+                total=len(seeds),
+                percent=84 + run_index / len(seeds) * 6,
+                metrics={"seed": seed, "auc": float(auc)},
+            )
+
+    runs = pd.concat(run_frames, ignore_index=True)
+    stability = (
+        runs.groupby("feature", sort=False)
+        .agg(
+            importance_median=("gain", "median"),
+            importance_mean=("gain", "mean"),
+            importance_std=("gain", lambda values: float(np.std(values, ddof=0))),
+            split_median=("split", "median"),
+            rank_median=("rank", "median"),
+            rank_mean=("rank", "mean"),
+            rank_std=("rank", lambda values: float(np.std(values, ddof=0))),
+            top_n_selection_rate=("selected_top_n", "mean"),
+            runs=("seed", "nunique"),
+        )
+        .reset_index()
     )
-    with heartbeat:
-        model, auc = train_lgbm(parts, features, cfg, seed=int(cfg["random_seed"]) + 500)
-    importance = model_importance(model, features).sort_values("gain", ascending=False).reset_index(drop=True)
-    importance["rank"] = np.arange(1, len(importance) + 1)
-    kept = importance.head(keep_top_n)["feature"].tolist()
+    stability = stability.sort_values(
+        ["top_n_selection_rate", "rank_median", "importance_median", "feature"],
+        ascending=[False, True, False, True],
+        kind="mergesort",
+    ).reset_index(drop=True)
+    stability["stability_warning"] = (
+        (stability["top_n_selection_rate"] < min_selection_rate)
+        | (stability["rank_std"] > max_rank_std)
+    )
+    stability["importance_status"] = np.where(
+        len(seeds) < 2,
+        "unknown_importance_stability",
+        np.where(stability["stability_warning"], "unstable_importance", "stable_importance"),
+    )
+    stability["final_rank"] = np.arange(1, len(stability) + 1)
+    stability["stability_qualified"] = ~stability["stability_warning"]
+    stability["selected"] = False
+    eligible = stability.index[stability["stability_qualified"]].tolist()
+    stability.loc[eligible[:keep_top_n], "selected"] = True
+    stability.loc[stability["feature"].isin(force_keep), "selected"] = True
+    stability["selection_reason"] = np.select(
+        [
+            stability["feature"].isin(force_keep),
+            stability["selected"] & stability["stability_qualified"],
+            stability["top_n_selection_rate"] < min_selection_rate,
+            stability["rank_std"] > max_rank_std,
+        ],
+        [
+            "force_keep",
+            "stability_qualified_top_n",
+            "below_min_selection_rate",
+            "above_max_rank_std",
+        ],
+        default="outside_target_feature_count",
+    )
+    # Legacy consumers read these three columns.  They now represent the
+    # stable aggregate rather than an arbitrary single fitted model.
+    stability["gain"] = stability["importance_median"]
+    stability["split"] = stability["split_median"]
+    stability["rank"] = stability["final_rank"]
+    selected_set = set(stability.loc[stability["selected"], "feature"])
+    kept = [feature for feature in stability["feature"].tolist() if feature in selected_set]
+    auc = float(np.median(aucs))
     if progress:
         progress.emit(
             step="d05_done",
-            message=f"基线模型重要性筛选完成，AUC={auc:.4f}，最终保留 {len(kept)} 个变量",
+            message=f"基线模型稳定性重要性筛选完成，AUC 中位数={auc:.4f}，最终保留 {len(kept)} 个变量",
             percent=90,
-            metrics={"auc": auc, "input_features": len(features), "final_features": len(kept)},
+            metrics={"auc_median": auc, "runs": len(seeds), "input_features": len(features), "final_features": len(kept)},
         )
-    return kept, importance, auc
+    return kept, stability, auc
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -1362,7 +1599,7 @@ def _run_refine(args: RefineAction) -> int:
         available_features=len(available_features),
         feature_matrix_memory_bytes=feature_matrix_memory,
     )
-    parts = make_dataset_parts(raw_df, x, cfg)
+    selection_parts, selection_split = make_selection_dataset_parts(raw_df, x, cfg)
     from risk_model_workbench.feature_selection.risk_review import normalize_months, resolve_month_column
 
     review_month_column = resolve_month_column(raw_df, cfg)
@@ -1371,15 +1608,26 @@ def _run_refine(args: RefineAction) -> int:
     dev_months = (
         normalize_months(raw_df.loc[dev_mask, review_month_column]).reset_index(drop=True)
         if review_month_column
-        else pd.Series(pd.NA, index=parts.train_x.index, dtype="string")
+        else pd.Series(pd.NA, index=range(int(dev_mask.sum())), dtype="string")
+    )
+    # D01/D02 evidence intentionally spans all DEV.  Model-driven selection
+    # stages below use selection_parts only.
+    dev_parts = DatasetParts(
+        train_x=x.loc[dev_mask].reset_index(drop=True),
+        train_y=raw_df.loc[dev_mask, input_cfg["label_column"]].astype(int).reset_index(drop=True),
+        valid_x=selection_parts.valid_x,
+        valid_y=selection_parts.valid_y,
     )
     memory_tracker.record(
         "split_dataset",
-        train_samples=int(len(parts.train_x)),
-        valid_samples=int(len(parts.valid_x)),
+        dev_samples=int(len(dev_parts.train_x)),
+        selection_train_samples=int(len(selection_parts.train_x)),
+        selection_valid_samples=int(len(selection_parts.valid_x)),
+        selection_split=selection_split,
     )
     print(f"[STAGE] raw_rows={len(raw_df)} initial_feat={len(initial_features)} "
-          f"available={len(available_features)} train={len(parts.train_x)} valid={len(parts.valid_x)}")
+          f"available={len(available_features)} selection_train={len(selection_parts.train_x)} "
+          f"selection_valid={len(selection_parts.valid_x)} mode={selection_split['mode']}")
     if reporter:
         reporter.emit(
             step="preprocess_done",
@@ -1392,8 +1640,9 @@ def _run_refine(args: RefineAction) -> int:
                 "raw_rows": int(len(raw_df)),
                 "initial_features": len(initial_features),
                 "available_features": len(available_features),
-                "train_samples": int(len(parts.train_x)),
-                "valid_samples": int(len(parts.valid_x)),
+                "selection_train_samples": int(len(selection_parts.train_x)),
+                "selection_valid_samples": int(len(selection_parts.valid_x)),
+                "selection_split": selection_split,
             },
         )
 
@@ -1404,7 +1653,7 @@ def _run_refine(args: RefineAction) -> int:
             percent=30,
             metrics={"input_features": len(available_features)},
         )
-    d01_kept, d01_detail = d01_local_prescreen(parts, available_features, cfg, progress=reporter)
+    d01_kept, d01_detail = d01_local_prescreen(dev_parts, available_features, cfg, progress=reporter)
     if reporter:
         reporter.emit(
             step="d01_done",
@@ -1426,7 +1675,7 @@ def _run_refine(args: RefineAction) -> int:
         )
     cfg["_runtime_dev_months"] = dev_months
     try:
-        d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg, progress=reporter)
+        d02_kept, d02_detail = d02_local_psi(dev_parts, d01_kept, cfg, progress=reporter)
     finally:
         cfg.pop("_runtime_dev_months", None)
     if reporter:
@@ -1449,8 +1698,8 @@ def _run_refine(args: RefineAction) -> int:
             metrics={"input_features": len(d02_kept)},
         )
     corr_features, corr_drops = global_corr_select(
-        parts.train_x.loc[:, d02_kept],
-        parts.train_y,
+        selection_parts.train_x.loc[:, d02_kept],
+        selection_parts.train_y,
         cfg,
         progress=reporter,
     )
@@ -1467,7 +1716,10 @@ def _run_refine(args: RefineAction) -> int:
             percent=40,
             metrics={"kept": len(corr_features), "dropped": len(corr_drops)},
         )
-    parts_corr = DatasetParts(parts.train_x.loc[:, corr_features], parts.train_y, parts.valid_x.loc[:, corr_features], parts.valid_y)
+    parts_corr = DatasetParts(
+        selection_parts.train_x.loc[:, corr_features], selection_parts.train_y,
+        selection_parts.valid_x.loc[:, corr_features], selection_parts.valid_y,
+    )
     d03_features, d03_detail = d03_random_importance(parts_corr, corr_features, cfg, progress=reporter)
     memory_tracker.record(
         "d03_done",
@@ -1501,8 +1753,17 @@ def _run_refine(args: RefineAction) -> int:
             percent=82,
             metrics={"kept": len(d04_features), "dropped": len(d03_features) - len(d04_features)},
         )
-    parts_d04 = DatasetParts(parts_d03.train_x.loc[:, d04_features], parts_d03.train_y, parts_d03.valid_x.loc[:, d04_features], parts_d03.valid_y)
-    final_features, d05_importance, d05_auc = d05_top_importance(parts_d04, d04_features, cfg, progress=reporter)
+    force_keep_features = [
+        feature
+        for feature in (cfg.get("feature_risk_review", {}) or {}).get("force_keep_features", []) or []
+        if feature in available_features
+    ]
+    d05_candidates = list(dict.fromkeys([*d04_features, *force_keep_features]))
+    parts_d04 = DatasetParts(
+        selection_parts.train_x.loc[:, d05_candidates], selection_parts.train_y,
+        selection_parts.valid_x.loc[:, d05_candidates], selection_parts.valid_y,
+    )
+    final_features, d05_importance, d05_auc = d05_top_importance(parts_d04, d05_candidates, cfg, progress=reporter)
     memory_tracker.record(
         "d05_done",
         final_features=len(final_features),
@@ -1550,6 +1811,7 @@ def _run_refine(args: RefineAction) -> int:
     d03_detail.to_csv(output_dir / "d03_random_importance_detail.csv", index=False, encoding="utf-8-sig")
     d04_detail.to_csv(output_dir / "d04_null_importance_detail.csv", index=False, encoding="utf-8-sig")
     d05_importance.to_csv(output_dir / "d05_baseline_importance.csv", index=False, encoding="utf-8-sig")
+    d05_importance.to_csv(output_dir / "d05_importance_stability.csv", index=False, encoding="utf-8-sig")
     write_json(output_dir / "resource_usage.json", resource_usage)
     write_feature_list(output_dir / "final_500_features.txt", final_features)
     write_feature_list(output_dir / "final_features.txt", final_features)
@@ -1564,8 +1826,10 @@ def _run_refine(args: RefineAction) -> int:
             "data_source_mode": "local_feather" if local_feather_path is not None else "remote_table",
             "raw_rows": int(len(raw_df)),
             "total_rows": int(len(raw_df)),
-            "train_samples": int(len(parts.train_x)),
-            "valid_samples": int(len(parts.valid_x)),
+            "train_samples": int(len(selection_parts.train_x)),
+            "valid_samples": int(len(selection_parts.valid_x)),
+            "selection_split": selection_split,
+            "selection_oot_used": False,
             "initial_features": len(initial_features),
             "available_features": len(available_features),
             "d01_kept_features": len(d01_kept),
@@ -1581,6 +1845,7 @@ def _run_refine(args: RefineAction) -> int:
             "after_d04_null_importance": len(d04_features),
             "final_features": len(final_features),
             "d05_valid_auc": d05_auc,
+            "d05_decision_artifact": "d05_importance_stability.csv",
             "sampling_where": cfg["sampling"].get("where"),
             "sampling_max_rows": cfg["sampling"].get("max_rows"),
             "configured_peak_multiplier": peak_multiplier,
