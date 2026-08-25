@@ -476,63 +476,46 @@ def d02_local_psi(
     *,
     progress: ProgressReporter | None = None,
 ) -> tuple[list[str], pd.DataFrame]:
-    """Local-feather d02 stability filter: per-feature PSI (DEV vs OOT). Reuses vendor
-    ``batch_psi`` (same function remote ``run_d02`` uses), so local and remote PSI share
-    binning. Returns (kept_features, detail_df).
-    """
+    """Generate DEV monthly PSI evidence without using OOT or dropping features."""
     step_cfg = cfg.get("local_d02", {}) or {}
     if not step_cfg.get("enabled", True):
-        detail = pd.DataFrame({"feature": remain_features, "max_psi": 0.0, "drop_reason": "kept"})
+        detail = pd.DataFrame({"feature": remain_features, "max_psi": np.nan, "psi_status": "disabled", "drop_reason": "kept"})
         return list(remain_features), detail
     if not remain_features:
-        return [], pd.DataFrame(columns=["feature", "max_psi", "drop_reason"])
-    psi_threshold = float(step_cfg.get("psi", 0.2))
-
-    _, _, batch_psi = _load_vendor_feature_select()
+        return [], pd.DataFrame(columns=["feature", "max_psi", "psi_status", "drop_reason"])
+    warning_threshold = float(step_cfg.get("warning_threshold", step_cfg.get("psi", 0.10)))
+    fail_threshold = float(step_cfg.get("fail_threshold", 0.25))
     if progress:
         progress.emit(
             step="d02_psi_start",
-            message=f"稳定性筛选：DEV vs OOT PSI 计算开始，输入 {len(remain_features)} 个变量",
+            message=f"稳定性审查：DEV 首月 Base 月度 PSI 计算开始，输入 {len(remain_features)} 个变量",
             percent=34,
             metrics={"input_features": len(remain_features)},
         )
-    psi_heartbeat = (
-        progress.heartbeat(
-            step="d02_psi_heartbeat",
-            message=f"稳定性筛选：DEV vs OOT PSI 仍在计算，输入 {len(remain_features)} 个变量",
-            percent=34,
-            metrics={"input_features": len(remain_features)},
-        )
-        if progress
-        else nullcontext()
-    )
-    with psi_heartbeat:
-        data_iter = iter(
-            [
-                ("base_DEV", parts.train_x.loc[:, remain_features]),
-                ("exp_OOT", parts.valid_x.loc[:, remain_features]),
-            ]
-        )
-        psi_result = batch_psi(data_iter, list(remain_features), method="quantile", num_nbins=10)
-    fea_psi = psi_result[2] if isinstance(psi_result, tuple) and len(psi_result) > 2 else psi_result
-    feature_max_psi = {feature: float(max(psi.values())) for feature, psi in fea_psi.items()}
+    from risk_model_workbench.feature_selection.risk_review import monthly_psi_evidence
 
-    kept: list[str] = []
-    rows = []
-    for feature in remain_features:
-        psi = feature_max_psi.get(feature, 0.0)
-        is_kept = psi <= psi_threshold
-        if is_kept:
-            kept.append(feature)
-        rows.append({"feature": feature, "max_psi": psi, "drop_reason": "kept" if is_kept else "high_psi"})
+    dev_months = cfg.get("_runtime_dev_months")
+    if dev_months is None:
+        dev_months = pd.Series(pd.NA, index=parts.train_x.index, dtype="string")
+    _, summary, _, _ = monthly_psi_evidence(
+        parts.train_x.loc[:, remain_features],
+        pd.Series(dev_months).reset_index(drop=True),
+        remain_features,
+        n_bins=int(step_cfg.get("n_bins", 10)),
+        warning_threshold=warning_threshold,
+        fail_threshold=fail_threshold,
+        min_base_samples=int(step_cfg.get("min_base_samples", 500)),
+    )
+    detail = summary.rename(columns={"monthly_psi_max": "max_psi"})
+    detail["drop_reason"] = "kept"
     if progress:
         progress.emit(
             step="d02_psi_done",
-            message=f"稳定性筛选：DEV vs OOT PSI 计算完成，保留 {len(kept)} 个变量",
+            message=f"稳定性审查：DEV 月度 PSI 计算完成；PSI 不单独删除变量",
             percent=36,
-            metrics={"input_features": len(remain_features), "kept": len(kept), "dropped": len(remain_features) - len(kept)},
+            metrics={"input_features": len(remain_features), "kept": len(remain_features), "dropped": 0},
         )
-    return kept, pd.DataFrame(rows)
+    return list(remain_features), detail
 
 
 def global_corr_select(
@@ -1380,6 +1363,16 @@ def _run_refine(args: RefineAction) -> int:
         feature_matrix_memory_bytes=feature_matrix_memory,
     )
     parts = make_dataset_parts(raw_df, x, cfg)
+    from risk_model_workbench.feature_selection.risk_review import normalize_months, resolve_month_column
+
+    review_month_column = resolve_month_column(raw_df, cfg)
+    input_cfg = cfg["input"]
+    dev_mask = (raw_df[input_cfg["split_column"]] == input_cfg["train_value"]) & raw_df[input_cfg["label_column"]].isin([0, 1])
+    dev_months = (
+        normalize_months(raw_df.loc[dev_mask, review_month_column]).reset_index(drop=True)
+        if review_month_column
+        else pd.Series(pd.NA, index=parts.train_x.index, dtype="string")
+    )
     memory_tracker.record(
         "split_dataset",
         train_samples=int(len(parts.train_x)),
@@ -1427,11 +1420,15 @@ def _run_refine(args: RefineAction) -> int:
     if reporter:
         reporter.emit(
             step="d02_start",
-            message=f"稳定性筛选开始：DEV vs OOT PSI，输入 {len(d01_kept)} 个变量",
+            message=f"稳定性审查开始：DEV 首月 Base 月度 PSI，输入 {len(d01_kept)} 个变量",
             percent=34,
             metrics={"input_features": len(d01_kept)},
         )
-    d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg, progress=reporter)
+    cfg["_runtime_dev_months"] = dev_months
+    try:
+        d02_kept, d02_detail = d02_local_psi(parts, d01_kept, cfg, progress=reporter)
+    finally:
+        cfg.pop("_runtime_dev_months", None)
     if reporter:
         reporter.emit(
             step="d02_done",
@@ -1511,6 +1508,31 @@ def _run_refine(args: RefineAction) -> int:
         final_features=len(final_features),
         d05_valid_auc=d05_auc,
     )
+    from risk_model_workbench.feature_selection.risk_review import generate_feature_risk_review
+
+    final_features, review_artifacts, review_summary = generate_feature_risk_review(
+        project_dir=project_dir,
+        output_dir=output_dir,
+        raw_df=raw_df,
+        feature_frame=x,
+        config=cfg,
+        initial_features=initial_features,
+        available_features=available_features,
+        selected_features=final_features,
+        preprocess_stats=preprocess_stats,
+        d01_detail=d01_detail,
+        corr_drops=corr_drops,
+        d03_features=d03_features,
+        d03_detail=d03_detail,
+        d04_features=d04_features,
+        d05_importance=d05_importance,
+    )
+    memory_tracker.record(
+        "feature_risk_review_done",
+        reviewed_candidates=int((review_summary.get("counts") or {}).get("reviewed_model_candidates", 0)),
+        review_required=int((review_summary.get("counts") or {}).get("review_required", 0)),
+        leakage_failed=int((review_summary.get("counts") or {}).get("leakage_failed", 0)),
+    )
     resource_usage = memory_tracker.summary(
         matrix_bytes=feature_matrix_memory or raw_df_memory,
         row_count=int(len(raw_df)),
@@ -1548,9 +1570,11 @@ def _run_refine(args: RefineAction) -> int:
             "available_features": len(available_features),
             "d01_kept_features": len(d01_kept),
             "d02_kept_features": len(d02_kept),
-            "d01_d02_mode": "local_feather",
+            "d01_d02_mode": "local_feather_dev_monthly_psi_evidence",
             "d01_thresholds": cfg.get("local_d01", {}),
-            "d02_psi_threshold": float((cfg.get("local_d02", {}) or {}).get("psi", 0.2)),
+            "d02_psi_warning_threshold": float((cfg.get("local_d02", {}) or {}).get("warning_threshold", (cfg.get("local_d02", {}) or {}).get("psi", 0.10))),
+            "d02_psi_fail_threshold": float((cfg.get("local_d02", {}) or {}).get("fail_threshold", 0.25)),
+            "d02_oot_used": False,
             "after_global_corr": len(corr_features),
             "d03_mode": str(cfg.get("d03_random_importance", {}).get("mode", "feature_select_v2")),
             "after_d03_random_importance": len(d03_features),
@@ -1562,6 +1586,8 @@ def _run_refine(args: RefineAction) -> int:
             "configured_peak_multiplier": peak_multiplier,
             "observed_peak_multiplier": resource_usage.get("observed_peak_multiplier"),
             "resource_usage_path": "resource_usage.json",
+            "feature_risk_review": review_summary.get("counts", {"enabled": False}),
+            "feature_risk_review_path": "feature_risk_review.json" if review_artifacts else None,
         },
     )
     manifest = write_manifest(
@@ -1581,6 +1607,7 @@ def _run_refine(args: RefineAction) -> int:
             output_dir / "final_500_features.txt",
             output_dir / "final_features.txt",
             output_dir / "d05_baseline_importance.csv",
+            *review_artifacts,
         ],
     )
     print(f"output: {output_dir}")

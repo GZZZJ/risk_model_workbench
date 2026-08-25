@@ -17,7 +17,7 @@ def _stage_summary_local() -> dict:
         "initial_features": 2837,
         "available_features": 2563,
         "d01_kept_features": 2400,
-        "d02_kept_features": 2350,
+        "d02_kept_features": 2400,
         "after_global_corr": 1852,
         "after_d03_random_importance": 1852,
         "after_d04_null_importance": 1028,
@@ -50,7 +50,7 @@ def test_screening_steps_renders_d01_d02_counts_in_local_feather(tmp_path):
     assert by_method["Feather观察样本可用特征"] == 2563
     # d01/d02 now computed locally → real counts, with honest "全表" labels
     assert by_method["分表基础预筛：缺失率、相关性、IV（全表，local feather）"] == 2400
-    assert by_method["稳定性筛选：DEV vs OOT PSI（全表，local feather）"] == 2350
+    assert by_method["稳定性审查：DEV首月Base月度PSI（仅证据，local feather）"] == 2400
     assert by_method["选取Top500特征入模"] == 500
 
 
@@ -72,7 +72,7 @@ def test_screening_steps_missing_d01_d02_keys_show_na_remote(tmp_path):
     by_method = dict(zip(frame["筛选方法"], frame["剩余变量个数"]))
     # remote legacy label, key absent → N/A
     assert by_method["分表基础预筛：缺失率、相关性、IV"] == "N/A"
-    assert by_method["稳定性筛选：DEV vs OOT PSI"] == "N/A"
+    assert by_method["稳定性审查：DEV首月Base月度PSI（仅证据）"] == "N/A"
 
 
 def test_screening_steps_shadowed_by_feature_screening_process(tmp_path):

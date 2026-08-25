@@ -91,6 +91,18 @@ def test_feature_refine_cli_and_runner_have_semantic_parity(tmp_path, monkeypatc
         output.mkdir(parents=True, exist_ok=True)
         (output / "stage_summary.json").write_text('{"status":"done"}')
         (output / "final_features.txt").write_text("x1\nx2\n")
+        for name in [
+            "feature_leakage_review.csv",
+            "feature_monthly_psi.csv",
+            "feature_monthly_psi_summary.csv",
+            "feature_badrate_bins.csv",
+            "feature_monthly_badrate.csv",
+            "feature_importance_stability.csv",
+            "feature_decision_ledger.csv",
+        ]:
+            (output / name).write_text("feature\nx1\n", encoding="utf-8")
+        (output / "feature_risk_review.json").write_text('{"schema_version":1}\n', encoding="utf-8")
+        (output / "feature_risk_review.md").write_text("# Feature Risk Review\n", encoding="utf-8")
         return 0
 
     monkeypatch.setattr("risk_model_workbench.feature_selection.refine.execute_refine_action", fake_refine)
@@ -101,6 +113,9 @@ def test_feature_refine_cli_and_runner_have_semantic_parity(tmp_path, monkeypatc
     result = runner.run(invocation=ActionInvocation(tool_name="feature_refine_local", params={}, project=str(project.resolve()), version_id="direct"), context=direct, attempt_id="refine")
     assert result.status == "done"
     assert _snapshot(cli, "feature_refine") == _snapshot(direct, "feature_refine")
+    paths = set(_snapshot(cli, "feature_refine")["artifacts"])
+    assert "feature_selection/feature_decision_ledger.csv" in paths
+    assert "feature_selection/feature_risk_review.json" in paths
 
 
 def test_feature_prescreen_sql_prepare_and_execute_cli_runner_parity(tmp_path, monkeypatch):

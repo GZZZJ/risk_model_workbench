@@ -52,9 +52,36 @@ feature_refine:
     n_bins: 10
 
   local_d02:
-    # DEV vs OOT per-feature PSI stability filter (local-feather mode)
+    # DEV first-natural-month base PSI evidence. OOT is never used here and PSI alone does not drop features.
     enabled: true
-    psi: 0.2
+    n_bins: 10
+    warning_threshold: 0.10
+    fail_threshold: 0.25
+    min_base_samples: 500
+
+  feature_risk_review:
+    enabled: true
+    # Optional explicit columns/files. If absent, month is inferred conservatively and time metadata remains unknown.
+    month_column: "{{period_column}}"
+    metadata_path: ""
+    prediction_time: ""
+    force_keep_features: []
+    psi:
+      n_bins: 10
+      warning_threshold: 0.10
+      fail_threshold: 0.25
+      min_base_samples: 500
+    badrate:
+      n_bins: 10
+      min_bin_samples: 30
+      min_bin_ratio: 0.01
+      min_rate_range: 0.02
+      min_month_bin_samples: 20
+      inversion_correlation: -0.30
+    importance:
+      top_n: 20
+      max_rank_std: 10.0
+      min_selection_rate: 0.60
 
   d03_random_importance:
     enabled: true

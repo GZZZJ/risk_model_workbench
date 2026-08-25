@@ -90,13 +90,12 @@ def build_feature_screening_summary(project_dir: str | Path) -> dict[str, Any]:
     thresholds = feature_select_config.get("thresholds", {})
     prescreen_config = feature_select_config.get("prescreen", {}) or feature_select_config.get("d01_d02", {})
     train_value = prescreen_config.get("train_value", "DEV")
-    valid_value = prescreen_config.get("valid_value", "OOT")
     quality_thresholds = (
         f"缺失率 < {float(thresholds.get('empty', 0.95)):.2f}，"
         f"相关性 < {float(thresholds.get('corr', 0.80)):.2f}，"
         f"IV >= {float(thresholds.get('iv', 0.005)):.3f}"
     )
-    psi_threshold = f"{train_value} vs {valid_value}，PSI <= {float(thresholds.get('psi', 0.10)):.2f}"
+    psi_threshold = f"{train_value}首个自然月为Base，warning阈值 {float(thresholds.get('psi', 0.10)):.2f}；仅生成证据"
     global_corr = refine_config["global_corr"]
     d03 = dict(refine_config["d03_random_importance"])
     if refine_summary.get("d03_mode"):

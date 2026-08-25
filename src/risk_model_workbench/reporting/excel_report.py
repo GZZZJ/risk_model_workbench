@@ -2155,7 +2155,7 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
             ("原始候选变量总数", "initial_features"),
             ("Feather观察样本可用特征", "available_features"),
             ("分表基础预筛：缺失率、相关性、IV（全表，local feather）", "d01_kept_features"),
-            ("稳定性筛选：DEV vs OOT PSI（全表，local feather）", "d02_kept_features"),
+            ("稳定性审查：DEV首月Base月度PSI（仅证据，local feather）", "d02_kept_features"),
             ("全局相关性去重：按单变量AUC保留更强特征", "after_global_corr"),
             (d03_label, "after_d03_random_importance"),
             ("空标签重要性筛选：保留显著高于空标签分布的特征", "after_d04_null_importance"),
@@ -2167,7 +2167,7 @@ def _screening_steps_frame(stage_summary: dict[str, Any], feature_dir: Path) -> 
         rows = [
             ("原始候选变量总数", "initial_features"),
             ("分表基础预筛：缺失率、相关性、IV", "d01_kept_features"),
-            ("稳定性筛选：DEV vs OOT PSI", "d02_kept_features"),
+            ("稳定性审查：DEV首月Base月度PSI（仅证据）", "d02_kept_features"),
             ("Feather观察样本可用特征", "available_features"),
             ("全局相关性去重：按单变量AUC保留更强特征", "after_global_corr"),
             (d03_label, "after_d03_random_importance"),

@@ -84,14 +84,21 @@ def _workspace_output(context: VersionContext, value: object, default: str) -> P
     return resolved
 
 
-def _copy_register(context: VersionContext, stage: str, source: Path, target: str) -> None:
+def _copy_register(
+    context: VersionContext,
+    stage: str,
+    source: Path,
+    target: str,
+    *,
+    contract_role: str = "required",
+) -> None:
     if not source.exists():
         return
     destination = context.workspace / target
     destination.parent.mkdir(parents=True, exist_ok=True)
     if source.resolve() != destination.resolve():
         shutil.copy2(source, destination)
-    register_action_artifact(context.workspace, stage, destination)
+    register_action_artifact(context.workspace, stage, destination, contract_role=contract_role)
 
 
 def run_feature_metadata(invocation: ActionInvocation, context: VersionContext, attempt_id: str) -> ActionResult:
@@ -379,14 +386,40 @@ def run_feature_refine(invocation: ActionInvocation, context: VersionContext, at
                 output = Path(str(cfg.get("output_dir") or context.workspace / "feature_selection"))
                 if not output.is_absolute():
                     output = context.project_dir / output
+                review_artifacts = {
+                    "feature_leakage_review.csv",
+                    "feature_monthly_psi.csv",
+                    "feature_monthly_psi_summary.csv",
+                    "feature_badrate_bins.csv",
+                    "feature_monthly_badrate.csv",
+                    "feature_importance_stability.csv",
+                    "feature_decision_ledger.csv",
+                    "feature_risk_review.json",
+                    "feature_risk_review.md",
+                }
                 for source_name, targets in {
                     "stage_summary.json": ["stage_summary.json", "feature_stage_summary.json"],
                     "resource_usage.json": ["resource_usage.json"],
                     "final_500_features.txt": ["final_500_features.txt"],
                     "final_features.txt": ["final_features.txt"],
+                    "feature_leakage_review.csv": ["feature_leakage_review.csv"],
+                    "feature_monthly_psi.csv": ["feature_monthly_psi.csv"],
+                    "feature_monthly_psi_summary.csv": ["feature_monthly_psi_summary.csv"],
+                    "feature_badrate_bins.csv": ["feature_badrate_bins.csv"],
+                    "feature_monthly_badrate.csv": ["feature_monthly_badrate.csv"],
+                    "feature_importance_stability.csv": ["feature_importance_stability.csv"],
+                    "feature_decision_ledger.csv": ["feature_decision_ledger.csv"],
+                    "feature_risk_review.json": ["feature_risk_review.json"],
+                    "feature_risk_review.md": ["feature_risk_review.md"],
                 }.items():
                     for target in targets:
-                        _copy_register(context, "feature_refine", output / source_name, f"feature_selection/{target}")
+                        _copy_register(
+                            context,
+                            "feature_refine",
+                            output / source_name,
+                            f"feature_selection/{target}",
+                            contract_role="optional" if source_name in review_artifacts else "required",
+                        )
                 prepare = invocation.tool_name == "feature_refine_prepare"
                 stage_action_done(context.workspace, "feature_refine", scaffold=prepare, message="SQL dry run waiting for approval" if prepare else "", failure_code=SQL_APPROVAL_REQUIRED if prepare else "")
         except Exception as exc:
