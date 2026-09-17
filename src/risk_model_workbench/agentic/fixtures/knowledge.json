@@ -1,0 +1,128 @@
+[
+  {
+    "id": "K_SEGMENT",
+    "kind": "knowledge",
+    "title": "客群结构变化诊断",
+    "signals": [
+      "performance_decline",
+      "stable_score",
+      "segment_shift"
+    ],
+    "action": "inspect_segment_performance",
+    "text": "整体 PSI 稳定不能排除结构变化。先分群核验 KS 下降是否集中；客群占比变化本身不能证明因果。",
+    "hypothesis": "整体衰退可能集中于新客，需要分群证据",
+    "expected_evidence": "同口径新老客 KS 变化和样本量"
+  },
+  {
+    "id": "K_OVERFIT",
+    "kind": "knowledge",
+    "title": "泛化差距诊断",
+    "signals": [
+      "generalization_gap",
+      "stable_score"
+    ],
+    "action": "inspect_overfitting",
+    "text": "INS 显著优于 OOS 时检查过拟合、泄漏和样本差异；OOT 只用于最终评估。",
+    "hypothesis": "泛化差距提示可能过拟合，尚不能排除泄漏或样本偏差",
+    "expected_evidence": "INS-OOS 与 INS-OOT KS gap"
+  },
+  {
+    "id": "K_SAMPLE",
+    "kind": "knowledge",
+    "title": "局部衰退与样本代表性",
+    "signals": [
+      "segment_localized",
+      "segment_shift"
+    ],
+    "action": "inspect_sample_shift",
+    "text": "客群局部衰退后检查开发样本代表性、时间和渠道变化；改变业务样本定义需人工。",
+    "hypothesis": "新客表现变化可能与开发样本代表性不足有关",
+    "expected_evidence": "历史和当前客群占比、样本量、标签率"
+  },
+  {
+    "id": "K_DRIFT",
+    "kind": "knowledge",
+    "title": "特征分布变化",
+    "signals": [
+      "performance_decline",
+      "high_psi"
+    ],
+    "action": "inspect_feature_drift",
+    "text": "高 PSI 是诊断信号，不是因果结论。时间外漂移只能诊断，不可用于筛选。",
+    "hypothesis": "特征分布变化可能伴随模型衰退",
+    "expected_evidence": "特征 PSI、缺失率变化和范围变化"
+  },
+  {
+    "id": "K_RELATION",
+    "kind": "knowledge",
+    "title": "特征与标签关系变化",
+    "signals": [
+      "segment_uniform",
+      "stable_score"
+    ],
+    "action": "inspect_feature_target_relation",
+    "text": "分布稳定但各群均衰退时检查标签成熟度和特征风险关系。",
+    "hypothesis": "衰退可能涉及标签口径或特征风险关系变化",
+    "expected_evidence": "同口径分箱坏样本率与标签成熟度"
+  },
+  {
+    "id": "K_TUNE",
+    "kind": "knowledge",
+    "title": "受控正则化实验",
+    "signals": [
+      "overfitting_signal_confirmed"
+    ],
+    "action": "tune_model",
+    "text": "泛化差距证据支持尝试有界正则化实验，按 OOS 选优；不使用 OOT 反馈搜索超参数。",
+    "hypothesis": "正则化可能缩小训练与验证差距",
+    "expected_evidence": "OOS 指标及训练验证差距变化"
+  },
+  {
+    "id": "K_COMPARE",
+    "kind": "knowledge",
+    "title": "冻结模型后比较",
+    "signals": [
+      "challenger_ready"
+    ],
+    "action": "compare_challenger",
+    "text": "冻结按 OOS 选出的模型后报告 OOT、稳定性和客群退化；不据 OOT 开启新一轮调参。",
+    "hypothesis": "OOS 改善能否在冻结的时间外评估中保持仍未知",
+    "expected_evidence": "冻结 Challenger 的 OOT KS、PSI 和分群退化"
+  },
+  {
+    "id": "K_HUMAN_SAMPLE_SHIFT_CHECKED",
+    "kind": "knowledge",
+    "title": "交付人工评审",
+    "signals": [
+      "sample_shift_checked"
+    ],
+    "action": "ask_human",
+    "text": "呈现已有证据和局限。涉及样本定义、标签问题或模型替换时交人工处理；Demo 不宣告上线成功。",
+    "hypothesis": "已有证据可供人工评审，不能替代业务决策",
+    "expected_evidence": "人工对数据口径或实验结论的确认"
+  },
+  {
+    "id": "K_HUMAN_COMPARISON_COMPLETE",
+    "kind": "knowledge",
+    "title": "交付人工评审",
+    "signals": [
+      "comparison_complete"
+    ],
+    "action": "ask_human",
+    "text": "呈现已有证据和局限。涉及样本定义、标签问题或模型替换时交人工处理；Demo 不宣告上线成功。",
+    "hypothesis": "已有证据可供人工评审，不能替代业务决策",
+    "expected_evidence": "人工对数据口径或实验结论的确认"
+  },
+  {
+    "id": "K_HUMAN_RELATION_CHECKED",
+    "kind": "knowledge",
+    "title": "交付人工评审",
+    "signals": [
+      "relation_checked"
+    ],
+    "action": "ask_human",
+    "text": "呈现已有证据和局限。涉及样本定义、标签问题或模型替换时交人工处理；Demo 不宣告上线成功。",
+    "hypothesis": "已有证据可供人工评审，不能替代业务决策",
+    "expected_evidence": "人工对数据口径或实验结论的确认"
+  }
+]

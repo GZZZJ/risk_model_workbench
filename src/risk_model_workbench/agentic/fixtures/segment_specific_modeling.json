@@ -1,0 +1,13 @@
+{
+  "scenario_id": "segment_specific_modeling",
+  "scenario_type": "COMPOSITE DEMO SCENARIO",
+  "business_context": "主B卡 V18 分客群优化；端到端轨迹为架构演示构造，不是完整 historical replay。",
+  "trigger": {"type": "segment_monitor_alert", "fact_summary": "逐月分客群 vintage KS 监控发现 E2 次新户和低活跃客群存在性能不足。"},
+  "initial_state": {"metadata": {"type": "scenario_description", "not_runtime_state": true}, "observations": {"new_customer_ks_before": 0.374, "new_customer_ks_after": 0.230, "low_activity_customer": "degraded"}},
+  "decision_knowledge": [
+    {"id": "S2_MONITORING", "kind": "decision_knowledge", "source_path": "项目准备/贷中复贷风险主模型V18_面试问答.md", "source_heading": "二、为什么需要迭代 V18？如何发现老模型问题？", "fact_summary": "E2 次新户主B卡 mob1 KS 从 0.374 衰退至 0.23；低活跃客群与历史版本几乎持平，发现方式是逐月分客群 KS 监控。", "recorded_at": "2026-07-22"}
+  ],
+  "historical_experience": [],
+  "negative_evidence": [],
+  "mock_outcomes": {"segment_modeling": {"new_evidence": ["KMeans alone hurts new_customer_segment"], "fact_summary": "KMeans alone: new_customer KS 0.2247→0.2187; partially_failed", "source_path": "项目准备/贷中复贷风险主模型V18_面试问答.md", "source_heading": "二十五、KMeans 和分客群子分在不同客群上的效果差异"}, "rule_based_segment_plus_kmeans": {"fact_summary": "combined: new_customer OOT KS 0.2352; improved", "source_path": "项目准备/贷中复贷风险主模型V18_面试问答.md", "source_heading": "二十五、KMeans 和分客群子分在不同客群上的效果差异"}}
+}

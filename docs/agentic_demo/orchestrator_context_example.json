@@ -1,0 +1,21 @@
+{
+  "example_type": "architecture_example_not_a_live_llm_request",
+  "scenario_type": "COMPOSITE DEMO SCENARIO",
+  "modeling_state": {
+    "goal": "提升辅助模型相对主B卡的增量风险识别能力",
+    "business_context": {
+      "scene": "贷中多模型决策",
+      "primary_model": "主B卡",
+      "evidence_transfer_limitation": "数值实例来自 Corr(A卡) 的贷前材料，不是主B卡实测。"
+    },
+    "observations": {
+      "candidate_model": {"name": "度小满(dxm_yz_26v1)", "ks": 0.1644, "corr_with_reference_primary": 0.7312, "cmi": 0.001402},
+      "benchmark_model": {"name": "银联(yl_yz_25v1)", "ks": 0.1615, "corr_with_reference_primary": 0.5085, "cmi": 0.002043}
+    },
+    "open_questions": ["高相关性原因是什么？", "是否能降低相关性并保留区分能力？", "是否带来组合增量？"]
+  },
+  "available_semantic_actions": ["inspect_incremental_value", "change_training_objective", "change_feature_space", "change_sample_composition", "change_label_definition", "compare_challenger", "ask_human"],
+  "decision_knowledge": [{"id": "D_CMI_EXAMPLE", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "8.1 条件互信息（CMI）", "fact_summary": "CMI 实例的 Corr 为 A卡；较低相关性对应更高 CMI。"}],
+  "historical_negative_evidence": [{"id": "H_COVLOSS_OUTCOME", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "4.3 LGB模型融合", "fact_summary": "covloss 可行；squareloss、klloss、jsdloss、doublelogloss 不适合作为重复优先实验。"}],
+  "constraints": {"oot_for_tuning": false, "label_change_requires_human": true, "new_external_source_requires_human": true, "production_promotion_requires_human": true}
+}

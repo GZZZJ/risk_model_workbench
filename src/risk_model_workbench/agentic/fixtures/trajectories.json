@@ -1,0 +1,6 @@
+[
+ {"id":"DEMO_V18","kind":"trajectory","title":"V18 风格示例（虚构，非真实项目记录）","signals":["segment_shift","stable_score"],"action":"inspect_segment_performance","text":"模拟经历：总体 PSI 稳定，分群诊断发现新客退化。仅作为方法先验。","usefulness":0.8},
+ {"id":"DEMO_RTA_V9","kind":"trajectory","title":"RTA V9 风格示例（虚构，非真实项目记录）","signals":["overfitting_signal_confirmed"],"action":"tune_model","text":"模拟经历：DEV/OOS 上正则化实验改善验证差距；不是当前实验的成功保证。","usefulness":0.7},
+ {"id":"DEMO_MULTI","kind":"trajectory","title":"多模型决策示例（虚构，非真实项目记录）","signals":["challenger_ready"],"action":"compare_challenger","text":"模拟经历：整体增益伴随局部退化，冻结后进行多维对比。","usefulness":0.8},
+ {"id":"DEMO_FAILED_TUNE","kind":"trajectory","title":"失败调参示例（虚构）","signals":["segment_localized","segment_shift"],"action":"tune_model","text":"模拟经历：样本代表性不足时调参未改善。降低优先级，不永久禁止。","usefulness":-0.8}
+]

@@ -12,6 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+agentic = ["pydantic>=2.9,<3", "numpy>=1.23"]
 modeling = [
   "pandas",
   "pyarrow",
@@ -35,3 +36,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 risk_model_workbench = ["reporting/assets/*.css", "reporting/assets/*.js"]
+"risk_model_workbench.agentic" = ["fixtures/*.json"]

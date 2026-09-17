@@ -2882,7 +2882,11 @@ def _write_model_reports(
         ]
     )
 
-    markdown = "\n".join(lines).rstrip() + "\n"
+    # Keep Markdown and HTML sidecars structurally consistent even if a future
+    # report contributor accidentally joins adjacent table rows.
+    from risk_model_workbench.reporting.html_report import normalize_markdown_tables
+
+    markdown = normalize_markdown_tables("\n".join(lines).rstrip() + "\n")
     md_path.write_text(markdown, encoding="utf-8")
     html_path.write_text(
         render_model_report_html(

@@ -1,0 +1,17 @@
+{
+  "scenario_id": "label_definition_diagnosis",
+  "scenario_type": "COMPOSITE DEMO SCENARIO",
+  "business_context": "RTA V8→V9 标签窗口与样本口径优化；端到端轨迹为架构演示构造，不是完整 historical replay。",
+  "trigger": {"type": "model_performance_degradation", "fact_summary": "模型效果下降；标签质量是待验证诊断假设，并非已确认的历史监控结论。"},
+  "initial_state": {"metadata": {"type": "scenario_description", "not_runtime_state": true}, "observations": {"conversion_ks": "decreased", "quality_ks": "decreased", "diagnosis_candidates": ["feature_shift_checked", "sample_shift_checked", "label_quality_suspected"]}},
+  "decision_knowledge": [
+    {"id": "S3_LABEL_WINDOW", "kind": "decision_knowledge", "source_path": "项目准备/获客RTA_V9模型_二十问二十答.md", "source_heading": "6. 为什么这次要重新设计样本口径？旧版本样本设计具体有什么问题？ / 7. 为什么要重新设计标签口径？", "fact_summary": "V8 T3 曝光标签约遗漏 25% 的后续动支；V9 改为 T15 点击高低单产，T15 覆盖 90%+ 动支并排除未点击灰样本。", "recorded_at": "2026-07-22"}
+  ],
+  "historical_experience": [
+    {"id": "S3_T15_SELECTED", "kind": "historical_experience", "source_path": "项目准备/获客RTAV9学习.txt", "source_heading": "建模过程解决方案 / 一、样本和标签选择问题", "fact_summary": "比较 T0/T3/T7/T15/T30 后确定 T15；转化模型随窗口拉长效果变强，质量模型与转化模型对齐。", "recorded_at": "2026-07-22"}
+  ],
+  "negative_evidence": [
+    {"id": "S3_T3_LIMITATION", "kind": "historical_experience", "source_path": "项目准备/获客RTA_V9模型_二十问二十答.md", "source_heading": "6. 为什么这次要重新设计样本口径？旧版本样本设计具体有什么问题？", "fact_summary": "V8 的 T3 曝光标签窗口过短，约 25% 动支在 T3 之后发生，且曝光→单产标签噪声较大。", "recorded_at": "2026-07-22"}
+  ],
+  "mock_outcomes": {"revisit_label_definition": "T3 coverage insufficient; T15 captures more downstream conversion", "retrain_with_new_label": "DecisionContract only; no training is executed"}
+}

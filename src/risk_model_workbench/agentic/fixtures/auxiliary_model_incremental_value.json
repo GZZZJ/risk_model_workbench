@@ -1,0 +1,16 @@
+{
+  "scenario": "auxiliary_model_incremental_value",
+  "scenario_type": "COMPOSITE DEMO SCENARIO",
+  "scenario_disclosure": "All knowledge elements are grounded in historical documents, but the end-to-end trajectory is constructed for demonstrating the Agentic modeling architecture and is not a historical replay of one production model iteration.",
+  "source_relationship": "D_CMI_* is a贷前实例 with Corr(A卡); H_COVLOSS_* is a separate 贷中融合 loss exploration. They are decision knowledge transfers, not one joined experiment.",
+  "source_root": "/Users/guzijun/Downloads/kb-1100-master",
+  "decision_knowledge": [
+    {"id": "D_CMI_EXAMPLE", "kind": "decision_knowledge", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "8.1 条件互信息（CMI）/ 为什么CMI是多模型决策的核心指标", "fact_summary": "度小满 KS=0.1644、Corr(A卡)=0.7312、CMI=0.001402；银联 KS=0.1615、Corr(A卡)=0.5085、CMI=0.002043。原文结论是较低相关性可带来更高 CMI 与更大交叉增益。", "recorded_at": "2026-07-22"},
+    {"id": "D_CMI_METRIC", "kind": "decision_knowledge", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "8.1 条件互信息（CMI）/ 辅助模型的CMI优化目标", "fact_summary": "辅助模型的目标是捕捉主模型未覆盖的信息；CMI同时反映区分能力与独立性。", "recorded_at": "2026-07-22"},
+    {"id": "D_DIFFERENTIATION", "kind": "decision_knowledge", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "1.4 降相关性的四个维度", "fact_summary": "降相关性可从样本、Y标签、算法和特征四个差异化维度切入。", "recorded_at": "2026-07-22"}
+  ],
+  "historical_experience": [
+    {"id": "H_COVLOSS_OUTCOME", "kind": "historical_experience", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "4.3 LGB模型融合（V16捞回→V18标准方法）/ 相关性损失函数探索", "fact_summary": "covloss 是唯一可行方案；squareloss 因 hessian 可能为负而难优化，klloss、jsdloss、doublelogloss 效果不佳。α过大降相关不足，β过大会损害 KS/AUC。", "recorded_at": "2026-07-22"},
+    {"id": "H_COVLOSS_USED", "kind": "historical_experience", "source_path": "贷中模型组/00基础知识/贷中多模型决策体系.md", "source_heading": "4.3 LGB模型融合（V16捞回→V18标准方法）", "fact_summary": "V16捞回至V18的 LGB 融合使用风险损失与 covloss 的组合，目标同时考虑风险排序与降低 B 卡相关性。", "recorded_at": "2026-07-22"}
+  ]
+}

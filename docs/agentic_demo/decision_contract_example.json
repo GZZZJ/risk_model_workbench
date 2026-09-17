@@ -1,0 +1,18 @@
+{
+  "example_type": "schema_shape_example_not_a_live_llm_decision",
+  "schema_version": "demo-1",
+  "decision_id": "example_auxiliary_0",
+  "state_id": "example_0",
+  "state_summary": "候选模型的单模型 KS 不低，但 Corr(A卡) 较高且 CMI 较低；这是 composite scenario 的迁移问题，而非主B卡实测。",
+  "primary_hypothesis": {"claim": "information_redundancy", "description": "当前瓶颈更可能是与主模型的信息冗余，而非单模型区分能力不足。", "status": "untested", "evidence": []},
+  "candidate_actions": [
+    {"action_type": "change_training_objective", "priority": 1, "reason": "历史 loss 经验支持优先审查 covloss。"},
+    {"action_type": "change_feature_space", "priority": 2, "reason": "可作为后续增量信息方向。"},
+    {"action_type": "change_sample_composition", "priority": 3, "reason": "需先确认样本与业务约束。"}
+  ],
+  "selected_action": {"action_type": "change_training_objective", "parameters": {"objective": "covloss", "optimization_split": "OOS"}},
+  "reason": "示例合同仅展示 LLM/Host-Agent 应返回的结构；不是本项目已证明的自主推理。",
+  "expected_evidence": "在非 OOT 验证口径下记录区分度、相关性和增量价值的变化。",
+  "open_questions": ["当前候选是否真的具有可接受的区分度？"],
+  "retrieved_refs": ["D_CMI_EXAMPLE", "H_COVLOSS_OUTCOME"]
+}
