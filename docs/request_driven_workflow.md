@@ -1,8 +1,20 @@
 # Request-Driven Workflow
 
 Users can provide a Markdown model request with YAML front matter. The request
-acts as the task contract for the local RMW Agent runtime and for the external
-Host-Agent layer such as Codex or Claude Code.
+acts as the task contract for the standalone RMW Agent runtime.
+
+Users may also ask the embedded model to create a reviewed draft:
+
+```bash
+rmw agent request draft \
+  --project <project> \
+  --request-id <request_id> \
+  --objective "<natural-language modeling objective>"
+```
+
+The model may select a supported workflow, algorithm, metrics, and outputs.
+Target, primary-key, and split fields come from project configuration and are
+not model-editable. The resulting Markdown still requires human confirmation.
 
 For non-technical users, use the static request builder:
 
@@ -23,14 +35,14 @@ Standard Agent flow:
 4. Initialize a version and copy the request plus plan into the version workspace.
 5. Bind `execution_plan.yml` into version-scoped `agent_plan.yml`.
 6. Execute safe tasks through `rmw agent run`.
-7. Pause for SQL/DP approval, Host-Agent advisor input, missing data, or failed audit evidence.
+7. Use the embedded Advisor for bounded judgment; pause for SQL/DP approval,
+   explicit user confirmation, missing data, or failed audit evidence.
 8. Register artifacts and decisions.
 9. Record missing reusable capabilities in `audit/improvement_candidates.md`.
 
-The local Agent runtime owns deterministic execution, policy gates, state, and
-trace artifacts. Codex or Claude Code remains the Host-Agent intelligence layer
-for ambiguous diagnosis, tuning advice, and product judgment. The version
-workspace remains the source of truth.
+LangGraph owns orchestration and model calls. The local Harness owns
+deterministic execution, policy gates, state, approval, receipts, and trace
+artifacts. The version workspace remains the source of truth.
 
 Recommended commands:
 
@@ -44,13 +56,12 @@ rmw agent status --project <project> --version-id <version_id>
 rmw version audit --project <project> --version-id <version_id> --strict
 ```
 
-When the Agent pauses for Host-Agent advice, inspect and answer the Advisor
-request with the local JSON protocol:
+Advisor files can be inspected for audit or legacy compatibility. Normal
+standalone execution answers them internally:
 
 ```bash
 rmw agent advisor list --project <project> --version-id <version_id>
 rmw agent advisor show --project <project> --version-id <version_id> --request-id <request_id>
-rmw agent advisor accept --project <project> --version-id <version_id> --response <response.json>
 rmw agent resume --project <project> --version-id <version_id>
 ```
 

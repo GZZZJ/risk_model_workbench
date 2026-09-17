@@ -181,7 +181,7 @@ def test_agent_advisor_cli_list_show_accept(tmp_path, capsys):
     assert "advisor_response: accepted" in capsys.readouterr().out
 
 
-def test_resume_requires_accepted_advisor_response(tmp_path, capsys):
+def test_resume_invokes_embedded_advisor_and_fails_closed_without_model_config(tmp_path, capsys, monkeypatch):
     project = _make_project(tmp_path)
     version_id = "demo_model_v1_20260709"
     workspace = _init_version(project, version_id=version_id)
@@ -205,8 +205,10 @@ def test_resume_requires_accepted_advisor_response(tmp_path, capsys):
     state = run_agent(project, version_id, runner=advisor_runner)
     request_id = state["blocker"]["advisor_request_id"]
 
+    monkeypatch.delenv("RMW_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("RMW_AGENT_PROVIDER", raising=False)
     assert main(["agent", "resume", "--project", str(project), "--version-id", version_id]) == 1
-    assert "advisor response pending" in capsys.readouterr().out
+    assert "embedded_reasoning_error: ModelUnavailableError" in capsys.readouterr().out
 
     response_path = workspace / "response.json"
     response_path.write_text(

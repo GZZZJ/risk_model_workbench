@@ -57,7 +57,11 @@ feature_select:
     iv: 0.005
     empty: 0.95
     corr: 0.80
+    # DEV monthly PSI warning threshold; PSI evidence alone does not drop features.
     psi: 0.10
+    psi_fail: 0.25
+    psi_bins: 10
+    psi_min_base_samples: 500
 
   feature_info:
     table_or_path: ""

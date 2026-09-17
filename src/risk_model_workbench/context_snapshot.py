@@ -140,7 +140,7 @@ def attach_context_pack_reference(
     context_pack: str,
     context_hash: str,
 ) -> dict[str, Any]:
-    """Attach a safe immutable Host-Agent context reference to a snapshot."""
+    """Attach a safe immutable reasoning-context reference to a snapshot."""
     normalised = str(context_pack).replace("\\", "/")
     path = PurePosixPath(normalised)
     digest = str(context_hash)
@@ -153,10 +153,13 @@ def attach_context_pack_reference(
     if pack.get("context_hash") != digest:
         raise ValueError("context pack reference hash mismatch")
     updated = deepcopy(snapshot)
-    updated["host_agent_context"] = {
+    reference = {
         "context_pack": normalised,
         "context_hash": digest,
     }
+    updated["reasoning_context"] = reference
+    # Compatibility alias for snapshots created before ADR 0005.
+    updated["host_agent_context"] = dict(reference)
     sources = updated.get("sources")
     if isinstance(sources, list) and normalised not in sources:
         sources.append(normalised)

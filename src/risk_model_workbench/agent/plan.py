@@ -105,7 +105,7 @@ def agent_tool_schema() -> list[dict[str, Any]]:
 
 
 def agent_capabilities() -> dict[str, Any]:
-    """Machine-readable Host-Agent contract, independent of CLI help text."""
+    """Machine-readable embedded Agent contract, independent of CLI help text."""
     return {
         "version": 1,
         "context_pack": context_pack_capabilities(),

@@ -1,4 +1,4 @@
-"""Local-feather d01 (missing/corr/IV) and d02 (DEV-vs-OOT PSI) compute tests.
+"""Local-feather d01 and DEV-monthly d02 compute tests.
 
 These pin the refine-stage local prescreen so the report's d01/d02 rows show real
 counts instead of N/A in local_feather mode. Pure functions on synthetic DataFrames —
@@ -14,7 +14,7 @@ pytest.importorskip("pyarrow")
 
 def _make_parts(n: int = 4000, seed: int = 0):
     """DatasetParts with an informative feature, a pure-noise feature, and a feature
-    highly correlated to the informative one. OOT valid_x shifts f_noise so its PSI is high."""
+    highly correlated to the informative one. OOT shifts are intentionally irrelevant to d02."""
     from risk_model_workbench.feature_refine import DatasetParts
 
     rng = np.random.RandomState(seed)
@@ -62,28 +62,30 @@ def test_d01_corr_filter_keeps_higher_iv_feature():
     assert any(v == "high_corr" for v in reasons.values())
 
 
-def test_d02_psi_drops_shifted_feature_keeps_stable():
+def test_d02_psi_is_dev_only_and_does_not_drop_features():
     from risk_model_workbench.feature_refine import d02_local_psi
 
     parts = _make_parts()
-    cfg = {"local_d02": {"enabled": True, "psi": 0.2}}
+    cfg = {"local_d02": {"enabled": True, "warning_threshold": 0.1, "fail_threshold": 0.25, "min_base_samples": 10}}
+    months = pd.Series(["2025-01"] * 2000 + ["2025-02"] * 2000)
+    cfg["_runtime_dev_months"] = months
     kept, detail = d02_local_psi(parts, ["f_info", "f_noise"], cfg)
 
-    assert "f_info" in kept      # stable DEV→OOT → low PSI
-    assert "f_noise" not in kept  # OOT shifted by +5 → high PSI → dropped
+    assert kept == ["f_info", "f_noise"]
     assert isinstance(detail, pd.DataFrame)
     assert "max_psi" in detail.columns
-    psi_by_feature = dict(zip(detail["feature"], detail["max_psi"]))
-    assert psi_by_feature["f_noise"] > psi_by_feature["f_info"]
+    assert set(detail["drop_reason"]) == {"kept"}
 
 
-def test_d02_returns_empty_kept_when_all_unstable():
+def test_d02_high_psi_still_returns_all_features():
     from risk_model_workbench.feature_refine import d02_local_psi
 
     parts = _make_parts()
-    cfg = {"local_d02": {"enabled": True, "psi": 0.0001}}  # impossible threshold → all dropped
+    cfg = {"local_d02": {"enabled": True, "warning_threshold": 0.0001, "fail_threshold": 0.0002}}
+    months = pd.Series(["2025-01"] * 2000 + ["2025-02"] * 2000)
+    cfg["_runtime_dev_months"] = months
     kept, detail = d02_local_psi(parts, ["f_noise"], cfg)
-    assert kept == []
+    assert kept == ["f_noise"]
     assert isinstance(detail, pd.DataFrame)
 
 
@@ -137,32 +139,23 @@ def test_d01_reports_iv_and_correlation_substeps(monkeypatch, tmp_path):
     assert events[-1]["metrics"]["kept"] == 1
 
 
-def test_d02_reports_psi_substep(monkeypatch, tmp_path):
+def test_d02_reports_psi_substep(tmp_path):
     from risk_model_workbench import feature_refine
     from risk_model_workbench.progress import ProgressReporter, load_progress_events
 
-    def fake_batch_psi(data_iter, features, method, num_nbins):
-        list(data_iter)
-        return None, None, {"f_info": {"oot": 0.1}, "f_noise": {"oot": 0.5}}
-
-    monkeypatch.setattr(
-        feature_refine,
-        "_load_vendor_feature_select",
-        lambda: (object(), object(), fake_batch_psi),
-    )
     reporter = ProgressReporter(tmp_path / "version", "feature_refine", emit_terminal=False)
 
     kept, _ = feature_refine.d02_local_psi(
         _make_parts(n=20),
         ["f_info", "f_noise"],
-        {"local_d02": {"enabled": True, "psi": 0.2}},
+        {"local_d02": {"enabled": True, "warning_threshold": 0.1, "fail_threshold": 0.25, "min_base_samples": 2}},
         progress=reporter,
     )
 
-    assert kept == ["f_info"]
+    assert kept == ["f_info", "f_noise"]
     events = load_progress_events(tmp_path / "version")
     assert [event["step"] for event in events] == ["d02_psi_start", "d02_psi_done"]
-    assert events[-1]["metrics"] == {"input_features": 2, "kept": 1, "dropped": 1}
+    assert events[-1]["metrics"] == {"input_features": 2, "kept": 2, "dropped": 0}
 
 
 def test_global_correlation_reports_score_matrix_and_scan_progress(tmp_path):

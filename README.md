@@ -20,13 +20,21 @@ status: done
 
 ## RMW Agent
 
-`RMW Agent` 是当前工作台的本地半自主 CLI Agent runtime。它不内置 LLM
-API、不提供 Web 后台，也不绕过 SQL/DP 审批；Codex 或 Claude Code 作为
-Host-Agent 负责复杂判断，本仓库负责确定性执行、状态、门禁和审计证据。
+`RMW Agent` 使用内嵌 LangGraph/LangChain runtime 负责目标理解、诊断和有界
+调参建议；RMW Harness 始终负责确定性执行、状态、门禁和审计证据。模型通过
+统一的 LangChain gateway 接入，可以选择 OpenAI、Anthropic Claude 或兼容端点。
 
 快速开始：
 
 ```bash
+.venv/bin/rmw agent model status
+
+# 可选：先把自然语言目标生成一份待确认的建模请求草案
+.venv/bin/rmw agent request draft \
+  --project projects/2026-05-fujie-gcard-v1 \
+  --request-id fujie-gcard-goal-v1 \
+  --objective "重跑复借G卡主模型，检查样本与特征稳定性，并生成模型报告"
+
 rmw agent start \
   --project projects/2026-05-fujie-gcard-v1 \
   --request projects/2026-05-fujie-gcard-v1/requests/model_request_template.md \
@@ -42,6 +50,16 @@ rmw agent status \
   --version-id fujie_gcard_agent_v1_20260706
 ```
 
+如需使用 Claude 模型，仅安装轻量的 LangChain Provider 适配：
+
+```bash
+.venv/bin/python -m pip install -e ".[modeling,agent-anthropic]"
+export RMW_AGENT_PROVIDER=anthropic
+export RMW_AGENT_MODEL=<claude-model-name>
+export ANTHROPIC_API_KEY=<secret>
+.venv/bin/rmw agent model status
+```
+
 如果 Agent 因 SQL/DP action 暂停，先审查生成的 SQL 和 approval 记录，再显式批准：
 
 ```bash
@@ -55,8 +73,10 @@ rmw agent approve \
 
 Agent 产物写入 version workspace，包括 `agent_plan.yml`、
 `audit/agent_state.yml`、`audit/agent_trace.jsonl`、`audit/approvals.yml`
-和 `audit/advisor_requests/`。如果 Agent 等待 Host-Agent 判断，使用
-`rmw agent advisor list/show/accept` 管理标准 Advisor request/response。
+、`audit/advisor_requests/`、`audit/model_invocations/`，默认运行时还会写入
+LangGraph checkpoint。
+Advisor request/response 是内嵌推理层与 Harness 之间的持久化合同；
+`rmw agent advisor list/show` 主要用于审计和旧版本兼容。
 最终闭环仍以 `version_state.yml`、`audit/artifact_manifest.json` 和
 `rmw version audit --strict` 为准。
 
@@ -102,11 +122,16 @@ active version 是本地全链路重跑证据。历史 imported run 和 legacy r
 ## 安装与检查
 
 ```bash
-pip install -e ".[modeling]"
+/opt/anaconda3/bin/python -m venv .venv
+.venv/bin/python -m pip install -e ".[modeling,agent-openai]"
 
-rmw doctor
-rmw project validate --project projects/2026-05-fujie-gcard-v1
-pytest tests -q
+export RMW_AGENT_PROVIDER=openai
+export RMW_AGENT_MODEL=<model-name>
+export OPENAI_API_KEY=<secret>
+
+.venv/bin/rmw doctor
+.venv/bin/rmw project validate --project projects/2026-05-fujie-gcard-v1
+.venv/bin/python -m pytest tests -q
 ```
 
 `rmw doctor` 会检查规划文档、模型资产索引、vendored feature-select-v2、项目模板和核心 workflow 是否存在；复借 G 卡历史工作簿只作为 legacy/example 资料提示。

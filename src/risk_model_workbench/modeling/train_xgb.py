@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from risk_model_workbench.modeling.train_lgb import coerce_features, fill_na_from_train, _write_input_snapshot
+from risk_model_workbench.modeling.llm_tuning import llm_guided_tuning_enabled
 
 
 def _predict_proba(model: Any, frame: Any) -> Any:
@@ -36,7 +37,14 @@ def _feature_importance(model: Any, features: list[str]):
     return pd.DataFrame({"feature": features, "gain": values, "split": values}).sort_values("gain", ascending=False)
 
 
-def _make_model(algorithm: str, config: dict[str, Any], tr_y):
+def _make_model(
+    algorithm: str,
+    config: dict[str, Any],
+    tr_y,
+    *,
+    tuning: bool = False,
+    trial_params: dict[str, Any] | None = None,
+):
     positives = float((tr_y == 1).sum())
     negatives = float((tr_y == 0).sum())
     scale_pos_weight = negatives / positives if positives > 0 else 1.0
@@ -49,22 +57,33 @@ def _make_model(algorithm: str, config: dict[str, Any], tr_y):
         try:
             from xgboost import XGBClassifier
 
-            xgb_cfg = config.get("xgboost", {})
+            xgb_cfg = {**(config.get("xgboost", {}) or {}), **(trial_params or {})}
+            model_params = {
+                "n_estimators": int(xgb_cfg.get("n_estimators", 120)),
+                "max_depth": int(xgb_cfg.get("max_depth", 3)),
+                "learning_rate": float(xgb_cfg.get("learning_rate", 0.05)),
+                "min_child_weight": float(xgb_cfg.get("min_child_weight", 1.0)),
+                "subsample": float(xgb_cfg.get("subsample", 0.8)),
+                "colsample_bytree": float(xgb_cfg.get("colsample_bytree", 0.8)),
+                "gamma": float(xgb_cfg.get("gamma", 0.0)),
+                "reg_alpha": float(xgb_cfg.get("reg_alpha", 0.0)),
+                "reg_lambda": float(xgb_cfg.get("reg_lambda", 1.0)),
+                "objective": "binary:logistic",
+                "eval_metric": "auc",
+                "random_state": int(config.get("training", {}).get("random_seed", 0)),
+                "scale_pos_weight": scale_pos_weight,
+                "n_jobs": 1,
+            }
+            if tuning and "early_stopping_rounds" in xgb_cfg:
+                # XGBoost 2.1's sklearn wrapper accepts this in __init__, not fit().
+                model_params["early_stopping_rounds"] = int(xgb_cfg["early_stopping_rounds"])
             return (
-                XGBClassifier(
-                    n_estimators=int(xgb_cfg.get("n_estimators", 120)),
-                    max_depth=int(xgb_cfg.get("max_depth", 3)),
-                    learning_rate=float(xgb_cfg.get("learning_rate", 0.05)),
-                    subsample=float(xgb_cfg.get("subsample", 0.8)),
-                    colsample_bytree=float(xgb_cfg.get("colsample_bytree", 0.8)),
-                    eval_metric="auc",
-                    random_state=int(config.get("training", {}).get("random_seed", 0)),
-                    scale_pos_weight=scale_pos_weight,
-                    n_jobs=1,
-                ),
+                XGBClassifier(**model_params),
                 "xgboost",
             )
-        except Exception:
+        except Exception as exc:
+            if tuning:
+                raise RuntimeError("xgboost backend unavailable; llm_guided_tune is blocked and cannot use sklearn fallback") from exc
             from sklearn.ensemble import HistGradientBoostingClassifier
 
             return (
@@ -178,6 +197,8 @@ def train_tabular_from_feather(
     # 一旦默认进入 valid_sets 会参与早停/调参选优，污染时间外评估。
     valid_values = train_cfg.get("valid_values", ["DEV-OOS"])
     oos_values = train_cfg.get("oos_values", ["DEV-OOS", "OOT-OOS"])
+    if llm_guided_tuning_enabled(config) and any(str(value).upper().startswith("OOT") for value in valid_values):
+        raise ValueError("LLM-guided tuning validation split must be development-only; OOT is prohibited")
     train_mask = raw[split_col].isin(train_values) & raw[label_col].isin([0, 1])
     valid_mask = raw[split_col].isin(valid_values) & raw[label_col].isin([0, 1])
     if int(train_mask.sum()) < 2 or int(valid_mask.sum()) < 2:
@@ -196,51 +217,112 @@ def train_tabular_from_feather(
     va_y = raw.loc[valid_mask, label_col].astype(int).reset_index(drop=True)
     (tr_x, va_x), medians = fill_na_from_train(tr_x, va_x)
 
-    model, backend = _make_model(algorithm, config, tr_y)
     if progress:
         progress.emit(step="train_model", message=f"{algorithm} 训练开始", percent=50)
-    start = time.time()
-    model.fit(tr_x, tr_y)
-
-    if algorithm == "teacher_student_distillation":
-        from sklearn.linear_model import LogisticRegression
-
-        teacher_score = _predict_proba(model, tr_x)
-        weights = 0.5 + np.abs(teacher_score - 0.5)
-        student = LogisticRegression(max_iter=1000)
-        student.fit(tr_x, tr_y, sample_weight=weights)
-        (output_dir / "distillation_summary.json").write_text(
-            json.dumps(
-                {
-                    "teacher_backend": backend,
-                    "student_backend": "sklearn_logistic_regression",
-                    "mean_teacher_confidence_weight": float(weights.mean()),
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-            + "\n",
-            encoding="utf-8",
+    training_mode = "single_train"
+    tuning_summary: dict[str, Any] | None = None
+    model_params: dict[str, Any] = {}
+    if llm_guided_tuning_enabled(config):
+        if algorithm != "xgboost":
+            raise ValueError(f"LLM-guided tuning is not supported by tabular algorithm: {algorithm}")
+        from risk_model_workbench.modeling.llm_tuning import (
+            TuningChampionUnavailable,
+            load_feature_review_summary,
+            public_params,
+            resolve_tuning_config,
+            run_tuning_loop,
         )
-        model = student
-        backend = "teacher_student_distillation_minimal"
 
-    tr_pred = _predict_proba(model, tr_x)
-    va_pred = _predict_proba(model, va_x)
-    metrics = {
-        "train_auc": float(roc_auc_score(tr_y, tr_pred)),
-        "valid_auc": float(roc_auc_score(va_y, va_pred)),
-        "train_ks": float(ks_2samp(tr_pred[tr_y == 1], tr_pred[tr_y == 0]).statistic),
-        "valid_ks": float(ks_2samp(va_pred[va_y == 1], va_pred[va_y == 0]).statistic),
-        "train_samples": int(len(tr_y)),
-        "valid_samples": int(len(va_y)),
-        "train_bad_rate": float(tr_y.mean()),
-        "valid_bad_rate": float(va_y.mean()),
-        "train_time_seconds": round(time.time() - start, 1),
-        "algorithm": algorithm,
-        "backend": backend,
-    }
-    metrics["auc_gap"] = metrics["train_auc"] - metrics["valid_auc"]
+        training_mode = "llm_guided_tune"
+        tuning_cfg = resolve_tuning_config(config, algorithm="xgboost")
+        experiment_name = runtime_experiment.get("name") or "main_xgboost"
+        base_params = {
+            "learning_rate": float((config.get("xgboost") or {}).get("learning_rate", 0.05)),
+            "max_depth": int((config.get("xgboost") or {}).get("max_depth", 3)),
+            "min_child_weight": float((config.get("xgboost") or {}).get("min_child_weight", 1.0)),
+            "subsample": float((config.get("xgboost") or {}).get("subsample", 0.8)),
+            "colsample_bytree": float((config.get("xgboost") or {}).get("colsample_bytree", 0.8)),
+            "gamma": float((config.get("xgboost") or {}).get("gamma", 0.0)),
+            "reg_alpha": float((config.get("xgboost") or {}).get("reg_alpha", 0.0)),
+            "reg_lambda": float((config.get("xgboost") or {}).get("reg_lambda", 1.0)),
+            "n_estimators": int((config.get("xgboost") or {}).get("n_estimators", 120)),
+            "early_stopping_rounds": int((config.get("xgboost") or {}).get("early_stopping_rounds", 50)),
+        }
+        training_summary = {
+            "train_samples": int(len(tr_y)), "valid_samples": int(len(va_y)),
+            "train_bad_rate": float(tr_y.mean()), "valid_bad_rate": float(va_y.mean()),
+            "candidate_features": len(candidate_features), "kept_features": len(kept_features),
+            "train_values": train_values, "valid_values": valid_values,
+        }
+
+        def _run_trial(round_index, name, trial_params, reason, advisor_type, diagnosis):
+            start = time.time()
+            fitted, trial_backend = _make_model("xgboost", config, tr_y, tuning=True, trial_params=trial_params)
+            # XGBoost 2.1.3 early stopping is bound at construction; fit only
+            # receives eval_set and never switches to sklearn silently.
+            fitted.fit(tr_x, tr_y, eval_set=[(va_x, va_y)], verbose=False)
+            tr_pred, va_pred = _predict_proba(fitted, tr_x), _predict_proba(fitted, va_x)
+            metrics = {
+                "train_auc": float(roc_auc_score(tr_y, tr_pred)),
+                "valid_auc": float(roc_auc_score(va_y, va_pred)),
+                "train_ks": float(ks_2samp(tr_pred[tr_y == 1], tr_pred[tr_y == 0]).statistic),
+                "valid_ks": float(ks_2samp(va_pred[va_y == 1], va_pred[va_y == 0]).statistic),
+                "train_samples": int(len(tr_y)), "valid_samples": int(len(va_y)),
+                "train_bad_rate": float(tr_y.mean()), "valid_bad_rate": float(va_y.mean()),
+                "best_iteration": int(getattr(fitted, "best_iteration", -1) or -1),
+                "train_time_seconds": round(time.time() - start, 1),
+            }
+            metrics["auc_gap"] = metrics["train_auc"] - metrics["valid_auc"]
+            merged_params = {**base_params, **trial_params}
+            return {
+                "round": round_index, "candidate_name": name, "advisor_type": advisor_type,
+                "reason": reason, "diagnosis_state": diagnosis.get("state", "") if diagnosis else "",
+                "params": public_params(merged_params, "xgboost"), "_model": fitted,
+                "_backend": trial_backend, "_params": merged_params, **metrics,
+            }
+
+        _, champion, tuning_summary, _ = run_tuning_loop(
+            output_dir=output_dir, experiment=experiment_name, algorithm="xgboost",
+            base_params=base_params, training_summary=training_summary, tuning_cfg=tuning_cfg,
+            run_trial=_run_trial, feature_review_summary=load_feature_review_summary(output_dir.parent.parent),
+        )
+        if champion is None:
+            raise TuningChampionUnavailable(tuning_summary["selection"])
+        model, backend, model_params = champion["_model"], champion["_backend"], dict(champion["_params"])
+        metrics = {key: champion[key] for key in [
+            "train_auc", "valid_auc", "train_ks", "valid_ks", "train_samples", "valid_samples",
+            "train_bad_rate", "valid_bad_rate", "best_iteration", "train_time_seconds", "auc_gap",
+        ]}
+        (output_dir / "best_params.json").write_text(
+            json.dumps(champion["params"], ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+    else:
+        model, backend = _make_model(algorithm, config, tr_y)
+        start = time.time()
+        model.fit(tr_x, tr_y)
+        if algorithm == "teacher_student_distillation":
+            from sklearn.linear_model import LogisticRegression
+
+            teacher_score = _predict_proba(model, tr_x)
+            weights = 0.5 + np.abs(teacher_score - 0.5)
+            student = LogisticRegression(max_iter=1000)
+            student.fit(tr_x, tr_y, sample_weight=weights)
+            (output_dir / "distillation_summary.json").write_text(
+                json.dumps({"teacher_backend": backend, "student_backend": "sklearn_logistic_regression", "mean_teacher_confidence_weight": float(weights.mean())}, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            model, backend = student, "teacher_student_distillation_minimal"
+        tr_pred, va_pred = _predict_proba(model, tr_x), _predict_proba(model, va_x)
+        metrics = {
+            "train_auc": float(roc_auc_score(tr_y, tr_pred)),
+            "valid_auc": float(roc_auc_score(va_y, va_pred)),
+            "train_ks": float(ks_2samp(tr_pred[tr_y == 1], tr_pred[tr_y == 0]).statistic),
+            "valid_ks": float(ks_2samp(va_pred[va_y == 1], va_pred[va_y == 0]).statistic),
+            "train_samples": int(len(tr_y)), "valid_samples": int(len(va_y)),
+            "train_bad_rate": float(tr_y.mean()), "valid_bad_rate": float(va_y.mean()),
+            "train_time_seconds": round(time.time() - start, 1), "algorithm": algorithm, "backend": backend,
+        }
+        metrics["auc_gap"] = metrics["train_auc"] - metrics["valid_auc"]
     (output_dir / "metrics_train_valid.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     preprocessing = {
@@ -275,6 +357,9 @@ def train_tabular_from_feather(
         "actual_feature_count": len(kept_features),
         "algorithm": algorithm,
         "backend": backend,
+        "params": model_params,
+        "training_mode": training_mode,
+        "tuning_summary": tuning_summary,
         "random_seed": train_cfg.get("random_seed", 0),
         **metrics,
     }

@@ -524,9 +524,17 @@ def _write_response(
         plan_path.write_text(
             json.dumps(
                 {
+                    "algorithm": "lightgbm",
                     "experiment": "main_lgbm",
                     "round": 1,
-                    "diagnosis": "bounded plan",
+                    "diagnosis": {
+                        "state": "healthy",
+                        "summary": "bounded plan",
+                        "evidence": ["baseline_only"],
+                        "recommended_direction": ["bounded_local_exploration"],
+                        "confidence": 0.8,
+                    },
+                    "decision": "continue",
                     "candidates": [
                         {
                             "name": "regularized_capacity",
@@ -534,7 +542,6 @@ def _write_response(
                             "reason": "bounded candidate",
                         }
                     ],
-                    "stop": False,
                 }
             ),
             encoding="utf-8",

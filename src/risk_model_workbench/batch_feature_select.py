@@ -224,6 +224,9 @@ def load_batch_settings(project_dir: Path, args: PrescreenAction | argparse.Name
             "empty": float(thresholds_cfg.get("empty", D01_THRESHOLDS["empty"])),
             "corr": float(thresholds_cfg.get("corr", D01_THRESHOLDS["corr"])),
             "iv": float(thresholds_cfg.get("iv", D01_THRESHOLDS["iv"])),
+            "__psi_fail": float(thresholds_cfg.get("psi_fail", 0.25)),
+            "__psi_bins": float(thresholds_cfg.get("psi_bins", 10)),
+            "__psi_min_base_samples": float(thresholds_cfg.get("psi_min_base_samples", 500)),
         },
         d02_psi_threshold=float(thresholds_cfg.get("psi", D02_PSI_THRESHOLD)),
         round_num=int(args.round_num if args.round_num is not None else prescreen_cfg.get("round_num", DEFAULT_ROUND_NUM)),
@@ -370,7 +373,7 @@ def run_d01(
         df=dev_df.loc[:, feature_list + [target_col]],
         target_col=target_col,
         feature_list=feature_list,
-        preselect_condition=d01_thresholds,
+        preselect_condition={key: value for key, value in d01_thresholds.items() if not key.startswith("__")},
         round_num=round_num,
         use_native=use_native,
         max_round=None,
@@ -387,22 +390,44 @@ def run_d02(
     psi_threshold: float,
     batch_psi_func,
 ) -> tuple[dict, dict[str, float], list[str]]:
+    """Generate DEV monthly PSI evidence without OOT-based feature deletion.
+
+    The legacy arguments stay in place for public API compatibility.  OOT and
+    the vendored PSI callable are intentionally not used.
+    """
+    del valid_value, batch_psi_func
     if not remain_features:
         return {}, {}, []
     dev_df = df[df[split_col] == train_value].copy()
-    oot_df = df[df[split_col] == valid_value].copy()
-    if dev_df.empty or oot_df.empty:
-        raise RuntimeError(f"PSI stability prescreen requires both {train_value} and {valid_value} rows.")
-    data_iter = iter(
-        [
-            (f"base_{train_value}", dev_df.loc[:, remain_features]),
-            (f"exp_{valid_value}", oot_df.loc[:, remain_features]),
-        ]
+    if dev_df.empty:
+        raise RuntimeError(f"PSI stability prescreen requires {train_value} rows.")
+    from risk_model_workbench.feature_selection.risk_review import monthly_psi_evidence, normalize_months, resolve_month_column
+
+    month_column = resolve_month_column(dev_df, {})
+    months = (
+        normalize_months(dev_df[month_column])
+        if month_column
+        else pd.Series(pd.NA, index=dev_df.index, dtype="string")
     )
-    psi_result = batch_psi_func(data_iter, remain_features, method="quantile", num_nbins=10)
-    feature_max_psi = {feature: max(psi_info.values()) for feature, psi_info in psi_result[2].items()}
-    psi_drop_features = [feature for feature, psi in feature_max_psi.items() if psi > psi_threshold]
-    return psi_result, feature_max_psi, psi_drop_features
+    detail, summary, _, warnings = monthly_psi_evidence(
+        dev_df.loc[:, remain_features],
+        months,
+        remain_features,
+        n_bins=int(df.attrs.get("rmw_psi_bins", 10)),
+        warning_threshold=float(psi_threshold),
+        fail_threshold=float(df.attrs.get("rmw_psi_fail_threshold", psi_threshold)),
+        min_base_samples=int(df.attrs.get("rmw_psi_min_base_samples", 500)),
+    )
+    feature_max_psi = summary.set_index("feature")["monthly_psi_max"].to_dict() if not summary.empty else {}
+    psi_result = {
+        "mode": "dev_first_natural_month_base",
+        "oot_used": False,
+        "month_column": month_column,
+        "warnings": warnings,
+        "detail": detail.to_dict("records"),
+        "summary": summary.to_dict("records"),
+    }
+    return psi_result, feature_max_psi, []
 
 
 def write_pickle(path: Path, payload) -> None:
@@ -524,7 +549,7 @@ def process_single_table(
     sql_path.write_text(sample_sql.strip() + "\n", encoding="utf-8")
 
     dataset_id = prescreen_dataset_id(table_name)
-    description = f"特征初筛样本：{table_name}，DEV/OOT 分区抽样后用于质量初筛和 PSI 稳定性初筛。"
+    description = f"特征初筛样本：{table_name}，DEV 用于质量初筛和月度 PSI 证据；OOT 不参与特征 PSI。"
     sample = load_or_fetch_dp_feather(
         project_dir=Path(project_dir),
         sql=sample_sql,
@@ -542,6 +567,9 @@ def process_single_table(
     if not available_features:
         raise RuntimeError(f"No feature columns available in table: {table_name}")
     available_features = shuffle_features(available_features, random_seed + table_index)
+    sample.attrs["rmw_psi_fail_threshold"] = d01_thresholds.get("__psi_fail", d02_psi_threshold)
+    sample.attrs["rmw_psi_bins"] = d01_thresholds.get("__psi_bins", 10)
+    sample.attrs["rmw_psi_min_base_samples"] = d01_thresholds.get("__psi_min_base_samples", 500)
 
     d01_result, d01_remain = run_d01(
         sample,
@@ -571,11 +599,11 @@ def process_single_table(
         psi_threshold=d02_psi_threshold,
         batch_psi_func=batch_psi,
     )
-    final_remain = [feature for feature in d01_remain if feature not in set(psi_drop_features)]
+    final_remain = list(d01_remain)
     if reporter:
         reporter.emit(
             step="psi_screen_done",
-            message=f"表 {table_index}/{total_tables}：PSI 稳定性初筛完成，最终保留 {len(final_remain)} 个变量",
+            message=f"表 {table_index}/{total_tables}：DEV 月度 PSI 证据生成完成；PSI 不单独删除变量",
             current=table_index - 1,
             total=total_tables,
             metrics={"table": table_name, "d02_psi_drop": len(psi_drop_features), "final_remain": len(final_remain)},
@@ -675,14 +703,18 @@ def _run_prescreen(args: PrescreenAction) -> int:
         "feature_columns": str(feature_columns_path),
         "feature_select_code_dir": str(feature_select_code_dir),
         "thresholds": {
-            "quality": settings.d01_thresholds,
+            "quality": {key: value for key, value in settings.d01_thresholds.items() if not key.startswith("__")},
             "psi": settings.d02_psi_threshold,
+            "psi_fail": settings.d01_thresholds.get("__psi_fail"),
+            "psi_bins": int(settings.d01_thresholds.get("__psi_bins", 10)),
+            "psi_min_base_samples": int(settings.d01_thresholds.get("__psi_min_base_samples", 500)),
         },
         "sampling": {
             "partition_col": settings.partition_col,
             "where": settings.sample_where,
             "quality_sample": f"{settings.split_col} = '{settings.train_value}'",
-            "stability_compare": f"{settings.train_value} vs {settings.valid_value}",
+            "stability_compare": "DEV first natural month vs later DEV months",
+            "oot_used_for_feature_psi": False,
         },
         "partitions": {
             "train": settings.train_partitions,
@@ -715,7 +747,7 @@ def _run_prescreen(args: PrescreenAction) -> int:
             dataset_id = prescreen_dataset_id(table_name)
             feather_path = dp_data_dir / f"{table_slug(table_name)}.feather"
             metadata_path = dp_metadata_dir / f"{table_slug(table_name)}.json"
-            description = f"特征初筛样本：{table_name}，DEV/OOT 分区抽样后用于质量初筛和 PSI 稳定性初筛。"
+            description = f"特征初筛样本：{table_name}，DEV 用于质量初筛和月度 PSI 证据；OOT 不参与特征 PSI。"
             write_dataset_metadata(
                 project_dir=project_dir,
                 metadata_path=metadata_path,

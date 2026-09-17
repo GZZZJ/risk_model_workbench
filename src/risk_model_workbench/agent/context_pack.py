@@ -1,4 +1,4 @@
-"""Deterministic, bounded context snapshots for an external Host-Agent.
+"""Deterministic, bounded context snapshots for the embedded reasoning layer.
 
 Context packs contain only locally generated summaries of explicitly allowed
 workspace files.  They never follow symlinks or expose raw datasets, model

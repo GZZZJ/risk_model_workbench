@@ -5712,7 +5712,7 @@
       ],
       "description": null,
       "epilog": null,
-      "format_help": "usage: rmw agent [-h]\n                 {start,run,resume,diagnose,reconcile,status,eval,approve,confirm,reject,tools,capabilities,plan,advisor}\n                 ...\n\npositional arguments:\n  {start,run,resume,diagnose,reconcile,status,eval,approve,confirm,reject,tools,capabilities,plan,advisor}\n    start               initialize an Agent-managed modeling version\n    run                 run an initialized Agent plan\n    resume              resume an Agent plan after approval or advisor input\n    diagnose            diagnose interrupted Agent attempts and transaction\n                        divergence\n    reconcile           consume explicit evidence for an unknown external\n                        operation\n    status              show Agent status\n    eval                run the Agent Harness product evaluation suite\n    approve             record approval for a blocked high-risk Agent action\n    confirm             confirm an Advisor response that requires explicit\n                        user confirmation\n    reject              reject a blocked approval or Advisor confirmation\n    tools               export Agent tool schema\n    capabilities        export the Host-Agent capability contract\n    plan                inspect or safely rebind an Agent plan\n    advisor             Advisor request/response protocol commands\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "format_help": "usage: rmw agent [-h]\n                 {start,run,resume,diagnose,reconcile,status,eval,model,request,approve,confirm,reject,tools,capabilities,plan,advisor}\n                 ...\n\npositional arguments:\n  {start,run,resume,diagnose,reconcile,status,eval,model,request,approve,confirm,reject,tools,capabilities,plan,advisor}\n    start               initialize an Agent-managed modeling version\n    run                 run an initialized standalone RMW Agent plan\n    resume              resume the standalone Agent after a human gate or\n                        fixed blocker\n    diagnose            diagnose interrupted Agent attempts and transaction\n                        divergence\n    reconcile           consume explicit evidence for an unknown external\n                        operation\n    status              show Agent status\n    eval                run the Agent Harness product evaluation suite\n    model               inspect embedded model configuration\n    request             create and inspect Agent-owned model request drafts\n    approve             record approval for a blocked high-risk Agent action\n    confirm             confirm an Advisor response that requires explicit\n                        user confirmation\n    reject              reject a blocked approval or Advisor confirmation\n    tools               export Agent tool schema\n    capabilities        export the embedded Agent capability contract\n    plan                inspect or safely rebind an Agent plan\n    advisor             durable Advisor protocol inspection and compatibility\n                        commands\n\noptions:\n  -h, --help            show this help message and exit\n",
       "formatter_class": "argparse.HelpFormatter",
       "mutually_exclusive_groups": [],
       "prog": "rmw agent",
@@ -5722,11 +5722,11 @@
           "name": "start"
         },
         {
-          "help": "run an initialized Agent plan",
+          "help": "run an initialized standalone RMW Agent plan",
           "name": "run"
         },
         {
-          "help": "resume an Agent plan after approval or advisor input",
+          "help": "resume the standalone Agent after a human gate or fixed blocker",
           "name": "resume"
         },
         {
@@ -5746,6 +5746,14 @@
           "name": "eval"
         },
         {
+          "help": "inspect embedded model configuration",
+          "name": "model"
+        },
+        {
+          "help": "create and inspect Agent-owned model request drafts",
+          "name": "request"
+        },
+        {
           "help": "record approval for a blocked high-risk Agent action",
           "name": "approve"
         },
@@ -5762,7 +5770,7 @@
           "name": "tools"
         },
         {
-          "help": "export the Host-Agent capability contract",
+          "help": "export the embedded Agent capability contract",
           "name": "capabilities"
         },
         {
@@ -5770,7 +5778,7 @@
           "name": "plan"
         },
         {
-          "help": "Advisor request/response protocol commands",
+          "help": "durable Advisor protocol inspection and compatibility commands",
           "name": "advisor"
         }
       ],
@@ -6511,7 +6519,8 @@
         {
           "action": "_StoreAction",
           "choices": [
-            "harness"
+            "harness",
+            "embedded"
           ],
           "const": null,
           "default": null,
@@ -6547,10 +6556,308 @@
       ],
       "description": null,
       "epilog": null,
-      "format_help": "usage: rmw agent eval [-h] --suite {harness} [--json]\n\noptions:\n  -h, --help         show this help message and exit\n  --suite {harness}\n  --json\n",
+      "format_help": "usage: rmw agent eval [-h] --suite {harness,embedded} [--json]\n\noptions:\n  -h, --help            show this help message and exit\n  --suite {harness,embedded}\n  --json\n",
       "formatter_class": "argparse.HelpFormatter",
       "mutually_exclusive_groups": [],
       "prog": "rmw agent eval",
+      "usage": null
+    },
+    {
+      "allow_abbrev": true,
+      "argument_groups": [
+        {
+          "description": null,
+          "destinations": [
+            "agent_model_command"
+          ],
+          "title": "positional arguments"
+        },
+        {
+          "description": null,
+          "destinations": [
+            "help"
+          ],
+          "title": "options"
+        }
+      ],
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "const": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "help": "show this help message and exit",
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "command_path": [
+        "agent",
+        "model"
+      ],
+      "description": null,
+      "epilog": null,
+      "format_help": "usage: rmw agent model [-h] {status} ...\n\npositional arguments:\n  {status}\n    status    validate the configured embedded model adapter\n\noptions:\n  -h, --help  show this help message and exit\n",
+      "formatter_class": "argparse.HelpFormatter",
+      "mutually_exclusive_groups": [],
+      "prog": "rmw agent model",
+      "subcommands": [
+        {
+          "help": "validate the configured embedded model adapter",
+          "name": "status"
+        }
+      ],
+      "usage": null
+    },
+    {
+      "allow_abbrev": true,
+      "argument_groups": [
+        {
+          "description": null,
+          "destinations": [],
+          "title": "positional arguments"
+        },
+        {
+          "description": null,
+          "destinations": [
+            "help",
+            "json"
+          ],
+          "title": "options"
+        }
+      ],
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "const": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "help": "show this help message and exit",
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "const": true,
+          "default": false,
+          "dest": "json",
+          "help": null,
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "command_path": [
+        "agent",
+        "model",
+        "status"
+      ],
+      "description": null,
+      "epilog": null,
+      "format_help": "usage: rmw agent model status [-h] [--json]\n\noptions:\n  -h, --help  show this help message and exit\n  --json\n",
+      "formatter_class": "argparse.HelpFormatter",
+      "mutually_exclusive_groups": [],
+      "prog": "rmw agent model status",
+      "usage": null
+    },
+    {
+      "allow_abbrev": true,
+      "argument_groups": [
+        {
+          "description": null,
+          "destinations": [
+            "agent_request_command"
+          ],
+          "title": "positional arguments"
+        },
+        {
+          "description": null,
+          "destinations": [
+            "help"
+          ],
+          "title": "options"
+        }
+      ],
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "const": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "help": "show this help message and exit",
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "command_path": [
+        "agent",
+        "request"
+      ],
+      "description": null,
+      "epilog": null,
+      "format_help": "usage: rmw agent request [-h] {draft} ...\n\npositional arguments:\n  {draft}\n    draft     interpret a natural-language objective into a validated request\n              draft\n\noptions:\n  -h, --help  show this help message and exit\n",
+      "formatter_class": "argparse.HelpFormatter",
+      "mutually_exclusive_groups": [],
+      "prog": "rmw agent request",
+      "subcommands": [
+        {
+          "help": "interpret a natural-language objective into a validated request draft",
+          "name": "draft"
+        }
+      ],
+      "usage": null
+    },
+    {
+      "allow_abbrev": true,
+      "argument_groups": [
+        {
+          "description": null,
+          "destinations": [],
+          "title": "positional arguments"
+        },
+        {
+          "description": null,
+          "destinations": [
+            "help",
+            "project",
+            "objective",
+            "request_id",
+            "output",
+            "json"
+          ],
+          "title": "options"
+        }
+      ],
+      "arguments": [
+        {
+          "action": "_HelpAction",
+          "choices": null,
+          "const": null,
+          "default": "==SUPPRESS==",
+          "dest": "help",
+          "help": "show this help message and exit",
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "-h",
+            "--help"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "const": null,
+          "default": null,
+          "dest": "project",
+          "help": null,
+          "metavar": null,
+          "nargs": null,
+          "option_strings": [
+            "--project"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "const": null,
+          "default": null,
+          "dest": "objective",
+          "help": null,
+          "metavar": null,
+          "nargs": null,
+          "option_strings": [
+            "--objective"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "const": null,
+          "default": null,
+          "dest": "request_id",
+          "help": null,
+          "metavar": null,
+          "nargs": null,
+          "option_strings": [
+            "--request-id"
+          ],
+          "required": true,
+          "type": null
+        },
+        {
+          "action": "_StoreAction",
+          "choices": null,
+          "const": null,
+          "default": null,
+          "dest": "output",
+          "help": null,
+          "metavar": null,
+          "nargs": null,
+          "option_strings": [
+            "--output"
+          ],
+          "required": false,
+          "type": null
+        },
+        {
+          "action": "_StoreTrueAction",
+          "choices": null,
+          "const": true,
+          "default": false,
+          "dest": "json",
+          "help": null,
+          "metavar": null,
+          "nargs": 0,
+          "option_strings": [
+            "--json"
+          ],
+          "required": false,
+          "type": null
+        }
+      ],
+      "command_path": [
+        "agent",
+        "request",
+        "draft"
+      ],
+      "description": null,
+      "epilog": null,
+      "format_help": "usage: rmw agent request draft [-h] --project PROJECT --objective OBJECTIVE\n                               --request-id REQUEST_ID [--output OUTPUT]\n                               [--json]\n\noptions:\n  -h, --help            show this help message and exit\n  --project PROJECT\n  --objective OBJECTIVE\n  --request-id REQUEST_ID\n  --output OUTPUT\n  --json\n",
+      "formatter_class": "argparse.HelpFormatter",
+      "mutually_exclusive_groups": [],
+      "prog": "rmw agent request draft",
       "usage": null
     },
     {
@@ -9938,6 +10245,11 @@
       },
       {
         "kind": "function",
+        "name": "project_config_path",
+        "signature": "(project_dir: 'str | Path') -> 'Path'"
+      },
+      {
+        "kind": "function",
         "name": "resolve_project_path",
         "signature": "(project_dir: 'Path', value: 'str') -> 'Path'"
       },
@@ -10012,9 +10324,19 @@
         "signature": "(*, handlers: 'HandlerRegistry', policy_check: 'PolicyCheck') -> 'None'"
       },
       {
+        "kind": "ModelMetaclass",
+        "name": "AgentModelConfig",
+        "signature": "(*, provider: Annotated[str, MinLen(min_length=1), MaxLen(max_length=80)], model: Annotated[str, MinLen(min_length=1), MaxLen(max_length=160)], temperature: Annotated[float, Ge(ge=0.0), Le(le=2.0)] = 0.0, timeout_seconds: Annotated[float, Gt(gt=0.0), Le(le=600.0)] = 120.0, max_retries: Annotated[int, Ge(ge=0), Le(le=5)] = 2, max_output_tokens: Annotated[int, Ge(ge=256), Le(le=32768)] = 4096, base_url: str | None = None) -> None"
+      },
+      {
         "kind": "_AnyMeta",
         "name": "Any",
         "signature": "(*args, **kwargs)"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigError",
+        "signature": "<unavailable>"
       },
       {
         "kind": "str",
@@ -10037,12 +10359,27 @@
         "name": "FEATURE_PRESCREEN_STAGE"
       },
       {
+        "kind": "type",
+        "name": "GoalPlanningError",
+        "signature": "<unavailable>"
+      },
+      {
         "kind": "str",
         "name": "LEGACY_FEATURE_PRESCREEN_STAGE"
       },
       {
         "kind": "str",
         "name": "LEGACY_PRESCREEN_REMAIN_FEATURES"
+      },
+      {
+        "kind": "type",
+        "name": "LangChainModelGateway",
+        "signature": "(config: 'AgentModelConfig', *, chat_model: 'Any | None' = None)"
+      },
+      {
+        "kind": "type",
+        "name": "ModelGatewayError",
+        "signature": "<unavailable>"
       },
       {
         "kind": "type",
@@ -10210,6 +10547,11 @@
       },
       {
         "kind": "function",
+        "name": "cmd_agent_model_status",
+        "signature": "(args: 'argparse.Namespace') -> 'int'"
+      },
+      {
+        "kind": "function",
         "name": "cmd_agent_plan_rebind",
         "signature": "(args: 'argparse.Namespace') -> 'int'"
       },
@@ -10221,6 +10563,11 @@
       {
         "kind": "function",
         "name": "cmd_agent_reject",
+        "signature": "(args: 'argparse.Namespace') -> 'int'"
+      },
+      {
+        "kind": "function",
+        "name": "cmd_agent_request_draft",
         "signature": "(args: 'argparse.Namespace') -> 'int'"
       },
       {
@@ -10460,6 +10807,11 @@
       },
       {
         "kind": "function",
+        "name": "create_request_draft_from_objective",
+        "signature": "(project_dir: 'str | Path', *, objective: 'str', request_id: 'str', gateway: 'ModelGateway', output: 'str | Path | None' = None) -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
         "name": "create_run_state",
         "signature": "(project_dir: 'str | Path', *, run_id: 'str', workflow: 'str', stages: 'list[str] | None' = None, status: 'str' = 'running') -> 'dict[str, Any]'"
       },
@@ -10487,6 +10839,11 @@
         "kind": "function",
         "name": "diagnose_recovery",
         "signature": "(workspace: 'str | Path') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "evaluate_embedded_suite",
+        "signature": "() -> 'dict[str, Any]'"
       },
       {
         "kind": "function",
@@ -10717,6 +11074,11 @@
       },
       {
         "kind": "function",
+        "name": "run_embedded_agent",
+        "signature": "(project_dir: 'str | Path', version_id: 'str', *, gateway: 'ModelGateway | None' = None, harness_runner: 'HarnessRunner' = <function run_agent at <ADDRESS>>, resume_human_gate: 'bool' = False, max_graph_steps: 'int' = 32, max_model_calls: 'int' = 4) -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
         "name": "run_with_retry",
         "signature": "(action_id: 'str', operation: 'Callable[[], T]', *, max_attempts: 'int' = 3) -> 'tuple[T, int]'"
       },
@@ -10768,6 +11130,11 @@
         "kind": "function",
         "name": "stage_action_started",
         "signature": "(run_path: 'str | Path', action_id: 'str') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "stage_config_path",
+        "signature": "(project_dir: 'str | Path', name: 'str') -> 'Path'"
       },
       {
         "kind": "function",
@@ -10865,6 +11232,21 @@
       },
       {
         "kind": "type",
+        "name": "ConfigConflictError",
+        "signature": "(canonical: 'str | Path', legacy: 'str | Path')"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigError",
+        "signature": "<unavailable>"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigFormatError",
+        "signature": "(path: 'str | Path', detail: 'str')"
+      },
+      {
+        "kind": "type",
         "name": "Path",
         "signature": "(*args, **kwargs)"
       },
@@ -10881,6 +11263,11 @@
         "kind": "function",
         "name": "load_yaml",
         "signature": "(path: 'str | Path') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "resolve_yaml_variant",
+        "signature": "(canonical: 'str | Path', legacy: 'str | Path') -> 'Path'"
       }
     ],
     "jingying_agent.dp_feather": [
@@ -11086,6 +11473,11 @@
       },
       {
         "kind": "function",
+        "name": "project_config_path",
+        "signature": "(project_dir: 'str | Path') -> 'Path'"
+      },
+      {
+        "kind": "function",
         "name": "read_tables",
         "signature": "(path: 'Path') -> 'tuple[str, list[str]]'"
       },
@@ -11098,6 +11490,11 @@
         "kind": "function",
         "name": "split_table",
         "signature": "(full_name: 'str') -> 'tuple[str, str]'"
+      },
+      {
+        "kind": "function",
+        "name": "stage_config_path",
+        "signature": "(project_dir: 'str | Path', name: 'str') -> 'Path'"
       },
       {
         "kind": "module",
@@ -11467,6 +11864,16 @@
       },
       {
         "kind": "function",
+        "name": "project_config_path",
+        "signature": "(project_dir: 'str | Path') -> 'Path'"
+      },
+      {
+        "kind": "function",
+        "name": "stage_config_path",
+        "signature": "(project_dir: 'str | Path', name: 'str') -> 'Path'"
+      },
+      {
+        "kind": "function",
         "name": "write_feature_screening_summary",
         "signature": "(project_dir: 'str | Path', output_path: 'str | Path') -> 'Path'"
       }
@@ -11526,8 +11933,17 @@
     ],
     "jingying_agent.project": [
       {
+        "kind": "type",
+        "name": "ProjectContext",
+        "signature": "(name: 'str', display_name: 'str', scenario: 'str', template: 'str', created_date: 'str', sample_table: 'str', target_column: 'str', time_column: 'str', period_column: 'str') -> None"
+      },
+      {
         "kind": "PosixPath",
         "name": "REPO_ROOT"
+      },
+      {
+        "kind": "PosixPath",
+        "name": "TEMPLATE_ROOT"
       },
       {
         "kind": "module",
@@ -11537,6 +11953,16 @@
         "kind": "function",
         "name": "create_project",
         "signature": "(root_dir: 'str | Path', *, name: 'str', display_name: 'str', scenario: 'str', template: 'str' = 'generic', force: 'bool' = False) -> 'Path'"
+      },
+      {
+        "kind": "function",
+        "name": "default_context",
+        "signature": "(name: 'str', display_name: 'str', scenario: 'str', template: 'str') -> 'ProjectContext'"
+      },
+      {
+        "kind": "function",
+        "name": "render_text",
+        "signature": "(text: 'str', context: 'ProjectContext') -> 'str'"
       }
     ],
     "jingying_agent.wide_sql": [
@@ -11656,6 +12082,11 @@
       },
       {
         "kind": "function",
+        "name": "resolve_project_config_path",
+        "signature": "(project_dir: 'str | Path') -> 'Path'"
+      },
+      {
+        "kind": "function",
         "name": "resolve_project_path",
         "signature": "(project_dir: 'Path', value: 'str | Path') -> 'Path'"
       },
@@ -11663,6 +12094,11 @@
         "kind": "function",
         "name": "sql_identifier",
         "signature": "(value: 'str') -> 'str'"
+      },
+      {
+        "kind": "function",
+        "name": "stage_config_path",
+        "signature": "(project_dir: 'str | Path', name: 'str') -> 'Path'"
       },
       {
         "kind": "function",
@@ -11718,9 +12154,19 @@
         "signature": "(*, handlers: 'HandlerRegistry', policy_check: 'PolicyCheck') -> 'None'"
       },
       {
+        "kind": "ModelMetaclass",
+        "name": "AgentModelConfig",
+        "signature": "(*, provider: Annotated[str, MinLen(min_length=1), MaxLen(max_length=80)], model: Annotated[str, MinLen(min_length=1), MaxLen(max_length=160)], temperature: Annotated[float, Ge(ge=0.0), Le(le=2.0)] = 0.0, timeout_seconds: Annotated[float, Gt(gt=0.0), Le(le=600.0)] = 120.0, max_retries: Annotated[int, Ge(ge=0), Le(le=5)] = 2, max_output_tokens: Annotated[int, Ge(ge=256), Le(le=32768)] = 4096, base_url: str | None = None) -> None"
+      },
+      {
         "kind": "_AnyMeta",
         "name": "Any",
         "signature": "(*args, **kwargs)"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigError",
+        "signature": "<unavailable>"
       },
       {
         "kind": "str",
@@ -11743,12 +12189,27 @@
         "name": "FEATURE_PRESCREEN_STAGE"
       },
       {
+        "kind": "type",
+        "name": "GoalPlanningError",
+        "signature": "<unavailable>"
+      },
+      {
         "kind": "str",
         "name": "LEGACY_FEATURE_PRESCREEN_STAGE"
       },
       {
         "kind": "str",
         "name": "LEGACY_PRESCREEN_REMAIN_FEATURES"
+      },
+      {
+        "kind": "type",
+        "name": "LangChainModelGateway",
+        "signature": "(config: 'AgentModelConfig', *, chat_model: 'Any | None' = None)"
+      },
+      {
+        "kind": "type",
+        "name": "ModelGatewayError",
+        "signature": "<unavailable>"
       },
       {
         "kind": "type",
@@ -11916,6 +12377,11 @@
       },
       {
         "kind": "function",
+        "name": "cmd_agent_model_status",
+        "signature": "(args: 'argparse.Namespace') -> 'int'"
+      },
+      {
+        "kind": "function",
         "name": "cmd_agent_plan_rebind",
         "signature": "(args: 'argparse.Namespace') -> 'int'"
       },
@@ -11927,6 +12393,11 @@
       {
         "kind": "function",
         "name": "cmd_agent_reject",
+        "signature": "(args: 'argparse.Namespace') -> 'int'"
+      },
+      {
+        "kind": "function",
+        "name": "cmd_agent_request_draft",
         "signature": "(args: 'argparse.Namespace') -> 'int'"
       },
       {
@@ -12166,6 +12637,11 @@
       },
       {
         "kind": "function",
+        "name": "create_request_draft_from_objective",
+        "signature": "(project_dir: 'str | Path', *, objective: 'str', request_id: 'str', gateway: 'ModelGateway', output: 'str | Path | None' = None) -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
         "name": "create_run_state",
         "signature": "(project_dir: 'str | Path', *, run_id: 'str', workflow: 'str', stages: 'list[str] | None' = None, status: 'str' = 'running') -> 'dict[str, Any]'"
       },
@@ -12193,6 +12669,11 @@
         "kind": "function",
         "name": "diagnose_recovery",
         "signature": "(workspace: 'str | Path') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "evaluate_embedded_suite",
+        "signature": "() -> 'dict[str, Any]'"
       },
       {
         "kind": "function",
@@ -12423,6 +12904,11 @@
       },
       {
         "kind": "function",
+        "name": "run_embedded_agent",
+        "signature": "(project_dir: 'str | Path', version_id: 'str', *, gateway: 'ModelGateway | None' = None, harness_runner: 'HarnessRunner' = <function run_agent at <ADDRESS>>, resume_human_gate: 'bool' = False, max_graph_steps: 'int' = 32, max_model_calls: 'int' = 4) -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
         "name": "run_with_retry",
         "signature": "(action_id: 'str', operation: 'Callable[[], T]', *, max_attempts: 'int' = 3) -> 'tuple[T, int]'"
       },
@@ -12474,6 +12960,11 @@
         "kind": "function",
         "name": "stage_action_started",
         "signature": "(run_path: 'str | Path', action_id: 'str') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "stage_config_path",
+        "signature": "(project_dir: 'str | Path', name: 'str') -> 'Path'"
       },
       {
         "kind": "function",
@@ -12571,6 +13062,21 @@
       },
       {
         "kind": "type",
+        "name": "ConfigConflictError",
+        "signature": "(canonical: 'str | Path', legacy: 'str | Path')"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigError",
+        "signature": "<unavailable>"
+      },
+      {
+        "kind": "type",
+        "name": "ConfigFormatError",
+        "signature": "(path: 'str | Path', detail: 'str')"
+      },
+      {
+        "kind": "type",
         "name": "Path",
         "signature": "(*args, **kwargs)"
       },
@@ -12587,6 +13093,11 @@
         "kind": "function",
         "name": "load_yaml",
         "signature": "(path: 'str | Path') -> 'dict[str, Any]'"
+      },
+      {
+        "kind": "function",
+        "name": "resolve_yaml_variant",
+        "signature": "(canonical: 'str | Path', legacy: 'str | Path') -> 'Path'"
       }
     ],
     "jingying_model_agent.harness.actions": [
@@ -12682,6 +13193,11 @@
       },
       {
         "kind": "function",
+        "name": "display_template",
+        "signature": "(command_id: 'str') -> 'str'"
+      },
+      {
+        "kind": "function",
         "name": "format_action_detail",
         "signature": "(spec: 'ActionSpec') -> 'str'"
       },
@@ -12748,8 +13264,18 @@
       },
       {
         "kind": "function",
+        "name": "argv_template",
+        "signature": "(command_id: 'str') -> 'tuple[str, ...]'"
+      },
+      {
+        "kind": "function",
         "name": "dataclass",
         "signature": "(cls=None, /, *, init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)"
+      },
+      {
+        "kind": "function",
+        "name": "display_template",
+        "signature": "(command_id: 'str') -> 'str'"
       },
       {
         "kind": "function",
@@ -12807,13 +13333,36 @@
     ],
     "jingying_model_agent.project": [
       {
+        "kind": "type",
+        "name": "ProjectContext",
+        "signature": "(name: 'str', display_name: 'str', scenario: 'str', template: 'str', created_date: 'str', sample_table: 'str', target_column: 'str', time_column: 'str', period_column: 'str') -> None"
+      },
+      {
         "kind": "PosixPath",
         "name": "REPO_ROOT"
+      },
+      {
+        "kind": "PosixPath",
+        "name": "TEMPLATE_ROOT"
+      },
+      {
+        "kind": "module",
+        "name": "create"
       },
       {
         "kind": "function",
         "name": "create_project",
         "signature": "(root_dir: 'str | Path', *, name: 'str', display_name: 'str', scenario: 'str', template: 'str' = 'generic', force: 'bool' = False) -> 'Path'"
+      },
+      {
+        "kind": "function",
+        "name": "default_context",
+        "signature": "(name: 'str', display_name: 'str', scenario: 'str', template: 'str') -> 'ProjectContext'"
+      },
+      {
+        "kind": "function",
+        "name": "render_text",
+        "signature": "(text: 'str', context: 'ProjectContext') -> 'str'"
       }
     ]
   },
@@ -12921,6 +13470,14 @@
       "lightgbm.basic",
       "numpy",
       "numpy.core.multiarray"
+    ],
+    "projects/2026-07-shoujie-t0-gcard-v1/versions/shoujie_t0_gcard_v1_20260714/modeling/main_lgbm/model.pkl": [
+      "collections",
+      "lightgbm.basic",
+      "lightgbm.sklearn",
+      "numpy",
+      "numpy._core.multiarray",
+      "sklearn.preprocessing._label"
     ]
   },
   "schema_version": 1,

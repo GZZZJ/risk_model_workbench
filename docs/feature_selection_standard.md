@@ -16,7 +16,8 @@ The reusable workbench uses generic feature-selection stages:
    later selection can use broader or fuller data.
 3. `feature_refine`: feature refinement/convergence on the wide-table sample,
    including executable-feature filtering, global correlation deduplication,
-   random-noise importance, null importance, and baseline-model importance.
+   random-noise importance, null importance, baseline-model importance, and a
+   deterministic Feature Risk Review over the resulting model candidates.
 
 `feature_prescreen` plus `feature_refine` is the complete workbench feature
 selection flow. Project-specific method names from legacy feature-selection
@@ -56,3 +57,32 @@ alongside heavy feature-selection work:
 
 `.pkl`, `.feather`, model binaries, and local caches are never sufficient audit
 evidence by themselves.
+
+## Feature Risk Review
+
+Feature Risk Review stays inside the existing `feature_refine` stage. It does
+not add a parallel workflow or delegate metric calculation to an LLM. Python
+generates availability/leakage, DEV monthly PSI, badrate relationship, monthly
+relationship, importance stability, and decision-ledger evidence.
+
+Feature PSI uses only DEV. The first DEV natural month fits numeric bin edges or
+category mappings, and every later DEV month reuses those rules. Missing values
+are a separate bucket. OOT is not a feature-selection PSI reference.
+
+Warnings are review evidence, not one-signal deletion rules. Non-monotonic
+badrate, name-based leakage signals, and PSI drift do not by themselves remove a
+feature. Only deterministic time evidence such as `available_time` later than
+prediction time, or a proven feature-window/label-window overlap, can produce a
+`leakage_status=failed` automatic exclusion.
+
+The stage registers these additional artifacts when review is enabled:
+
+- `feature_selection/feature_leakage_review.csv`
+- `feature_selection/feature_monthly_psi.csv`
+- `feature_selection/feature_monthly_psi_summary.csv`
+- `feature_selection/feature_badrate_bins.csv`
+- `feature_selection/feature_monthly_badrate.csv`
+- `feature_selection/feature_importance_stability.csv`
+- `feature_selection/feature_decision_ledger.csv`
+- `feature_selection/feature_risk_review.json`
+- `feature_selection/feature_risk_review.md`

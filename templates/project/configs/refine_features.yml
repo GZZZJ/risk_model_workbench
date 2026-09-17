@@ -31,6 +31,13 @@ feature_refine:
   random_seed: 0
   target_feature_count: 500
 
+  # Exclusive train/validation boundary for feature selection. OOT is never a
+  # fallback here; use explicit DEV-OOS only when the source split provides it.
+  selection_split:
+    mode: dev_temporal
+    month_column: "{{period_column}}"
+    valid_months: 1
+
   preprocessing:
     missing_sentinels:
       - -999
@@ -52,9 +59,36 @@ feature_refine:
     n_bins: 10
 
   local_d02:
-    # DEV vs OOT per-feature PSI stability filter (local-feather mode)
+    # DEV first-natural-month base PSI evidence. OOT is never used here and PSI alone does not drop features.
     enabled: true
-    psi: 0.2
+    n_bins: 10
+    warning_threshold: 0.10
+    fail_threshold: 0.25
+    min_base_samples: 500
+
+  feature_risk_review:
+    enabled: true
+    # Optional explicit columns/files. If absent, month is inferred conservatively and time metadata remains unknown.
+    month_column: "{{period_column}}"
+    metadata_path: ""
+    prediction_time: ""
+    force_keep_features: []
+    psi:
+      n_bins: 10
+      warning_threshold: 0.10
+      fail_threshold: 0.25
+      min_base_samples: 500
+    badrate:
+      n_bins: 10
+      min_bin_samples: 30
+      min_bin_ratio: 0.01
+      min_rate_range: 0.02
+      min_month_bin_samples: 20
+      inversion_correlation: -0.30
+    importance:
+      top_n: 20
+      max_rank_std: 10.0
+      min_selection_rate: 0.60
 
   d03_random_importance:
     enabled: true
@@ -84,6 +118,9 @@ feature_refine:
     enabled: true
     importance_type: gain
     keep_top_n: 500
+    seeds: [0, 17, 42, 73, 101]
+    min_selection_rate: 0.60
+    max_rank_std: 50
 
   lightgbm:
     objective: binary

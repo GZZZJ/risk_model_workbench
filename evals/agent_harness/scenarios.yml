@@ -153,7 +153,7 @@ scenarios:
 
   - name: crash_after_manifest
     fixture: tests/agent_scenarios/test_crash_recovery.py::test_crash_after_manifest_before_version_state_is_detected_and_safe_action_requeues
-    expected_transitions: [running_to_done]
+    expected_transitions: [running_to_done_with_gaps]
     expected_blockers: [missing_action_result, transaction_divergence]
     expected_artifacts: [audit/artifact_manifest.json, audit/attempt_journal.jsonl]
     expected_audit_verdict: null
